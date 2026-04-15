@@ -1,4 +1,5 @@
 import { useLazyListAttendancesByDateRangeQuery } from "@entities/attendance/api/attendanceApi";
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import {
   AttendanceDaily,
   DuplicateAttendanceDaily,
@@ -6,8 +7,6 @@ import {
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
-
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 
 import { calculateTotalOvertimeMinutes } from "../lib/overtimeUtils";
 

@@ -123,6 +123,51 @@ type Attendance @model @auth(rules: [{ allow: private }]) {
   revision: Int
 }
 
+enum AttendanceStatisticsStatus {
+  IDLE
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+type AttendanceStatisticsMonthlySummary {
+  month: Int!
+  rangeStart: String!
+  rangeEnd: String!
+  workHours: Float!
+  paidDays: Int!
+  specialHolidayDays: Int!
+  absentDays: Int!
+  workDays: Int!
+  isFallback: Boolean!
+}
+
+type AttendanceStatisticsSnapshot @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  staffId: String!
+    @index(
+      name: "byStaffIdYear"
+      sortKeyFields: ["year"]
+      queryField: "attendanceStatisticsByStaffIdYear"
+    )
+  year: Int!
+  status: AttendanceStatisticsStatus!
+  progressPercent: Float
+  currentStepLabel: String
+  rangeStart: String
+  rangeEnd: String
+  monthlySummaries: [AttendanceStatisticsMonthlySummary!]
+  totalWorkHours: Float
+  totalPaidDays: Int
+  totalSpecialHolidayDays: Int
+  totalAbsentDays: Int
+  totalWorkDays: Int
+  startedAt: String
+  completedAt: String
+  lastAggregatedAt: String
+  errorMessage: String
+}
+
 type Document @model @auth(rules: [{ allow: private }]) {
   id: ID!
   title: String!
@@ -424,6 +469,7 @@ enum WorkflowCategory {
   OVERTIME
   CLOCK_CORRECTION
   CUSTOM
+  COMPENSATORY_LEAVE
 }
 
 enum WorkflowStatus {

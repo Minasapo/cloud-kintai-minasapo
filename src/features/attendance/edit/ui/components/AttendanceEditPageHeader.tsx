@@ -1,5 +1,7 @@
 import "./AttendanceEditPageHeader.scss";
 
+import { PageTitle } from "@shared/ui/typography";
+
 import AttendanceEditBackNavigation from "../AttendanceEditBackNavigation";
 
 type AttendanceEditPageHeaderProps = {
@@ -19,11 +21,11 @@ export function AttendanceEditPageHeader({
     <div className={`attendance-edit-page-header attendance-edit-page-header--${variant}`}>
       <div className="attendance-edit-page-header__inner">
         {showBackNavigation ? <AttendanceEditBackNavigation /> : null}
-        <h1
+        <PageTitle
           className={`attendance-edit-page-header__title attendance-edit-page-header__title--${variant}`}
         >
           {title}
-        </h1>
+        </PageTitle>
         {description ? (
           <p
             className={`attendance-edit-page-header__description attendance-edit-page-header__description--${variant}`}

@@ -1,7 +1,6 @@
+import { AttendanceTime } from "@entities/attendance/lib/AttendanceTime";
 import { TableCell, TableRow } from "@mui/material";
 import dayjs from "dayjs";
-
-import { AttendanceTime } from "@/entities/attendance/lib/AttendanceTime";
 
 export default function WorkTimeTableRow({
   startTime,

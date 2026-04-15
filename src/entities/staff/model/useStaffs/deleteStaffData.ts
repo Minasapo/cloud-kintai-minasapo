@@ -1,3 +1,4 @@
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { deleteStaff } from "@shared/api/graphql/documents/mutations";
 import {
   DeleteStaffInput,
@@ -5,8 +6,6 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 export default async function deleteStaffData(input: DeleteStaffInput) {
   const response = (await graphqlClient.graphql({

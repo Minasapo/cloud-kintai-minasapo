@@ -1,8 +1,8 @@
+import { getDesignTokens } from "@shared/designSystem";
 import { render, screen } from "@testing-library/react";
 import dayjs from "dayjs";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { getDesignTokens } from "@/shared/designSystem";
 
 import Developer from "./Developer";
 

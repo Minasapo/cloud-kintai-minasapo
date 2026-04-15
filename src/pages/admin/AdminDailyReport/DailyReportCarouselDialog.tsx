@@ -1,5 +1,15 @@
+import {
+  logDailyReportCommentAdd,
+  logDailyReportReactionUpdate,
+} from "@entities/operation-log/model/dailyReportOperationLog";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { sendDailyReportCommentNotification } from "@features/attendance/daily-report/lib/sendDailyReportCommentNotification";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getGraphQLErrorMessage,
+  getNextVersion,
+} from "@shared/api/graphql/concurrency";
 import { updateDailyReport } from "@shared/api/graphql/documents/mutations";
 import { getDailyReport } from "@shared/api/graphql/documents/queries";
 import type {
@@ -8,22 +18,13 @@ import type {
   GetDailyReportQuery,
   UpdateDailyReportMutation,
 } from "@shared/api/graphql/types";
+import { formatDateSlash, formatDateTimeReadable } from "@shared/lib/time";
+import { SectionTitle, SubsectionTitle } from "@shared/ui/typography";
 import type { GraphQLResult } from "aws-amplify/api";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
-import {
-  logDailyReportCommentAdd,
-  logDailyReportReactionUpdate,
-} from "@/entities/operation-log/model/dailyReportOperationLog";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import {
-  buildVersionOrUpdatedAtCondition,
-  getGraphQLErrorMessage,
-  getNextVersion,
-} from "@/shared/api/graphql/concurrency";
-import { formatDateSlash, formatDateTimeReadable } from "@/shared/lib/time";
 
 import {
   type AdminDailyReport,
@@ -522,7 +523,7 @@ export default function DailyReportCarouselDialog({
       >
         {/* Dialog header */}
         <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-3">
-          <h2 className="text-base font-bold text-slate-800">日報を確認</h2>
+          <SectionTitle className="text-base font-bold text-slate-800">日報を確認</SectionTitle>
           <button
             type="button"
             onClick={onClose}
@@ -632,9 +633,9 @@ export default function DailyReportCarouselDialog({
 
               {/* Report header */}
               <div>
-                <h3 className="text-base font-bold text-slate-800">
+                <SubsectionTitle className="text-base font-bold text-slate-800">
                   {report.title}
-                </h3>
+                </SubsectionTitle>
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   <span className="text-xs text-slate-500">
                     {formatDateSlash(report.date) || report.date} |{" "}

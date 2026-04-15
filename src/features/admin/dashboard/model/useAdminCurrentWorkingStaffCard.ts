@@ -1,21 +1,20 @@
-import { GraphQLResult } from "aws-amplify/api";
-import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { listAttendances } from "@/shared/api/graphql/documents/queries";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import { listAttendances } from "@shared/api/graphql/documents/queries";
 import {
   onCreateAttendance,
   onDeleteAttendance,
   onUpdateAttendance,
-} from "@/shared/api/graphql/documents/subscriptions";
+} from "@shared/api/graphql/documents/subscriptions";
 import {
   ListAttendancesQuery,
   OnCreateAttendanceSubscription,
   OnDeleteAttendanceSubscription,
   OnUpdateAttendanceSubscription,
-} from "@/shared/api/graphql/types";
-import { createLogger } from "@/shared/lib/logger";
+} from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
+import { GraphQLResult } from "aws-amplify/api";
+import dayjs from "dayjs";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { isAttendanceCurrentWorking } from "../lib/adminDashboardSelectors";
 

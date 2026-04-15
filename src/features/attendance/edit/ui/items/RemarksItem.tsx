@@ -1,11 +1,11 @@
 import "./RemarksItem.scss";
 
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
+import { RemarksInputField } from "@features/attendance/edit/ui/items/RemarksInputField";
+import { toStringArray } from "@features/attendance/edit/ui/items/remarksItemUtils";
+import { RemarksTags } from "@features/attendance/edit/ui/items/RemarksTags";
+import { SectionTitle } from "@shared/ui/typography";
 import { useContext, useState } from "react";
-
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import { RemarksInputField } from "@/features/attendance/edit/ui/items/RemarksInputField";
-import { toStringArray } from "@/features/attendance/edit/ui/items/remarksItemUtils";
-import { RemarksTags } from "@/features/attendance/edit/ui/items/RemarksTags";
 
 export default function RemarksItem() {
   const { getValues, setValue, control, watch, readOnly } = useContext(
@@ -63,9 +63,9 @@ export default function RemarksItem() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="attendance-remarks-item__overlay-header">
-              <h2 id="remarks-expanded-title" className="attendance-remarks-item__overlay-title">
+              <SectionTitle id="remarks-expanded-title" className="attendance-remarks-item__overlay-title">
                 備考入力
-              </h2>
+              </SectionTitle>
               <button
                 type="button"
                 className="attendance-remarks-item__close-button"

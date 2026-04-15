@@ -1,5 +1,5 @@
-import { store } from "@/app/store";
-import { workflowApi } from "@/entities/workflow/api/workflowApi";
+import { store } from "@app/store";
+import { workflowApi } from "@entities/workflow/api/workflowApi";
 
 export async function workflowListLoader(): Promise<null> {
   await store

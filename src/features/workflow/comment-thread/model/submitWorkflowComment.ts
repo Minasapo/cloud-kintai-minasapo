@@ -1,3 +1,17 @@
+import {
+  NotificationStaff,
+  publishWorkflowCommentNotifications,
+} from "@features/workflow/notification/model/workflowNotificationEventService";
+import {
+  buildWorkflowCommentActorName,
+  sendWorkflowCommentNotification,
+} from "@features/workflow/notifications/sendWorkflowCommentNotification";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+  isConditionalCheckFailed,
+} from "@shared/api/graphql/concurrency";
 import { updateWorkflow } from "@shared/api/graphql/documents/mutations";
 import { getWorkflow } from "@shared/api/graphql/documents/queries";
 import type {
@@ -8,23 +22,8 @@ import type {
   WorkflowComment,
   WorkflowCommentInput,
 } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { GraphQLResult } from "aws-amplify/api";
-
-import {
-  NotificationStaff,
-  publishWorkflowCommentNotifications,
-} from "@/features/workflow/notification/model/workflowNotificationEventService";
-import {
-  buildWorkflowCommentActorName,
-  sendWorkflowCommentNotification,
-} from "@/features/workflow/notifications/sendWorkflowCommentNotification";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import {
-  buildVersionOrUpdatedAtCondition,
-  getNextVersion,
-  isConditionalCheckFailed,
-} from "@/shared/api/graphql/concurrency";
-import { createLogger } from "@/shared/lib/logger";
 
 const logger = createLogger("submitWorkflowComment");
 

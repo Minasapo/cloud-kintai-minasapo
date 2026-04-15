@@ -1,3 +1,5 @@
+import { useAttendanceEditUi } from "@features/attendance/edit/model/AttendanceEditProvider";
+import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
@@ -6,9 +8,6 @@ import {
   FieldArrayWithId,
   UseFieldArrayUpdate,
 } from "react-hook-form";
-
-import { useAttendanceEditUi } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 import { AttendanceControl, AttendanceFieldPath } from "../../../model/types";
 

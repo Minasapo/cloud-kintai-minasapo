@@ -1,9 +1,8 @@
+import { useAttendanceEditUi } from "@features/attendance/edit/model/AttendanceEditProvider";
+import TimeInputField from "@features/attendance/edit/ui/shared/TimeInputField";
 import dayjs from "dayjs";
 import { useRef, useState } from "react";
 import { Controller } from "react-hook-form";
-
-import { useAttendanceEditUi } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import TimeInputField from "@/features/attendance/edit/ui/shared/TimeInputField";
 
 import {
   AttendanceControl,

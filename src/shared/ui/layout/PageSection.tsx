@@ -1,7 +1,6 @@
+import { designTokenVar } from "@shared/designSystem";
 import type { CSSProperties, HTMLAttributes } from "react";
 import { forwardRef } from "react";
-
-import { designTokenVar } from "@/shared/designSystem";
 
 type PageSectionElement = "section" | "div" | "form" | "article" | "main";
 

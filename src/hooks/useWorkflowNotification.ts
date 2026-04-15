@@ -2,6 +2,7 @@ import {
   StaffRole,
   useStaffs,
 } from "@entities/staff/model/useStaffs/useStaffs";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { onCreateWorkflow } from "@shared/api/graphql/documents/subscriptions";
 import {
   OnCreateWorkflowSubscription,
@@ -12,7 +13,6 @@ import { useCallback, useContext, useEffect, useMemo } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
 import { useAppNotification } from "@/hooks/useAppNotification";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 const logger = createLogger("useWorkflowNotification");
 
@@ -25,6 +25,7 @@ const WORKFLOW_CATEGORY_LABELS: Record<WorkflowCategory, string> = {
   [WorkflowCategory.OVERTIME]: "時間外勤務申請",
   [WorkflowCategory.CLOCK_CORRECTION]: "勤怠修正申請",
   [WorkflowCategory.CUSTOM]: "その他申請",
+  [WorkflowCategory.COMPENSATORY_LEAVE]: "振替休暇申請",
 };
 
 /**

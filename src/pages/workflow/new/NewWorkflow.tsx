@@ -3,8 +3,21 @@ import {
   StaffType,
   useStaffs,
 } from "@entities/staff/model/useStaffs/useStaffs";
+import {
+  CATEGORY_LABELS,
+  getEnabledWorkflowCategories,
+} from "@entities/workflow/lib/workflowLabels";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
-import useWorkflowTemplates from "@entities/workflow-template/model/useWorkflowTemplates";
+import {
+  DynamicWorkflowFormProvider,
+} from "@features/workflow/application-form/model/DynamicWorkflowFormContext";
+import {
+  buildDynamicCreateWorkflowInput,
+  validateDynamicWorkflowForm,
+} from "@features/workflow/application-form/model/dynamicWorkflowFormModel";
+import { useDynamicWorkflowForm } from "@features/workflow/application-form/model/useDynamicWorkflowForm";
+import DynamicWorkflowTypeFields from "@features/workflow/application-form/ui/DynamicWorkflowTypeFields";
+import { sendWorkflowSubmissionNotification } from "@features/workflow/notifications/sendWorkflowSubmissionNotification";
 import {
   ApprovalStatus,
   ApprovalStepInput,
@@ -12,40 +25,37 @@ import {
   ApproverSettingMode,
   WorkflowCategory,
 } from "@shared/api/graphql/types";
-import Page from "@shared/ui/page/Page";
-import React, { useContext, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-import { AuthContext } from "@/context/AuthContext";
-import {
-  CATEGORY_LABELS,
-  getEnabledWorkflowCategories,
-} from "@/entities/workflow/lib/workflowLabels";
-import { useNewWorkflowForm } from "@/features/workflow/application-form/model/useNewWorkflowForm";
-import { WorkflowFormProvider } from "@/features/workflow/application-form/model/WorkflowFormContext";
-import {
-  buildCreateWorkflowInput,
-  CLOCK_CORRECTION_CHECK_OUT_LABEL,
-  CLOCK_CORRECTION_LABEL,
-  validateWorkflowForm,
-} from "@/features/workflow/application-form/model/workflowFormModel";
-import WorkflowTypeFields from "@/features/workflow/application-form/ui/WorkflowTypeFields";
-import { sendWorkflowSubmissionNotification } from "@/features/workflow/notifications/sendWorkflowSubmissionNotification";
-import { useAppNotification } from "@/hooks/useAppNotification";
-import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
-import { createLogger } from "@/shared/lib/logger";
-import { parseTimeToISO } from "@/shared/lib/time";
+import { createLogger } from "@shared/lib/logger";
+import { parseTimeToISO } from "@shared/lib/time";
 import {
   DashboardInnerSurface,
   PageContent,
   PageSection,
-} from "@/shared/ui/layout";
+} from "@shared/ui/layout";
+import Page from "@shared/ui/page/Page";
+import { SectionTitle } from "@shared/ui/typography";
+import React, { useContext, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { AuthContext } from "@/context/AuthContext";
+import { useAppNotification } from "@/hooks/useAppNotification";
+import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 
 import styles from "./NewWorkflow.module.scss";
 
+// ワークフロー種別ラベル定数（YAML 由来の値と合わせる）
+const CLOCK_CORRECTION_LABEL = "打刻修正(出勤忘れ)";
+const CLOCK_CORRECTION_CHECK_OUT_LABEL = "打刻修正(退勤忘れ)";
+
 const logger = createLogger("NewWorkflow");
 
-const WORKFLOW_TEMPLATE_ORGANIZATION_ID = "default";
+const getTodayAsSlash = (): string => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}/${m}/${day}`;
+};
 
 const generateApprovalSteps = (
   staff: StaffType,
@@ -179,49 +189,21 @@ export default function NewWorkflow() {
 
   const { staffs } = useStaffs({ isAuthenticated });
   const { create: createWorkflow } = useWorkflows({ isAuthenticated });
-  const { templates } = useWorkflowTemplates({
-    isAuthenticated,
-    organizationId: WORKFLOW_TEMPLATE_ORGANIZATION_ID,
-  });
   const { notify } = useAppNotification();
   const { config, getStartTime, getEndTime, getAbsentEnabled } = useAppConfig();
 
-  const {
-    draftMode,
-    handleDraftToggle,
-    category,
-    setCategory,
-    applicationDate,
-    formState,
-    errors,
-    applyValidationErrors,
-    startDate,
-    setStartDate,
-    endDate,
-    setEndDate,
-    absenceDate,
-    setAbsenceDate,
-    absenceReason,
-    setAbsenceReason,
-    paidReason,
-    setPaidReason,
-    overtimeStart,
-    setOvertimeStart,
-    overtimeEnd,
-    setOvertimeEnd,
-    overtimeDate,
-    setOvertimeDate,
-    overtimeReason,
-    setOvertimeReason,
-    customWorkflowTitle,
-    setCustomWorkflowTitle,
-    customWorkflowContent,
-    setCustomWorkflowContent,
-    selectedTemplateId,
-    setSelectedTemplateId,
-    isDirty,
-  } = useNewWorkflowForm();
+  const [draftMode, setDraftMode] = useState(false);
+  const [category, setCategory] = useState("");
+  const applicationDate = getTodayAsSlash();
+
+  const { fields, setFieldValue, resetFields, isDirty: isFieldsDirty } =
+    useDynamicWorkflowForm();
+
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
+
+  const isDirty = draftMode || category !== "" || isFieldsDirty;
+
   const { dialog, runWithoutGuard } = usePageLeaveGuard({
     isDirty,
     isBusy: isSaving,
@@ -246,8 +228,9 @@ export default function NewWorkflow() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validation = validateWorkflowForm(formState);
-    applyValidationErrors(validation.errors);
+    const state = { categoryLabel: category, fields };
+    const validation = validateDynamicWorkflowForm(state);
+    setFieldErrors(validation.fieldErrors);
     if (!validation.isValid) return;
 
     if (!staff?.id) {
@@ -260,11 +243,10 @@ export default function NewWorkflow() {
       return;
     }
 
-    const input = buildCreateWorkflowInput({
+    const input = buildDynamicCreateWorkflowInput({
       staffId: staff.id,
       draftMode,
-      state: formState,
-      overtimeDateFallbackFactory: () => new Date().toISOString().slice(0, 10),
+      state,
     });
 
     const { approvalSteps, assignedApproverStaffIds } = generateApprovalSteps(
@@ -336,90 +318,44 @@ export default function NewWorkflow() {
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const v = e.target.value;
     setCategory(v);
+    setFieldErrors({});
+
     const today = new Date().toISOString().slice(0, 10);
+
+    // 種別切り替え時にフィールドをリセットしてデフォルト値を設定
     if (v === "有給休暇申請") {
-      setStartDate(today);
-      setEndDate(today);
-      if (!paidReason) setPaidReason("私用のため");
+      resetFields({
+        dateRange: { start: today, end: today },
+        reason: "私用のため",
+      });
     } else if (v === CLOCK_CORRECTION_LABEL) {
-      setOvertimeDate(today);
       const isoTime = parseTimeToISO(getStartTime().format("HH:mm"), today);
-      setOvertimeStart(isoTime);
-      setOvertimeEnd(null);
+      resetFields({ date: today, checkInTime: isoTime });
     } else if (v === CLOCK_CORRECTION_CHECK_OUT_LABEL) {
-      setOvertimeDate(today);
       const defaultEndTime = getEndTime();
-      setOvertimeEnd(
-        defaultEndTime
+      resetFields({
+        date: today,
+        checkOutTime: defaultEndTime
           ? parseTimeToISO(defaultEndTime.format("HH:mm"), today)
           : null,
-      );
-      setOvertimeStart(null);
-    }
-  };
-
-  const handleApplyTemplate = () => {
-    if (!selectedTemplateId) return;
-
-    const targetTemplate = templates.find((t) => t.id === selectedTemplateId);
-    if (!targetTemplate) {
-      notify({
-        title: "エラー",
-        description: "テンプレートが見つかりませんでした。",
-        tone: "error",
-        dedupeKey: "workflow-template-not-found",
       });
-      return;
+    } else if (v === "残業申請") {
+      resetFields({
+        date: today,
+        timeRange: { start: null, end: null },
+        reason: "",
+      });
+    } else if (v === "欠勤申請") {
+      resetFields({ date: today, reason: "" });
+    } else if (v === "振替休暇申請") {
+      resetFields({ targetDate: today, compensatoryDate: today, reason: "" });
+    } else {
+      resetFields();
     }
-
-    const hasCurrentValue =
-      customWorkflowTitle.trim().length > 0 ||
-      customWorkflowContent.trim().length > 0;
-    const confirmMessage = hasCurrentValue
-      ? "現在入力しているタイトル・詳細をテンプレート内容で上書きします。よろしいですか？"
-      : "テンプレートを適用しますか？";
-    if (!window.confirm(confirmMessage)) return;
-
-    setCustomWorkflowTitle(targetTemplate.title);
-    setCustomWorkflowContent(targetTemplate.content);
   };
 
-  const workflowFormContextValue = {
-    category,
-    disabled: category === "",
-    startDate,
-    setStartDate,
-    endDate,
-    setEndDate,
-    dateError: errors.dateError,
-    paidReason,
-    setPaidReason,
-    absenceDate,
-    setAbsenceDate,
-    absenceDateError: errors.absenceDateError,
-    absenceReason,
-    setAbsenceReason,
-    overtimeDate,
-    setOvertimeDate,
-    overtimeDateError: errors.overtimeDateError,
-    overtimeStart,
-    setOvertimeStart,
-    overtimeEnd,
-    setOvertimeEnd,
-    overtimeError: errors.overtimeError,
-    overtimeReason,
-    setOvertimeReason,
-    customWorkflowTitle,
-    setCustomWorkflowTitle,
-    customWorkflowContent,
-    setCustomWorkflowContent,
-    customWorkflowTitleError: errors.customWorkflowTitleError,
-    customWorkflowContentError: errors.customWorkflowContentError,
-    templateOptions: templates.map((t) => ({ id: t.id, name: t.name })),
-    selectedTemplateId,
-    setSelectedTemplateId,
-    onApplyTemplate: handleApplyTemplate,
-    disableTemplateApply: !selectedTemplateId,
+  const handleDraftToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDraftMode(e.target.checked);
   };
 
   return (
@@ -444,7 +380,7 @@ export default function NewWorkflow() {
 
           <div className={styles.pageHeader}>
             <div>
-              <h2 className={styles.pageTitle}>新規作成</h2>
+              <SectionTitle className={styles.pageTitle}>新規作成</SectionTitle>
               <p className={styles.pageSubtitle}>
                 申請一覧を起点に、申請内容を作成します。
               </p>
@@ -487,9 +423,17 @@ export default function NewWorkflow() {
                 </div>
               </FormRow>
 
-              <WorkflowFormProvider value={workflowFormContextValue}>
-                <WorkflowTypeFields />
-              </WorkflowFormProvider>
+              <DynamicWorkflowFormProvider
+                value={{
+                  category,
+                  disabled: category === "",
+                  fields,
+                  setFieldValue,
+                  fieldErrors,
+                }}
+              >
+                <DynamicWorkflowTypeFields />
+              </DynamicWorkflowFormProvider>
 
               <FormRow label="下書き">
                 <div>
@@ -516,9 +460,9 @@ export default function NewWorkflow() {
                     <button
                       type="submit"
                       className={styles.submitButton}
-                      disabled={category === ""}
+                      disabled={category === "" || isSaving}
                     >
-                      作成
+                      {isSaving ? "処理中..." : "作成"}
                     </button>
                   </div>
                 </div>

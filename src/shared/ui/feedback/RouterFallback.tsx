@@ -1,6 +1,5 @@
+import { designTokenVar } from "@shared/designSystem";
 import type { CSSProperties } from "react";
-
-import { designTokenVar } from "@/shared/designSystem";
 
 const HEADER_HEIGHT = designTokenVar("component.headerBar.minHeight", "48px");
 const PAGE_PADDING_X = designTokenVar("spacing.lg", "16px");

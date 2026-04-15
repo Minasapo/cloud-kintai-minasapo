@@ -1,11 +1,10 @@
+import WorkflowCommentThread from "@features/workflow/comment-thread/ui/WorkflowCommentThread";
+import { useWorkflowDetailContext } from "@features/workflow/detail-panel/model/WorkflowDetailContext";
+import { WorkflowDetailProvider } from "@features/workflow/detail-panel/model/WorkflowDetailProvider";
+import WorkflowDetailHeader from "@features/workflow/detail-panel/ui/WorkflowDetailHeader";
+import WorkflowMetadataPanel from "@features/workflow/detail-panel/ui/WorkflowMetadataPanel";
+import { PageSection } from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
-
-import WorkflowCommentThread from "@/features/workflow/comment-thread/ui/WorkflowCommentThread";
-import { useWorkflowDetailContext } from "@/features/workflow/detail-panel/model/WorkflowDetailContext";
-import { WorkflowDetailProvider } from "@/features/workflow/detail-panel/model/WorkflowDetailProvider";
-import WorkflowDetailHeader from "@/features/workflow/detail-panel/ui/WorkflowDetailHeader";
-import WorkflowMetadataPanel from "@/features/workflow/detail-panel/ui/WorkflowMetadataPanel";
-import { PageSection } from "@/shared/ui/layout";
 
 import styles from "./WorkflowDetail.module.scss";
 

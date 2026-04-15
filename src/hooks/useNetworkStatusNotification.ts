@@ -1,10 +1,9 @@
 import { useAppDispatchV2 } from "@app/hooks";
-import { useEffect, useRef } from "react";
-
 import {
   dismissNotification,
   pushNotification,
-} from "@/shared/lib/store/notificationSlice";
+} from "@shared/lib/store/notificationSlice";
+import { useEffect, useRef } from "react";
 
 import { useOnlineStatus } from "./useOnlineStatus";
 

@@ -1,15 +1,14 @@
 import "./styles.scss";
 
+import type { TimeRecorderAnnouncement } from "@features/attendance/time-recorder/lib/timeRecorderAnnouncement";
+import RegisterDashboard from "@features/attendance/time-recorder/ui/RegisterDashboard";
+import RegisterSummaryAttendanceErrorCountCard from "@features/attendance/time-recorder/ui/RegisterSummaryAttendanceErrorCountCard";
+import TimeRecorder, {
+  type TimeRecorderElapsedWorkInfo,
+} from "@features/attendance/time-recorder/ui/TimeRecorder";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useState } from "react";
-
-import type { TimeRecorderAnnouncement } from "@/features/attendance/time-recorder/lib/timeRecorderAnnouncement";
-import RegisterDashboard from "@/features/attendance/time-recorder/ui/RegisterDashboard";
-import RegisterSummaryAttendanceErrorCountCard from "@/features/attendance/time-recorder/ui/RegisterSummaryAttendanceErrorCountCard";
-import TimeRecorder, {
-  type TimeRecorderElapsedWorkInfo,
-} from "@/features/attendance/time-recorder/ui/TimeRecorder";
 
 type RegisterContentProps = {
   configId: string | null;
@@ -44,6 +43,7 @@ export default function RegisterContent({
               <RegisterSummaryAttendanceErrorCountCard
                 attendanceErrorCount={attendanceErrorCount}
                 hasAttendanceError={attendanceErrorCount > 0}
+                to="/attendance/list"
               />
             </div>
           )}

@@ -1,6 +1,6 @@
+import { designTokenVar } from "@shared/designSystem";
+import { Heading } from "@shared/ui/typography";
 import { CSSProperties, ReactNode } from "react";
-
-import { designTokenVar } from "@/shared/designSystem";
 
 const GROUP_BORDER_WIDTH = designTokenVar(
   "component.groupContainer.borderWidth",
@@ -97,9 +97,13 @@ const GroupContainerMobile = ({
     >
       {title ? (
         <div className="flex items-center justify-between">
-          <h2 className="m-0 text-base font-bold leading-6 text-slate-900">
+          <Heading
+            level="section"
+            appearance="quiet"
+            className="m-0 text-slate-900"
+          >
             {title}
-          </h2>
+          </Heading>
           {typeof count === "number" && (
             <span className="text-xs leading-5 text-[color:var(--group-count-color)]">
               {`(${count}件)`}

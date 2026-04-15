@@ -1,6 +1,5 @@
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import type { GraphQLResult } from "aws-amplify/api";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 import {
   EXPORT_MODEL_DEFINITIONS,

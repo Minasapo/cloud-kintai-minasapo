@@ -1,6 +1,5 @@
+import type { WorkflowListItem } from "@features/workflow/list/workflowListModel";
 import StatusChip from "@shared/ui/chips/StatusChip";
-
-import type { WorkflowListItem } from "@/features/workflow/list/workflowListModel";
 
 import {
   isCancelledWorkflow,

@@ -1,12 +1,56 @@
 import type * as Preset from "@docusaurus/preset-classic";
-import type { Config } from "@docusaurus/types";
+import type { Config, Plugin } from "@docusaurus/types";
 import { themes as prismThemes } from "prism-react-renderer";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
+type WebpackWarningLike = {
+  message?: unknown;
+  moduleIdentifier?: unknown;
+  module?: {
+    resource?: unknown;
+  };
+};
+
+const MERMAID_SERVER_WARNING_MESSAGE =
+  "Critical dependency: require function is used in a way in which dependencies cannot be statically extracted";
+const MERMAID_SERVER_WARNING_MODULE =
+  "vscode-languageserver-types/lib/umd/main.js";
+
+function shouldIgnoreMermaidServerWarning(warning: WebpackWarningLike) {
+  const message =
+    typeof warning.message === "string" ? warning.message : "";
+  const moduleIdentifier =
+    typeof warning.moduleIdentifier === "string"
+      ? warning.moduleIdentifier
+      : typeof warning.module?.resource === "string"
+        ? warning.module.resource
+        : "";
+
+  return (
+    message.includes(MERMAID_SERVER_WARNING_MESSAGE) &&
+    moduleIdentifier.includes(MERMAID_SERVER_WARNING_MODULE)
+  );
+}
+
+function suppressMermaidServerWarningPlugin(): Plugin {
+  return {
+    name: "suppress-mermaid-server-warning",
+    configureWebpack(_config, isServer) {
+      if (!isServer) {
+        return {};
+      }
+
+      return {
+        ignoreWarnings: [shouldIgnoreMermaidServerWarning],
+      };
+    },
+  };
+}
+
 const config: Config = {
   title: "クラウド勤怠 ドキュメント",
-  tagline: "スタッフ・管理者・開発者それぞれの利用ガイド",
+  tagline: "ロール別に、ユースケースと機能の両軸で辿れる利用ガイド",
   favicon: "img/favicon.ico",
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -36,6 +80,7 @@ const config: Config = {
   themes: ["@docusaurus/theme-mermaid"],
 
   plugins: [
+    suppressMermaidServerWarningPlugin,
     [
       require.resolve("@easyops-cn/docusaurus-search-local"),
       {

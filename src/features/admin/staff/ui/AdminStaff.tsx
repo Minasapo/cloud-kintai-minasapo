@@ -1,25 +1,25 @@
 import "@/features/admin/staff/ui/styles.scss";
 
+import { useAppDispatchV2 } from "@app/hooks";
+import { isAttendanceManagementEnabled } from "@entities/staff/lib/attendanceManagement";
+import { getWorkTypeLabel } from "@entities/staff/lib/workTypeOptions";
 import {
   roleLabelMap,
   StaffRole,
   useStaffs,
 } from "@entities/staff/model/useStaffs/useStaffs";
-import dayjs from "dayjs";
-import { useContext, useMemo, useState } from "react";
-
-import { useAppDispatchV2 } from "@/app/hooks";
-import { AuthContext } from "@/context/AuthContext";
-import { isAttendanceManagementEnabled } from "@/entities/staff/lib/attendanceManagement";
-import { getWorkTypeLabel } from "@/entities/staff/lib/workTypeOptions";
-import * as MESSAGE_CODE from "@/errors";
 import {
   CreateStaffDialog,
   MoreActionButton,
   SyncCognitoUser,
-} from "@/features/admin/staff/ui/actions";
-import { EditButton } from "@/features/admin/staff/ui/EditButton";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
+} from "@features/admin/staff/ui/actions";
+import { EditButton } from "@features/admin/staff/ui/EditButton";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
+import dayjs from "dayjs";
+import { useContext, useMemo, useState } from "react";
+
+import { AuthContext } from "@/context/AuthContext";
+import * as MESSAGE_CODE from "@/errors";
 
 const STATUS_LABEL_MAP = new Map<string, string>([
   ["CONFIRMED", "確認済み"],

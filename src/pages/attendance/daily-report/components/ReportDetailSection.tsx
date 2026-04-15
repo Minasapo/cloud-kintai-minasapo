@@ -7,6 +7,7 @@ import {
   formatDateTimeReadable,
   formatRelativeDateTime,
 } from "@shared/lib/time";
+import { SubsectionTitle } from "@shared/ui/typography";
 import { type ReactNode } from "react";
 
 import { buildSavedAtLabel } from "../dailyReportHelpers";
@@ -81,7 +82,7 @@ function DetailHeader({ report }: { report: DailyReportItem }) {
     <div className="dr-detail-header">
       <div>
         <StatusChip label={statusMeta.label} className={statusMeta.className} />
-        <h3 className="dr-section-heading dr-break-word">{report.title}</h3>
+        <SubsectionTitle className="dr-section-heading dr-break-word">{report.title}</SubsectionTitle>
         {report.updatedAt && (
           <p className="daily-report-calendar-note">
             最終更新: {buildUpdatedAtLabel(report.updatedAt)}

@@ -1,4 +1,5 @@
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import { PageContent } from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
 import dayjs from "dayjs";
 import {
@@ -11,8 +12,8 @@ import {
 } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
+import AdminShiftSettingsDialog from "@/features/admin-config-shift/AdminShiftSettingsDialog";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
-import { PageContent } from "@/shared/ui/layout";
 
 import { BatchEditToolbar } from "../../../features/shift/collaborative/components/BatchEditToolbar";
 import { ChangeHistoryPanel } from "../../../features/shift/collaborative/components/ChangeHistoryPanel";
@@ -85,6 +86,10 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
       handleChangeState,
       handleLockCells,
       handleUnlockCells,
+      handleLockStaffRow,
+      handleUnlockStaffRow,
+      handleLockMonth,
+      handleUnlockMonth,
       handleApplySuggestion,
       violations,
       isAnalyzing,
@@ -131,6 +136,8 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
 
     const { isPrintDialogOpen, openPrintDialog, closePrintDialog } =
       usePrintShift();
+
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     const staffNameMap = useMemo(
       () =>
@@ -299,6 +306,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             editingCells={state.editingCells}
             onPrevMonth={onPrevMonth}
             onNextMonth={onNextMonth}
+            onOpenSettings={() => setIsSettingsOpen(true)}
           />
 
           <UndoRedoToolbar
@@ -365,6 +373,12 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             ShiftCellComponent={ShiftCellWithComments}
             isWeekend={isWeekend}
             currentUserId={currentUserId}
+            isAdmin={isAdmin}
+            onLockStaffRow={handleLockStaffRow}
+            onUnlockStaffRow={handleUnlockStaffRow}
+            onLockMonth={handleLockMonth}
+            onUnlockMonth={handleUnlockMonth}
+            currentMonth={currentMonth.format("YYYY年M月")}
           />
 
           <BatchEditToolbar
@@ -392,7 +406,7 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
             onAddComments={handleAddCommentsToSelectedCells}
             onShowCellHistory={(cellKey) => handleShowCellHistory(cellKey)}
             canUnlock={isAdmin}
-            showLock={hasUnlocked}
+            showLock={hasUnlocked && isAdmin}
             showUnlock={hasLocked}
             hasClipboard={hasClipboard}
             canPaste={focusedCell !== null}
@@ -427,6 +441,11 @@ const ShiftCollaborativePageInner = memo<ShiftCollaborativePageInnerProps>(
               }))}
             shiftDataMap={state.shiftDataMap}
             targetMonth={targetMonth}
+          />
+
+          <AdminShiftSettingsDialog
+            open={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
           />
         </PageContent>
 

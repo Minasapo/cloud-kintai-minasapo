@@ -1,9 +1,8 @@
 import useAppConfig from "@entities/app-config/model/useAppConfig";
+import { resolveConfigTimeOnDate } from "@entities/attendance/lib/resolveConfigTimeOnDate";
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
 import { GoDirectlyFlagCheckbox } from "@features/attendance/edit/ui/GoDirectlyFlagCheckbox";
 import { useContext, useState } from "react";
-
-import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 export function GoDirectlyFlagInput() {
   const { control, setValue, workDate, getValues, attendance } = useContext(

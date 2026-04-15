@@ -1,4 +1,4 @@
-import { SettingsRow, SettingsSwitch } from "@/features/admin/layout/ui/SettingsPrimitives";
+import { SettingsRow, SettingsSwitch } from "@features/admin/layout/ui/SettingsPrimitives";
 
 interface OfficeModeSectionProps {
   officeMode: boolean;

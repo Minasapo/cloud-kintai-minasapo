@@ -1,7 +1,9 @@
+import { PageTitle } from "@shared/ui/typography";
+
 function AdminAttendancePrint() {
   return (
     <div>
-      <h1>AdminAttendancePrint</h1>
+      <PageTitle>AdminAttendancePrint</PageTitle>
     </div>
   );
 }

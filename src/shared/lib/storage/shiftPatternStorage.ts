@@ -1,6 +1,5 @@
+import { createLogger } from "@shared/lib/logger";
 import { downloadData, uploadData } from "aws-amplify/storage";
-
-import { createLogger } from "@/shared/lib/logger";
 
 const logger = createLogger("shiftPatternStorage");
 

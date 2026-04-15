@@ -1,11 +1,11 @@
+import { useAppDispatchV2 } from "@app/hooks";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import { handleSyncCognitoUser } from "@features/admin/staff/model/handleSyncCognitoUser";
 import { CreateStaffInput, UpdateStaffInput } from "@shared/api/graphql/types";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useState } from "react";
 
-import { useAppDispatchV2 } from "@/app/hooks";
 import * as MESSAGE_CODE from "@/errors";
-import { handleSyncCognitoUser } from "@/features/admin/staff/model/handleSyncCognitoUser";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 export default function SyncCognitoUser({ staffs, refreshStaff, createStaff, updateStaff, }: {
     staffs: StaffType[];

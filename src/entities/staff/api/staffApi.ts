@@ -1,3 +1,4 @@
+import { logOperationEvent } from "@entities/operation-log/model/canonicalOperationLog";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import {
   createStaff,
@@ -18,8 +19,6 @@ import type {
   UpdateStaffInput,
   UpdateStaffMutation,
 } from "@shared/api/graphql/types";
-
-import { logOperationEvent } from "@/entities/operation-log/model/canonicalOperationLog";
 
 export type UpdateStaffPayload = {
   input: UpdateStaffInput;

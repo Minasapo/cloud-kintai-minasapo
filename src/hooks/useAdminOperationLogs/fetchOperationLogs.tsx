@@ -1,6 +1,5 @@
+import fetchOperationLogs from "@entities/operation-log/model/fetchOperationLogs";
 import type { ModelOperationLogFilterInput } from "@shared/api/graphql/types";
-
-import fetchOperationLogs from "@/entities/operation-log/model/fetchOperationLogs";
 
 export default async function fetchAdminOperationLogs(
   nextToken: string | null = null,

@@ -1,3 +1,4 @@
+import { isAttendanceManagementEnabled } from "@entities/staff/lib/attendanceManagement";
 import {
   Attendance,
   CompanyHolidayCalendar,
@@ -5,8 +6,6 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
-
-import { isAttendanceManagementEnabled } from "@/entities/staff/lib/attendanceManagement";
 
 import { AttendanceDate } from "./AttendanceDate";
 import { CompanyHoliday } from "./CompanyHoliday";

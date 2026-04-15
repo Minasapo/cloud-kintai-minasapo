@@ -11,6 +11,8 @@ export const CATEGORY_LABELS: Record<string, string> = {
   [WorkflowCategory.OVERTIME]: "残業申請",
   [WorkflowCategory.CLOCK_CORRECTION]: CLOCK_CORRECTION_DISPLAY_LABEL,
   [WorkflowCategory.CUSTOM]: "その他",
+  // amplify codegen 後は WorkflowCategory.COMPENSATORY_LEAVE に置き換える
+  COMPENSATORY_LEAVE: "振替休暇申請",
 };
 
 export type WorkflowCategoryOrderItem = {
@@ -34,6 +36,8 @@ type WorkflowCategoryOrderConfigLike = {
 const DEFAULT_WORKFLOW_CATEGORY_ORDER: readonly WorkflowCategory[] = [
   WorkflowCategory.PAID_LEAVE,
   WorkflowCategory.ABSENCE,
+  // amplify codegen 後は WorkflowCategory.COMPENSATORY_LEAVE に置き換える
+  "COMPENSATORY_LEAVE" as unknown as WorkflowCategory,
   WorkflowCategory.CLOCK_CORRECTION,
   WorkflowCategory.OVERTIME,
   WorkflowCategory.CUSTOM,

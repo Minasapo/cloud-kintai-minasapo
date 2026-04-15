@@ -1,4 +1,4 @@
-import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
+import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
 
 const KNOWN_REMARK_TAGS = ["有給休暇", "特別休暇", "欠勤"] as const;
 

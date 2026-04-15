@@ -1,17 +1,17 @@
+import { useAppDispatchV2 } from "@app/hooks";
+import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { defaultValues, Inputs } from "@features/admin/jobTerm/lib/common";
 import { CloseDate, UpdateCloseDateInput } from "@shared/api/graphql/types";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
+import { AppButton } from "@shared/ui/button";
+import AppDialog from "@shared/ui/feedback/AppDialog";
+import DateField from "@shared/ui/form/DateField";
 import dayjs from "dayjs";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import { useAppDispatchV2 } from "@/app/hooks";
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import * as MESSAGE_CODE from "@/errors";
-import { defaultValues, Inputs } from "@/features/admin/jobTerm/lib/common";
 import { useDialogCloseGuard } from "@/hooks/useDialogCloseGuard";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
-import { AppButton } from "@/shared/ui/button";
-import AppDialog from "@/shared/ui/feedback/AppDialog";
-import DateField from "@/shared/ui/form/DateField";
 
 export default function EditJobTermInputDialog({ targetData, open, onClose, candidateCloseDates, updateCloseDate, }: {
     targetData: CloseDate | null;

@@ -1,13 +1,12 @@
 import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import { submitWorkflowComment } from "@features/workflow/comment-thread/model/submitWorkflowComment";
+import { WorkflowCommentThreadView as WorkflowCommentThread } from "@features/workflow/comment-thread/ui/WorkflowCommentThread";
 import {
   GetWorkflowQuery,
   WorkflowComment,
   WorkflowCommentInput,
 } from "@shared/api/graphql/types";
 import { useEffect, useMemo, useState } from "react";
-
-import { submitWorkflowComment } from "@/features/workflow/comment-thread/model/submitWorkflowComment";
-import { WorkflowCommentThreadView as WorkflowCommentThread } from "@/features/workflow/comment-thread/ui/WorkflowCommentThread";
 
 type WorkflowData = NonNullable<GetWorkflowQuery["getWorkflow"]>;
 

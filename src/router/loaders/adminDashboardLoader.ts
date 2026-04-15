@@ -1,5 +1,6 @@
-import { store } from "@/app/store";
-import { calendarApi } from "@/entities/calendar/api/calendarApi";
+import { store } from "@app/store";
+import { calendarApi } from "@entities/calendar/api/calendarApi";
+import { workflowApi } from "@entities/workflow/api/workflowApi";
 
 export async function adminDashboardLoader(): Promise<null> {
   await Promise.allSettled([
@@ -20,6 +21,13 @@ export async function adminDashboardLoader(): Promise<null> {
     store
       .dispatch(
         calendarApi.endpoints.getEventCalendars.initiate(undefined, {
+          subscribe: false,
+        }),
+      )
+      .unwrap(),
+    store
+      .dispatch(
+        workflowApi.endpoints.getWorkflows.initiate(undefined, {
           subscribe: false,
         }),
       )

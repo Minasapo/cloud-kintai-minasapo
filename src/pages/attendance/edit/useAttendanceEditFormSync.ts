@@ -1,3 +1,8 @@
+import { resolveConfigTimeOnDate } from "@entities/attendance/lib/resolveConfigTimeOnDate";
+import {
+  AttendanceEditInputs,
+  HourlyPaidHolidayTimeInputs,
+} from "@features/attendance/edit/model/common";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo } from "react";
@@ -9,12 +14,6 @@ import {
   UseFormSetValue,
   useWatch,
 } from "react-hook-form";
-
-import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
-import {
-  AttendanceEditInputs,
-  HourlyPaidHolidayTimeInputs,
-} from "@/features/attendance/edit/model/common";
 
 import { normalizeTimeRanges, splitRemarks } from "./attendanceEditUtils";
 

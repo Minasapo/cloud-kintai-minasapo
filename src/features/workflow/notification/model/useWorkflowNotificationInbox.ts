@@ -2,6 +2,11 @@ import {
   StaffRole,
   useStaffs,
 } from "@entities/staff/model/useStaffs/useStaffs";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getNextVersion,
+} from "@shared/api/graphql/concurrency";
 import { updateWorkflowNotificationEvent } from "@shared/api/graphql/documents/mutations";
 import { workflowNotificationEventsByRecipient } from "@shared/api/graphql/documents/queries";
 import {
@@ -15,16 +20,11 @@ import {
   UpdateWorkflowNotificationEventMutation,
   WorkflowNotificationEventsByRecipientQuery,
 } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { GraphQLResult } from "aws-amplify/api";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import {
-  buildVersionOrUpdatedAtCondition,
-  getNextVersion,
-} from "@/shared/api/graphql/concurrency";
-import { createLogger } from "@/shared/lib/logger";
 
 const logger = createLogger("useWorkflowNotificationInbox");
 const NOTIFICATION_PAGE_SIZE = 10;

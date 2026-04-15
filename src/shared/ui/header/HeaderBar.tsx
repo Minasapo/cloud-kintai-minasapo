@@ -1,6 +1,5 @@
+import { designTokenVar } from "@shared/designSystem";
 import type { CSSProperties, ReactNode } from "react";
-
-import { designTokenVar } from "@/shared/designSystem";
 
 interface HeaderBarProps {
   themeColor?: string;

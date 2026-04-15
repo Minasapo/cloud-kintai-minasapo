@@ -1,9 +1,9 @@
-import ClockInButton from "@/shared/ui/time-recorder/ClockInButton";
-import ClockOutButton from "@/shared/ui/time-recorder/ClockOutButton";
-import GoDirectlyButton from "@/shared/ui/time-recorder/GoDirectlyButton";
-import RestEndButton from "@/shared/ui/time-recorder/RestEndButton";
-import RestStartButton from "@/shared/ui/time-recorder/RestStartButton";
-import ReturnDirectlyButton from "@/shared/ui/time-recorder/ReturnDirectlyButton";
+import ClockInButton from "@shared/ui/time-recorder/ClockInButton";
+import ClockOutButton from "@shared/ui/time-recorder/ClockOutButton";
+import GoDirectlyButton from "@shared/ui/time-recorder/GoDirectlyButton";
+import RestEndButton from "@shared/ui/time-recorder/RestEndButton";
+import RestStartButton from "@shared/ui/time-recorder/RestStartButton";
+import ReturnDirectlyButton from "@shared/ui/time-recorder/ReturnDirectlyButton";
 
 import { WorkStatusCodes } from "../lib/common";
 import { useTimeRecorder } from "./TimeRecorderContext";

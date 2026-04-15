@@ -178,7 +178,7 @@ npm run test:e2e -- smoke-test --project=chromium-staff
 
 ## 開発ドキュメントサイト（Docusaurus）
 
-Docusaurus ベースのドキュメントサイトは `docs-site/` 配下にあります。
+Docusaurus ベースのドキュメントサイトの実体は `docs-site/` 配下にあります。
 
 初回は依存関係をインストールしてください。
 

@@ -1,3 +1,5 @@
+import { PageTitle } from "@shared/ui/typography";
+
 import { useWorkflowListActions, useWorkflowListData } from "../context/WorkflowListPageContext";
 import WorkflowCreateButton from "./WorkflowCreateButton";
 
@@ -9,7 +11,7 @@ export default function WorkflowHero() {
     <section className="workflow-hero">
       <div className="workflow-hero__inner">
         <div className="workflow-hero__copy">
-          <h1 className="workflow-hero__title">ワークフロー</h1>
+          <PageTitle className="workflow-hero__title">ワークフロー</PageTitle>
           <p className="workflow-hero__description">
             ワークフローの申請状況を確認・管理できます。
           </p>

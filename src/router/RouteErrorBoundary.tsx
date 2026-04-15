@@ -1,7 +1,6 @@
+import NotFound from "@pages/NotFound";
+import { designTokenVar } from "@shared/designSystem";
 import { isRouteErrorResponse, useRouteError } from "react-router-dom";
-
-import NotFound from "@/pages/NotFound";
-import { designTokenVar } from "@/shared/designSystem";
 
 const PAGE_PADDING_TOP = designTokenVar("component.page.paddingTop", "24px");
 const PAGE_SECTION_GAP = designTokenVar("component.page.sectionGap", "16px");

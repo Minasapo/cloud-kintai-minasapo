@@ -1,4 +1,8 @@
 import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import AttendanceEditProvider, {
+  AttendanceEditContext,
+} from "@features/attendance/edit/model/AttendanceEditProvider";
+import type { AttendanceEditInputs } from "@features/attendance/edit/model/common";
 import type { AttendanceChangeRequest } from "@shared/api/graphql/types";
 import { render, screen } from "@testing-library/react";
 import React, { type ReactElement } from "react";
@@ -11,11 +15,6 @@ import type {
   UseFormWatch,
 } from "react-hook-form";
 import { MemoryRouter } from "react-router-dom";
-
-import AttendanceEditProvider, {
-  AttendanceEditContext,
-} from "@/features/attendance/edit/model/AttendanceEditProvider";
-import type { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 // react-hook-formのuseFormState/Controllerを軽量モック
 jest.mock("react-hook-form", () => ({

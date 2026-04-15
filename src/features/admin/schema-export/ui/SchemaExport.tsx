@@ -1,10 +1,11 @@
-import { useContext, useMemo, useState } from "react";
-
-import { AuthContext } from "@/context/AuthContext";
 import {
   SettingsAlert,
   SettingsSelect,
-} from "@/features/admin/layout/ui/SettingsPrimitives";
+} from "@features/admin/layout/ui/SettingsPrimitives";
+import { SectionTitle, SubsectionTitle } from "@shared/ui/typography";
+import { useContext, useMemo, useState } from "react";
+
+import { AuthContext } from "@/context/AuthContext";
 
 import { downloadJsonFile } from "../model/downloadJsonFile";
 import {
@@ -87,7 +88,7 @@ export default function SchemaExport() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="m-0 text-2xl font-semibold text-slate-900">データエクスポート</h2>
+        <SectionTitle className="m-0 text-2xl font-semibold text-slate-900">データエクスポート</SectionTitle>
         <p className="mt-2 text-sm text-slate-500">
           システム内の設定や登録データを、まとめて JSON ファイルとして保存できる保守機能です。
         </p>
@@ -105,7 +106,7 @@ export default function SchemaExport() {
         <>
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-4">
-              <h3 className="m-0 text-lg font-semibold text-slate-900">個別エクスポート</h3>
+              <SubsectionTitle className="m-0 text-lg font-semibold text-slate-900">個別エクスポート</SubsectionTitle>
               <SettingsSelect
                 label="対象モデル"
                 value={selectedModel}
@@ -134,7 +135,7 @@ export default function SchemaExport() {
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-4">
-              <h3 className="m-0 text-lg font-semibold text-slate-900">一括エクスポート</h3>
+              <SubsectionTitle className="m-0 text-lg font-semibold text-slate-900">一括エクスポート</SubsectionTitle>
               <p className="m-0 text-sm text-slate-500">
                 対象 {modelOptions.length} モデルを全件取得し、単一 JSON ファイルとしてダウンロードします。
               </p>

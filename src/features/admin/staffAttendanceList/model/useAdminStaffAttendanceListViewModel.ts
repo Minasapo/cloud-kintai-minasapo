@@ -1,19 +1,19 @@
 import { type DuplicateAttendanceInfo, useListAttendancesByDateRangeQuery, useUpdateAttendanceMutation, } from "@entities/attendance/api/attendanceApi";
+import { ChangeRequest, hasUnapprovedChangeRequest, } from "@entities/attendance/lib/ChangeRequest";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
+import { AttendanceRowVariant, getAttendanceRowVariant, } from "@entities/attendance/ui/rowVariant";
 import { useCalendars } from "@entities/calendar/model/useCalendars";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType, } from "@entities/staff/model/useStaffs/useStaffs";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import { onCreateAttendance, onDeleteAttendance, onUpdateAttendance, } from "@shared/api/graphql/documents/subscriptions";
 import { Attendance, CloseDate, CompanyHolidayCalendar, HolidayCalendar, OnCreateAttendanceSubscription, OnDeleteAttendanceSubscription, OnUpdateAttendanceSubscription, Staff, } from "@shared/api/graphql/types";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 import dayjs, { Dayjs } from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 
-import { ChangeRequest, hasUnapprovedChangeRequest, } from "@/entities/attendance/lib/ChangeRequest";
-import { AttendanceRowVariant, getAttendanceRowVariant, } from "@/entities/attendance/ui/rowVariant";
 import * as MESSAGE_CODE from "@/errors";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { onCreateAttendance, onDeleteAttendance, onUpdateAttendance, } from "@/shared/api/graphql/documents/subscriptions";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 import type { PendingAttendanceControls } from "../ui/components";
 import { useAdminAttendanceChangeRequests } from "./useAdminAttendanceChangeRequests";

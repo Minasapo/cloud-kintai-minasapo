@@ -5,14 +5,35 @@ import {
   useUpdateAttendanceMutation,
   useUpsertAttendanceByStaffAndDateMutation,
 } from "@entities/attendance/api/attendanceApi";
+import {
+  clockInAction,
+  clockOutAction,
+  GoDirectlyFlag,
+  restEndAction,
+  restStartAction,
+  ReturnDirectlyFlag,
+} from "@entities/attendance/lib/actions/attendanceActions";
+import { getWorkStatus } from "@entities/attendance/lib/actions/workStatus";
+import {
+  getEffectiveDateRange,
+  getEffectivePastDateRangeEnd,
+} from "@entities/attendance/lib/aggregationDateRange";
+import { resolveCurrentBusinessWorkDate } from "@entities/attendance/lib/businessDate";
+import { buildAttendanceIdempotencyKey } from "@entities/attendance/lib/operationContext";
+import { getNowISOStringWithZeroSeconds } from "@entities/attendance/lib/time";
+import useCloseDates from "@entities/attendance/model/useCloseDates";
 import { useCalendars } from "@entities/calendar/model/useCalendars";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import { onUpdateAttendance } from "@shared/api/graphql/documents/subscriptions";
 import {
   Attendance,
   CreateAttendanceInput,
   OnUpdateAttendanceSubscription,
   Staff,
 } from "@shared/api/graphql/types";
+import { Logger } from "@shared/lib/logger";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 import dayjs from "dayjs";
 import {
   useCallback,
@@ -26,28 +47,7 @@ import { useDispatch } from "react-redux";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
 import { AuthContext } from "@/context/AuthContext";
-import {
-  clockInAction,
-  clockOutAction,
-  GoDirectlyFlag,
-  restEndAction,
-  restStartAction,
-  ReturnDirectlyFlag,
-} from "@/entities/attendance/lib/actions/attendanceActions";
-import { getWorkStatus } from "@/entities/attendance/lib/actions/workStatus";
-import {
-  getEffectiveDateRange,
-  getEffectivePastDateRangeEnd,
-} from "@/entities/attendance/lib/aggregationDateRange";
-import { resolveCurrentBusinessWorkDate } from "@/entities/attendance/lib/businessDate";
-import { buildAttendanceIdempotencyKey } from "@/entities/attendance/lib/operationContext";
-import { getNowISOStringWithZeroSeconds } from "@/entities/attendance/lib/time";
-import useCloseDates from "@/entities/attendance/model/useCloseDates";
 import * as MESSAGE_CODE from "@/errors";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { onUpdateAttendance } from "@/shared/api/graphql/documents/subscriptions";
-import { Logger } from "@/shared/lib/logger";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 import { WorkStatus } from "../lib/common";
 import { clockInCallback } from "./clockInCallback";

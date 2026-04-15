@@ -1,139 +1,39 @@
 import "./styles.scss";
 
-import {
-  useCreateAttendanceMutation,
-  useGetAttendanceByStaffAndDateQuery,
-  useUpdateAttendanceMutation,
-} from "@entities/attendance/api/attendanceApi";
-import { attendanceEditSchema } from "@entities/attendance/validation/attendanceEditSchema";
 import { collectAttendanceErrorMessages } from "@entities/attendance/validation/collectErrorMessages";
-import {
-  StaffType,
-  useStaffs,
-} from "@entities/staff/model/useStaffs/useStaffs";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Attendance } from "@shared/api/graphql/types";
+import type { AttendanceEditContextProps } from "@features/attendance/edit/model/AttendanceEditProvider";
+import AttendanceEditProvider from "@features/attendance/edit/model/AttendanceEditProvider";
+import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
+import DesktopEditor from "@features/attendance/edit/ui/desktopEditor/DesktopEditor";
+import { MobileEditor } from "@features/attendance/edit/ui/mobileEditor/MobileEditor";
+import { PageContent } from "@shared/ui/layout";
 import dayjs from "dayjs";
-import { useCallback, useContext, useEffect, useMemo } from "react";
-import {
-  useFieldArray,
-  useForm,
-  UseFormHandleSubmit,
-} from "react-hook-form";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useMemo } from "react";
+import { UseFormHandleSubmit } from "react-hook-form";
 
-import { AppConfigContext } from "@/context/AppConfigContext";
-import { AuthContext } from "@/context/AuthContext";
-import { AttendanceDate } from "@/entities/attendance/lib/AttendanceDate";
 import * as MESSAGE_CODE from "@/errors";
-import type { AttendanceEditContextProps } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import AttendanceEditProvider from "@/features/attendance/edit/model/AttendanceEditProvider";
-import {
-  AttendanceEditInputs,
-  defaultValues,
-} from "@/features/attendance/edit/model/common";
-import DesktopEditor from "@/features/attendance/edit/ui/desktopEditor/DesktopEditor";
-import { MobileEditor } from "@/features/attendance/edit/ui/mobileEditor/MobileEditor";
 import { useAppNotification } from "@/hooks/useAppNotification";
-import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
-import { createLogger } from "@/shared/lib/logger";
-import { PageContent } from "@/shared/ui/layout";
 
 import { AttendanceEditErrorAlert } from "./AttendanceEditErrorAlert";
-import { buildChangeRequestPayload } from "./attendanceEditUtils";
-import sendChangeRequestMail from "./sendChangeRequestMail";
-import { useAttendanceEditFormSync } from "./useAttendanceEditFormSync";
-
-const logger = createLogger("AttendanceEdit");
-
-const MONTH_QUERY_KEY = "month";
+import { useAttendanceEditData } from "./useAttendanceEditData";
+import { useAttendanceForm } from "./useAttendanceForm";
+import { useSubmitAttendanceEdit } from "./useSubmitAttendanceEdit";
 
 export default function AttendanceEdit() {
   const { notify } = useAppNotification();
-  const { cognitoUser, authStatus } = useContext(AuthContext);
+
   const {
-    getHourlyPaidHolidayEnabled,
-    getStartTime,
-    getEndTime,
-    getLunchRestStartTime,
-    getLunchRestEndTime,
-  } = useContext(AppConfigContext);
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { targetWorkDate } = useParams();
-
-  const attendanceListPath = useMemo(() => {
-    const month = searchParams.get(MONTH_QUERY_KEY);
-    if (!month) {
-      return "/attendance/list";
-    }
-
-    return `/attendance/list?${new URLSearchParams({
-      [MONTH_QUERY_KEY]: month,
-    }).toString()}`;
-  }, [searchParams]);
-
-  const isAuthenticated = authStatus === "authenticated";
-  const {
+    cognitoUser,
+    targetWorkDate,
+    targetWorkDateISO,
+    staff,
     staffs,
-    loading: staffsLoading,
-    error: staffSError,
-  } = useStaffs({
-    isAuthenticated,
-  });
-  const [createAttendanceMutation] = useCreateAttendanceMutation();
-  const [updateAttendanceMutation] = useUpdateAttendanceMutation();
-
-  const createAttendance = useCallback(
-    (input: Parameters<typeof createAttendanceMutation>[0]) =>
-      createAttendanceMutation(input).unwrap(),
-    [createAttendanceMutation],
-  );
-
-  const updateAttendance = useCallback(
-    (input: Parameters<typeof updateAttendanceMutation>[0]) =>
-      updateAttendanceMutation(input).unwrap(),
-    [updateAttendanceMutation],
-  );
-
-  const targetWorkDateISO = useMemo(() => {
-    if (!targetWorkDate) {
-      return null;
-    }
-
-    return dayjs(targetWorkDate).format(AttendanceDate.DataFormat);
-  }, [targetWorkDate]);
-
-  const staff = useMemo<StaffType | null | undefined>(() => {
-    if (!cognitoUser?.id) return undefined;
-    const { id: staffId } = cognitoUser;
-    return staffs.find((s) => s.cognitoUserId === staffId) || null;
-  }, [staffs, cognitoUser]);
-
-  const staffId = staff?.cognitoUserId ?? null;
-  const shouldFetchAttendance = Boolean(staffId && targetWorkDateISO);
-
-  const {
-    data: attendanceData,
-    isLoading: isAttendanceInitialLoading,
-    isFetching: isAttendanceFetching,
-    isUninitialized: isAttendanceUninitialized,
-    error: attendanceError,
-  } = useGetAttendanceByStaffAndDateQuery(
-    {
-      staffId: staffId ?? "",
-      workDate: targetWorkDateISO ?? "",
-    },
-    { skip: !shouldFetchAttendance },
-  );
-
-  const attendance: Attendance | null = attendanceData ?? null;
-
-  const attendanceLoading =
-    !shouldFetchAttendance ||
-    isAttendanceInitialLoading ||
-    isAttendanceFetching ||
-    isAttendanceUninitialized;
+    staffsLoading,
+    staffSError,
+    attendance,
+    attendanceLoading,
+    attendanceListPath,
+  } = useAttendanceEditData();
 
   const {
     register,
@@ -142,169 +42,39 @@ export default function AttendanceEdit() {
     getValues,
     watch,
     handleSubmit,
-    reset,
-    formState: { isDirty, isValid, isSubmitting, errors },
-  } = useForm<AttendanceEditInputs>({
-    mode: "onChange",
-    defaultValues,
-    resolver: zodResolver(attendanceEditSchema),
-  });
-
-  const {
-    fields: restFields,
-    append: restAppend,
-    remove: restRemove,
-    update: restUpdate,
-    replace: restReplace,
-  } = useFieldArray({
-    control,
-    name: "rests",
-  });
-
-  const {
-    fields: hourlyPaidHolidayTimeFields,
-    append: hourlyPaidHolidayTimeAppend,
-    remove: hourlyPaidHolidayTimeRemove,
-    update: hourlyPaidHolidayTimeUpdate,
-    replace: hourlyPaidHolidayTimeReplace,
-  } = useFieldArray({
-    control,
-    name: "hourlyPaidHolidayTimes",
-  });
-
-  const hourlyPaidHolidayEnabled = getHourlyPaidHolidayEnabled();
-  const { dialog, runWithoutGuard } = usePageLeaveGuard({
     isDirty,
-    isBusy: isSubmitting,
-  });
-
-  const onSubmit = async (data: AttendanceEditInputs) => {
-    const changeRequestPayload = buildChangeRequestPayload(data);
-
-    if (attendance) {
-      await updateAttendance({
-        id: attendance.id,
-        changeRequests: [changeRequestPayload],
-        revision: attendance.revision,
-        logContext: {
-          action: "attendance.request.submit",
-        },
-      })
-        .then(() => {
-          if (!cognitoUser) return;
-
-          try {
-            void sendChangeRequestMail(
-              cognitoUser,
-              dayjs(attendance.workDate),
-              staffs,
-              data.staffComment,
-            );
-          } catch (mailError) {
-            logger.error("Failed to send change request mail:", mailError);
-            notify({
-              title: "メール送信エラー",
-              description: MESSAGE_CODE.E00002,
-              tone: "error",
-              dedupeKey: "mail-error",
-            });
-          }
-
-          notify({
-            title: "修正申請完了",
-            description: MESSAGE_CODE.S02005,
-            tone: "success",
-            dedupeKey: "attendance-change-request",
-          });
-
-          runWithoutGuard(() => navigate(attendanceListPath));
-        })
-        .catch(() => {
-          notify({
-            title: "修正申請エラー",
-            description: MESSAGE_CODE.E02005,
-            tone: "error",
-            dedupeKey: "attendance-change-request-error",
-          });
-        });
-    } else {
-      if (!staff || !targetWorkDate) return;
-
-      await createAttendance({
-        staffId: staff.cognitoUserId,
-        workDate: dayjs(targetWorkDate).format(AttendanceDate.DataFormat),
-        changeRequests: [changeRequestPayload],
-        logContext: {
-          action: "attendance.request.submit",
-        },
-      })
-        .then(() => {
-          notify({
-            title: "修正申請完了",
-            description: MESSAGE_CODE.S02005,
-            tone: "success",
-            dedupeKey: "attendance-change-request",
-          });
-
-          if (!cognitoUser) return;
-          try {
-            void sendChangeRequestMail(
-              cognitoUser,
-              dayjs(targetWorkDate),
-              staffs,
-              data.staffComment,
-            );
-          } catch (mailError) {
-            console.error("Failed to send change request mail:", mailError);
-            notify({
-              title: "メール送信エラー",
-              description: MESSAGE_CODE.E00002,
-              tone: "error",
-              dedupeKey: "mail-error",
-            });
-          }
-          runWithoutGuard(() => navigate(attendanceListPath));
-        })
-        .catch((e) => {
-          logger.error("Failed to update attendance:", e);
-          notify({
-            title: "修正申請エラー",
-            description: MESSAGE_CODE.E02005,
-            tone: "error",
-            dedupeKey: "attendance-change-request-error",
-          });
-        });
-    }
-  };
-
-  useEffect(() => {
-    if (!shouldFetchAttendance || !attendanceError) {
-      return;
-    }
-
-    notify({
-      title: "データ取得エラー",
-      description: MESSAGE_CODE.E02001,
-      tone: "error",
-      dedupeKey: "attendance-fetch-error",
-    });
-  }, [attendanceError, shouldFetchAttendance, notify]);
-
-  const { isOnBreak } = useAttendanceEditFormSync({
-    control,
-    setValue,
-    getValues,
-    reset,
+    isValid,
+    isSubmitting,
+    errors,
+    restFields,
+    restAppend,
+    restRemove,
+    restUpdate,
     restReplace,
+    hourlyPaidHolidayTimeFields,
+    hourlyPaidHolidayTimeAppend,
+    hourlyPaidHolidayTimeRemove,
+    hourlyPaidHolidayTimeUpdate,
     hourlyPaidHolidayTimeReplace,
+    hourlyPaidHolidayEnabled,
+    isOnBreak,
+    dialog,
+    runWithoutGuard,
+  } = useAttendanceForm({
     attendance,
     targetWorkDate,
     targetWorkDateISO,
-    staffId,
-    getStartTime,
-    getEndTime,
-    getLunchRestStartTime,
-    getLunchRestEndTime,
+    staffId: staff?.cognitoUserId ?? null,
+  });
+
+  const { onSubmit } = useSubmitAttendanceEdit({
+    cognitoUser,
+    attendance,
+    staff,
+    staffs,
+    targetWorkDate,
+    attendanceListPath,
+    runWithoutGuard,
   });
 
   const changeRequests = attendance?.changeRequests
@@ -312,6 +82,7 @@ export default function AttendanceEdit() {
         .filter((item): item is NonNullable<typeof item> => item !== null)
         .filter((item) => !item.completed)
     : [];
+
   const errorMessages = useMemo(
     () => collectAttendanceErrorMessages(errors),
     [errors],

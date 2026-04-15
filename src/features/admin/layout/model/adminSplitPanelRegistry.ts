@@ -1,6 +1,5 @@
+import type { PanelConfig, ScreenOption } from "@features/splitView";
 import React, { lazy } from "react";
-
-import type { PanelConfig, ScreenOption } from "@/features/splitView";
 
 const AdminDashboardComponent = lazy(
   () => import("@/pages/admin/AdminDashboard"),
@@ -17,9 +16,6 @@ const AdminStaffComponent = lazy(
 const AdminShiftPlanComponent = lazy(
   () => import("@/pages/admin/AdminShiftPlan/AdminShiftPlan"),
 );
-const AdminWorkflowComponent = lazy(
-  () => import("@/pages/admin/AdminWorkflow/AdminWorkflow"),
-);
 const AdminLogsComponent = lazy(
   () => import("@/pages/admin/AdminLogs/AdminLogsClean"),
 );
@@ -34,7 +30,6 @@ export const ADMIN_SPLIT_PANEL_OPTIONS: ScreenOption[] = [
   { value: "staff-list", label: "スタッフ一覧", route: "/admin/staff" },
   { value: "shift-plan", label: "シフト管理", route: "/admin/shift" },
   { value: "shift-planning", label: "シフト計画", route: "/admin/shift-plan" },
-  { value: "workflow", label: "ワークフロー", route: "/admin/workflow" },
   { value: "audit-logs", label: "ログ", route: "/admin/logs" },
   { value: "settings", label: "設定", route: "/admin/master" },
 ];
@@ -59,7 +54,6 @@ export const ADMIN_SPLIT_PANEL_COMPONENTS: Record<
   "shift-planning": AdminShiftPlanComponent as React.ComponentType<{
     panelId: string;
   }>,
-  workflow: AdminWorkflowComponent as React.ComponentType<{ panelId: string }>,
   "audit-logs": AdminLogsComponent as React.ComponentType<{ panelId: string }>,
   settings: AdminSettingsTopComponent as React.ComponentType<{
     panelId: string;

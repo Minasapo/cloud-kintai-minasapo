@@ -1,6 +1,5 @@
+import TimeRecorderAnnouncementBanner from "@features/attendance/time-recorder/ui/TimeRecorderAnnouncementBanner";
 import { fireEvent, render, screen } from "@testing-library/react";
-
-import TimeRecorderAnnouncementBanner from "@/features/attendance/time-recorder/ui/TimeRecorderAnnouncementBanner";
 
 describe("TimeRecorderAnnouncementBanner", () => {
   beforeEach(() => {

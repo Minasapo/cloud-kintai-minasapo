@@ -1,8 +1,7 @@
 import "./MobileCalendar.scss";
 
+import { AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
 import { CSSProperties, ReactNode } from "react";
-
-import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 type CalendarDayCellProps = {
   isCurrentMonth: boolean;
@@ -47,17 +46,29 @@ export const CalendarDayCell = ({
     ? "var(--mui-palette-text-primary)"
     : "var(--mui-palette-text-secondary)";
 
-  if (status === AttendanceStatus.Error || hasError) {
-    color = "var(--mui-palette-error-dark)";
-  } else if (status === AttendanceStatus.Late) {
-    color = "var(--mui-palette-warning-dark)";
-  } else if (status === AttendanceStatus.None && !isCurrentMonth) {
-    backgroundColor = "var(--mui-palette-grey-200)";
+  if (!isCurrentMonth) {
+    backgroundColor = "var(--mui-palette-grey-100)";
+    borderColor = "rgba(156, 163, 175, 0.4)";
     color = "var(--mui-palette-text-secondary)";
-  }
-
-  if (isSelected) {
-    borderColor = "var(--mui-palette-primary-main)";
+  } else if (status === AttendanceStatus.Error || hasError) {
+    backgroundColor = "rgba(211, 47, 47, 0.14)";
+    borderColor = "var(--mui-palette-error-main)";
+    color = "#8f1d1d";
+  } else if (status === AttendanceStatus.Late) {
+    backgroundColor = "rgba(237, 108, 2, 0.18)";
+    borderColor = "var(--mui-palette-warning-main)";
+    color = "#8a3b00";
+  } else if (status === AttendanceStatus.Ok) {
+    backgroundColor = "rgba(46, 125, 50, 0.14)";
+    borderColor = "rgba(46, 125, 50, 0.32)";
+    color = "#1f5f24";
+  } else if (
+    status === AttendanceStatus.Requesting ||
+    status === AttendanceStatus.Working
+  ) {
+    backgroundColor = "rgba(2, 136, 209, 0.12)";
+    borderColor = "rgba(2, 136, 209, 0.34)";
+    color = "#0b5f8a";
   }
 
   const classNames = ["mobile-calendar__day-cell"];
@@ -71,6 +82,7 @@ export const CalendarDayCell = ({
     color,
     "--term-color": termColor ?? "transparent",
     "--day-hover-shadow": "0px 1px 3px rgba(0, 0, 0, 0.2)",
+    "--selected-ring-color": "var(--mui-palette-primary-main)",
   } as CSSProperties;
 
   return (

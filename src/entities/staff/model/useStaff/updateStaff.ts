@@ -1,3 +1,4 @@
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import * as mutations from "@shared/api/graphql/documents/mutations";
 import {
   ModelStaffConditionInput,
@@ -6,8 +7,6 @@ import {
   UpdateStaffMutation,
 } from "@shared/api/graphql/types";
 import { GraphQLResult } from "aws-amplify/api";
-
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
 
 export type UpdateStaffPayload = {
   input: UpdateStaffInput;

@@ -1,3 +1,4 @@
+import { AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
 import {
   Attendance,
   CompanyHolidayCalendar,
@@ -5,8 +6,6 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
-
-import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 import { getStatus } from "../../lib/attendanceStatusUtils";
 import { DateRange } from "../attendanceListUtils";

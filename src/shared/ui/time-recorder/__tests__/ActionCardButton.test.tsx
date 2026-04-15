@@ -1,10 +1,9 @@
-import { render, screen } from "@testing-library/react";
-
-import ActionCardButton from "@/shared/ui/time-recorder/ActionCardButton";
+import ActionCardButton from "@shared/ui/time-recorder/ActionCardButton";
 import {
   buildActionCardVars,
   TIME_RECORDER_BUTTON_PALETTES,
-} from "@/shared/ui/time-recorder/buttonStyles";
+} from "@shared/ui/time-recorder/buttonStyles";
+import { render, screen } from "@testing-library/react";
 
 const style = buildActionCardVars(TIME_RECORDER_BUTTON_PALETTES.clockIn);
 

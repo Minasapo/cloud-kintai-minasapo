@@ -1,3 +1,4 @@
+import { SectionTitle } from "@shared/ui/typography";
 import { ChangeEvent, ReactNode, useEffect } from "react";
 
 export interface QuickDailyReportCardViewProps {
@@ -248,12 +249,12 @@ const QuickDailyReportCardView = ({
             onClick={(event) => event.stopPropagation()}
           >
             <div className="border-b border-slate-200 px-6 py-4">
-              <h2
+              <SectionTitle
                 id={`${contentPanelId}-dialog-title`}
                 className="m-0 text-lg font-semibold text-slate-900"
               >
                 今日の日報メモを拡大表示
-              </h2>
+              </SectionTitle>
             </div>
             <div className="space-y-4 px-6 py-5">
               {isLoading && <LoadingBar />}

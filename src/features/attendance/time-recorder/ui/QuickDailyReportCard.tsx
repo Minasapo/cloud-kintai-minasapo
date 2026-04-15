@@ -1,17 +1,16 @@
+import { logDailyReportMutation } from "@entities/operation-log/model/dailyReportOperationLog";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import { buildVersionOrUpdatedAtCondition, getGraphQLErrorMessage, getNextVersion, } from "@shared/api/graphql/concurrency";
 import { createDailyReport, updateDailyReport, } from "@shared/api/graphql/documents/mutations";
 import { dailyReportsByStaffId } from "@shared/api/graphql/documents/queries";
 import type { CreateDailyReportMutation, DailyReportsByStaffIdQuery, UpdateDailyReportMutation, } from "@shared/api/graphql/types";
 import { DailyReportStatus } from "@shared/api/graphql/types";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
+import QuickDailyReportCardView from "@shared/ui/time-recorder/QuickDailyReportCard";
 import { GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-
-import { logDailyReportMutation } from "@/entities/operation-log/model/dailyReportOperationLog";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { buildVersionOrUpdatedAtCondition, getGraphQLErrorMessage, getNextVersion, } from "@/shared/api/graphql/concurrency";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
-import QuickDailyReportCardView from "@/shared/ui/time-recorder/QuickDailyReportCard";
 /**
  * 定数定義
  */

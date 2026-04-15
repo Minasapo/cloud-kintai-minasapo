@@ -1,18 +1,19 @@
+import { useAppDispatchV2 } from "@app/hooks";
+import type { ShiftDisplayMode } from "@entities/app-config/model/useAppConfig";
+import AdminSettingsLayout from "@features/admin/layout/ui/AdminSettingsLayout";
+import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
+import { SettingsAlert, SettingsButton, } from "@features/admin/layout/ui/SettingsPrimitives";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateAppConfigInput, UpdateAppConfigInput, } from "@shared/api/graphql/types";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
+import { SubsectionTitle } from "@shared/ui/typography";
 // Title removed per admin UI simplification
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 
-import { useAppDispatchV2 } from "@/app/hooks";
 import { AppConfigContext } from "@/context/AppConfigContext";
-import type { ShiftDisplayMode } from "@/entities/app-config/model/useAppConfig";
 import { E14001, S14001, S14002 } from "@/errors";
-import AdminSettingsLayout from "@/features/admin/layout/ui/AdminSettingsLayout";
-import SettingsIcon from "@/features/admin/layout/ui/SettingsIcon";
-import { SettingsAlert, SettingsButton, } from "@/features/admin/layout/ui/SettingsPrimitives";
 import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
-import { pushNotification } from "@/shared/lib/store/notificationSlice";
 
 import { buildShiftGroupPayload, createShiftGroup, SHIFT_GROUP_UI_TEXTS, ShiftGroupRow, } from "./";
 import { toShiftGroupFormValue } from "./shiftGroupFactory";
@@ -96,7 +97,13 @@ export default function AdminShiftSettings() {
         } | undefined>>;
     }), [errors]);
     const hasValidationError = validationDetails.length > 0;
-    const initialShiftGroupSnapshot = useMemo(() => JSON.stringify(getShiftGroups().map((group) => toShiftGroupFormValue(group))), [getShiftGroups]);
+    const initialShiftGroupSnapshot = useMemo(() => JSON.stringify(getShiftGroups().map((group) => ({
+        label: group.label ?? "",
+        min: typeof group.min === "number" && !Number.isNaN(group.min) ? String(group.min) : "",
+        max: typeof group.max === "number" && !Number.isNaN(group.max) ? String(group.max) : "",
+        fixed: typeof group.fixed === "number" && !Number.isNaN(group.fixed) ? String(group.fixed) : "",
+        description: group.description ?? "",
+    }))), [getShiftGroups]);
     const currentShiftGroupSnapshot = useMemo(() => JSON.stringify(fields.map((field) => ({
         label: field.label ?? "",
         min: field.min ?? "",
@@ -233,7 +240,7 @@ export default function AdminShiftSettings() {
 
               <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
                 <div className="flex flex-col gap-6">
-                  <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">シフトグループ</h3>
+                  <SubsectionTitle className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">シフトグループ</SubsectionTitle>
                   <div className="flex flex-col gap-4">
                   {fields.length === 0 ? (<SettingsAlert>
                       {SHIFT_GROUP_UI_TEXTS.emptyGroups}
@@ -271,7 +278,7 @@ export default function AdminShiftSettings() {
               <SettingsAlert>シフト管理画面の表示モードを設定します。</SettingsAlert>
               <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
                 <div className="flex flex-col gap-6">
-                  <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">シフト表示</h3>
+                  <SubsectionTitle className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">シフト表示</SubsectionTitle>
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-2">
                       <span className="text-sm font-medium text-slate-700">表示モード</span>

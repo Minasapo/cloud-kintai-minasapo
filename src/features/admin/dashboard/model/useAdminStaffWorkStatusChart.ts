@@ -1,3 +1,24 @@
+import useCloseDates from "@entities/attendance/model/useCloseDates";
+import {
+  type StaffType,
+  useStaffs,
+} from "@entities/staff/model/useStaffs/useStaffs";
+import { useStandardWorkHours } from "@features/admin/dashboard/model/useAppConfigDerived";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import { listAttendances } from "@shared/api/graphql/documents/queries";
+import {
+  onCreateAttendance,
+  onDeleteAttendance,
+  onUpdateAttendance,
+} from "@shared/api/graphql/documents/subscriptions";
+import {
+  Attendance,
+  ListAttendancesQuery,
+  OnCreateAttendanceSubscription,
+  OnDeleteAttendanceSubscription,
+  OnUpdateAttendanceSubscription,
+} from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { GraphQLResult } from "aws-amplify/api";
 import {
   BarElement,
@@ -10,28 +31,7 @@ import {
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import useCloseDates from "@/entities/attendance/model/useCloseDates";
-import {
-  type StaffType,
-  useStaffs,
-} from "@/entities/staff/model/useStaffs/useStaffs";
-import { useStandardWorkHours } from "@/features/admin/dashboard/model/useAppConfigDerived";
 import { useAuthSessionSummary } from "@/hooks/useAuthSessionSummary";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import { listAttendances } from "@/shared/api/graphql/documents/queries";
-import {
-  onCreateAttendance,
-  onDeleteAttendance,
-  onUpdateAttendance,
-} from "@/shared/api/graphql/documents/subscriptions";
-import {
-  Attendance,
-  ListAttendancesQuery,
-  OnCreateAttendanceSubscription,
-  OnDeleteAttendanceSubscription,
-  OnUpdateAttendanceSubscription,
-} from "@/shared/api/graphql/types";
-import { createLogger } from "@/shared/lib/logger";
 
 import {
   buildAggregationPeriodInfoLabel,

@@ -1,11 +1,19 @@
 import "./styles.scss";
 
+import { logDailyReportMutation } from "@entities/operation-log/model/dailyReportOperationLog";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
   DailyReportCalendar,
   DailyReportFormChangeHandler,
 } from "@features/attendance/daily-report";
+import { sendDailyReportSubmissionNotification } from "@features/attendance/daily-report/lib/sendDailyReportSubmissionNotification";
+import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import {
+  buildVersionOrUpdatedAtCondition,
+  getGraphQLErrorMessage,
+  getNextVersion,
+} from "@shared/api/graphql/concurrency";
 import {
   createDailyReport,
   updateDailyReport,
@@ -21,6 +29,11 @@ import {
   DailyReportStatus,
   ModelSortDirection,
 } from "@shared/api/graphql/types";
+import {
+  DashboardInnerSurface,
+  PageContent,
+  PageSection,
+} from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
 import { GraphQLResult } from "aws-amplify/api";
 import dayjs, { type Dayjs } from "dayjs";
@@ -35,21 +48,8 @@ import {
 import { useSearchParams } from "react-router-dom";
 
 import { AuthContext } from "@/context/AuthContext";
-import { logDailyReportMutation } from "@/entities/operation-log/model/dailyReportOperationLog";
-import { sendDailyReportSubmissionNotification } from "@/features/attendance/daily-report/lib/sendDailyReportSubmissionNotification";
 import { useAppNotification } from "@/hooks/useAppNotification";
 import useCognitoUser from "@/hooks/useCognitoUser";
-import { graphqlClient } from "@/shared/api/amplify/graphqlClient";
-import {
-  buildVersionOrUpdatedAtCondition,
-  getGraphQLErrorMessage,
-  getNextVersion,
-} from "@/shared/api/graphql/concurrency";
-import {
-  DashboardInnerSurface,
-  PageContent,
-  PageSection,
-} from "@/shared/ui/layout";
 
 import {
   AlertBox,

@@ -1,6 +1,8 @@
 import type { ComponentPropsWithoutRef, JSX, MouseEventHandler } from "react";
 import { useEffect, useId, useRef, useState } from "react";
 
+import styles from "./styles.module.css";
+
 type GlossaryTermProps = ComponentPropsWithoutRef<"abbr"> & {
   description: string;
 };
@@ -15,8 +17,7 @@ export default function GlossaryTerm({
   const wrapperRef = useRef<HTMLSpanElement>(null);
   const tooltipId = useId();
   const [isOpen, setIsOpen] = useState(false);
-
-  const classes = ["docs-glossary-term", className].filter(Boolean).join(" ");
+  const classes = [styles.term, className].filter(Boolean).join(" ");
 
   useEffect(() => {
     if (!isOpen) {
@@ -53,7 +54,7 @@ export default function GlossaryTerm({
   return (
     <span
       ref={wrapperRef}
-      className="docs-glossary-term-wrapper"
+      className={styles.termWrapper}
       data-open={isOpen ? "true" : "false"}
     >
       <abbr
@@ -75,7 +76,7 @@ export default function GlossaryTerm({
       >
         {children}
       </abbr>
-      <span id={tooltipId} role="tooltip" className="docs-glossary-tooltip">
+      <span id={tooltipId} role="tooltip" className={styles.tooltip}>
         {description}
       </span>
     </span>

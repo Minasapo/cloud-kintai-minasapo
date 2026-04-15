@@ -217,7 +217,7 @@ export function useAutoSave<T>({
 
     // debounce タイマーをセット
     timerRef.current = setTimeout(() => {
-      void save(data);
+      void save(data).catch(() => undefined);
     }, delay);
 
     // クリーンアップ

@@ -1,42 +1,46 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
 
-import { designTokenVar } from "@/shared/designSystem";
+import {
+  Heading,
+  type HeadingAppearance,
+  type HeadingContrast,
+} from "./Heading";
 
 type HeadlineProps = {
+  as?: "h1" | "h2" | "h3" | "div" | "span";
+  appearance?: HeadingAppearance;
+  borderColor?: string;
   children: ReactNode;
-};
+  className?: string;
+  color?: string;
+  contrast?: HeadingContrast;
+  style?: CSSProperties;
+} & Omit<HTMLAttributes<HTMLElement>, "children" | "color" | "style">;
 
-export const Headline = ({ children }: HeadlineProps) => {
-  const HEADLINE_ACCENT_COLOR = designTokenVar(
-    "component.headline.accentColor",
-    "#0FA85E",
-  );
-  const HEADLINE_BORDER_WIDTH = designTokenVar(
-    "component.headline.borderWidth",
-    "5px",
-  );
-  const HEADLINE_PADDING_LEFT = designTokenVar(
-    "component.headline.paddingLeft",
-    "8px",
-  );
-  const HEADLINE_TEXT_COLOR = designTokenVar(
-    "component.headline.textColor",
-    "#0FA85E",
-  );
-
-  const headlineStyle: CSSProperties & Record<`--${string}`, string> = {
-    "--headline-accent-color": HEADLINE_ACCENT_COLOR,
-    "--headline-border-width": HEADLINE_BORDER_WIDTH,
-    "--headline-padding-left": HEADLINE_PADDING_LEFT,
-    "--headline-text-color": HEADLINE_TEXT_COLOR,
-  };
-
+export const Headline = ({
+  as = "h2",
+  appearance = "standard",
+  borderColor,
+  children,
+  className,
+  color,
+  contrast,
+  style,
+  ...rest
+}: HeadlineProps) => {
   return (
-    <h2
-      className="border-b-[var(--headline-border-width)] border-l-[var(--headline-border-width)] border-[color:var(--headline-accent-color)] pl-[var(--headline-padding-left)] text-3xl font-bold leading-tight text-[color:var(--headline-text-color)] sm:text-4xl"
-      style={headlineStyle}
+    <Heading
+      as={as}
+      appearance={appearance}
+      borderColor={borderColor}
+      className={className}
+      color={color}
+      contrast={contrast}
+      style={style}
+      level="section"
+      {...rest}
     >
       {children}
-    </h2>
+    </Heading>
   );
 };

@@ -1,8 +1,7 @@
+import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
 import GroupContainer from "@shared/ui/group-container/GroupContainer";
 import { ReactNode } from "react";
 import { Control } from "react-hook-form";
-
-import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
 
 import RestTimeItem from "../desktopEditor/RestTimeItem/RestTimeItem";
 import { WorkTimeInput } from "../desktopEditor/WorkTimeInput/WorkTimeInput";

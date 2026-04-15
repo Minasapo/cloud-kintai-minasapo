@@ -1,6 +1,5 @@
+import { AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
 import dayjs from "dayjs";
-
-import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
 
 import { getStatus } from "../attendanceStatusUtils";
 

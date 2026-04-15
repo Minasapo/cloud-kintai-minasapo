@@ -1,15 +1,15 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
-
-import { AuthContext } from "@/context/AuthContext";
-import { StaffRole } from "@/entities/staff/model/useStaffs/useStaffs";
-import { listAttendances } from "@/shared/api/graphql/documents/queries";
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
+import { listAttendances } from "@shared/api/graphql/documents/queries";
 import {
   onCreateAttendance,
   onDeleteAttendance,
   onUpdateAttendance,
-} from "@/shared/api/graphql/documents/subscriptions";
-import { WorkflowStatus } from "@/shared/api/graphql/types";
+} from "@shared/api/graphql/documents/subscriptions";
+import { WorkflowStatus } from "@shared/api/graphql/types";
+import { render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+
+import { AuthContext } from "@/context/AuthContext";
 
 import AdminPendingApprovalSummary from "./AdminPendingApprovalSummary";
 
@@ -67,9 +67,13 @@ describe("AdminPendingApprovalSummary", () => {
   beforeEach(() => {
     mockUseWorkflows.mockReset();
     mockGraphql.mockReset();
+    mockUseWorkflows.mockReturnValue({
+      workflows: [],
+      loading: false,
+    });
   });
 
-  it("管理者には2つの件数カードと管理者のみタグを表示する", async () => {
+  it("管理者には勤怠申請カードと管理者のみタグを表示する", async () => {
     mockUseWorkflows.mockReturnValue({
       workflows: [
         { id: "wf-1", status: WorkflowStatus.SUBMITTED },
@@ -124,9 +128,12 @@ describe("AdminPendingApprovalSummary", () => {
       screen.getByRole("heading", { name: "ワークフロー申請" }),
     ).toBeInTheDocument();
     expect(screen.getByTestId("admin-pending-approval-summary")).toHaveClass(
-      "grid-cols-2",
+      "grid-cols-1",
     );
     expect(screen.getByTestId("admin-pending-attendance-card")).toHaveClass(
+      "rounded-[4px]",
+    );
+    expect(screen.getByTestId("admin-pending-workflow-card")).toHaveClass(
       "rounded-[4px]",
     );
     expect(screen.getAllByText("管理者のみ")).toHaveLength(2);
@@ -146,6 +153,7 @@ describe("AdminPendingApprovalSummary", () => {
       "href",
       "/admin/workflow",
     );
+    expect(screen.getByText("集計中")).toBeInTheDocument();
     expect(screen.getByText("2件")).toBeInTheDocument();
 
     await waitFor(() => {
@@ -246,9 +254,71 @@ describe("AdminPendingApprovalSummary", () => {
     expect(screen.getByTestId("admin-pending-attendance-card")).toHaveClass(
       "h-full",
     );
+    expect(screen.getByTestId("admin-pending-workflow-card")).toHaveClass(
+      "rounded-[4px]",
+    );
+    expect(screen.getByTestId("admin-pending-workflow-card")).toHaveClass(
+      "h-full",
+    );
     expect(
       screen.getByTestId("admin-pending-attendance-card-description-tooltip"),
     ).toHaveAttribute("aria-label", "未承認の勤怠修正申請");
+    expect(
+      screen.getByTestId("admin-pending-workflow-card-description-tooltip"),
+    ).toHaveAttribute("aria-label", "未承認のワークフロー申請");
     expect(screen.queryByText("管理者のみ")).not.toBeInTheDocument();
+  });
+
+  it("layoutMode=two-columns の場合は2列で表示する", async () => {
+    mockGraphql.mockImplementation(({ query }: { query: unknown }) => {
+      if (query === listAttendances) {
+        return Promise.resolve({
+          data: {
+            listAttendances: {
+              items: [],
+              nextToken: null,
+            },
+          },
+        });
+      }
+
+      if (
+        query === onCreateAttendance ||
+        query === onUpdateAttendance ||
+        query === onDeleteAttendance
+      ) {
+        return createSubscription();
+      }
+
+      return Promise.resolve({});
+    });
+
+    render(
+      <MemoryRouter>
+        <AuthContext.Provider
+          value={{
+            signOut: jest.fn(),
+            signIn: jest.fn(),
+            authStatus: "authenticated",
+            isAuthenticated: true,
+            isLoading: false,
+            roles: [StaffRole.ADMIN],
+            isCognitoUserRole: (role: StaffRole) => role === StaffRole.ADMIN,
+          }}
+        >
+          <AdminPendingApprovalSummary layoutMode="two-columns" />
+        </AuthContext.Provider>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("admin-pending-approval-summary"),
+      ).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId("admin-pending-approval-summary")).toHaveClass(
+      "grid-cols-2",
+    );
   });
 });

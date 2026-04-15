@@ -1,6 +1,4 @@
-import { Box, Typography } from "@mui/material";
-
-import { designTokenVar, getDesignTokens } from "@/shared/designSystem";
+import { designTokenVar, getDesignTokens } from "@shared/designSystem";
 
 import { statusVisualMap } from "../../lib/shiftStateMapping";
 
@@ -45,93 +43,57 @@ const EXCESS_BORDER = mixWithTransparent(
 
 export default function ShiftManagementLegend() {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 0.5,
-        mb: 1.5,
-      }}
-    >
-      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-        凡例
-      </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 2,
-          alignItems: "center",
-        }}
-      >
+    <div className="flex flex-col gap-1 mb-6">
+      <div className="text-sm font-semibold text-gray-900">凡例</div>
+      <div className="flex flex-wrap items-center gap-4">
         {[
           { key: "work", label: "出勤" },
           { key: "fixedOff", label: "固定休" },
           { key: "requestedOff", label: "希望休" },
           { key: "auto", label: "自動調整枠" },
         ].map((item) => (
-          <Box
-            key={item.key}
-            sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-          >
-            <Typography
-              sx={{
+          <div key={item.key} className="flex items-center gap-1.5">
+            <span
+              className="text-sm font-bold"
+              style={{
                 color:
                   statusVisualMap[item.key as keyof typeof statusVisualMap]
                     .color,
-                fontWeight: 700,
               }}
             >
               {statusVisualMap[item.key as keyof typeof statusVisualMap].label}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {item.label}
-            </Typography>
-          </Box>
+            </span>
+            <span className="text-xs text-gray-500">{item.label}</span>
+          </div>
         ))}
-      </Box>
-      <Box
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 2,
-          alignItems: "center",
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-          <Box
-            sx={{
-              width: 16,
-              height: 16,
+      </div>
+      <div className="flex flex-wrap items-center gap-4 mt-2">
+        <div className="flex items-center gap-2">
+          <div
+            className="w-4 h-4 border"
+            style={{
               borderRadius: SHIFT_INDICATOR_RADIUS,
-              bgcolor: SHORTAGE_BG,
-              border: "1px solid",
+              backgroundColor: SHORTAGE_BG,
               borderColor: SHORTAGE_BORDER,
             }}
           />
-          <Typography variant="caption" color="text.secondary">
-            下限未達／固定人数不足
-          </Typography>
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-          <Box
-            sx={{
-              width: 16,
-              height: 16,
+          <span className="text-xs text-gray-500">下限未達／固定人数不足</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div
+            className="w-4 h-4 border"
+            style={{
               borderRadius: SHIFT_INDICATOR_RADIUS,
-              bgcolor: EXCESS_BG,
-              border: "1px solid",
+              backgroundColor: EXCESS_BG,
               borderColor: EXCESS_BORDER,
             }}
           />
-          <Typography variant="caption" color="text.secondary">
-            上限超過／固定人数超過
-          </Typography>
-        </Box>
-        <Typography variant="caption" color="text.secondary">
+          <span className="text-xs text-gray-500">上限超過／固定人数超過</span>
+        </div>
+        <span className="text-xs text-gray-500">
           数値は日別の出勤人数を示します。
-        </Typography>
-      </Box>
-    </Box>
+        </span>
+      </div>
+    </div>
   );
 }

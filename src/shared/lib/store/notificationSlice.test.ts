@@ -2,7 +2,7 @@ import notificationReducer, {
   clearNotifications,
   dismissNotification,
   pushNotification,
-} from "@/shared/lib/store/notificationSlice";
+} from "@shared/lib/store/notificationSlice";
 
 describe("notificationSlice", () => {
   it("global notification を既定値付きで enqueue する", () => {

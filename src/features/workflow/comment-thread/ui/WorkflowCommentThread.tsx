@@ -1,14 +1,12 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import { useWorkflowDetailContext } from "@features/workflow/detail-panel/model/WorkflowDetailContext";
+import { PANEL_HEIGHTS } from "@shared/config/uiDimensions";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-
-import { useWorkflowDetailContext } from "@/features/workflow/detail-panel/model/WorkflowDetailContext";
-import { PANEL_HEIGHTS } from "@/shared/config/uiDimensions";
 
 import { shouldTruncateWorkflowMessage } from "../model/workflowCommentUtils";
 import type { WorkflowCommentMessage } from "../types";
 
 type Props = {
-  title?: string;
   messages: WorkflowCommentMessage[];
   staffs: StaffType[];
   currentStaff?: StaffType;
@@ -60,7 +58,6 @@ const useIsMobile = () => {
 };
 
 export function WorkflowCommentThreadView({
-  title = "コメント",
   messages,
   staffs,
   currentStaff,
@@ -126,7 +123,6 @@ export function WorkflowCommentThreadView({
 
   return (
     <div className="min-w-0">
-      <h3 className="mb-1 text-lg font-bold text-slate-950">{title}</h3>
       <p className="mb-2 text-sm text-slate-500">
         申請に関するやり取りをこの場で記録します。
       </p>

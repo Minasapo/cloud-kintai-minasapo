@@ -1,4 +1,9 @@
 import useAppConfig from "@entities/app-config/model/useAppConfig";
+import { resolveConfigTimeOnDate } from "@entities/attendance/lib/resolveConfigTimeOnDate";
+import { collectAttendanceErrorMessages } from "@entities/attendance/validation/collectErrorMessages";
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
+import { AttendanceEditPageHeader } from "@features/attendance/edit/ui/components/AttendanceEditPageHeader";
+import { AttendanceErrorSummary } from "@features/attendance/edit/ui/components/AttendanceErrorSummary";
 import { VacationTabs } from "@features/attendance/edit/ui/components/VacationTabs";
 import { GoDirectlyFlagCheckbox } from "@features/attendance/edit/ui/GoDirectlyFlagCheckbox";
 import HourlyPaidHolidayTimeItem, {
@@ -6,20 +11,15 @@ import HourlyPaidHolidayTimeItem, {
 } from "@features/attendance/edit/ui/items/HourlyPaidHolidayTimeItem";
 import ProductionTimeItem from "@features/attendance/edit/ui/items/ProductionTimeItem";
 import StaffNameItem from "@features/attendance/edit/ui/items/StaffNameItem";
+import { SubstituteHolidayDateInput } from "@features/attendance/edit/ui/items/SubstituteHolidayDateInput";
 import WorkTypeItem from "@features/attendance/edit/ui/items/WorkTypeItem";
 import QuickInputButtons from "@features/attendance/edit/ui/QuickInputButtons";
+import { AppButton, AppIconButton } from "@shared/ui/button";
 import GroupContainer from "@shared/ui/group-container/GroupContainer";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Controller, useFormState } from "react-hook-form";
 
 import { AppConfigContext } from "@/context/AppConfigContext";
-import { resolveConfigTimeOnDate } from "@/entities/attendance/lib/resolveConfigTimeOnDate";
-import { collectAttendanceErrorMessages } from "@/entities/attendance/validation/collectErrorMessages";
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
-import { AttendanceEditPageHeader } from "@/features/attendance/edit/ui/components/AttendanceEditPageHeader";
-import { AttendanceErrorSummary } from "@/features/attendance/edit/ui/components/AttendanceErrorSummary";
-import { SubstituteHolidayDateInput } from "@/features/attendance/edit/ui/items/SubstituteHolidayDateInput";
-import { AppButton, AppIconButton } from "@/shared/ui/button";
 
 import ChangeRequestingAlert from "./ChangeRequestingMessage";
 import NoDataAlert from "./NoDataAlert";

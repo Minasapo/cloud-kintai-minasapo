@@ -54,10 +54,10 @@ export const ADMIN_HEADER_MENU_ITEMS: readonly AdminHeaderMenuItem[] = [
     href: "/admin/daily-report",
   },
   {
-    primaryLabel: "ワークフロー",
+    primaryLabel: "申請",
     secondaryLabel: "Workflow",
-    description: "申請フローの進行管理とテンプレート整備を行います。",
-    ctaLabel: "保留申請を処理",
+    description: "スタッフからの各種申請を確認し、承認・却下を行います。",
+    ctaLabel: "申請一覧を確認",
     href: "/admin/workflow",
   },
   {

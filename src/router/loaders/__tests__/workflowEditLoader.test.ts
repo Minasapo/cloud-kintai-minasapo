@@ -1,5 +1,6 @@
-import { resolveWorkflowLoaderData } from "@/entities/workflow/model/loader";
-import * as workflowDetailLoaderModule from "@/entities/workflow/model/loader";
+import { resolveWorkflowLoaderData } from "@entities/workflow/model/loader";
+import * as workflowDetailLoaderModule from "@entities/workflow/model/loader";
+
 import { workflowEditLoader } from "@/router/loaders/workflowEditLoader";
 
 import { createLoaderArgs } from "./loaderTestUtils";

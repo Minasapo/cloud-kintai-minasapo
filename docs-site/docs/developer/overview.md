@@ -1,39 +1,32 @@
 ---
 sidebar_position: 1
 title: 開発者向けガイド
-description: garaku-frontend の開発に必要なセットアップ、アーキテクチャ、主要機能仕様の入口ページです。
+description: 本プロジェクトの開発に参加するメンバー向けに、最初に読む順番と変更種別ごとの入口をまとめたページです。
 ---
 
-# 開発者向けガイド
+このページは、新しく開発に参加したメンバーが、何から読み始めるかを決めるための入口です。設計資料や仕様を逆引きしたい場合は、[開発者向けリファレンス索引](./reference-index) を参照してください。
 
-このセクションは、本プロジェクトの開発に参加するメンバー向けのガイドです。
+## 最初に読む順番
 
-## はじめに
+- [開発フロー](./getting-started/development-flow)
+- [セットアップ](./getting-started/setup)
+- [テスト運用](./testing-operations)
+- [ドキュメント運用ルール](./documentation-rules)
 
-- [セットアップ](./getting-started/setup.md)
+最初に全体の流れを把握したい場合は [開発フロー](./getting-started/development-flow) から読み始めてください。Amplify に関わる変更を行う場合は、この後に [Amplify 概要](./amplify/overview) と [Amplify 変更フロー](./amplify/change-workflow) を続けて確認してください。
 
-## アーキテクチャ
+## 変更の種類ごとの入口
 
-- [ディレクトリ構成](./architecture/directory-structure.md)
-- [依存ルール](./architecture/dependency-rules.md)
-- [配置判断ガイド](./architecture/placement-guide.md)
-- [サイドバーカテゴリ運用ルール](./architecture/sidebar-category-rules.md)
+- 開発参加直後に全体像を確認したい: [開発フロー](./getting-started/development-flow)
+- ローカル環境を整えたい: [セットアップ](./getting-started/setup)
+- Amplify に関わる変更をしたい: [Amplify 概要](./amplify/overview)、[Amplify 変更フロー](./amplify/change-workflow)
+- 配置や依存ルールを確認したい: [開発者向けリファレンス索引](./reference-index)
+- ドキュメントサイトの更新ルールを知りたい: [ドキュメント運用ルール](./documentation-rules)
 
-## 機能仕様
+## 逆引きで探す
 
-- [勤怠管理対象フラグ仕様](./attendance-management-enabled.md) — `attendanceManagementEnabled` フラグの目的・判定ロジック・影響範囲
-- [打刻エラー一覧の表示仕様](./attendance-error-list-display.md) — エラー一覧の表示条件・対象期間・デスクトップ/モバイル差異
-- [勤怠ステータス判定ロジック](./attendance-status-determination.md) — `getStatus()` の全優先度テーブルと分岐条件
-
-## ドキュメント運用
-
-- [用語集](../terminology.md)
-- 用語を本文中で補足する場合は、`<GlossaryTerm description="定義">用語</GlossaryTerm>` を利用してください。
-- `GlossaryTerm` はデスクトップでホバー/キーボードフォーカス、モバイルでタップ時に補足を表示します。
-- 定義本文は用語集ページを正本とし、本文中の `description` は短い補足に留めて重複を避けてください。
-
-## 今後追加予定
-
-- 開発フロー
-- テスト運用
-- デプロイ運用
+- 設計資料、仕様、実装ルールをカテゴリから探したい場合は、[開発者向けリファレンス索引](./reference-index) を利用してください。
+- メッセージコードの一覧や使い分けを確認したい場合は、[エラーコード一覧](./error-code-reference) を参照してください。
+- 共通用語の定義を確認したい場合は、[用語集](../terminology) を参照してください。
+- `GlossaryTerm` はデスクトップでホバーまたはキーボードフォーカス、モバイルでタップ時に補足を表示します。
+- リポジトリ直下の `docs/OSS_SYNC_GUIDE.md` は OSS 同期用のリポジトリ運用資料であり、ドキュメントサイトの対象外です。

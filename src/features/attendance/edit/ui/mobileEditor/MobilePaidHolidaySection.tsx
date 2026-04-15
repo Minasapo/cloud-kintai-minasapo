@@ -1,11 +1,13 @@
 import "./MobilePaidHolidaySection.scss";
 
+import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
 import {
   AttendanceControl,
   AttendanceGetValues,
   AttendanceSetValue,
 } from "@features/attendance/edit/model/types";
 import HourlyPaidHolidayTimeItemMobile from "@features/attendance/edit/ui/items/HourlyPaidHolidayTimeItemMobile";
+import { Label } from "@features/attendance/edit/ui/mobile/Label";
 import PaidHolidayFlagInputMobile from "@features/attendance/edit/ui/PaidHolidayFlagInputMobile";
 import dayjs from "dayjs";
 import { ReactNode } from "react";
@@ -15,9 +17,6 @@ import {
   UseFieldArrayAppend,
   UseFieldArrayReplace,
 } from "react-hook-form";
-
-import { AttendanceEditInputs } from "@/features/attendance/edit/model/common";
-import { Label } from "@/features/attendance/edit/ui/mobile/Label";
 
 import { SubstituteHolidayDateInput } from "./SubstituteHolidayDateInput";
 

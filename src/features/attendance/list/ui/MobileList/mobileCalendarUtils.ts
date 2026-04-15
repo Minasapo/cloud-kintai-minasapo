@@ -1,3 +1,4 @@
+import { AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
 import {
   Attendance,
   CloseDate,
@@ -7,17 +8,10 @@ import {
 } from "@shared/api/graphql/types";
 import dayjs, { Dayjs } from "dayjs";
 
-import { AttendanceStatus } from "@/entities/attendance/lib/AttendanceState";
-
 import { getStatus, isHolidayLike } from "../../lib/attendanceStatusUtils";
+import { MonthTerm, resolveMonthlyTerms as resolveMonthlyTermsBase } from "../../lib/monthlyTermUtils";
 
-export type MonthTerm = {
-  start: Dayjs;
-  end: Dayjs;
-  source: "closeDate" | "fallback";
-  label: string;
-  color: string;
-};
+export type { MonthTerm };
 
 export type HolidayInfo = {
   name: string;
@@ -196,22 +190,22 @@ export const getStatusBadgeMeta = (status: AttendanceStatus) => {
   if (status === AttendanceStatus.Error) {
     return {
       label: "エラー",
-      backgroundColor: "var(--mui-palette-error-light)",
-      color: "var(--mui-palette-error-dark)",
+      backgroundColor: "rgba(211, 47, 47, 0.14)",
+      color: "#8f1d1d",
     };
   }
   if (status === AttendanceStatus.Late) {
     return {
       label: "遅刻",
-      backgroundColor: "var(--mui-palette-warning-light)",
-      color: "var(--mui-palette-warning-dark)",
+      backgroundColor: "rgba(237, 108, 2, 0.18)",
+      color: "#8a3b00",
     };
   }
   if (status === AttendanceStatus.Ok) {
     return {
       label: "正常",
-      backgroundColor: "var(--mui-palette-success-light)",
-      color: "var(--mui-palette-success-dark)",
+      backgroundColor: "rgba(46, 125, 50, 0.14)",
+      color: "#1f5f24",
     };
   }
   return {
@@ -233,55 +227,10 @@ export const formatTimeRange = (
   return `${formattedStart} 〜 ${formattedEnd}`;
 };
 
-const formatMobileTermLabel = (start: Dayjs, end: Dayjs) => {
-  const useYear = start.year() !== end.year();
-  const format = useYear ? "YY/M/D" : "M/D";
-  return `${start.format(format)}〜${end.format(format)}`;
-};
-
 export const resolveMonthlyTerms = (
   currentMonth: Dayjs,
   closeDates: CloseDate[] = [],
   palette: string[],
 ): MonthTerm[] => {
-  const monthStart = currentMonth.startOf("month");
-  const monthEnd = currentMonth.endOf("month");
-
-  const fallback: MonthTerm = {
-    start: monthStart,
-    end: monthEnd,
-    source: "fallback",
-    label: formatMobileTermLabel(monthStart, monthEnd),
-    color: palette[0] ?? "#90CAF9",
-  };
-
-  if (closeDates.length === 0) return [fallback];
-
-  const terms = closeDates
-    .map((item) => {
-      const start = dayjs(item.startDate);
-      const end = dayjs(item.endDate);
-      return { start, end };
-    })
-    .filter(({ start, end }) => {
-      return (
-        start.isValid() &&
-        end.isValid() &&
-        !end.isBefore(monthStart, "day") &&
-        !start.isAfter(monthEnd, "day")
-      );
-    })
-    .toSorted((a, b) => a.start.valueOf() - b.start.valueOf())
-    .map(
-      ({ start, end }, index): MonthTerm => ({
-        start: start.startOf("day"),
-        end: end.startOf("day"),
-        source: "closeDate",
-        label: formatMobileTermLabel(start, end),
-        color: palette[index % palette.length] ?? palette[0] ?? "#90CAF9",
-      }),
-    );
-
-  if (terms.length === 0) return [fallback];
-  return terms;
+  return resolveMonthlyTermsBase(currentMonth, closeDates, palette, "mobile");
 };

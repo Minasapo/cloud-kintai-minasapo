@@ -1,7 +1,6 @@
 import AttendanceEditor from "@features/attendance/edit/ui/AttendanceEditor";
+import { PageContent } from "@shared/ui/layout";
 import { useSearchParams } from "react-router-dom";
-
-import { PageContent } from "@/shared/ui/layout";
 
 export default function AdminAttendanceEditor() {
   const [searchParams] = useSearchParams();

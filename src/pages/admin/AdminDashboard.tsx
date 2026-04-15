@@ -1,13 +1,13 @@
+import { useAdminCurrentWorkingStaffCard } from "@features/admin/dashboard/model/useAdminCurrentWorkingStaffCard";
+import { useAdminDailyReportStatusCard } from "@features/admin/dashboard/model/useAdminDailyReportStatusCard";
+import { useAdminStaffWorkStatusChart } from "@features/admin/dashboard/model/useAdminStaffWorkStatusChart";
+import { CurrentWorkingStaffCard } from "@features/admin/dashboard/ui/CurrentWorkingStaffCard";
+import { DailyReportStatusCard } from "@features/admin/dashboard/ui/DailyReportStatusCard";
+import { StaffWorkStatusChartCard } from "@features/admin/dashboard/ui/StaffWorkStatusChartCard";
+import { designTokenVar } from "@shared/designSystem";
+import { PageSection } from "@shared/ui/layout";
 import { memo } from "react";
 
-import { useAdminCurrentWorkingStaffCard } from "@/features/admin/dashboard/model/useAdminCurrentWorkingStaffCard";
-import { useAdminDailyReportStatusCard } from "@/features/admin/dashboard/model/useAdminDailyReportStatusCard";
-import { useAdminStaffWorkStatusChart } from "@/features/admin/dashboard/model/useAdminStaffWorkStatusChart";
-import { CurrentWorkingStaffCard } from "@/features/admin/dashboard/ui/CurrentWorkingStaffCard";
-import { DailyReportStatusCard } from "@/features/admin/dashboard/ui/DailyReportStatusCard";
-import { StaffWorkStatusChartCard } from "@/features/admin/dashboard/ui/StaffWorkStatusChartCard";
-import { designTokenVar } from "@/shared/designSystem";
-import { PageSection } from "@/shared/ui/layout";
 import AdminPendingApprovalSummary from "@/widgets/layout/header/AdminPendingApprovalSummary";
 
 const PAGE_SECTION_GAP = designTokenVar("spacing.lg", "16px");

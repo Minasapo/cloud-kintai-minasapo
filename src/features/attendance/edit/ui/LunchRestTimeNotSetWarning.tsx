@@ -1,7 +1,6 @@
+import { AttendanceDateTime } from "@entities/attendance/lib/AttendanceDateTime";
+import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
 import { useContext } from "react";
-
-import { AttendanceDateTime } from "@/entities/attendance/lib/AttendanceDateTime";
-import { AttendanceEditContext } from "@/features/attendance/edit/model/AttendanceEditProvider";
 
 export function LunchRestTimeNotSetWarning({
   targetWorkDate,
