@@ -164,6 +164,18 @@ export const useCollaborativeShiftData = ({
       normalizedMessage.includes("network") ||
       normalizedMessage.includes("timeout") ||
       (typeof details === "object" && details && "statusCode" in details);
+    const isVersionConflict =
+      normalizedMessage.includes("conditionalcheckfailed") ||
+      normalizedMessage.includes("conditional check failed") ||
+      normalizedMessage.includes("the conditional request failed");
+
+    if (isVersionConflict) {
+      return {
+        message:
+          "他のユーザーがシフトを更新しています。画面を再読み込みしてください。",
+        connection: "error" as const,
+      };
+    }
 
     if (isUnauthorized) {
       return { message: "権限がありません。", connection: "error" as const };
@@ -326,35 +338,32 @@ export const useCollaborativeShiftData = ({
 
       onSaveStartedRef.current?.();
 
-      // 先に nextMap を計算してから State に設定
-      setShiftDataMap((prev) => {
-        const nextMap = applyShiftCellUpdateToMap({
-          shiftDataMap: prev,
-          update,
-          currentUserId,
-        });
-
-        // 保留中の変更として記録
-        pendingChangesRef.current.set(key, update);
-
-        // 非同期でデータ永続化を実行
-        persistShiftUpdate(update, nextMap)
-          .then(() => {
-            pendingChangesRef.current.delete(key);
-            setConnectionState("connected");
-            onSaveCompletedRef.current?.();
-          })
-          .catch((err) => {
-            console.error("Failed to update shift:", err);
-            const { message, connection } = buildShiftErrorMessage(err);
-            setConnectionState(connection);
-            onSaveFailedRef.current?.(message);
-          });
-
-        return nextMap;
+      const prevMap = shiftDataMap;
+      const nextMap = applyShiftCellUpdateToMap({
+        shiftDataMap: prevMap,
+        update,
+        currentUserId,
       });
+
+      pendingChangesRef.current.set(key, update);
+      setShiftDataMap(nextMap);
+
+      persistShiftUpdate(update, nextMap)
+        .then(() => {
+          pendingChangesRef.current.delete(key);
+          setConnectionState("connected");
+          onSaveCompletedRef.current?.();
+        })
+        .catch((err) => {
+          console.error("Failed to update shift:", err);
+          pendingChangesRef.current.delete(key);
+          setShiftDataMap(prevMap);
+          const { message, connection } = buildShiftErrorMessage(err);
+          setConnectionState(connection);
+          onSaveFailedRef.current?.(message);
+        });
     },
-    [currentUserId, persistShiftUpdate, buildShiftErrorMessage],
+    [currentUserId, persistShiftUpdate, buildShiftErrorMessage, shiftDataMap],
   );
 
   /**
@@ -368,6 +377,8 @@ export const useCollaborativeShiftData = ({
 
       setIsBatchUpdating(true);
       onSaveStartedRef.current?.();
+
+      const prevMap = shiftDataMap;
 
       try {
         const nextMap = updates.reduce(
@@ -489,6 +500,11 @@ export const useCollaborativeShiftData = ({
         }
       } catch (err) {
         console.error("Batch update failed:", err);
+        setShiftDataMap(prevMap);
+        updates.forEach((update) => {
+          const key = `${update.staffId}-${update.date}`;
+          pendingChangesRef.current.delete(key);
+        });
         const { message, connection } = buildShiftErrorMessage(err);
         setConnectionState(connection);
         onSaveFailedRef.current?.(message);
