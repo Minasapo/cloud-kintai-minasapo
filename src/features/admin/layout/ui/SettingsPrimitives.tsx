@@ -1,3 +1,4 @@
+import type { SxProps, Theme } from "@mui/material/styles";
 import { AppButton } from "@shared/ui/button";
 import dayjs, { type Dayjs } from "dayjs";
 import type {
@@ -19,6 +20,7 @@ type SettingsButtonProps = {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
+  sx?: SxProps<Theme>;
 };
 
 type SettingsRowProps = {
@@ -473,6 +475,7 @@ export function SettingsButton({
   children,
   className,
   style,
+  sx,
 }: SettingsButtonProps) {
   const toneByVariant: Record<
     SettingsButtonVariant,
@@ -493,6 +496,7 @@ export function SettingsButton({
       size={size}
       className={className}
       style={style}
+      sx={sx}
     >
       {children}
     </AppButton>

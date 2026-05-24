@@ -13,7 +13,6 @@ import { resolveThemeColor } from "@shared/config/theme";
 import { useAppNotification } from "@shared/lib/useAppNotification";
 import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
 import { SubsectionTitle } from "@shared/ui/typography";
-import type { CSSProperties } from "react";
 import { useContext, useEffect, useMemo, useState } from "react";
 
 import { E15001, S15001 } from "@/errors";
@@ -301,15 +300,20 @@ export default function AdminTheme() {
                 選択したカラーがフォーカスリングやボタンにどう反映されるかを確認できます。
               </p>
               <SettingsButton
-                className="mt-1 self-start [--app-button-bg:var(--preview-brand-primary)] [--app-button-border:var(--preview-brand-primary)] [--app-button-hover-bg:var(--preview-brand-primary)] [--app-button-hover-border:var(--preview-brand-primary)] [--app-button-color:var(--preview-brand-contrast)] [--app-button-hover-color:var(--preview-brand-contrast)] [--ds-shadow-focus:0_0_0_2px_var(--preview-focus-ring)]"
-                style={
-                  {
-                    "--preview-brand-primary": brandPrimary,
-                    "--preview-brand-contrast":
-                      previewTokens.color.brand.primary.contrastText,
-                    "--preview-focus-ring": focusRingColor,
-                  } as CSSProperties
-                }
+                className="mt-1 self-start"
+                sx={{
+                  backgroundColor: `${brandPrimary} !important`,
+                  borderColor: `${brandPrimary} !important`,
+                  color: `${previewTokens.color.brand.primary.contrastText} !important`,
+                  "&:hover": {
+                    backgroundColor: `${brandPrimary} !important`,
+                    borderColor: `${brandPrimary} !important`,
+                    color: `${previewTokens.color.brand.primary.contrastText} !important`,
+                  },
+                  "&:focus-visible": {
+                    boxShadow: `0 0 0 2px ${focusRingColor}`,
+                  },
+                }}
               >
                 プライマリボタン
               </SettingsButton>

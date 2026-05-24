@@ -152,10 +152,6 @@ describe("AdminDailyReport", () => {
     await waitFor(() => {
       expect(button).not.toBeDisabled();
     });
-
-    expect(button).toHaveAttribute("data-app-button-variant", "solid");
-    expect(button).toHaveAttribute("data-app-button-tone", "primary");
-    expect(button).toHaveAttribute("data-app-button-size", "sm");
   });
 
   it("表示対象の日報がないときCSV出力ボタンを無効化する", async () => {

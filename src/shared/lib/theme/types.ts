@@ -7,6 +7,7 @@ declare module "@mui/material/styles" {
     login: Palette["primary"];
     logout: Palette["error"];
     delete: Palette["error"];
+    neutral: Palette["primary"];
   }
 
   interface PaletteOptions {
@@ -17,6 +18,7 @@ declare module "@mui/material/styles" {
     login?: PaletteOptions["primary"];
     logout?: PaletteOptions["error"];
     delete?: PaletteOptions["error"];
+    neutral?: PaletteOptions["primary"];
   }
 }
 
@@ -29,6 +31,7 @@ declare module "@mui/material/Button" {
     login: true;
     logout: true;
     delete: true;
+    neutral: true;
   }
 
   interface ButtonPropsVariantOverrides {
@@ -39,6 +42,12 @@ declare module "@mui/material/Button" {
     login: true;
     logout: true;
     delete: true;
+  }
+}
+
+declare module "@mui/material/IconButton" {
+  interface IconButtonPropsColorOverrides {
+    neutral: true;
   }
 }
 

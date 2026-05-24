@@ -1,6 +1,6 @@
-import "./buttonStyles.scss";
-
-import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from "react";
+import CircularProgress from "@mui/material/CircularProgress";
+import MuiIconButton from "@mui/material/IconButton";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 import type { IconButtonSize, IconButtonTone } from "./types";
 
@@ -18,11 +18,15 @@ export type AppIconButtonProps = Omit<
   "aria-label": string;
 };
 
-const joinClassNames = (...values: Array<string | undefined | false>) =>
-  values.filter(Boolean).join(" ");
+const toneMap: Record<IconButtonTone, "primary" | "error" | "neutral"> = {
+  neutral: "neutral",
+  primary: "primary",
+  danger: "error",
+};
 
-const sharedStyle: CSSProperties = {
-  fontFamily: "var(--ds-typography-font-family)",
+const sizeMap: Record<IconButtonSize, "small" | "medium"> = {
+  sm: "small",
+  md: "medium",
 };
 
 export default function AppIconButton({
@@ -37,26 +41,24 @@ export default function AppIconButton({
   ...rest
 }: AppIconButtonProps) {
   const resolvedDisabled = disabled || loading;
+  const muiColor = toneMap[tone];
+  const muiSize = sizeMap[size];
 
   const button = (
-    <button
-      {...rest}
-      type={rest.type ?? "button"}
+    <MuiIconButton
+      {...(rest as object)}
+      color={muiColor}
+      size={muiSize}
       disabled={resolvedDisabled}
-      className={joinClassNames("app-icon-button", className)}
-      data-app-icon-button-tone={tone}
-      data-app-icon-button-size={size}
-      data-app-icon-button-active={String(active)}
-      style={sharedStyle}
+      className={className}
+      sx={active ? { opacity: 1, filter: "brightness(0.85)" } : undefined}
     >
       {loading ? (
-        <span className="app-icon-button__spinner" aria-hidden="true" />
+        <CircularProgress size={16} color="inherit" thickness={5} />
       ) : (
-        <span className="app-icon-button__icon" aria-hidden="true">
-          {children}
-        </span>
+        children
       )}
-    </button>
+    </MuiIconButton>
   );
 
   if (!tooltip) return button;
