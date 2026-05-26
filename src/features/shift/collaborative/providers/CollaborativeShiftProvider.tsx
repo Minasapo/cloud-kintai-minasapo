@@ -290,6 +290,33 @@ export const CollaborativeShiftProvider: React.FC<
     shiftRequestId,
     targetMonth,
   });
+  const currentUserColor = useMemo(
+    () => activeUsers.find((u) => u.userId === currentUserId)?.color || "#1976d2",
+    [activeUsers, currentUserId],
+  );
+  const getStaffIdFromCellKey = useCallback((cellKey: string) => {
+    return cellKey.split("#")[0] ?? "";
+  }, []);
+  const persistCommentsByCellKey = useCallback(
+    async (cellKey: string) => {
+      const staffId = getStaffIdFromCellKey(cellKey);
+      if (!staffId) {
+        return;
+      }
+      await persistComments(staffId);
+    },
+    [getStaffIdFromCellKey, persistComments],
+  );
+  const enrichShiftUpdate = useCallback((update: ShiftCellUpdate): ShiftCellUpdate => {
+    const currentCellData = shiftDataMapRef.current
+      .get(update.staffId)
+      ?.get(update.date);
+    return {
+      ...update,
+      previousState: update.previousState ?? currentCellData?.state,
+      previousLocked: update.previousLocked ?? currentCellData?.isLocked,
+    };
+  }, []);
 
   const {
     editingCells,
@@ -313,15 +340,7 @@ export const CollaborativeShiftProvider: React.FC<
   const handleUpdateShift = useCallback(
     async (update: ShiftCellUpdate) => {
       updateActivity();
-
-      const currentCellData = shiftDataMapRef.current
-        .get(update.staffId)
-        ?.get(update.date);
-      const enrichedUpdate: ShiftCellUpdate = {
-        ...update,
-        previousState: update.previousState ?? currentCellData?.state,
-        previousLocked: update.previousLocked ?? currentCellData?.isLocked,
-      };
+      const enrichedUpdate = enrichShiftUpdate(update);
       recordCellChange(enrichedUpdate, currentUserId, currentUserName, "manual");
 
       await updateShift(update);
@@ -332,6 +351,7 @@ export const CollaborativeShiftProvider: React.FC<
       updateShift,
       currentUserId,
       currentUserName,
+      enrichShiftUpdate,
     ],
   );
 
@@ -342,16 +362,7 @@ export const CollaborativeShiftProvider: React.FC<
     async (updates: ShiftCellUpdate[]) => {
       updateActivity();
 
-      const enrichedUpdates = updates.map((update) => {
-        const currentCellData = shiftDataMapRef.current
-          .get(update.staffId)
-          ?.get(update.date);
-        return {
-          ...update,
-          previousState: update.previousState ?? currentCellData?.state,
-          previousLocked: update.previousLocked ?? currentCellData?.isLocked,
-        };
-      });
+      const enrichedUpdates = updates.map(enrichShiftUpdate);
       recordBatchCellChanges(enrichedUpdates, currentUserId, currentUserName, "batch");
 
       await batchUpdateShifts(updates);
@@ -362,6 +373,7 @@ export const CollaborativeShiftProvider: React.FC<
       batchUpdateShifts,
       currentUserId,
       currentUserName,
+      enrichShiftUpdate,
     ],
   );
 
@@ -438,18 +450,21 @@ export const CollaborativeShiftProvider: React.FC<
         cellKey,
         currentUserId,
         currentUserName,
-        activeUsers.find((u) => u.userId === currentUserId)?.color || "#1976d2",
+        currentUserColor,
         content,
         mentions,
       );
-
-      // cellKey は "staffId#date" 形式
-      const staffId = cellKey.split("#")[0];
-      await persistComments(staffId);
+      await persistCommentsByCellKey(cellKey);
 
       return comment;
     },
-    [addComment, currentUserId, currentUserName, activeUsers, persistComments],
+    [
+      addComment,
+      currentUserId,
+      currentUserName,
+      currentUserColor,
+      persistCommentsByCellKey,
+    ],
   );
 
   /**
@@ -465,13 +480,11 @@ export const CollaborativeShiftProvider: React.FC<
       if (!updated) {
         throw new Error(`Comment ${commentId} not found`);
       }
-
-      const staffId = updated.cellKey.split("#")[0];
-      await persistComments(staffId);
+      await persistCommentsByCellKey(updated.cellKey);
 
       return updated;
     },
-    [updateComment, persistComments],
+    [updateComment, persistCommentsByCellKey],
   );
 
   /**
@@ -481,11 +494,10 @@ export const CollaborativeShiftProvider: React.FC<
     async (commentId: string): Promise<void> => {
       const { cellKey } = deleteComment(commentId);
       if (cellKey) {
-        const staffId = cellKey.split("#")[0];
-        await persistComments(staffId);
+        await persistCommentsByCellKey(cellKey);
       }
     },
-    [deleteComment, persistComments],
+    [deleteComment, persistCommentsByCellKey],
   );
 
   /**
@@ -511,16 +523,14 @@ export const CollaborativeShiftProvider: React.FC<
         parentCommentId,
         currentUserId,
         currentUserName,
-        activeUsers.find((u) => u.userId === currentUserId)?.color || "#1976d2",
+        currentUserColor,
         content,
         mentions,
       );
       if (!reply) {
         throw new Error(`Parent comment ${parentCommentId} not found`);
       }
-
-      const staffId = reply.cellKey.split("#")[0];
-      await persistComments(staffId);
+      await persistCommentsByCellKey(reply.cellKey);
 
       return reply;
     },
@@ -528,8 +538,8 @@ export const CollaborativeShiftProvider: React.FC<
       replyToComment,
       currentUserId,
       currentUserName,
-      activeUsers,
-      persistComments,
+      currentUserColor,
+      persistCommentsByCellKey,
     ],
   );
 

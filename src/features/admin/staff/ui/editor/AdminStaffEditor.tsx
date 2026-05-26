@@ -31,10 +31,10 @@ import { DatePicker } from "@mui/x-date-pickers";
 import {
   ApproverSettingMode,
 } from "@shared/api/graphql/types";
-import { AppTabs } from "@shared/ui/tabs";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { ProgressBar } from "@shared/ui/feedback";
 import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
+import { AppTabs } from "@shared/ui/tabs";
 import { PageTitle } from "@shared/ui/typography";
 import dayjs from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";

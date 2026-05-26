@@ -1,7 +1,7 @@
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { EditCalendarItem } from "@features/admin/holidayCalendar/ui/components/EditCalendarItem";
 import { CompanyHolidayCalendar } from "@shared/api/graphql/types";
 import { CompanyHolidayCalendarMessage } from "@shared/lib/message/CompanyHolidayCalendarMessage";
-import { EditCalendarItem } from "@features/admin/holidayCalendar/ui/components/EditCalendarItem";
 
 export default function CompanyHolidayCalendarEdit({
   holidayCalendar,

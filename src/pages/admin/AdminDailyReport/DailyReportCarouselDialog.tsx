@@ -7,18 +7,11 @@ import useCognitoUser from "@entities/staff/model/useCognitoUser";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { sendDailyReportCommentNotification } from "@features/attendance/daily-report/lib/sendDailyReportCommentNotification";
 import { graphqlClient } from "@shared/api/amplify/graphqlClient";
-import {
-  buildVersionOrUpdatedAtCondition,
-  getGraphQLErrorMessage,
-  getNextVersion,
-} from "@shared/api/graphql/concurrency";
-import { updateDailyReport } from "@shared/api/graphql/documents/mutations";
 import { getDailyReport } from "@shared/api/graphql/documents/queries";
 import type {
   DailyReportComment,
   DailyReportReaction,
   GetDailyReportQuery,
-  UpdateDailyReportMutation,
 } from "@shared/api/graphql/types";
 import { formatDateSlash, formatDateTimeReadable } from "@shared/lib/time";
 import { SectionTitle, SubsectionTitle } from "@shared/ui/typography";
@@ -28,10 +21,17 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   type AdminDailyReport,
   mapDailyReport,
+  normalizeComments,
+  normalizeReactions,
   REACTION_META,
   type ReactionType,
   STATUS_META,
 } from "./data";
+import {
+  addDailyReportComment,
+  buildDailyReportBeforeSnapshot,
+  updateDailyReportReaction,
+} from "./services/dailyReportInteractionService";
 import { useCurrentStaff } from "./useCurrentStaff";
 
 interface DailyReportCarouselDialogProps {
@@ -48,39 +48,6 @@ const STATUS_BADGE_CLASS: Record<"default" | "info" | "success", string> = {
   success:
     "inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700",
 };
-
-const normalizeReactions = (
-  entries?: (DailyReportReaction | null)[] | null,
-): DailyReportReaction[] =>
-  entries?.filter((entry): entry is DailyReportReaction => Boolean(entry)) ??
-  [];
-
-const normalizeComments = (
-  entries?: (DailyReportComment | null)[] | null,
-): DailyReportComment[] =>
-  entries?.filter((entry): entry is DailyReportComment => Boolean(entry)) ?? [];
-
-const buildDailyReportBeforeSnapshot = ({
-  report,
-  reactionEntries,
-  commentEntries,
-}: {
-  report: AdminDailyReport;
-  reactionEntries: DailyReportReaction[] | null;
-  commentEntries: DailyReportComment[] | null;
-}) => ({
-  id: report.id,
-  staffId: report.staffId,
-  reportDate: report.date,
-  title: report.title,
-  content: report.content,
-  status: report.status,
-  reactions: reactionEntries ?? [],
-  comments: commentEntries ?? [],
-  createdAt: report.createdAt ?? null,
-  updatedAt: report.updatedAt,
-  version: report.version ?? null,
-});
 
 interface PreloadedReport {
   report: AdminDailyReport;
@@ -299,68 +266,24 @@ export default function DailyReportCarouselDialog({
     setIsSavingReaction(true);
     setActionError(null);
 
-    const hasReaction = reactionEntries.some(
-      (entry) => entry.staffId === currentStaffId && entry.type === type,
-    );
-    const timestamp = new Date().toISOString();
-    const nextEntries = hasReaction
-      ? reactionEntries.filter(
-          (entry) => entry.staffId !== currentStaffId || entry.type !== type,
-        )
-      : [
-          ...reactionEntries,
-          {
-            __typename: "DailyReportReaction",
-            staffId: currentStaffId,
-            type,
-            createdAt: timestamp,
-          },
-        ];
-
     try {
-      const beforeReport = buildDailyReportBeforeSnapshot({
+      const beforeReport = buildDailyReportBeforeSnapshot(
         report,
         reactionEntries,
         commentEntries,
+      );
+      const { updated, operation } = await updateDailyReportReaction({
+        report,
+        reactionEntries,
+        currentStaffId,
+        type,
       });
-      const response = (await graphqlClient.graphql({
-        query: updateDailyReport,
-        variables: {
-          condition: buildVersionOrUpdatedAtCondition(
-            report.version,
-            report.updatedAt,
-          ),
-          input: {
-            id: report.id,
-            reactions: nextEntries.map(({ staffId, type, createdAt }) => ({
-              staffId,
-              type,
-              createdAt,
-            })),
-            updatedAt: timestamp,
-            version: getNextVersion(report.version),
-          },
-        },
-        authMode: "userPool",
-      })) as GraphQLResult<UpdateDailyReportMutation>;
-
-      if (response.errors?.length) {
-        throw new Error(
-          getGraphQLErrorMessage(
-            response.errors,
-            "リアクションの更新に失敗しました。",
-          ),
-        );
-      }
-
-      const updated = response.data?.updateDailyReport;
-      if (!updated) throw new Error("リアクションの更新に失敗しました。");
 
       await logDailyReportReactionUpdate({
         actorStaffId: currentStaffId,
         before: beforeReport,
         after: updated,
-        operation: hasReaction ? "remove" : "add",
+        operation,
         reactionType: type,
       });
 
@@ -399,67 +322,19 @@ export default function DailyReportCarouselDialog({
     setIsSavingComment(true);
     setActionError(null);
 
-    const timestamp = new Date().toISOString();
-    const newCommentEntry: DailyReportComment = {
-      __typename: "DailyReportComment",
-      id: `admin-comment-${Date.now().toString(36)}-${Math.random()
-        .toString(36)
-        .slice(2, 8)}`,
-      staffId: currentStaffId,
-      authorName: currentStaffName,
-      body,
-      createdAt: timestamp,
-    };
-    const nextComments = [newCommentEntry, ...commentEntries];
-
     try {
-      const beforeReport = buildDailyReportBeforeSnapshot({
+      const beforeReport = buildDailyReportBeforeSnapshot(
         report,
         reactionEntries,
         commentEntries,
+      );
+      const { updated, addedComment } = await addDailyReportComment({
+        report,
+        commentEntries,
+        currentStaffId,
+        currentStaffName,
+        body,
       });
-      const response = (await graphqlClient.graphql({
-        query: updateDailyReport,
-        variables: {
-          condition: buildVersionOrUpdatedAtCondition(
-            report.version,
-            report.updatedAt,
-          ),
-          input: {
-            id: report.id,
-            comments: nextComments.map(
-              ({
-                id: commentId,
-                staffId,
-                authorName,
-                body: commentBody,
-                createdAt,
-              }) => ({
-                id: commentId,
-                staffId,
-                authorName,
-                body: commentBody,
-                createdAt,
-              }),
-            ),
-            updatedAt: timestamp,
-            version: getNextVersion(report.version),
-          },
-        },
-        authMode: "userPool",
-      })) as GraphQLResult<UpdateDailyReportMutation>;
-
-      if (response.errors?.length) {
-        throw new Error(
-          getGraphQLErrorMessage(
-            response.errors,
-            "コメントの更新に失敗しました。",
-          ),
-        );
-      }
-
-      const updated = response.data?.updateDailyReport;
-      if (!updated) throw new Error("コメントの更新に失敗しました。");
 
       try {
         await sendDailyReportCommentNotification({
@@ -479,7 +354,7 @@ export default function DailyReportCarouselDialog({
         actorStaffId: currentStaffId,
         before: beforeReport,
         after: updated,
-        comment: newCommentEntry,
+        comment: addedComment,
       });
 
       setReactionEntries(normalizeReactions(updated.reactions));

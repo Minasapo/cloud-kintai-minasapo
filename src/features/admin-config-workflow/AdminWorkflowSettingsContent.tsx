@@ -5,8 +5,8 @@ import {
   SettingsTextAreaField,
   SettingsTextField,
 } from "@features/admin/layout/ui/SettingsPrimitives";
-import { AppTabs } from "@shared/ui/tabs";
 import { formatDateSlash } from "@shared/lib/time";
+import { AppTabs } from "@shared/ui/tabs";
 import { SectionTitle, SubsectionTitle } from "@shared/ui/typography";
 import { useState } from "react";
 

@@ -7,18 +7,11 @@ import useCognitoUser from "@entities/staff/model/useCognitoUser";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { sendDailyReportCommentNotification } from "@features/attendance/daily-report/lib/sendDailyReportCommentNotification";
 import { graphqlClient } from "@shared/api/amplify/graphqlClient";
-import {
-  buildVersionOrUpdatedAtCondition,
-  getGraphQLErrorMessage,
-  getNextVersion,
-} from "@shared/api/graphql/concurrency";
-import { updateDailyReport } from "@shared/api/graphql/documents/mutations";
 import { getDailyReport } from "@shared/api/graphql/documents/queries";
 import type {
   DailyReportComment,
   DailyReportReaction,
   GetDailyReportQuery,
-  UpdateDailyReportMutation,
 } from "@shared/api/graphql/types";
 import type { GraphQLResult } from "aws-amplify/api";
 import {
@@ -36,6 +29,11 @@ import {
   normalizeReactions,
   type ReactionType,
 } from "../data";
+import {
+  addDailyReportComment,
+  buildDailyReportBeforeSnapshot,
+  updateDailyReportReaction,
+} from "../services/dailyReportInteractionService";
 import { useCurrentStaff } from "../useCurrentStaff";
 
 type State = {
@@ -141,26 +139,6 @@ function reducer(state: State, action: Action): State {
         actionError: action.error,
       };
   }
-}
-
-function buildBeforeSnapshot(
-  report: AdminDailyReport,
-  reactionEntries: DailyReportReaction[] | null,
-  commentEntries: DailyReportComment[] | null,
-) {
-  return {
-    id: report.id,
-    staffId: report.staffId,
-    reportDate: report.date,
-    title: report.title,
-    content: report.content,
-    status: report.status,
-    reactions: reactionEntries ?? [],
-    comments: commentEntries ?? [],
-    createdAt: report.createdAt ?? null,
-    updatedAt: report.updatedAt,
-    version: report.version ?? null,
-  };
 }
 
 export function useAdminDailyReportDetailState(
@@ -282,71 +260,24 @@ export function useAdminDailyReportDetailState(
 
       dispatch({ type: "REACTION_START" });
 
-      const hasReaction = state.reactionEntries.some(
-        (entry) => entry.staffId === currentStaffId && entry.type === type,
-      );
-      const timestamp = new Date().toISOString();
-      const nextEntries = hasReaction
-        ? state.reactionEntries.filter(
-            (entry) =>
-              entry.staffId !== currentStaffId || entry.type !== type,
-          )
-        : [
-            ...state.reactionEntries,
-            {
-              __typename: "DailyReportReaction" as const,
-              staffId: currentStaffId,
-              type,
-              createdAt: timestamp,
-            },
-          ];
-
       try {
-        const beforeReport = buildBeforeSnapshot(
+        const beforeReport = buildDailyReportBeforeSnapshot(
           state.report,
           state.reactionEntries,
           state.commentEntries,
         );
-        const response = (await graphqlClient.graphql({
-          query: updateDailyReport,
-          variables: {
-            condition: buildVersionOrUpdatedAtCondition(
-              state.report.version,
-              state.report.updatedAt,
-            ),
-            input: {
-              id: state.report.id,
-              reactions: nextEntries.map(
-                ({ staffId, type: reactionType, createdAt }) => ({
-                  staffId,
-                  type: reactionType,
-                  createdAt,
-                }),
-              ),
-              updatedAt: timestamp,
-              version: getNextVersion(state.report.version),
-            },
-          },
-          authMode: "userPool",
-        })) as GraphQLResult<UpdateDailyReportMutation>;
-
-        if (response.errors?.length) {
-          throw new Error(
-            getGraphQLErrorMessage(
-              response.errors,
-              "リアクションの更新に失敗しました。",
-            ),
-          );
-        }
-
-        const updated = response.data?.updateDailyReport;
-        if (!updated) throw new Error("リアクションの更新に失敗しました。");
+        const { updated, operation } = await updateDailyReportReaction({
+          report: state.report,
+          reactionEntries: state.reactionEntries,
+          currentStaffId,
+          type,
+        });
 
         await logDailyReportReactionUpdate({
           actorStaffId: currentStaffId,
           before: beforeReport,
           after: updated,
-          operation: hasReaction ? "remove" : "add",
+          operation,
           reactionType: type,
         });
 
@@ -399,67 +330,19 @@ export function useAdminDailyReportDetailState(
 
     dispatch({ type: "COMMENT_START" });
 
-    const timestamp = new Date().toISOString();
-    const newCommentEntry: DailyReportComment = {
-      __typename: "DailyReportComment",
-      id: `admin-comment-${Date.now().toString(36)}-${Math.random()
-        .toString(36)
-        .slice(2, 8)}`,
-      staffId: currentStaffId,
-      authorName: currentStaffName,
-      body,
-      createdAt: timestamp,
-    };
-    const nextComments = [newCommentEntry, ...state.commentEntries];
-
     try {
-      const beforeReport = buildBeforeSnapshot(
+      const beforeReport = buildDailyReportBeforeSnapshot(
         state.report,
         state.reactionEntries,
         state.commentEntries,
       );
-      const response = (await graphqlClient.graphql({
-        query: updateDailyReport,
-        variables: {
-          condition: buildVersionOrUpdatedAtCondition(
-            state.report.version,
-            state.report.updatedAt,
-          ),
-          input: {
-            id: state.report.id,
-            comments: nextComments.map(
-              ({
-                id: commentId,
-                staffId,
-                authorName,
-                body: commentBody,
-                createdAt,
-              }) => ({
-                id: commentId,
-                staffId,
-                authorName,
-                body: commentBody,
-                createdAt,
-              }),
-            ),
-            updatedAt: timestamp,
-            version: getNextVersion(state.report.version),
-          },
-        },
-        authMode: "userPool",
-      })) as GraphQLResult<UpdateDailyReportMutation>;
-
-      if (response.errors?.length) {
-        throw new Error(
-          getGraphQLErrorMessage(
-            response.errors,
-            "コメントの更新に失敗しました。",
-          ),
-        );
-      }
-
-      const updated = response.data?.updateDailyReport;
-      if (!updated) throw new Error("コメントの更新に失敗しました。");
+      const { updated, addedComment } = await addDailyReportComment({
+        report: state.report,
+        commentEntries: state.commentEntries,
+        currentStaffId,
+        currentStaffName,
+        body,
+      });
 
       try {
         await sendDailyReportCommentNotification({
@@ -479,7 +362,7 @@ export function useAdminDailyReportDetailState(
         actorStaffId: currentStaffId,
         before: beforeReport,
         after: updated,
-        comment: newCommentEntry,
+        comment: addedComment,
       });
 
       dispatch({

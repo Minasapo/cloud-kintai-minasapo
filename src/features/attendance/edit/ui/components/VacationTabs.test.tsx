@@ -1,7 +1,6 @@
+import { type AppTabAppearance } from "@shared/ui/tabs";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
-
-import { type AppTabAppearance } from "@shared/ui/tabs";
 
 import { VacationTabs } from "./VacationTabs";
 

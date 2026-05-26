@@ -34,6 +34,11 @@ import { useDispatch } from "react-redux";
 
 import * as MESSAGE_CODE from "@/errors";
 
+import {
+  DuplicateSelectionMode,
+  useDuplicateSelectionModel,
+} from "../model/useDuplicateSelectionModel";
+
 const diffWrapperSx = { whiteSpace: "pre-wrap" } as const;
 const diffHighlightSx = {
   backgroundColor: "rgba(255, 87, 34, 0.22)",
@@ -75,6 +80,22 @@ type ConfirmFieldRow = {
   render: (record: Attendance) => string;
 };
 
+type DuplicateComparisonTableProps = {
+  confirmRecords: Attendance[];
+  confirmFieldRows: ConfirmFieldRow[];
+  selectionMode: DuplicateSelectionMode;
+  selectedRecordIndex: number | null;
+  fieldSelections: Record<string, number>;
+  onSelectRecord: (index: number) => void;
+  onSelectField: (
+    label: string,
+    index: number,
+    rowIndex: number,
+    isShift: boolean,
+  ) => void;
+  renderInlineDiff: (base: string, target: string) => React.ReactNode;
+};
+
 type DuplicateAttendanceManagerProps = {
   duplicates: DuplicateAttendanceDaily[];
   staffNameMap: Record<string, string>;
@@ -107,6 +128,136 @@ export function DuplicateAttendanceBadge({
   );
 }
 
+function DuplicateComparisonTable({
+  confirmRecords,
+  confirmFieldRows,
+  selectionMode,
+  selectedRecordIndex,
+  fieldSelections,
+  onSelectRecord,
+  onSelectField,
+  renderInlineDiff,
+}: DuplicateComparisonTableProps) {
+  const handleRecordHeaderClick = useCallback(
+    (event: React.MouseEvent<HTMLTableCellElement>) => {
+      if (selectionMode !== "record") {
+        return;
+      }
+      const idx = Number(event.currentTarget.dataset.recordIndex);
+      onSelectRecord(idx);
+    },
+    [onSelectRecord, selectionMode],
+  );
+
+  const handleBodyCellClick = useCallback(
+    (event: React.MouseEvent<HTMLTableCellElement>) => {
+      const idx = Number(event.currentTarget.dataset.recordIndex);
+      const rowIndex = Number(event.currentTarget.dataset.rowIndex);
+      const fieldLabel = event.currentTarget.dataset.fieldLabel ?? "";
+
+      if (selectionMode === "record") {
+        onSelectRecord(idx);
+      } else if (selectionMode === "field") {
+        onSelectField(fieldLabel, idx, rowIndex, event.shiftKey);
+      }
+    },
+    [onSelectField, onSelectRecord, selectionMode],
+  );
+
+  return (
+    <TableContainer sx={tableContainerSx}>
+      <Table size="small">
+        <TableHead>
+          <TableRow>
+            <TableCell sx={colItemLabelSx}>項目</TableCell>
+            {confirmRecords.map((record, idx) => {
+              const isSelected =
+                selectionMode === "record" && selectedRecordIndex === idx;
+              const selectable = selectionMode === "record";
+              return (
+                <TableCell
+                  key={record.id}
+                  sx={{
+                    minWidth: 140,
+                    cursor: selectable ? "pointer" : "default",
+                    fontWeight: isSelected ? 700 : 400,
+                    border: isSelected ? "2px solid rgba(25,118,210,0.6)" : undefined,
+                    backgroundColor: isSelected
+                      ? "rgba(25,118,210,0.08)"
+                      : undefined,
+                  }}
+                  data-record-index={idx}
+                  onClick={handleRecordHeaderClick}
+                >
+                  #{idx + 1} ({record.id})
+                </TableCell>
+              );
+            })}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {confirmFieldRows.map((row, rowIndex) => {
+            const values = confirmRecords.map((record) => row.value(record));
+            const unique = new Set(values);
+            const hasDiff = unique.size > 1;
+            const diffSx = hasDiff
+              ? {
+                  backgroundColor: "rgba(255,205,210,0.35)",
+                  fontWeight: 700,
+                }
+              : undefined;
+            const base = values[0] ?? "";
+
+            return (
+              <TableRow key={row.label}>
+                <TableCell sx={{ fontWeight: hasDiff ? 700 : 600, ...diffSx }}>
+                  {row.label}
+                </TableCell>
+                {confirmRecords.map((record, idx) => {
+                  const current = values[idx] ?? "";
+                  const content = hasDiff
+                    ? renderInlineDiff(base, current)
+                    : row.render(record);
+                  const recordSelected =
+                    selectionMode === "record" && selectedRecordIndex === idx;
+                  const isFieldSelected =
+                    selectionMode === "field" && fieldSelections[row.label] === idx;
+                  const selectable =
+                    selectionMode === "field" || selectionMode === "record";
+
+                  return (
+                    <TableCell
+                      key={`${row.label}-${record.id}`}
+                      sx={{
+                        ...diffSx,
+                        cursor: selectable ? "pointer" : "default",
+                        border:
+                          isFieldSelected || recordSelected
+                            ? "2px solid rgba(25,118,210,0.6)"
+                            : undefined,
+                        backgroundColor:
+                          isFieldSelected || recordSelected
+                            ? "rgba(25,118,210,0.08)"
+                            : undefined,
+                      }}
+                      data-record-index={idx}
+                      data-row-index={rowIndex}
+                      data-field-label={row.label}
+                      onClick={handleBodyCellClick}
+                    >
+                      {content}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
+
 export function DuplicateAttendanceManager({
   duplicates,
   staffNameMap,
@@ -122,19 +273,6 @@ export function DuplicateAttendanceManager({
   const [confirmTargetName, setConfirmTargetName] = useState("");
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [confirmRecords, setConfirmRecords] = useState<Attendance[]>([]);
-  const [selectionMode, setSelectionMode] = useState<"record" | "field">(
-    "record",
-  );
-  const [selectedRecordIndex, setSelectedRecordIndex] = useState<number | null>(
-    null,
-  );
-  const [fieldSelections, setFieldSelections] = useState<Record<string, number>>(
-    {},
-  );
-  const [lastFieldRowIndex, setLastFieldRowIndex] = useState<number | null>(null);
-  const [lastFieldRecordIndex, setLastFieldRecordIndex] = useState<number | null>(
-    null,
-  );
 
   const confirmFieldRows = useMemo<ConfirmFieldRow[]>(() => {
     const formatTime = (value?: string | null) =>
@@ -215,6 +353,19 @@ export function DuplicateAttendanceManager({
     ];
   }, []);
 
+  const {
+    selectionMode,
+    selectedRecordIndex,
+    fieldSelections,
+    resetSelection,
+    resetToRecordMode,
+    handleChangeSelectionMode,
+    handleSelectRecord,
+    handleSelectField,
+  } = useDuplicateSelectionModel({
+    fieldLabels: confirmFieldRows.map((row) => row.label),
+  });
+
   const renderInlineDiff = useCallback((base: string, target: string) => {
     if (base === target) {
       return target || "-";
@@ -255,15 +406,11 @@ export function DuplicateAttendanceManager({
 
   const handleOpenConfirm = useCallback(
     async (staffId: string) => {
-      setSelectionMode("record");
-      setSelectedRecordIndex(null);
-      setFieldSelections({});
+      resetToRecordMode();
       setConfirmTargetStaffId(staffId);
       setConfirmTargetName(staffNameMap[staffId] ?? staffId);
       setConfirmOpen(true);
       setConfirmLoading(true);
-      setLastFieldRowIndex(null);
-      setLastFieldRecordIndex(null);
 
       const targetIds = duplicates
         .filter((duplicate) => duplicate.staffId === staffId)
@@ -307,7 +454,7 @@ export function DuplicateAttendanceManager({
         setConfirmLoading(false);
       }
     },
-    [dispatch, duplicates, staffNameMap, triggerGetAttendanceById],
+    [dispatch, duplicates, resetToRecordMode, staffNameMap, triggerGetAttendanceById],
   );
 
   const handleOpenConfirmClick = useCallback(
@@ -323,102 +470,8 @@ export function DuplicateAttendanceManager({
   const handleCloseConfirm = useCallback(() => {
     setConfirmOpen(false);
     setConfirmRecords([]);
-    setSelectedRecordIndex(null);
-    setFieldSelections({});
-    setLastFieldRowIndex(null);
-    setLastFieldRecordIndex(null);
-  }, []);
-
-  const handleChangeSelectionMode = useCallback(
-    (_: unknown, next: "record" | "field" | null) => {
-      if (!next) {
-        return;
-      }
-      setSelectionMode(next);
-      setSelectedRecordIndex(null);
-      setFieldSelections({});
-      setLastFieldRowIndex(null);
-      setLastFieldRecordIndex(null);
-    },
-    [],
-  );
-
-  const handleSelectRecord = useCallback(
-    (index: number) => {
-      if (selectionMode !== "record") {
-        return;
-      }
-      setSelectedRecordIndex((previous) => (previous === index ? null : index));
-    },
-    [selectionMode],
-  );
-
-  const handleRecordHeaderClick = useCallback(
-    (event: React.MouseEvent<HTMLTableCellElement>) => {
-      if (selectionMode !== "record") {
-        return;
-      }
-      const idx = Number(event.currentTarget.dataset.recordIndex);
-      handleSelectRecord(idx);
-    },
-    [handleSelectRecord, selectionMode],
-  );
-
-  const handleSelectField = useCallback(
-    (label: string, index: number, rowIndex: number, isShift: boolean) => {
-      if (selectionMode !== "field") {
-        return;
-      }
-
-      setFieldSelections((previous) => {
-        if (
-          isShift &&
-          lastFieldRowIndex !== null &&
-          lastFieldRecordIndex === index
-        ) {
-          const next = { ...previous };
-          const start = Math.min(lastFieldRowIndex, rowIndex);
-          const end = Math.max(lastFieldRowIndex, rowIndex);
-          confirmFieldRows.slice(start, end + 1).forEach((row) => {
-            next[row.label] = index;
-          });
-          return next;
-        }
-
-        const current = previous[label];
-        if (current === index) {
-          const { [label]: _removed, ...rest } = previous;
-          return rest;
-        }
-
-        return { ...previous, [label]: index };
-      });
-
-      setLastFieldRowIndex(rowIndex);
-      setLastFieldRecordIndex(index);
-    },
-    [
-      confirmFieldRows,
-      lastFieldRecordIndex,
-      lastFieldRowIndex,
-      selectionMode,
-    ],
-  );
-
-  const handleBodyCellClick = useCallback(
-    (event: React.MouseEvent<HTMLTableCellElement>) => {
-      const idx = Number(event.currentTarget.dataset.recordIndex);
-      const rowIndex = Number(event.currentTarget.dataset.rowIndex);
-      const fieldLabel = event.currentTarget.dataset.fieldLabel ?? "";
-
-      if (selectionMode === "record") {
-        handleSelectRecord(idx);
-      } else if (selectionMode === "field") {
-        handleSelectField(fieldLabel, idx, rowIndex, event.shiftKey);
-      }
-    },
-    [handleSelectField, handleSelectRecord, selectionMode],
-  );
+    resetSelection();
+  }, [resetSelection]);
 
   const handleDeleteDuplicates = useCallback(async () => {
     if (selectedRecordIndex === null) {
@@ -557,100 +610,16 @@ export function DuplicateAttendanceManager({
                 </ToggleButtonGroup>
               </Box>
 
-              <TableContainer sx={tableContainerSx}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={colItemLabelSx}>項目</TableCell>
-                      {confirmRecords.map((record, idx) => {
-                        const isSelected =
-                          selectionMode === "record" && selectedRecordIndex === idx;
-                        const selectable = selectionMode === "record";
-                        return (
-                          <TableCell
-                            key={record.id}
-                            sx={{
-                              minWidth: 140,
-                              cursor: selectable ? "pointer" : "default",
-                              fontWeight: isSelected ? 700 : 400,
-                              border: isSelected
-                                ? "2px solid rgba(25,118,210,0.6)"
-                                : undefined,
-                              backgroundColor: isSelected
-                                ? "rgba(25,118,210,0.08)"
-                                : undefined,
-                            }}
-                            data-record-index={idx}
-                            onClick={handleRecordHeaderClick}
-                          >
-                            #{idx + 1} ({record.id})
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {confirmFieldRows.map((row, rowIndex) => {
-                      const values = confirmRecords.map((record) => row.value(record));
-                      const unique = new Set(values);
-                      const hasDiff = unique.size > 1;
-                      const diffSx = hasDiff
-                        ? {
-                            backgroundColor: "rgba(255,205,210,0.35)",
-                            fontWeight: 700,
-                          }
-                        : undefined;
-                      const base = values[0] ?? "";
-
-                      return (
-                        <TableRow key={row.label}>
-                          <TableCell sx={{ fontWeight: hasDiff ? 700 : 600, ...diffSx }}>
-                            {row.label}
-                          </TableCell>
-                          {confirmRecords.map((record, idx) => {
-                            const current = values[idx] ?? "";
-                            const content = hasDiff
-                              ? renderInlineDiff(base, current)
-                              : row.render(record);
-                            const recordSelected =
-                              selectionMode === "record" && selectedRecordIndex === idx;
-                            const isFieldSelected =
-                              selectionMode === "field" &&
-                              fieldSelections[row.label] === idx;
-                            const isFieldMode = selectionMode === "field";
-                            const isRecordMode = selectionMode === "record";
-                            const selectable = isFieldMode || isRecordMode;
-
-                            return (
-                              <TableCell
-                                key={`${row.label}-${record.id}`}
-                                sx={{
-                                  ...diffSx,
-                                  cursor: selectable ? "pointer" : "default",
-                                  border:
-                                    isFieldSelected || recordSelected
-                                      ? "2px solid rgba(25,118,210,0.6)"
-                                      : undefined,
-                                  backgroundColor:
-                                    isFieldSelected || recordSelected
-                                      ? "rgba(25,118,210,0.08)"
-                                      : undefined,
-                                }}
-                                data-record-index={idx}
-                                data-row-index={rowIndex}
-                                data-field-label={row.label}
-                                onClick={handleBodyCellClick}
-                              >
-                                {content}
-                              </TableCell>
-                            );
-                          })}
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <DuplicateComparisonTable
+                confirmRecords={confirmRecords}
+                confirmFieldRows={confirmFieldRows}
+                selectionMode={selectionMode}
+                selectedRecordIndex={selectedRecordIndex}
+                fieldSelections={fieldSelections}
+                onSelectRecord={handleSelectRecord}
+                onSelectField={handleSelectField}
+                renderInlineDiff={renderInlineDiff}
+              />
             </>
           )}
         </DialogContent>
