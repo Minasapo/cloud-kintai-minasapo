@@ -28,6 +28,146 @@ interface CommentsListProps {
   maxHeight?: string | number;
 }
 
+interface CommentItemProps {
+  comment: CellComment & { cellKey: string };
+  currentUserId: string;
+  onCommentClick?: (cellKey: string) => void;
+  onDeleteComment?: (commentId: string) => void;
+  onEditComment?: (comment: CellComment) => void;
+}
+
+const CommentItem = ({
+  comment,
+  currentUserId,
+  onCommentClick,
+  onDeleteComment,
+  onEditComment,
+}: CommentItemProps) => {
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        mb: 1,
+        p: 1.5,
+        bgcolor: "background.default",
+        border: "1px solid #e0e0e0",
+        cursor: onCommentClick ? "pointer" : "default",
+        "&:hover": onCommentClick
+          ? {
+              bgcolor: "action.hover",
+              borderColor: "primary.main",
+            }
+          : {},
+      }}
+      onClick={() => onCommentClick?.(comment.cellKey)}
+    >
+      <Box sx={{ display: "flex", alignItems: "flex-start" }}>
+        <Avatar
+          sx={{
+            bgcolor: comment.userColor,
+            width: 32,
+            height: 32,
+            mr: 1,
+            fontSize: "0.75rem",
+            flexShrink: 0,
+          }}
+        >
+          {comment.userName[0]}
+        </Avatar>
+
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mb: 0.5,
+            }}
+          >
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                {comment.userName}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {comment.cellKey}
+              </Typography>
+            </Box>
+            <Typography variant="caption" color="text.secondary">
+              {new Date(comment.createdAt).toLocaleString("ja-JP")}
+            </Typography>
+          </Box>
+
+          <Typography
+            variant="body2"
+            sx={{
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              mb: 0.5,
+            }}
+          >
+            {comment.content}
+          </Typography>
+
+          {comment.mentions && comment.mentions.length > 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                gap: 0.5,
+                flexWrap: "wrap",
+                mt: 0.5,
+              }}
+            >
+              {comment.mentions.map((mention) => (
+                <Chip
+                  key={mention.userId}
+                  label={`@${mention.userName}`}
+                  size="small"
+                  variant="outlined"
+                />
+              ))}
+            </Box>
+          )}
+        </Box>
+
+        {currentUserId === comment.userId && (
+          <Box sx={{ display: "flex", gap: 0.5, ml: 1 }}>
+            {onEditComment && (
+              <Tooltip title="編集">
+                <AppEditIconButton
+                  size="sm"
+                  aria-label="編集"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEditComment(comment);
+                  }}
+                />
+              </Tooltip>
+            )}
+            {onDeleteComment && (
+              <Tooltip title="削除">
+                <AppDeleteIconButton
+                  outlined
+                  size="sm"
+                  aria-label="削除"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteComment(comment.id);
+                  }}
+                />
+              </Tooltip>
+            )}
+          </Box>
+        )}
+      </Box>
+    </Paper>
+  );
+};
+
 /**
  * コメント一覧パネル
  * 全セルのコメントを一覧表示
@@ -135,135 +275,14 @@ export const CommentsList: React.FC<CommentsListProps> = ({
         {filteredComments.length > 0 ? (
           <List sx={{ p: 1 }}>
             {filteredComments.map((comment) => (
-              <Paper
+              <CommentItem
                 key={`${comment.id}-${comment.cellKey}`}
-                elevation={0}
-                sx={{
-                  mb: 1,
-                  p: 1.5,
-                  bgcolor: "background.default",
-                  border: "1px solid #e0e0e0",
-                  cursor: onCommentClick ? "pointer" : "default",
-                  "&:hover": onCommentClick
-                    ? {
-                        bgcolor: "action.hover",
-                        borderColor: "primary.main",
-                      }
-                    : {},
-                }}
-                onClick={() => onCommentClick?.(comment.cellKey)}
-              >
-                <Box sx={{ display: "flex", alignItems: "flex-start" }}>
-                  <Avatar
-                    sx={{
-                      bgcolor: comment.userColor,
-                      width: 32,
-                      height: 32,
-                      mr: 1,
-                      fontSize: "0.75rem",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {comment.userName[0]}
-                  </Avatar>
-
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    {/* ヘッダー */}
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        mb: 0.5,
-                      }}
-                    >
-                      <Box>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{ fontWeight: 600 }}
-                        >
-                          {comment.userName}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {comment.cellKey}
-                        </Typography>
-                      </Box>
-                      <Typography variant="caption" color="text.secondary">
-                        {new Date(comment.createdAt).toLocaleString("ja-JP")}
-                      </Typography>
-                    </Box>
-
-                    {/* コンテンツ */}
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        whiteSpace: "pre-wrap",
-                        wordBreak: "break-word",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        mb: 0.5,
-                      }}
-                    >
-                      {comment.content}
-                    </Typography>
-
-                    {/* メンション */}
-                    {comment.mentions && comment.mentions.length > 0 && (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          gap: 0.5,
-                          flexWrap: "wrap",
-                          mt: 0.5,
-                        }}
-                      >
-                        {comment.mentions.map((mention) => (
-                          <Chip
-                            key={mention.userId}
-                            label={`@${mention.userName}`}
-                            size="small"
-                            variant="outlined"
-                          />
-                        ))}
-                      </Box>
-                    )}
-                  </Box>
-
-                  {/* アクション */}
-                  {currentUserId === comment.userId && (
-                    <Box sx={{ display: "flex", gap: 0.5, ml: 1 }}>
-                      {onEditComment && (
-                        <Tooltip title="編集">
-                          <AppEditIconButton
-                            size="sm"
-                            aria-label="編集"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onEditComment(comment);
-                            }}
-                          />
-                        </Tooltip>
-                      )}
-                      {onDeleteComment && (
-                        <Tooltip title="削除">
-                          <AppDeleteIconButton
-                            outlined
-                            size="sm"
-                            aria-label="削除"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onDeleteComment(comment.id);
-                            }}
-                          />
-                        </Tooltip>
-                      )}
-                    </Box>
-                  )}
-                </Box>
-              </Paper>
+                comment={comment}
+                currentUserId={currentUserId}
+                onCommentClick={onCommentClick}
+                onDeleteComment={onDeleteComment}
+                onEditComment={onEditComment}
+              />
             ))}
           </List>
         ) : (

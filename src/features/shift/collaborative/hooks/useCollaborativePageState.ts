@@ -7,6 +7,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import { useCollaborativeShift } from "../context/CollaborativeShiftContext";
 import { SuggestedAction } from "../rules/shiftRules";
+import type { ShiftDataMap } from "../types/collaborative.types";
 import { useCellStateActions } from "./page-state/useCellStateActions";
 import { useLockActions } from "./page-state/useLockActions";
 import { useSelectionInteractions } from "./page-state/useSelectionInteractions";
@@ -18,6 +19,63 @@ import { useShiftSuggestions } from "./useShiftSuggestions";
 
 const NETWORK_EDIT_DISABLED_MESSAGE =
   "通信が切断されています。再接続後に編集を再開してください。";
+
+const isAdminRole = (isCognitoUserRole: (role: StaffRole) => boolean) =>
+  isCognitoUserRole(StaffRole.ADMIN) ||
+  isCognitoUserRole(StaffRole.STAFF_ADMIN) ||
+  isCognitoUserRole(StaffRole.OWNER);
+
+const useShiftCalendarAndCellState = (
+  targetMonth: string,
+  shiftDataMap: ShiftDataMap,
+) => {
+  const { currentMonth, shiftPlanCapacities } = useShiftPlanCapacities(targetMonth);
+  const { data: registeredEventCalendars = [] } = useGetEventCalendarsQuery();
+  const {
+    holidayCalendars: holidays,
+    companyHolidayCalendars: companyHolidays,
+  } = useCalendars();
+  const { days, dateKeys, eventCalendar } = useShiftCalendar(
+    currentMonth,
+    registeredEventCalendars,
+    holidays,
+    companyHolidays,
+  );
+  const staffIds = useMemo(
+    () => Array.from(shiftDataMap.keys()),
+    [shiftDataMap],
+  );
+  const getEventsForDay = useCallback(
+    (day: dayjs.Dayjs) =>
+      eventCalendar.filter((event) => {
+        const end = event.end ?? event.start;
+        return (
+          day.isSame(event.start, "day") ||
+          day.isSame(end, "day") ||
+          (day.isAfter(event.start, "day") && day.isBefore(end, "day"))
+        );
+      }),
+    [eventCalendar],
+  );
+  const getCellData = useCallback(
+    (staffId: string, date: string) => shiftDataMap.get(staffId)?.get(date),
+    [shiftDataMap],
+  );
+  const isCellLocked = useCallback(
+    (staffId: string, date: string) => getCellData(staffId, date)?.isLocked ?? false,
+    [getCellData],
+  );
+  return {
+    currentMonth,
+    shiftPlanCapacities,
+    days,
+    dateKeys,
+    staffIds,
+    getEventsForDay,
+    getCellData,
+    isCellLocked,
+  };
+};
 
 export const useCollaborativePageState = (targetMonth: string) => {
   const {
@@ -46,39 +104,20 @@ export const useCollaborativePageState = (targetMonth: string) => {
   } = useCollaborativeShift();
 
   const { isCognitoUserRole } = useAuthSessionSummary();
-  const isAdmin = useMemo(
-    () =>
-      isCognitoUserRole(StaffRole.ADMIN) ||
-      isCognitoUserRole(StaffRole.STAFF_ADMIN) ||
-      isCognitoUserRole(StaffRole.OWNER),
-    [isCognitoUserRole],
-  );
-
-  const { currentMonth, shiftPlanCapacities } = useShiftPlanCapacities(
-    targetMonth,
-  );
-
-  const { data: registeredEventCalendars = [] } = useGetEventCalendarsQuery();
+  const isAdmin = useMemo(() => isAdminRole(isCognitoUserRole), [isCognitoUserRole]);
 
   const {
-    holidayCalendars: holidays,
-    companyHolidayCalendars: companyHolidays,
-  } = useCalendars();
-
-  const { days, dateKeys, eventCalendar } = useShiftCalendar(
     currentMonth,
-    registeredEventCalendars,
-    holidays,
-    companyHolidays,
-  );
+    shiftPlanCapacities,
+    days,
+    dateKeys,
+    staffIds,
+    getEventsForDay,
+    getCellData,
+    isCellLocked,
+  } = useShiftCalendarAndCellState(targetMonth, state.shiftDataMap);
 
   const [editLockError, setEditLockError] = useState<string | null>(null);
-
-  const staffIds = useMemo(
-    () => Array.from(state.shiftDataMap.keys()),
-    [state.shiftDataMap],
-  );
-
   const [showHelp, setShowHelp] = useState(false);
 
   const {
@@ -101,33 +140,6 @@ export const useCollaborativePageState = (targetMonth: string) => {
     isDragging,
   } = useSelectionState(staffIds, dateKeys);
 
-  const getEventsForDay = useCallback(
-    (day: dayjs.Dayjs) =>
-      eventCalendar.filter((event) => {
-        const end = event.end ?? event.start;
-        return (
-          day.isSame(event.start, "day") ||
-          day.isSame(end, "day") ||
-          (day.isAfter(event.start, "day") && day.isBefore(end, "day"))
-        );
-      }),
-    [eventCalendar],
-  );
-
-  const getCellData = useCallback(
-    (staffId: string, date: string) => {
-      return state.shiftDataMap.get(staffId)?.get(date);
-    },
-    [state.shiftDataMap],
-  );
-
-  const isCellLocked = useCallback(
-    (staffId: string, date: string) => {
-      return getCellData(staffId, date)?.isLocked ?? false;
-    },
-    [getCellData],
-  );
-
   const { violations, isAnalyzing, analyzeShifts } = useShiftSuggestions({
     shiftDataMap: state.shiftDataMap,
     staffIds,
@@ -141,11 +153,8 @@ export const useCollaborativePageState = (targetMonth: string) => {
     !state.isOnline || state.connectionState === "disconnected";
 
   const releaseEditLocks = useCallback(
-    async (targets: Array<{ staffId: string; date: string }>) => {
-      await Promise.all(
-        targets.map(({ staffId, date }) => stopEditingCell(staffId, date)),
-      );
-    },
+    (targets: Array<{ staffId: string; date: string }>) =>
+      Promise.all(targets.map(({ staffId, date }) => stopEditingCell(staffId, date))).then(() => {}),
     [stopEditingCell],
   );
 
@@ -230,17 +239,11 @@ export const useCollaborativePageState = (targetMonth: string) => {
   });
 
   const handleApplySuggestion = useCallback(
-    (action: SuggestedAction) => {
-      action.changes.forEach(({ staffId, date, newState }) => {
-        changeCellState(staffId, date, newState);
-      });
-    },
+    ({ changes }: SuggestedAction) => changes.forEach(({ staffId, date, newState }) => changeCellState(staffId, date, newState)),
     [changeCellState],
   );
 
-  const handleSync = async () => {
-    await triggerSync();
-  };
+  const handleSync = triggerSync;
 
   const { calculateDailyCount, progress } = useShiftMetrics(
     days,
