@@ -227,4 +227,14 @@ export default [
       "no-restricted-imports": "off",
     },
   },
+  {
+    files: [
+      "src/**/*.test.{ts,tsx}",
+      "src/**/*.spec.{ts,tsx}",
+      "playwright/**/*.spec.{ts,tsx}",
+    ],
+    rules: {
+      "max-lines-per-function": "off",
+    },
+  },
 ];
