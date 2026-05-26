@@ -5,9 +5,10 @@ import { appendItem, removeItemAt, toggleEnabledAt, updateItem, } from "@feature
 import { DEFAULT_AM_HOLIDAY_END, DEFAULT_AM_HOLIDAY_START, DEFAULT_PM_HOLIDAY_END, DEFAULT_PM_HOLIDAY_START, TIME_FORMAT, } from "@features/admin/configManagement/lib/constants";
 import { buildCreatePayload, buildUpdatePayload, } from "@features/admin/configManagement/lib/payloadHelpers";
 import { validateAdminConfigForm } from "@features/admin/configManagement/lib/validation";
+import type { CreateAppConfigInput, UpdateAppConfigInput } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import dayjs, { Dayjs } from "dayjs";
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 import { useContext, useEffect, useMemo, useState } from "react";
 
 import { E14001, S14001, S14002 } from "@/errors";
@@ -26,6 +27,183 @@ export type ReasonItem = {
     reason: string;
     enabled: boolean;
 };
+type AdminConfigGetters = {
+    getStartTime: () => Dayjs;
+    getEndTime: () => Dayjs;
+    getConfigId: () => string | null;
+    getLinks: () => LinkItem[];
+    getReasons: () => ReasonItem[];
+    getOfficeMode: () => boolean;
+    getQuickInputStartTimes: (onlyEnabled?: boolean) => { time: string; enabled: boolean }[];
+    getQuickInputEndTimes: (onlyEnabled?: boolean) => { time: string; enabled: boolean }[];
+    getLunchRestStartTime: () => Dayjs;
+    getLunchRestEndTime: () => Dayjs;
+    getHourlyPaidHolidayEnabled: () => boolean;
+    getSpecialHolidayEnabled?: () => boolean;
+    getAbsentEnabled?: () => boolean;
+    getOverTimeCheckEnabled?: () => boolean;
+    getShiftCollaborativeEnabled?: () => boolean;
+    getShiftDefaultMode?: () => ShiftDisplayMode;
+    getAttendanceStatisticsEnabled: () => boolean;
+    getWorkflowNotificationEnabled: () => boolean;
+    getTimeRecorderAnnouncement: () => { enabled: boolean; message: string };
+    getAmHolidayStartTime?: () => Dayjs | null;
+    getAmHolidayEndTime?: () => Dayjs | null;
+    getPmHolidayStartTime?: () => Dayjs | null;
+    getPmHolidayEndTime?: () => Dayjs | null;
+    getAmPmHolidayEnabled?: () => boolean;
+};
+
+type AdminConfigSetters = {
+    setStartTime: Dispatch<SetStateAction<Dayjs | null>>;
+    setEndTime: Dispatch<SetStateAction<Dayjs | null>>;
+    setId: Dispatch<SetStateAction<string | null>>;
+    setLinks: Dispatch<SetStateAction<LinkItem[]>>;
+    setReasons: Dispatch<SetStateAction<ReasonItem[]>>;
+    setOfficeMode: Dispatch<SetStateAction<boolean>>;
+    setQuickInputStartTimes: Dispatch<SetStateAction<QuickInputEntry[]>>;
+    setQuickInputEndTimes: Dispatch<SetStateAction<QuickInputEntry[]>>;
+    setLunchRestStartTime: Dispatch<SetStateAction<Dayjs | null>>;
+    setLunchRestEndTime: Dispatch<SetStateAction<Dayjs | null>>;
+    setHourlyPaidHolidayEnabled: Dispatch<SetStateAction<boolean>>;
+    setAmHolidayStartTime: Dispatch<SetStateAction<Dayjs | null>>;
+    setAmHolidayEndTime: Dispatch<SetStateAction<Dayjs | null>>;
+    setPmHolidayStartTime: Dispatch<SetStateAction<Dayjs | null>>;
+    setPmHolidayEndTime: Dispatch<SetStateAction<Dayjs | null>>;
+    setAmPmHolidayEnabled: Dispatch<SetStateAction<boolean>>;
+    setSpecialHolidayEnabled: Dispatch<SetStateAction<boolean>>;
+    setAbsentEnabled: Dispatch<SetStateAction<boolean>>;
+    setOverTimeCheckEnabled: Dispatch<SetStateAction<boolean>>;
+    setShiftCollaborativeEnabled: Dispatch<SetStateAction<boolean>>;
+    setShiftDefaultMode: Dispatch<SetStateAction<ShiftDisplayMode>>;
+    setAttendanceStatisticsEnabled: Dispatch<SetStateAction<boolean>>;
+    setWorkflowNotificationEnabled: Dispatch<SetStateAction<boolean>>;
+    setTimeRecorderAnnouncementEnabled: Dispatch<SetStateAction<boolean>>;
+    setTimeRecorderAnnouncementMessage: Dispatch<SetStateAction<string>>;
+};
+
+function hydrateAdminConfigFormState(g: AdminConfigGetters, s: AdminConfigSetters) {
+    s.setStartTime(g.getStartTime());
+    s.setEndTime(g.getEndTime());
+    s.setId(g.getConfigId());
+    s.setLinks(g.getLinks());
+    s.setReasons(g.getReasons());
+    s.setOfficeMode(g.getOfficeMode());
+    s.setQuickInputStartTimes(g.getQuickInputStartTimes().map((entry) => ({ time: dayjs(entry.time, TIME_FORMAT), enabled: entry.enabled })));
+    s.setQuickInputEndTimes(g.getQuickInputEndTimes().map((entry) => ({ time: dayjs(entry.time, TIME_FORMAT), enabled: entry.enabled })));
+    s.setLunchRestStartTime(g.getLunchRestStartTime());
+    s.setLunchRestEndTime(g.getLunchRestEndTime());
+    s.setHourlyPaidHolidayEnabled(g.getHourlyPaidHolidayEnabled());
+    if (typeof g.getSpecialHolidayEnabled === "function") s.setSpecialHolidayEnabled(g.getSpecialHolidayEnabled());
+    if (typeof g.getAbsentEnabled === "function") s.setAbsentEnabled(g.getAbsentEnabled());
+    if (typeof g.getOverTimeCheckEnabled === "function") s.setOverTimeCheckEnabled(g.getOverTimeCheckEnabled());
+    if (typeof g.getShiftCollaborativeEnabled === "function") s.setShiftCollaborativeEnabled(g.getShiftCollaborativeEnabled());
+    if (typeof g.getShiftDefaultMode === "function") s.setShiftDefaultMode(g.getShiftDefaultMode());
+    s.setAttendanceStatisticsEnabled(g.getAttendanceStatisticsEnabled());
+    s.setWorkflowNotificationEnabled(g.getWorkflowNotificationEnabled());
+    const announcement = g.getTimeRecorderAnnouncement();
+    s.setTimeRecorderAnnouncementEnabled(announcement.enabled);
+    s.setTimeRecorderAnnouncementMessage(announcement.message);
+    if (typeof g.getAmHolidayStartTime === "function" && g.getAmHolidayStartTime()) s.setAmHolidayStartTime(g.getAmHolidayStartTime());
+    if (typeof g.getAmHolidayEndTime === "function" && g.getAmHolidayEndTime()) s.setAmHolidayEndTime(g.getAmHolidayEndTime());
+    if (typeof g.getPmHolidayStartTime === "function" && g.getPmHolidayStartTime()) s.setPmHolidayStartTime(g.getPmHolidayStartTime());
+    if (typeof g.getPmHolidayEndTime === "function" && g.getPmHolidayEndTime()) s.setPmHolidayEndTime(g.getPmHolidayEndTime());
+    if (typeof g.getAmPmHolidayEnabled === "function") s.setAmPmHolidayEnabled(g.getAmPmHolidayEnabled());
+}
+
+type AdminConfigSaveDeps = {
+    saveConfig: (payload: CreateAppConfigInput | UpdateAppConfigInput) => Promise<void>;
+    dispatch: ReturnType<typeof useAppDispatchV2>;
+    fetchConfig: () => Promise<void>;
+};
+
+type AdminConfigFormValues = {
+    id: string | null;
+    startTime: Dayjs | null;
+    endTime: Dayjs | null;
+    lunchRestStartTime: Dayjs | null;
+    lunchRestEndTime: Dayjs | null;
+    amHolidayStartTime: Dayjs | null;
+    amHolidayEndTime: Dayjs | null;
+    pmHolidayStartTime: Dayjs | null;
+    pmHolidayEndTime: Dayjs | null;
+    links: LinkItem[];
+    reasons: ReasonItem[];
+    quickInputStartTimes: QuickInputEntry[];
+    quickInputEndTimes: QuickInputEntry[];
+    officeMode: boolean;
+    absentEnabled: boolean;
+    hourlyPaidHolidayEnabled: boolean;
+    amPmHolidayEnabled: boolean;
+    specialHolidayEnabled: boolean;
+    attendanceStatisticsEnabled: boolean;
+    workflowNotificationEnabled: boolean;
+    timeRecorderAnnouncementEnabled: boolean;
+    timeRecorderAnnouncementMessage: string;
+    overTimeCheckEnabled: boolean;
+    shiftCollaborativeEnabled: boolean;
+    shiftDefaultMode: ShiftDisplayMode;
+};
+
+async function executeAdminConfigSave(
+    formValues: AdminConfigFormValues,
+    deps: { saveConfig: AdminConfigSaveDeps["saveConfig"]; dispatch: AdminConfigSaveDeps["dispatch"]; fetchConfig: AdminConfigSaveDeps["fetchConfig"] },
+) {
+    const validationResult = validateAdminConfigForm({
+        startTime: formValues.startTime,
+        endTime: formValues.endTime,
+        lunchRestStartTime: formValues.lunchRestStartTime,
+        lunchRestEndTime: formValues.lunchRestEndTime,
+        amHolidayStartTime: formValues.amHolidayStartTime,
+        amHolidayEndTime: formValues.amHolidayEndTime,
+        pmHolidayStartTime: formValues.pmHolidayStartTime,
+        pmHolidayEndTime: formValues.pmHolidayEndTime,
+    });
+    if (!validationResult.isValid) {
+        deps.dispatch(pushNotification({ tone: "error", message: validationResult.errorMessage! }));
+        return;
+    }
+    const formState = {
+        id: formValues.id,
+        links: formValues.links,
+        reasons: formValues.reasons,
+        quickInputStartTimes: formValues.quickInputStartTimes,
+        quickInputEndTimes: formValues.quickInputEndTimes,
+        officeMode: formValues.officeMode,
+        absentEnabled: formValues.absentEnabled,
+        hourlyPaidHolidayEnabled: formValues.hourlyPaidHolidayEnabled,
+        amPmHolidayEnabled: formValues.amPmHolidayEnabled,
+        specialHolidayEnabled: formValues.specialHolidayEnabled,
+        attendanceStatisticsEnabled: formValues.attendanceStatisticsEnabled,
+        workflowNotificationEnabled: formValues.workflowNotificationEnabled,
+        timeRecorderAnnouncementEnabled: formValues.timeRecorderAnnouncementEnabled,
+        timeRecorderAnnouncementMessage: formValues.timeRecorderAnnouncementMessage,
+        overTimeCheckEnabled: formValues.overTimeCheckEnabled,
+        shiftCollaborativeEnabled: formValues.shiftCollaborativeEnabled,
+        shiftDefaultMode: formValues.shiftDefaultMode,
+        startTime: formValues.startTime!,
+        endTime: formValues.endTime!,
+        lunchRestStartTime: formValues.lunchRestStartTime!,
+        lunchRestEndTime: formValues.lunchRestEndTime!,
+        amHolidayStartTime: formValues.amHolidayStartTime!,
+        amHolidayEndTime: formValues.amHolidayEndTime!,
+        pmHolidayStartTime: formValues.pmHolidayStartTime!,
+        pmHolidayEndTime: formValues.pmHolidayEndTime!,
+    };
+    try {
+        if (formValues.id) {
+            await deps.saveConfig(buildUpdatePayload(formState));
+            deps.dispatch(pushNotification({ tone: "success", message: S14002 }));
+        } else {
+            await deps.saveConfig(buildCreatePayload(formState));
+            deps.dispatch(pushNotification({ tone: "success", message: S14001 }));
+        }
+        await deps.fetchConfig();
+    } catch {
+        deps.dispatch(pushNotification({ tone: "error", message: E14001 }));
+    }
+}
+
 export function useAdminConfigForm() {
     const { fetchConfig, saveConfig, getStartTime, getEndTime, getConfigId, getLinks, getReasons, getOfficeMode, getQuickInputStartTimes, getQuickInputEndTimes, getLunchRestStartTime, getLunchRestEndTime, getHourlyPaidHolidayEnabled, getAmHolidayStartTime, getAmHolidayEndTime, getPmHolidayStartTime, getPmHolidayEndTime, getAmPmHolidayEnabled, getSpecialHolidayEnabled, getAbsentEnabled, getAttendanceStatisticsEnabled, getWorkflowNotificationEnabled, getTimeRecorderAnnouncement, getOverTimeCheckEnabled, getShiftCollaborativeEnabled, getShiftDefaultMode, getThemeTokens, } = useContext(AppConfigContext);
     const adminPanelTokens = useMemo(() => getThemeTokens(), [
@@ -58,66 +236,12 @@ export function useAdminConfigForm() {
     const [shiftCollaborativeEnabled, setShiftCollaborativeEnabled] = useState<boolean>(false);
     const [shiftDefaultMode, setShiftDefaultMode] = useState<ShiftDisplayMode>("normal");
     const dispatch = useAppDispatchV2();
-    const hydrateFromContext = () => {
-        setStartTime(getStartTime());
-        setEndTime(getEndTime());
-        setId(getConfigId());
-        setLinks(getLinks());
-        setReasons(getReasons());
-        setOfficeMode(getOfficeMode());
-        const startTimes = getQuickInputStartTimes();
-        setQuickInputStartTimes(startTimes.map((entry) => ({
-            time: dayjs(entry.time, TIME_FORMAT),
-            enabled: entry.enabled,
-        })));
-        setQuickInputEndTimes(getQuickInputEndTimes().map((entry) => ({
-            time: dayjs(entry.time, TIME_FORMAT),
-            enabled: entry.enabled,
-        })));
-        setLunchRestStartTime(getLunchRestStartTime());
-        setLunchRestEndTime(getLunchRestEndTime());
-        setHourlyPaidHolidayEnabled(getHourlyPaidHolidayEnabled());
-        if (typeof getSpecialHolidayEnabled === "function") {
-            setSpecialHolidayEnabled(getSpecialHolidayEnabled());
-        }
-        if (typeof getAbsentEnabled === "function") {
-            setAbsentEnabled(getAbsentEnabled());
-        }
-        if (typeof getOverTimeCheckEnabled === "function") {
-            setOverTimeCheckEnabled(getOverTimeCheckEnabled());
-        }
-        if (typeof getShiftCollaborativeEnabled === "function") {
-            setShiftCollaborativeEnabled(getShiftCollaborativeEnabled());
-        }
-        if (typeof getShiftDefaultMode === "function") {
-            setShiftDefaultMode(getShiftDefaultMode());
-        }
-        setAttendanceStatisticsEnabled(getAttendanceStatisticsEnabled());
-        setWorkflowNotificationEnabled(getWorkflowNotificationEnabled());
-        const timeRecorderAnnouncement = getTimeRecorderAnnouncement();
-        setTimeRecorderAnnouncementEnabled(timeRecorderAnnouncement.enabled);
-        setTimeRecorderAnnouncementMessage(timeRecorderAnnouncement.message);
-        if (typeof getAmHolidayStartTime === "function" &&
-            getAmHolidayStartTime()) {
-            setAmHolidayStartTime(getAmHolidayStartTime());
-        }
-        if (typeof getAmHolidayEndTime === "function" && getAmHolidayEndTime()) {
-            setAmHolidayEndTime(getAmHolidayEndTime());
-        }
-        if (typeof getPmHolidayStartTime === "function" &&
-            getPmHolidayStartTime()) {
-            setPmHolidayStartTime(getPmHolidayStartTime());
-        }
-        if (typeof getPmHolidayEndTime === "function" && getPmHolidayEndTime()) {
-            setPmHolidayEndTime(getPmHolidayEndTime());
-        }
-        if (typeof getAmPmHolidayEnabled === "function") {
-            setAmPmHolidayEnabled(getAmPmHolidayEnabled());
-        }
-    };
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        hydrateFromContext();
+        hydrateAdminConfigFormState(
+            { getStartTime, getEndTime, getConfigId, getLinks, getReasons, getOfficeMode, getQuickInputStartTimes, getQuickInputEndTimes, getLunchRestStartTime, getLunchRestEndTime, getHourlyPaidHolidayEnabled, getSpecialHolidayEnabled, getAbsentEnabled, getOverTimeCheckEnabled, getShiftCollaborativeEnabled, getShiftDefaultMode, getAttendanceStatisticsEnabled, getWorkflowNotificationEnabled, getTimeRecorderAnnouncement, getAmHolidayStartTime, getAmHolidayEndTime, getPmHolidayStartTime, getPmHolidayEndTime, getAmPmHolidayEnabled },
+            { setStartTime, setEndTime, setId, setLinks, setReasons, setOfficeMode, setQuickInputStartTimes, setQuickInputEndTimes, setLunchRestStartTime, setLunchRestEndTime, setHourlyPaidHolidayEnabled, setAmHolidayStartTime, setAmHolidayEndTime, setPmHolidayStartTime, setPmHolidayEndTime, setAmPmHolidayEnabled, setSpecialHolidayEnabled, setAbsentEnabled, setOverTimeCheckEnabled, setShiftCollaborativeEnabled, setShiftDefaultMode, setAttendanceStatisticsEnabled, setWorkflowNotificationEnabled, setTimeRecorderAnnouncementEnabled, setTimeRecorderAnnouncementMessage },
+        );
     }, []);
     const handleAddLink = () => {
         setLinks(appendItem(links, { label: "", url: "", enabled: true, icon: "" }));
@@ -209,75 +333,10 @@ export function useAdminConfigForm() {
         setShiftDefaultMode(mode);
     };
     const handleSave = async () => {
-        const validationResult = validateAdminConfigForm({
-            startTime,
-            endTime,
-            lunchRestStartTime,
-            lunchRestEndTime,
-            amHolidayStartTime,
-            amHolidayEndTime,
-            pmHolidayStartTime,
-            pmHolidayEndTime,
-        });
-        if (!validationResult.isValid) {
-            dispatch(pushNotification({
-                tone: "error",
-                message: validationResult.errorMessage!
-            }));
-            return;
-        }
-        const formState = {
-            id,
-            links,
-            reasons,
-            quickInputStartTimes,
-            quickInputEndTimes,
-            officeMode,
-            absentEnabled,
-            hourlyPaidHolidayEnabled,
-            amPmHolidayEnabled,
-            specialHolidayEnabled,
-            attendanceStatisticsEnabled,
-            workflowNotificationEnabled,
-            timeRecorderAnnouncementEnabled,
-            timeRecorderAnnouncementMessage,
-            overTimeCheckEnabled,
-            shiftCollaborativeEnabled,
-            shiftDefaultMode,
-            startTime: startTime!,
-            endTime: endTime!,
-            lunchRestStartTime: lunchRestStartTime!,
-            lunchRestEndTime: lunchRestEndTime!,
-            amHolidayStartTime: amHolidayStartTime!,
-            amHolidayEndTime: amHolidayEndTime!,
-            pmHolidayStartTime: pmHolidayStartTime!,
-            pmHolidayEndTime: pmHolidayEndTime!,
-        };
-        try {
-            if (id) {
-                const payload = buildUpdatePayload(formState);
-                await saveConfig(payload);
-                dispatch(pushNotification({
-                    tone: "success",
-                    message: S14002
-                }));
-            }
-            else {
-                const payload = buildCreatePayload(formState);
-                await saveConfig(payload);
-                dispatch(pushNotification({
-                    tone: "success",
-                    message: S14001
-                }));
-            }
-            await fetchConfig();
-        }
-        catch {
-            dispatch(pushNotification({
-                tone: "error",
-                message: E14001
-            }));
-        }
+        await executeAdminConfigSave(
+            { id, startTime, endTime, lunchRestStartTime, lunchRestEndTime, amHolidayStartTime, amHolidayEndTime, pmHolidayStartTime, pmHolidayEndTime, links, reasons, quickInputStartTimes, quickInputEndTimes, officeMode, absentEnabled, hourlyPaidHolidayEnabled, amPmHolidayEnabled, specialHolidayEnabled, attendanceStatisticsEnabled, workflowNotificationEnabled, timeRecorderAnnouncementEnabled, timeRecorderAnnouncementMessage, overTimeCheckEnabled, shiftCollaborativeEnabled, shiftDefaultMode },
+            { saveConfig, dispatch, fetchConfig },
+        );
     };
     return {
         sectionSpacing,
