@@ -262,7 +262,7 @@ const useAppConfig = () => {
 
       await createAppConfig(newConfig as CreateAppConfigInput).unwrap();
     },
-    [createAppConfig, updateAppConfig],
+    [createAppConfig, updateAppConfig, config?.version, config?.updatedAt],
   );
 
   const getConfigId = useCallback(() => config?.id ?? null, [config?.id]);

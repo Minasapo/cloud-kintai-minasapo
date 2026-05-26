@@ -258,12 +258,13 @@ export const useWorkflowNotificationInbox = () => {
     Record<string, string | null>
   >({});
 
+  const cognitoUserId = cognitoUser?.id ?? null;
   const currentStaffId = useMemo(() => {
-    if (!isAuthenticated || !cognitoUser?.id) return null;
+    if (!isAuthenticated || !cognitoUserId) return null;
     return (
-      staffs.find((staff) => staff.cognitoUserId === cognitoUser.id)?.id ?? null
+      staffs.find((staff) => staff.cognitoUserId === cognitoUserId)?.id ?? null
     );
-  }, [cognitoUser?.id, isAuthenticated, staffs]);
+  }, [cognitoUserId, isAuthenticated, staffs]);
 
   const isAdminWatcher = useMemo(
     () =>
@@ -274,7 +275,7 @@ export const useWorkflowNotificationInbox = () => {
   );
 
   const recipientIds = useMemo(() => {
-    const selfIds = [currentStaffId, cognitoUser?.id].filter(
+    const selfIds = [currentStaffId, cognitoUserId].filter(
       (id): id is string => Boolean(id),
     );
 
@@ -285,9 +286,9 @@ export const useWorkflowNotificationInbox = () => {
     return [...selfIds, "ADMINS"].filter(
       (id, index, list) => list.indexOf(id) === index,
     );
-  }, [cognitoUser?.id, currentStaffId, isAdminWatcher]);
+  }, [cognitoUserId, currentStaffId, isAdminWatcher]);
 
-  const { getLocallyReadAdminIds, markAdminGroupEventAsReadLocally } = useAdminGroupLocalReadState(cognitoUser?.id);
+  const { getLocallyReadAdminIds, markAdminGroupEventAsReadLocally } = useAdminGroupLocalReadState(cognitoUserId ?? undefined);
 
   const fetchNotifications = useCallback(
     async () => executeFetchNotifications(recipientIds, getLocallyReadAdminIds, { setNotifications, setUnreadCount, setLoading, setError, setNextTokensByRecipient, getLocallyReadAdminIds }),
