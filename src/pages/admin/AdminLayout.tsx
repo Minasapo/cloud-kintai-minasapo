@@ -484,7 +484,7 @@ const TripleLayoutPanels = memo(function TripleLayoutPanels({
   );
 });
 
-function AdminLayoutContent() {
+function useAdminLayoutContent() {
   const menuItems = useHeaderMenu();
   const navigate = useNavigate();
   const location = useLocation();
@@ -703,6 +703,62 @@ function AdminLayoutContent() {
     }
   }, [isMobile, state.mode, setMode, setLeftPanel]);
 
+  return {
+    menuItems,
+    activeMenuHref,
+    activeMenuItem,
+    currentPath: location.pathname,
+    isMobile,
+    isMobileRailOpen,
+    handleSelect,
+    handleToggleMobileRail,
+    handleToggleSplitMode,
+    handleCloseMiddlePanel,
+    handleCloseRightPanel,
+    handleMiddleScreenChange,
+    handleRightScreenChange,
+    selectedMiddleScreen,
+    selectedRightScreen,
+    isSplitMode,
+    isTripleMode,
+    splitPanelPosition,
+    splitPanelConfig,
+    MiddlePanelComponent,
+    RightPanelComponent,
+    splitMode: state.mode,
+    middlePanelTitle: state.leftPanel?.title,
+    rightPanelTitle: state.rightPanel?.title,
+  };
+}
+
+function AdminLayoutContent() {
+  const {
+    menuItems,
+    activeMenuHref,
+    activeMenuItem,
+    currentPath,
+    isMobile,
+    isMobileRailOpen,
+    handleSelect,
+    handleToggleMobileRail,
+    handleToggleSplitMode,
+    handleCloseMiddlePanel,
+    handleCloseRightPanel,
+    handleMiddleScreenChange,
+    handleRightScreenChange,
+    selectedMiddleScreen,
+    selectedRightScreen,
+    isSplitMode,
+    isTripleMode,
+    splitPanelPosition,
+    splitPanelConfig,
+    MiddlePanelComponent,
+    RightPanelComponent,
+    splitMode,
+    middlePanelTitle,
+    rightPanelTitle,
+  } = useAdminLayoutContent();
+
   return (
     <Stack component="section" sx={PAGE_CONTAINER_SX}>
       <PageSection
@@ -730,7 +786,7 @@ function AdminLayoutContent() {
               {isMobileRailOpen ? "ナビを閉じる" : "ナビを開く"}
             </Button>
           )}
-          <SplitModeToggle mode={state.mode} onToggle={handleToggleSplitMode} />
+          <SplitModeToggle mode={splitMode} onToggle={handleToggleSplitMode} />
         </Box>
 
         <Stack
@@ -742,7 +798,7 @@ function AdminLayoutContent() {
               menuItems={menuItems}
               activeMenuHref={activeMenuHref}
               activeMenuItem={activeMenuItem}
-              currentPath={location.pathname}
+              currentPath={currentPath}
               onSelect={handleSelect}
             />
           )}
@@ -755,7 +811,7 @@ function AdminLayoutContent() {
                   menuItems={menuItems}
                   activeMenuHref={activeMenuHref}
                   activeMenuItem={activeMenuItem}
-                  currentPath={location.pathname}
+                  currentPath={currentPath}
                   onSelect={handleSelect}
                 />
               </Box>
@@ -763,8 +819,8 @@ function AdminLayoutContent() {
 
             {isTripleMode ? (
               <TripleLayoutPanels
-                middlePanelTitle={state.leftPanel?.title}
-                rightPanelTitle={state.rightPanel?.title}
+                middlePanelTitle={middlePanelTitle}
+                rightPanelTitle={rightPanelTitle}
                 middleSelectedScreen={selectedMiddleScreen}
                 rightSelectedScreen={selectedRightScreen}
                 onCloseMiddlePanel={handleCloseMiddlePanel}

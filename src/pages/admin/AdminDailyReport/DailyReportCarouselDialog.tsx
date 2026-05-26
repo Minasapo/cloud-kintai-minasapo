@@ -4,6 +4,7 @@ import {
   logDailyReportReactionUpdate,
 } from "@entities/operation-log/model/dailyReportOperationLog";
 import useCognitoUser from "@entities/staff/model/useCognitoUser";
+import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { sendDailyReportCommentNotification } from "@features/attendance/daily-report/lib/sendDailyReportCommentNotification";
 import { graphqlClient } from "@shared/api/amplify/graphqlClient";
@@ -55,12 +56,11 @@ interface PreloadedReport {
   commentEntries: DailyReportComment[];
 }
 
-export default function DailyReportCarouselDialog({
-  open,
-  onClose,
-  selectedReport,
-  filteredReports,
-}: DailyReportCarouselDialogProps) {
+function useDailyReportCarouselData(
+  open: boolean,
+  selectedReport: AdminDailyReport,
+  filteredReports: AdminDailyReport[],
+) {
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
   const { staffs, loading: isStaffLoading } = useStaffs({ isAuthenticated });
@@ -74,30 +74,14 @@ export default function DailyReportCarouselDialog({
   const [preloadedReports, setPreloadedReports] = useState<
     Map<string, PreloadedReport>
   >(new Map());
-  const [commentInput, setCommentInput] = useState<string>("");
   const [reactionEntries, setReactionEntries] = useState<
     DailyReportReaction[] | null
   >(null);
   const [commentEntries, setCommentEntries] = useState<
     DailyReportComment[] | null
   >(null);
-  const [actionError, setActionError] = useState<string | null>(null);
-  const [isSavingReaction, setIsSavingReaction] = useState(false);
-  const [isSavingComment, setIsSavingComment] = useState(false);
-  const {
-    currentStaffId,
-    currentStaffName,
-    isResolving: isResolvingCurrentStaff,
-  } = useCurrentStaff(cognitoUser);
-
-  const reactions = useMemo(() => report?.reactions ?? [], [report]);
-  const comments = useMemo(() => report?.comments ?? [], [report]);
-  const selectedReactions = useMemo(() => {
-    if (!reactionEntries || !currentStaffId) return [];
-    return reactionEntries
-      .filter((entry) => entry.staffId === currentStaffId)
-      .map((entry) => entry.type as ReactionType);
-  }, [currentStaffId, reactionEntries]);
+  const { currentStaffId, currentStaffName, isResolving: isResolvingCurrentStaff } =
+    useCurrentStaff(cognitoUser);
 
   const buildStaffName = useCallback(
     (staffId: string) => {
@@ -142,10 +126,7 @@ export default function DailyReportCarouselDialog({
 
       const fetchedReactions = normalizeReactions(record.reactions);
       const fetchedComments = normalizeComments(record.comments);
-      const mappedReport = mapDailyReport(
-        record,
-        buildStaffName(record.staffId),
-      );
+      const mappedReport = mapDailyReport(record, buildStaffName(record.staffId));
 
       setReactionEntries(fetchedReactions);
       setCommentEntries(fetchedComments);
@@ -169,9 +150,7 @@ export default function DailyReportCarouselDialog({
 
   useEffect(() => {
     if (open) {
-      setCurrentIndex(
-        filteredReports.findIndex((r) => r.id === selectedReport.id),
-      );
+      setCurrentIndex(filteredReports.findIndex((r) => r.id === selectedReport.id));
       setPreloadedReports(new Map());
     }
   }, [open, selectedReport.id, filteredReports]);
@@ -187,10 +166,7 @@ export default function DailyReportCarouselDialog({
       for (let i = 0; i < filteredReports.length; i++) {
         if (!mounted) break;
         const reportToPreload = filteredReports[i];
-        if (
-          preloadedReports.has(reportToPreload.id) ||
-          reportToPreload.id === currentReport?.id
-        ) {
+        if (preloadedReports.has(reportToPreload.id) || reportToPreload.id === currentReport?.id) {
           continue;
         }
         try {
@@ -208,10 +184,7 @@ export default function DailyReportCarouselDialog({
 
           const preloadedReactions = normalizeReactions(record.reactions);
           const preloadedComments = normalizeComments(record.comments);
-          const mappedReport = mapDailyReport(
-            record,
-            buildStaffName(record.staffId),
-          );
+          const mappedReport = mapDailyReport(record, buildStaffName(record.staffId));
 
           if (mounted) {
             setPreloadedReports((prev) =>
@@ -234,31 +207,72 @@ export default function DailyReportCarouselDialog({
     };
   }, [open, filteredReports, buildStaffName, currentReport, preloadedReports]);
 
+  return {
+    currentIndex,
+    setCurrentIndex,
+    currentReport,
+    report,
+    setReport,
+    isLoading,
+    loadError,
+    isStaffLoading,
+    reactionEntries,
+    setReactionEntries,
+    commentEntries,
+    setCommentEntries,
+    staffs,
+    cognitoUser,
+    currentStaffId,
+    currentStaffName,
+    isResolvingCurrentStaff,
+    buildStaffName,
+  };
+}
+
+type DailyReportInteractionsDeps = {
+  report: AdminDailyReport | null;
+  reactionEntries: DailyReportReaction[] | null;
+  commentEntries: DailyReportComment[] | null;
+  setReport: (r: AdminDailyReport) => void;
+  setReactionEntries: (entries: DailyReportReaction[]) => void;
+  setCommentEntries: (entries: DailyReportComment[]) => void;
+  currentStaffId: string | null;
+  currentStaffName: string;
+  isResolvingCurrentStaff: boolean;
+  staffs: StaffType[];
+  buildStaffName: (staffId: string) => string;
+};
+
+function useDailyReportInteractions({
+  report,
+  reactionEntries,
+  commentEntries,
+  setReport,
+  setReactionEntries,
+  setCommentEntries,
+  currentStaffId,
+  currentStaffName,
+  isResolvingCurrentStaff,
+  staffs,
+  buildStaffName,
+}: DailyReportInteractionsDeps) {
+  const [commentInput, setCommentInput] = useState("");
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [isSavingReaction, setIsSavingReaction] = useState(false);
+  const [isSavingComment, setIsSavingComment] = useState(false);
+
   useEffect(() => {
     setCommentInput("");
   }, [report]);
 
-  const handlePrevious = () => {
-    if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
-  };
-
-  const handleNext = () => {
-    if (currentIndex < filteredReports.length - 1)
-      setCurrentIndex(currentIndex + 1);
-  };
-
   const handleToggleReaction = async (type: ReactionType) => {
     if (!report) return;
     if (!reactionEntries) {
-      setActionError(
-        "リアクション情報の取得中です。少し待ってから再度お試しください。",
-      );
+      setActionError("リアクション情報の取得中です。少し待ってから再度お試しください。");
       return;
     }
     if (!currentStaffId || isResolvingCurrentStaff) {
-      setActionError(
-        "スタッフ情報が取得できないため、リアクションを登録できません。",
-      );
+      setActionError("スタッフ情報が取得できないため、リアクションを登録できません。");
       return;
     }
     if (isSavingReaction) return;
@@ -267,11 +281,7 @@ export default function DailyReportCarouselDialog({
     setActionError(null);
 
     try {
-      const beforeReport = buildDailyReportBeforeSnapshot(
-        report,
-        reactionEntries,
-        commentEntries,
-      );
+      const beforeReport = buildDailyReportBeforeSnapshot(report, reactionEntries, commentEntries);
       const { updated, operation } = await updateDailyReportReaction({
         report,
         reactionEntries,
@@ -292,9 +302,7 @@ export default function DailyReportCarouselDialog({
       setReport(mapDailyReport(updated, buildStaffName(updated.staffId)));
     } catch (error) {
       setActionError(
-        error instanceof Error
-          ? error.message
-          : "リアクションの登録に失敗しました。",
+        error instanceof Error ? error.message : "リアクションの登録に失敗しました。",
       );
     } finally {
       setIsSavingReaction(false);
@@ -306,15 +314,11 @@ export default function DailyReportCarouselDialog({
     if (!body) return;
     if (!report) return;
     if (!commentEntries) {
-      setActionError(
-        "コメント情報の取得中です。少し待ってから再度お試しください。",
-      );
+      setActionError("コメント情報の取得中です。少し待ってから再度お試しください。");
       return;
     }
     if (!currentStaffId || isResolvingCurrentStaff) {
-      setActionError(
-        "スタッフ情報が取得できないため、コメントを登録できません。",
-      );
+      setActionError("スタッフ情報が取得できないため、コメントを登録できません。");
       return;
     }
     if (isSavingComment) return;
@@ -323,11 +327,7 @@ export default function DailyReportCarouselDialog({
     setActionError(null);
 
     try {
-      const beforeReport = buildDailyReportBeforeSnapshot(
-        report,
-        reactionEntries,
-        commentEntries,
-      );
+      const beforeReport = buildDailyReportBeforeSnapshot(report, reactionEntries, commentEntries);
       const { updated, addedComment } = await addDailyReportComment({
         report,
         commentEntries,
@@ -344,10 +344,7 @@ export default function DailyReportCarouselDialog({
           commentBody: body,
         });
       } catch (mailError) {
-        console.error(
-          "Failed to send daily report comment notification:",
-          mailError,
-        );
+        console.error("Failed to send daily report comment notification:", mailError);
       }
 
       await logDailyReportCommentAdd({
@@ -363,9 +360,7 @@ export default function DailyReportCarouselDialog({
       setCommentInput("");
     } catch (error) {
       setActionError(
-        error instanceof Error
-          ? error.message
-          : "コメントの登録に失敗しました。",
+        error instanceof Error ? error.message : "コメントの登録に失敗しました。",
       );
     } finally {
       setIsSavingComment(false);
@@ -373,16 +368,87 @@ export default function DailyReportCarouselDialog({
   };
 
   const chipsDisabled =
-    !reactionEntries ||
-    !currentStaffId ||
-    isSavingReaction ||
-    isResolvingCurrentStaff;
+    !reactionEntries || !currentStaffId || isSavingReaction || isResolvingCurrentStaff;
   const isCommentDisabled =
-    !commentInput.trim() ||
-    !currentStaffId ||
-    !commentEntries ||
-    isSavingComment ||
-    isResolvingCurrentStaff;
+    !commentInput.trim() || !currentStaffId || !commentEntries || isSavingComment || isResolvingCurrentStaff;
+
+  return {
+    commentInput,
+    setCommentInput,
+    actionError,
+    setActionError,
+    handleToggleReaction,
+    handleSubmitComment,
+    chipsDisabled,
+    isCommentDisabled,
+  };
+}
+
+export default function DailyReportCarouselDialog({
+  open,
+  onClose,
+  selectedReport,
+  filteredReports,
+}: DailyReportCarouselDialogProps) {
+  const {
+    currentIndex,
+    setCurrentIndex,
+    report,
+    setReport,
+    isLoading,
+    loadError,
+    isStaffLoading,
+    reactionEntries,
+    setReactionEntries,
+    commentEntries,
+    setCommentEntries,
+    staffs,
+    currentStaffId,
+    currentStaffName,
+    isResolvingCurrentStaff,
+    buildStaffName,
+  } = useDailyReportCarouselData(open, selectedReport, filteredReports);
+
+  const {
+    commentInput,
+    setCommentInput,
+    actionError,
+    setActionError,
+    handleToggleReaction,
+    handleSubmitComment,
+    chipsDisabled,
+    isCommentDisabled,
+  } = useDailyReportInteractions({
+    report,
+    reactionEntries,
+    commentEntries,
+    setReport,
+    setReactionEntries,
+    setCommentEntries,
+    currentStaffId,
+    currentStaffName,
+    isResolvingCurrentStaff,
+    staffs,
+    buildStaffName,
+  });
+
+  const reactions = useMemo(() => report?.reactions ?? [], [report]);
+  const comments = useMemo(() => report?.comments ?? [], [report]);
+  const selectedReactions = useMemo(() => {
+    if (!reactionEntries || !currentStaffId) return [];
+    return reactionEntries
+      .filter((entry) => entry.staffId === currentStaffId)
+      .map((entry) => entry.type as ReactionType);
+  }, [currentStaffId, reactionEntries]);
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
+  };
+
+  const handleNext = () => {
+    if (currentIndex < filteredReports.length - 1)
+      setCurrentIndex(currentIndex + 1);
+  };
 
   if (!open) return null;
 
@@ -396,7 +462,6 @@ export default function DailyReportCarouselDialog({
         className="flex h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Dialog header */}
         <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-3">
           <SectionTitle className="text-base font-bold text-slate-800">日報を確認</SectionTitle>
           <button
@@ -404,101 +469,45 @@ export default function DailyReportCarouselDialog({
             onClick={onClose}
             className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
           >
-            <svg
-              className="h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
 
-        {/* Carousel navigation */}
         <div className="flex shrink-0 items-center justify-between border-b border-slate-100 bg-slate-50 px-4 py-2">
-          <button
-            type="button"
-            onClick={handlePrevious}
-            disabled={currentIndex <= 0}
+          <button type="button" onClick={handlePrevious} disabled={currentIndex <= 0}
             className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <svg
-              className="h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
-          <span className="text-xs text-slate-500">
-            {currentIndex + 1} / {filteredReports.length}
-          </span>
-          <button
-            type="button"
-            onClick={handleNext}
-            disabled={currentIndex >= filteredReports.length - 1}
+          <span className="text-xs text-slate-500">{currentIndex + 1} / {filteredReports.length}</span>
+          <button type="button" onClick={handleNext} disabled={currentIndex >= filteredReports.length - 1}
             className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <svg
-              className="h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
         </div>
 
-        {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {isLoading || isStaffLoading ? (
-            <p className="py-8 text-center text-sm text-slate-400">
-              読み込み中...
-            </p>
+            <p className="py-8 text-center text-sm text-slate-400">読み込み中...</p>
           ) : loadError ? (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {loadError}
-            </div>
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{loadError}</div>
           ) : !report ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-              日報が見つかりません
-            </div>
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">日報が見つかりません</div>
           ) : (
             <div className="space-y-4">
               {actionError && (
                 <div className="flex items-start justify-between rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                   <span>{actionError}</span>
-                  <button
-                    type="button"
-                    onClick={() => setActionError(null)}
-                    className="ml-3 shrink-0 text-red-400 hover:text-red-600"
-                  >
-                    <svg
-                      className="h-4 w-4"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
+                  <button type="button" onClick={() => setActionError(null)} className="ml-3 shrink-0 text-red-400 hover:text-red-600">
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <line x1="18" y1="6" x2="6" y2="18" />
                       <line x1="6" y1="6" x2="18" y2="18" />
                     </svg>
@@ -506,21 +515,13 @@ export default function DailyReportCarouselDialog({
                 </div>
               )}
 
-              {/* Report header */}
               <div>
-                <SubsectionTitle className="text-base font-bold text-slate-800">
-                  {report.title}
-                </SubsectionTitle>
+                <SubsectionTitle className="text-base font-bold text-slate-800">{report.title}</SubsectionTitle>
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   <span className="text-xs text-slate-500">
-                    {formatDateSlash(report.date) || report.date} |{" "}
-                    {report.author}
+                    {formatDateSlash(report.date) || report.date} | {report.author}
                   </span>
-                  <span
-                    className={
-                      STATUS_BADGE_CLASS[STATUS_META[report.status].color]
-                    }
-                  >
+                  <span className={STATUS_BADGE_CLASS[STATUS_META[report.status].color]}>
                     {STATUS_META[report.status].label}
                   </span>
                 </div>
@@ -531,89 +532,54 @@ export default function DailyReportCarouselDialog({
 
               <hr className="border-slate-100" />
 
-              {/* Content */}
               <pre className="whitespace-pre-wrap font-[inherit] text-sm leading-relaxed text-slate-700">
                 {report.content || "内容は登録されていません"}
               </pre>
 
               <hr className="border-slate-100" />
 
-              {/* Reactions */}
               <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  リアクション
-                </p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">リアクション</p>
                 <div className="flex flex-wrap gap-2">
-                  {(Object.keys(REACTION_META) as ReactionType[]).map(
-                    (type) => {
-                      const meta = REACTION_META[type];
-                      const count =
-                        reactions.find((r) => r.type === type)?.count ?? 0;
-                      const isSelected = selectedReactions.includes(type);
-                      return (
-                        <button
-                          key={type}
-                          type="button"
-                          disabled={chipsDisabled}
-                          onClick={() => {
-                            void handleToggleReaction(type);
-                          }}
-                          data-testid={`daily-report-reaction-${type}`}
-                          className={[
-                            "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium transition",
-                            isSelected
-                              ? "border-emerald-300 bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                              : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
-                            chipsDisabled
-                              ? "cursor-not-allowed opacity-50"
-                              : "",
-                          ]
-                            .filter(Boolean)
-                            .join(" ")}
-                        >
-                          {meta.emoji} {meta.label}
-                          {count > 0 && (
-                            <span className="ml-1 text-slate-400">
-                              ({count})
-                            </span>
-                          )}
-                        </button>
-                      );
-                    },
-                  )}
+                  {(Object.keys(REACTION_META) as ReactionType[]).map((type) => {
+                    const meta = REACTION_META[type];
+                    const count = reactions.find((r) => r.type === type)?.count ?? 0;
+                    const isSelected = selectedReactions.includes(type);
+                    return (
+                      <button key={type} type="button" disabled={chipsDisabled}
+                        onClick={() => { void handleToggleReaction(type); }}
+                        data-testid={`daily-report-reaction-${type}`}
+                        className={[
+                          "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium transition",
+                          isSelected ? "border-emerald-300 bg-emerald-100 text-emerald-700 hover:bg-emerald-200" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+                          chipsDisabled ? "cursor-not-allowed opacity-50" : "",
+                        ].filter(Boolean).join(" ")}
+                      >
+                        {meta.emoji} {meta.label}
+                        {count > 0 && <span className="ml-1 text-slate-400">({count})</span>}
+                      </button>
+                    );
+                  })}
                 </div>
                 {reactions.length === 0 && (
-                  <p className="text-xs text-slate-400">
-                    まだリアクションはありません。
-                  </p>
+                  <p className="text-xs text-slate-400">まだリアクションはありません。</p>
                 )}
               </div>
 
               <hr className="border-slate-100" />
 
-              {/* Comments */}
               <div className="space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  コメント
-                </p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">コメント</p>
                 <textarea
                   value={commentInput}
-                  onChange={(e) => {
-                    if (actionError) setActionError(null);
-                    setCommentInput(e.target.value);
-                  }}
+                  onChange={(e) => { if (actionError) setActionError(null); setCommentInput(e.target.value); }}
                   placeholder="コメントを入力"
                   rows={2}
                   data-testid="daily-report-comment-input"
                   className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-200"
                 />
                 <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      void handleSubmitComment();
-                    }}
-                    disabled={isCommentDisabled}
+                  <button type="button" onClick={() => { void handleSubmitComment(); }} disabled={isCommentDisabled}
                     data-testid="daily-report-comment-submit"
                     className="inline-flex h-8 items-center rounded-lg bg-emerald-600 px-4 text-xs font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
@@ -622,28 +588,18 @@ export default function DailyReportCarouselDialog({
                 </div>
 
                 {comments.length === 0 ? (
-                  <p className="text-xs text-slate-400">
-                    まだコメントはありません。
-                  </p>
+                  <p className="text-xs text-slate-400">まだコメントはありません。</p>
                 ) : (
                   <div className="space-y-2">
                     {comments.map((comment) => (
-                      <div
-                        key={comment.id}
-                        className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
-                      >
+                      <div key={comment.id} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
                         <div className="flex items-start justify-between gap-2">
-                          <span className="text-xs font-semibold text-slate-700">
-                            {comment.author}
-                          </span>
+                          <span className="text-xs font-semibold text-slate-700">{comment.author}</span>
                           <span className="shrink-0 text-xs text-slate-400">
-                            {formatDateTimeReadable(comment.createdAt) ||
-                              comment.createdAt}
+                            {formatDateTimeReadable(comment.createdAt) || comment.createdAt}
                           </span>
                         </div>
-                        <p className="mt-1 text-xs text-slate-600">
-                          {comment.body}
-                        </p>
+                        <p className="mt-1 text-xs text-slate-600">{comment.body}</p>
                       </div>
                     ))}
                   </div>

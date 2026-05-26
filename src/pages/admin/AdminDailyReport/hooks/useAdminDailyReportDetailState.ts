@@ -4,6 +4,7 @@ import {
   logDailyReportReactionUpdate,
 } from "@entities/operation-log/model/dailyReportOperationLog";
 import useCognitoUser from "@entities/staff/model/useCognitoUser";
+import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { sendDailyReportCommentNotification } from "@features/attendance/daily-report/lib/sendDailyReportCommentNotification";
 import { graphqlClient } from "@shared/api/amplify/graphqlClient";
@@ -15,6 +16,7 @@ import type {
 } from "@shared/api/graphql/types";
 import type { GraphQLResult } from "aws-amplify/api";
 import {
+  type Dispatch,
   useCallback,
   useContext,
   useEffect,
@@ -141,102 +143,25 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-export function useAdminDailyReportDetailState(
-  id: string | undefined,
-  initialReport: AdminDailyReport | null,
-) {
-  const { authStatus } = useContext(AuthContext);
-  const isAuthenticated = authStatus === "authenticated";
-  const { staffs, loading: isStaffLoading } = useStaffs({ isAuthenticated });
-  const { cognitoUser } = useCognitoUser();
-  const {
-    currentStaffId,
-    currentStaffName,
-    isResolving: isResolvingCurrentStaff,
-  } = useCurrentStaff(cognitoUser);
+type ReportInteractionDeps = {
+  state: State;
+  dispatch: Dispatch<Action>;
+  currentStaffId: string | null;
+  currentStaffName: string;
+  isResolvingCurrentStaff: boolean;
+  buildStaffName: (staffId: string) => string;
+  staffs: StaffType[];
+};
 
-  const stateReportId = initialReport?.id ?? null;
-
-  const [state, dispatch] = useReducer(reducer, {
-    report: initialReport,
-    isLoading: !initialReport,
-    loadError: null,
-    reactionEntries: null,
-    commentEntries: null,
-    commentInput: "",
-    actionError: null,
-    isSavingReaction: false,
-    isSavingComment: false,
-  });
-
-  const buildStaffName = useCallback(
-    (staffId: string) => {
-      const staff = staffs.find((item) => item.id === staffId);
-      if (!staff) return "スタッフ";
-      const name = [staff.familyName, staff.givenName]
-        .filter((part): part is string => Boolean(part && part.trim()))
-        .join(" ");
-      return name || "スタッフ";
-    },
-    [staffs],
-  );
-
-  // Derive report with up-to-date author from staffs list (eliminates author-update useEffect)
-  const report = useMemo(
-    () =>
-      state.report
-        ? { ...state.report, author: buildStaffName(state.report.staffId) }
-        : null,
-    [state.report, buildStaffName],
-  );
-
-  const reactions = useMemo(() => report?.reactions ?? [], [report]);
-  const comments = useMemo(() => report?.comments ?? [], [report]);
-
-  const selectedReactions = useMemo(() => {
-    if (!state.reactionEntries || !currentStaffId) return [];
-    return state.reactionEntries
-      .filter((entry) => entry.staffId === currentStaffId)
-      .map((entry) => entry.type as ReactionType);
-  }, [state.reactionEntries, currentStaffId]);
-
-  const fetchReport = useCallback(async () => {
-    if (!id) return;
-    dispatch({ type: "FETCH_START" });
-    try {
-      const response = (await graphqlClient.graphql({
-        query: getDailyReport,
-        variables: { id },
-        authMode: "userPool",
-      })) as GraphQLResult<GetDailyReportQuery>;
-
-      if (response.errors?.length) {
-        throw new Error(response.errors.map((err) => err.message).join("\n"));
-      }
-
-      const record = response.data?.getDailyReport;
-      if (!record) throw new Error("日報が見つかりませんでした。");
-
-      dispatch({
-        type: "FETCH_SUCCESS",
-        report: mapDailyReport(record, buildStaffName(record.staffId)),
-        reactionEntries: normalizeReactions(record.reactions),
-        commentEntries: normalizeComments(record.comments),
-      });
-    } catch (error) {
-      dispatch({
-        type: "FETCH_ERROR",
-        error:
-          error instanceof Error ? error.message : "日報の取得に失敗しました。",
-        clearReport: !stateReportId,
-      });
-    }
-  }, [buildStaffName, id, stateReportId]);
-
-  useEffect(() => {
-    void fetchReport();
-  }, [fetchReport]);
-
+function useReportInteractions({
+  state,
+  dispatch,
+  currentStaffId,
+  currentStaffName,
+  isResolvingCurrentStaff,
+  buildStaffName,
+  staffs,
+}: ReportInteractionDeps) {
   const handleToggleReaction = useCallback(
     async (type: ReactionType) => {
       if (!state.report) return;
@@ -392,6 +317,115 @@ export function useAdminDailyReportDetailState(
     buildStaffName,
     staffs,
   ]);
+
+  return { handleToggleReaction, handleSubmitComment };
+}
+
+export function useAdminDailyReportDetailState(
+  id: string | undefined,
+  initialReport: AdminDailyReport | null,
+) {
+  const { authStatus } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { staffs, loading: isStaffLoading } = useStaffs({ isAuthenticated });
+  const { cognitoUser } = useCognitoUser();
+  const {
+    currentStaffId,
+    currentStaffName,
+    isResolving: isResolvingCurrentStaff,
+  } = useCurrentStaff(cognitoUser);
+
+  const stateReportId = initialReport?.id ?? null;
+
+  const [state, dispatch] = useReducer(reducer, {
+    report: initialReport,
+    isLoading: !initialReport,
+    loadError: null,
+    reactionEntries: null,
+    commentEntries: null,
+    commentInput: "",
+    actionError: null,
+    isSavingReaction: false,
+    isSavingComment: false,
+  });
+
+  const buildStaffName = useCallback(
+    (staffId: string) => {
+      const staff = staffs.find((item) => item.id === staffId);
+      if (!staff) return "スタッフ";
+      const name = [staff.familyName, staff.givenName]
+        .filter((part): part is string => Boolean(part && part.trim()))
+        .join(" ");
+      return name || "スタッフ";
+    },
+    [staffs],
+  );
+
+  // Derive report with up-to-date author from staffs list (eliminates author-update useEffect)
+  const report = useMemo(
+    () =>
+      state.report
+        ? { ...state.report, author: buildStaffName(state.report.staffId) }
+        : null,
+    [state.report, buildStaffName],
+  );
+
+  const reactions = useMemo(() => report?.reactions ?? [], [report]);
+  const comments = useMemo(() => report?.comments ?? [], [report]);
+
+  const selectedReactions = useMemo(() => {
+    if (!state.reactionEntries || !currentStaffId) return [];
+    return state.reactionEntries
+      .filter((entry) => entry.staffId === currentStaffId)
+      .map((entry) => entry.type as ReactionType);
+  }, [state.reactionEntries, currentStaffId]);
+
+  const fetchReport = useCallback(async () => {
+    if (!id) return;
+    dispatch({ type: "FETCH_START" });
+    try {
+      const response = (await graphqlClient.graphql({
+        query: getDailyReport,
+        variables: { id },
+        authMode: "userPool",
+      })) as GraphQLResult<GetDailyReportQuery>;
+
+      if (response.errors?.length) {
+        throw new Error(response.errors.map((err) => err.message).join("\n"));
+      }
+
+      const record = response.data?.getDailyReport;
+      if (!record) throw new Error("日報が見つかりませんでした。");
+
+      dispatch({
+        type: "FETCH_SUCCESS",
+        report: mapDailyReport(record, buildStaffName(record.staffId)),
+        reactionEntries: normalizeReactions(record.reactions),
+        commentEntries: normalizeComments(record.comments),
+      });
+    } catch (error) {
+      dispatch({
+        type: "FETCH_ERROR",
+        error:
+          error instanceof Error ? error.message : "日報の取得に失敗しました。",
+        clearReport: !stateReportId,
+      });
+    }
+  }, [buildStaffName, id, stateReportId]);
+
+  useEffect(() => {
+    void fetchReport();
+  }, [fetchReport]);
+
+  const { handleToggleReaction, handleSubmitComment } = useReportInteractions({
+    state,
+    dispatch,
+    currentStaffId,
+    currentStaffName,
+    isResolvingCurrentStaff,
+    buildStaffName,
+    staffs,
+  });
 
   const chipsDisabled = useMemo(
     () =>
