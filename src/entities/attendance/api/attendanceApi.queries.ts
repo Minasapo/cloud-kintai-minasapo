@@ -18,7 +18,141 @@ import {
   fetchAttendancesByStaffDate,
 } from "./attendanceApi.helpers";
 import { buildDuplicateDetailsError, collectAttendancesByWorkDate, nonNullable } from "./attendanceApi.shared";
-import type { AttendanceListResponse } from "./attendanceApi.types";
+import type { AttendanceBaseQuery, AttendanceListResponse } from "./attendanceApi.types";
+
+// ---------------------------------------------------------------------------
+// Module-level helpers — extracted to keep the endpoints callback under the line limit
+// ---------------------------------------------------------------------------
+
+const fetchRecentAttendancesQueryFn = async (
+  { staffId, days = 30 }: { staffId: string; days?: number },
+  baseQuery: AttendanceBaseQuery,
+) => {
+  const safeDays = Math.max(1, days);
+  const now = dayjs();
+  const dateList = Array.from({ length: safeDays }, (_, index) =>
+    now.subtract(index, "day").format(AttendanceDate.DataFormat),
+  ).toSorted();
+
+  const result = await baseQuery({
+    document: attendancesByStaffId,
+    variables: {
+      staffId,
+      workDate: { between: [dateList[0], dateList[dateList.length - 1]] },
+    },
+  });
+
+  if (result.error) {
+    return { error: result.error };
+  }
+
+  const data = result.data as AttendancesByStaffIdQuery | null;
+  const connection = data?.attendancesByStaffId;
+
+  if (!connection) {
+    return { error: { message: "Failed to fetch attendance" } };
+  }
+
+  const fetchedAttendances = connection.items.filter(nonNullable);
+  const { attendanceMap, duplicateDetails } = collectAttendancesByWorkDate(
+    staffId,
+    fetchedAttendances,
+  );
+
+  if (duplicateDetails.length > 0) {
+    return { error: buildDuplicateDetailsError(staffId, duplicateDetails) };
+  }
+
+  const attendanceList = dateList.map((targetDate) => {
+    const matches = attendanceMap.get(targetDate) ?? [];
+    return buildAttendanceForList(targetDate, matches[0] ?? null);
+  });
+
+  return { data: { attendances: attendanceList } };
+};
+
+const listAttendancesByDateRangeQueryFn = async (
+  { staffId, startDate, endDate }: { staffId: string; startDate: string; endDate: string },
+  baseQuery: AttendanceBaseQuery,
+) => {
+  const paginatedResult = await executePaginatedQuery<Attendance>({
+    baseQuery,
+    document: attendancesByStaffId,
+    variables: {
+      staffId,
+      workDate: { between: [startDate, endDate] },
+      sortDirection: "ASC",
+    },
+    connectionExtractor: (data) =>
+      (data as AttendancesByStaffIdQuery | null)?.attendancesByStaffId,
+    errorMessage: "Failed to fetch attendance",
+  });
+
+  if (paginatedResult.error) {
+    return { error: paginatedResult.error };
+  }
+
+  const attendances = paginatedResult.data;
+  const { duplicateDetails } = collectAttendancesByWorkDate(staffId, attendances);
+
+  if (duplicateDetails.length > 0) {
+    return { error: buildDuplicateDetailsError(staffId, duplicateDetails) };
+  }
+
+  return { data: attendances };
+};
+
+const listAttendancesByDateRangeWithPlaceholdersQueryFn = async (
+  { staffId, startDate, endDate }: { staffId: string; startDate: string; endDate: string },
+  baseQuery: AttendanceBaseQuery,
+) => {
+  const dateList = buildDateListForRange(startDate, endDate);
+
+  if (dateList.length === 0) {
+    return { data: { attendances: [] as Attendance[] } };
+  }
+
+  const result = await baseQuery({
+    document: attendancesByStaffId,
+    variables: {
+      staffId,
+      workDate: { between: [dateList[0], dateList[dateList.length - 1]] },
+      sortDirection: "ASC",
+    },
+  });
+
+  if (result.error) {
+    return { error: result.error };
+  }
+
+  const data = result.data as AttendancesByStaffIdQuery | null;
+  const connection = data?.attendancesByStaffId;
+
+  if (!connection) {
+    return { error: { message: "Failed to fetch attendance" } };
+  }
+
+  const fetchedAttendances = connection.items.filter(nonNullable);
+  const { attendanceMap, duplicateDetails } = collectAttendancesByWorkDate(
+    staffId,
+    fetchedAttendances,
+  );
+
+  if (duplicateDetails.length > 0) {
+    return { error: buildDuplicateDetailsError(staffId, duplicateDetails) };
+  }
+
+  return {
+    data: {
+      attendances: dateList.map((targetDate) => {
+        const matches = attendanceMap.get(targetDate) ?? [];
+        return buildAttendanceForList(targetDate, matches[0] ?? null);
+      }),
+    },
+  };
+};
+
+// ---------------------------------------------------------------------------
 
 export const attendanceApiWithQueries = baseAttendanceApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -94,63 +228,8 @@ export const attendanceApiWithQueries = baseAttendanceApi.injectEndpoints({
       AttendanceListResponse,
       { staffId: string; days?: number }
     >({
-      async queryFn(
-        { staffId, days = 30 },
-        _queryApi,
-        _extraOptions,
-        baseQuery,
-      ) {
-        const safeDays = Math.max(1, days);
-        const now = dayjs();
-        const dateList = Array.from({ length: safeDays }, (_, index) =>
-          now.subtract(index, "day").format(AttendanceDate.DataFormat),
-        ).toSorted();
-
-        const result = await baseQuery({
-          document: attendancesByStaffId,
-          variables: {
-            staffId,
-            workDate: {
-              between: [dateList[0], dateList[dateList.length - 1]],
-            },
-          },
-        });
-
-        if (result.error) {
-          return { error: result.error };
-        }
-
-        const data = result.data as AttendancesByStaffIdQuery | null;
-        const connection = data?.attendancesByStaffId;
-
-        if (!connection) {
-          return { error: { message: "Failed to fetch attendance" } };
-        }
-
-        const fetchedAttendances = connection.items.filter(nonNullable);
-        const { attendanceMap, duplicateDetails } = collectAttendancesByWorkDate(
-          staffId,
-          fetchedAttendances,
-        );
-
-        if (duplicateDetails.length > 0) {
-          return {
-            error: buildDuplicateDetailsError(staffId, duplicateDetails),
-          };
-        }
-
-        const attendanceList = dateList.map((targetDate) => {
-          const matches = attendanceMap.get(targetDate) ?? [];
-          const match = matches[0] ?? null;
-
-          return buildAttendanceForList(targetDate, match);
-        });
-
-        return {
-          data: {
-            attendances: attendanceList,
-          },
-        };
+      async queryFn(arg, _queryApi, _extraOptions, baseQuery) {
+        return fetchRecentAttendancesQueryFn(arg, baseQuery);
       },
       providesTags: (result) =>
         buildListAndItemTags(
@@ -163,63 +242,8 @@ export const attendanceApiWithQueries = baseAttendanceApi.injectEndpoints({
       AttendanceListResponse,
       { staffId: string; days?: number }
     >({
-      async queryFn(
-        { staffId, days = 30 },
-        _queryApi,
-        _extraOptions,
-        baseQuery,
-      ) {
-        const safeDays = Math.max(1, days);
-        const now = dayjs();
-        const dateList = Array.from({ length: safeDays }, (_, index) =>
-          now.subtract(index, "day").format(AttendanceDate.DataFormat),
-        ).toSorted();
-
-        const result = await baseQuery({
-          document: attendancesByStaffId,
-          variables: {
-            staffId,
-            workDate: {
-              between: [dateList[0], dateList[dateList.length - 1]],
-            },
-          },
-        });
-
-        if (result.error) {
-          return { error: result.error };
-        }
-
-        const data = result.data as AttendancesByStaffIdQuery | null;
-        const connection = data?.attendancesByStaffId;
-
-        if (!connection) {
-          return { error: { message: "Failed to fetch attendance" } };
-        }
-
-        const fetchedAttendances = connection.items.filter(nonNullable);
-        const { attendanceMap, duplicateDetails } = collectAttendancesByWorkDate(
-          staffId,
-          fetchedAttendances,
-        );
-
-        if (duplicateDetails.length > 0) {
-          return {
-            error: buildDuplicateDetailsError(staffId, duplicateDetails),
-          };
-        }
-
-        const attendanceList = dateList.map((targetDate) => {
-          const matches = attendanceMap.get(targetDate) ?? [];
-          const match = matches[0] ?? null;
-
-          return buildAttendanceForList(targetDate, match);
-        });
-
-        return {
-          data: {
-            attendances: attendanceList,
-          },
-        };
+      async queryFn(arg, _queryApi, _extraOptions, baseQuery) {
+        return fetchRecentAttendancesQueryFn(arg, baseQuery);
       },
       providesTags: (result) =>
         buildListAndItemTags(
@@ -232,42 +256,8 @@ export const attendanceApiWithQueries = baseAttendanceApi.injectEndpoints({
       Attendance[],
       { staffId: string; startDate: string; endDate: string }
     >({
-      async queryFn(
-        { staffId, startDate, endDate },
-        _queryApi,
-        _extraOptions,
-        baseQuery,
-      ) {
-        const paginatedResult = await executePaginatedQuery<Attendance>({
-          baseQuery,
-          document: attendancesByStaffId,
-          variables: {
-            staffId,
-            workDate: { between: [startDate, endDate] },
-            sortDirection: "ASC",
-          },
-          connectionExtractor: (data) =>
-            (data as AttendancesByStaffIdQuery | null)?.attendancesByStaffId,
-          errorMessage: "Failed to fetch attendance",
-        });
-
-        if (paginatedResult.error) {
-          return { error: paginatedResult.error };
-        }
-
-        const attendances = paginatedResult.data;
-        const { duplicateDetails } = collectAttendancesByWorkDate(
-          staffId,
-          attendances,
-        );
-
-        if (duplicateDetails.length > 0) {
-          return {
-            error: buildDuplicateDetailsError(staffId, duplicateDetails),
-          };
-        }
-
-        return { data: attendances };
+      async queryFn(arg, _queryApi, _extraOptions, baseQuery) {
+        return listAttendancesByDateRangeQueryFn(arg, baseQuery);
       },
       providesTags: (_result, _error, arg) => [
         { type: "Attendance" as const, id: "LIST" },
@@ -281,65 +271,8 @@ export const attendanceApiWithQueries = baseAttendanceApi.injectEndpoints({
       AttendanceListResponse,
       { staffId: string; startDate: string; endDate: string }
     >({
-      async queryFn(
-        { staffId, startDate, endDate },
-        _queryApi,
-        _extraOptions,
-        baseQuery,
-      ) {
-        const dateList = buildDateListForRange(startDate, endDate);
-
-        if (dateList.length === 0) {
-          return {
-            data: {
-              attendances: [],
-            },
-          };
-        }
-
-        const result = await baseQuery({
-          document: attendancesByStaffId,
-          variables: {
-            staffId,
-            workDate: {
-              between: [dateList[0], dateList[dateList.length - 1]],
-            },
-            sortDirection: "ASC",
-          },
-        });
-
-        if (result.error) {
-          return { error: result.error };
-        }
-
-        const data = result.data as AttendancesByStaffIdQuery | null;
-        const connection = data?.attendancesByStaffId;
-
-        if (!connection) {
-          return { error: { message: "Failed to fetch attendance" } };
-        }
-
-        const fetchedAttendances = connection.items.filter(nonNullable);
-        const { attendanceMap, duplicateDetails } = collectAttendancesByWorkDate(
-          staffId,
-          fetchedAttendances,
-        );
-
-        if (duplicateDetails.length > 0) {
-          return {
-            error: buildDuplicateDetailsError(staffId, duplicateDetails),
-          };
-        }
-
-        return {
-          data: {
-            attendances: dateList.map((targetDate) => {
-              const matches = attendanceMap.get(targetDate) ?? [];
-              const match = matches[0] ?? null;
-              return buildAttendanceForList(targetDate, match);
-            }),
-          },
-        };
+      async queryFn(arg, _queryApi, _extraOptions, baseQuery) {
+        return listAttendancesByDateRangeWithPlaceholdersQueryFn(arg, baseQuery);
       },
       providesTags: (_result, _error, arg) => [
         { type: "Attendance" as const, id: "LIST" },

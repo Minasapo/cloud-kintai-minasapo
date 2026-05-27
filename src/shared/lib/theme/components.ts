@@ -7,6 +7,90 @@ import { type TypographyHelpers } from "./typography";
 
 const toPx = (value: number) => `${value}px`;
 
+type NeutralColor = DesignTokens["color"]["neutral"];
+type ShadowTokens = DesignTokens["shadow"];
+
+const buildButtonVariants = (color: NeutralColor, shadow: ShadowTokens) => [
+  {
+    props: { color: "neutral", variant: "contained" } as const,
+    style: {
+      backgroundColor: color[100],
+      color: color[800],
+      "&:hover": {
+        backgroundColor: color[200],
+        boxShadow: shadow.card,
+      },
+      "&.Mui-disabled": {
+        backgroundColor: color[100],
+        color: color[500],
+      },
+    },
+  },
+  {
+    props: { color: "neutral", variant: "outlined" } as const,
+    style: {
+      backgroundColor: color[50],
+      borderColor: color[200],
+      color: color[700],
+      "&:hover": {
+        backgroundColor: color[100],
+        borderColor: color[300],
+        boxShadow: "none",
+      },
+    },
+  },
+  {
+    props: { color: "neutral", variant: "text" } as const,
+    style: {
+      color: color[700],
+      "&:hover": {
+        backgroundColor: color[100],
+        boxShadow: "none",
+      },
+    },
+  },
+];
+
+const buildLinkVariants = (
+  palette: AppPalette,
+  radius: DesignTokens["radius"],
+  typography: DesignTokens["typography"],
+  buttonPadding: string,
+) => [
+  {
+    props: { variant: "button", color: "primary" } as const,
+    style: {
+      backgroundColor: palette.primary.main,
+      color: palette.primary.contrastText,
+      textDecoration: "none",
+      borderRadius: toPx(radius.sm),
+      padding: buttonPadding,
+      fontWeight: typography.fontWeight.medium,
+      "&:hover": {
+        backgroundColor: palette.primary.contrastText,
+        color: palette.primary.main,
+        textDecoration: "none",
+      },
+    },
+  },
+  {
+    props: { variant: "button", color: "secondary" } as const,
+    style: {
+      backgroundColor: palette.secondary.main,
+      color: palette.secondary.contrastText,
+      textDecoration: "none",
+      borderRadius: toPx(radius.sm),
+      padding: buttonPadding,
+      fontWeight: typography.fontWeight.medium,
+      "&:hover": {
+        backgroundColor: palette.secondary.contrastText,
+        color: palette.secondary.main,
+        textDecoration: "none",
+      },
+    },
+  },
+];
+
 export const createComponents = (
   tokens: DesignTokens,
   palette: AppPalette,
@@ -92,46 +176,7 @@ export const createComponents = (
           minHeight: "36px",
         },
       },
-      variants: [
-        {
-          props: { color: "neutral", variant: "contained" },
-          style: {
-            backgroundColor: color.neutral[100],
-            color: color.neutral[800],
-            "&:hover": {
-              backgroundColor: color.neutral[200],
-              boxShadow: shadow.card,
-            },
-            "&.Mui-disabled": {
-              backgroundColor: color.neutral[100],
-              color: color.neutral[500],
-            },
-          },
-        },
-        {
-          props: { color: "neutral", variant: "outlined" },
-          style: {
-            backgroundColor: color.neutral[50],
-            borderColor: color.neutral[200],
-            color: color.neutral[700],
-            "&:hover": {
-              backgroundColor: color.neutral[100],
-              borderColor: color.neutral[300],
-              boxShadow: "none",
-            },
-          },
-        },
-        {
-          props: { color: "neutral", variant: "text" },
-          style: {
-            color: color.neutral[700],
-            "&:hover": {
-              backgroundColor: color.neutral[100],
-              boxShadow: "none",
-            },
-          },
-        },
-      ],
+      variants: buildButtonVariants(color.neutral, shadow),
     },
     MuiIconButton: {
       styleOverrides: {
@@ -200,40 +245,7 @@ export const createComponents = (
       },
     },
     MuiLink: {
-      variants: [
-        {
-          props: { variant: "button", color: "primary" },
-          style: {
-            backgroundColor: palette.primary.main,
-            color: palette.primary.contrastText,
-            textDecoration: "none",
-            borderRadius: toPx(radius.sm),
-            padding: buttonPadding,
-            fontWeight: typography.fontWeight.medium,
-            "&:hover": {
-              backgroundColor: palette.primary.contrastText,
-              color: palette.primary.main,
-              textDecoration: "none",
-            },
-          },
-        },
-        {
-          props: { variant: "button", color: "secondary" },
-          style: {
-            backgroundColor: palette.secondary.main,
-            color: palette.secondary.contrastText,
-            textDecoration: "none",
-            borderRadius: toPx(radius.sm),
-            padding: buttonPadding,
-            fontWeight: typography.fontWeight.medium,
-            "&:hover": {
-              backgroundColor: palette.secondary.contrastText,
-              color: palette.secondary.main,
-              textDecoration: "none",
-            },
-          },
-        },
-      ],
+      variants: buildLinkVariants(palette, radius, typography, buttonPadding),
     },
   };
 };

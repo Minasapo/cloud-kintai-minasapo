@@ -8,7 +8,6 @@ import {
   MutableRefObject,
   SetStateAction,
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -228,13 +227,16 @@ export function useDailyReportPageActions({
     const dateMap = new Map<string, DailyReportItem>();
     const dateSet = new Set<string>();
     const idMap = new Map<string, DailyReportItem>();
-    reports.forEach((report) => {
+    const effectiveReports = authorName
+      ? reports.map((r) => (r.author === resolvedAuthorName ? r : { ...r, author: resolvedAuthorName }))
+      : reports;
+    effectiveReports.forEach((report) => {
       if (!dateMap.has(report.date)) dateMap.set(report.date, report);
       idMap.set(report.id, report);
       dateSet.add(report.date);
     });
     return { dateMap, dateSet, idMap };
-  }, [reports]);
+  }, [reports, authorName, resolvedAuthorName]);
 
   const isCreateMode = selectedReportId === "create";
   const selectedReport = selectedReportId && selectedReportId !== "create" ? (reportsById.get(selectedReportId) ?? null) : null;
@@ -244,11 +246,10 @@ export function useDailyReportPageActions({
   const canSubmit = Boolean(staffId && createForm.title.trim());
   const canEditSubmit = Boolean(editDraft && editDraft.title.trim());
 
-  useEffect(() => {
-    if (!authorName) return;
-    setCreateForm((prev) => prev.author === resolvedAuthorName ? prev : { ...prev, author: resolvedAuthorName });
-    setReports((prev) => prev.map((report) => ({ ...report, author: resolvedAuthorName })));
-  }, [authorName, resolvedAuthorName, setReports]);
+  const effectiveCreateForm = useMemo<DailyReportForm>(() => {
+    if (!authorName || createForm.author === resolvedAuthorName) return createForm;
+    return { ...createForm, author: resolvedAuthorName };
+  }, [createForm, authorName, resolvedAuthorName]);
 
   const handleCalendarDateSelected = useCallback((dateKey: string) => {
     const reportForDate = reportsByDate.get(dateKey);
@@ -348,7 +349,7 @@ export function useDailyReportPageActions({
   });
 
   return {
-    createForm, editDraft, editingReportId, selectedReportId, actionError,
+    createForm: effectiveCreateForm, editDraft, editingReportId, selectedReportId, actionError,
     isSubmitting, isUpdating, isAutoSaving,
     createFormLastSavedAt, editDraftLastSavedAt,
     reportsByDate, reportsById, reportedDateSet,

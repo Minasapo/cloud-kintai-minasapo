@@ -163,6 +163,51 @@ const mockFetchOnly = (report: AdminDailyReport) => {
   mockGraphql.mockImplementation(() => Promise.resolve(makeFetchResponse(report)));
 };
 
+/** Fetch mock that merges `overrides` into the getDailyReport payload. */
+const mockFetchWith = (
+  report: AdminDailyReport,
+  overrides: Record<string, unknown> = {},
+) => {
+  mockGraphql.mockImplementation(() =>
+    Promise.resolve({
+      data: {
+        getDailyReport: {
+          ...makeFetchResponse(report).data.getDailyReport,
+          ...overrides,
+        },
+      },
+    }),
+  );
+};
+
+// ─── Navigation button helpers ────────────────────────────────────────────────
+
+const getNavButton = (direction: "prev" | "next") => {
+  const points =
+    direction === "prev"
+      ? "polyline[points='15 18 9 12 15 6']"
+      : "polyline[points='9 18 15 12 9 6']";
+  return screen.getAllByRole("button").find((b) => b.querySelector(points) !== null)!;
+};
+
+// ─── Comment interaction helper ───────────────────────────────────────────────
+
+const fillAndSubmitComment = async (
+  user: ReturnType<typeof userEvent.setup>,
+  text = "テストコメント",
+) => {
+  await waitFor(() =>
+    expect(screen.getByPlaceholderText("コメントを入力")).toBeInTheDocument(),
+  );
+  const textarea = screen.getByPlaceholderText("コメントを入力");
+  await user.type(textarea, text);
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "追加" })).not.toBeDisabled(),
+  );
+  await user.click(screen.getByRole("button", { name: "追加" }));
+  return textarea;
+};
+
 
 beforeEach(() => {
   // resetAllMocks clears call counts AND resets implementations
@@ -208,8 +253,7 @@ beforeEach(() => {
 
 // ─── Tests ─────────────────────────────────────────────────────────────────────
 
-describe("DailyReportCarouselDialog", () => {
-  describe("open/close", () => {
+describe("DailyReportCarouselDialog > open/close", () => {
     it("renders nothing when open=false", () => {
       const { container } = renderDialog({ open: false });
       expect(container.firstChild).toBeNull();
@@ -250,9 +294,9 @@ describe("DailyReportCarouselDialog", () => {
       await user.click(closeBtn);
       expect(onClose).toHaveBeenCalled();
     });
-  });
+});
 
-  describe("loading state", () => {
+describe("DailyReportCarouselDialog > loading state", () => {
     it("shows 読み込み中... while fetching", async () => {
       // Never-resolving mock keeps the loading state visible
       mockGraphql.mockImplementation(() => new Promise(() => {}));
@@ -271,9 +315,9 @@ describe("DailyReportCarouselDialog", () => {
       });
       expect(screen.getByText("テスト内容")).toBeInTheDocument();
     });
-  });
+});
 
-  describe("error state", () => {
+describe("DailyReportCarouselDialog > error state", () => {
     it("shows error message when fetch fails", async () => {
       mockGraphql.mockRejectedValue(new Error("ネットワークエラー"));
       renderDialog();
@@ -301,9 +345,9 @@ describe("DailyReportCarouselDialog", () => {
         expect(screen.getByText(/日報が見つかりません/)).toBeInTheDocument();
       });
     });
-  });
+});
 
-  describe("report content", () => {
+describe("DailyReportCarouselDialog > report content", () => {
     it("displays report title", async () => {
       const report = makeReport({ title: "タイトルテスト" });
       mockFetchOnly(report);
@@ -322,77 +366,41 @@ describe("DailyReportCarouselDialog", () => {
       });
     });
 
-    it("displays SUBMITTED status badge", async () => {
-      const report = makeReport({ status: DailyReportStatus.SUBMITTED });
-      mockFetchOnly(report);
+    test.each([
+      [DailyReportStatus.SUBMITTED, "提出済"],
+      [DailyReportStatus.APPROVED, "確認済"],
+    ])("displays %s status badge", async (status, expectedText) => {
+      const report = makeReport({ status });
+      mockFetchWith(report);
       renderDialog({ selectedReport: report, filteredReports: [report] });
       await waitFor(() => {
-        expect(screen.getByText("提出済")).toBeInTheDocument();
-      });
-    });
-
-    it("displays APPROVED status badge", async () => {
-      const report = makeReport({ status: DailyReportStatus.APPROVED });
-      mockGraphql.mockImplementation(() =>
-        Promise.resolve({
-          data: {
-            getDailyReport: {
-              ...makeFetchResponse(report).data.getDailyReport,
-              status: DailyReportStatus.APPROVED,
-            },
-          },
-        }),
-      );
-      renderDialog({ selectedReport: report, filteredReports: [report] });
-      await waitFor(() => {
-        expect(screen.getByText("確認済")).toBeInTheDocument();
+        expect(screen.getByText(expectedText)).toBeInTheDocument();
       });
     });
 
     it("shows 内容は登録されていません when content is empty", async () => {
       const report = makeReport({ content: "" });
-      mockGraphql.mockImplementation(() =>
-        Promise.resolve({
-          data: {
-            getDailyReport: {
-              ...makeFetchResponse(report).data.getDailyReport,
-              content: null,
-            },
-          },
-        }),
-      );
+      mockFetchWith(report, { content: null });
       renderDialog({ selectedReport: report, filteredReports: [report] });
       await waitFor(() => {
-        expect(
-          screen.getByText("内容は登録されていません"),
-        ).toBeInTheDocument();
+        expect(screen.getByText("内容は登録されていません")).toBeInTheDocument();
       });
     });
 
-    it("shows まだリアクションはありません when reactions is empty", async () => {
-      const report = makeReport({ reactions: [] });
+    test.each([
+      ["reactions", "まだリアクションはありません。"],
+      ["comments", "まだコメントはありません。"],
+    ])("shows empty state message when %s is empty", async (_field, expectedText) => {
+      const report = makeReport({ reactions: [], comments: [] });
       mockFetchOnly(report);
       renderDialog({ selectedReport: report, filteredReports: [report] });
       await waitFor(() => {
-        expect(
-          screen.getByText("まだリアクションはありません。"),
-        ).toBeInTheDocument();
+        expect(screen.getByText(expectedText)).toBeInTheDocument();
       });
     });
+});
 
-    it("shows まだコメントはありません when comments is empty", async () => {
-      const report = makeReport({ comments: [] });
-      mockFetchOnly(report);
-      renderDialog({ selectedReport: report, filteredReports: [report] });
-      await waitFor(() => {
-        expect(
-          screen.getByText("まだコメントはありません。"),
-        ).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe("carousel navigation", () => {
+describe("DailyReportCarouselDialog > carousel navigation", () => {
     it("shows 1 / N counter for single report", () => {
       const report = makeReport();
       mockFetchOnly(report);
@@ -420,11 +428,7 @@ describe("DailyReportCarouselDialog", () => {
       mockFetchOnly(reports[0]);
       renderDialog({ selectedReport: reports[0], filteredReports: reports });
       expect(screen.getByText("1 / 2")).toBeInTheDocument();
-      const nextBtn = screen.getAllByRole("button").find(
-        (b) =>
-          b.querySelector("polyline[points='9 18 15 12 9 6']") !== null,
-      )!;
-      await user.click(nextBtn);
+      await user.click(getNavButton("next"));
       expect(screen.getByText("2 / 2")).toBeInTheDocument();
     });
 
@@ -434,38 +438,23 @@ describe("DailyReportCarouselDialog", () => {
       mockFetchOnly(reports[1]);
       renderDialog({ selectedReport: reports[1], filteredReports: reports });
       expect(screen.getByText("2 / 2")).toBeInTheDocument();
-      const prevBtn = screen.getAllByRole("button").find(
-        (b) =>
-          b.querySelector("polyline[points='15 18 9 12 15 6']") !== null,
-      )!;
-      await user.click(prevBtn);
+      await user.click(getNavButton("prev"));
       expect(screen.getByText("1 / 2")).toBeInTheDocument();
     });
 
-    it("previous button is disabled at first report", () => {
+    test.each([
+      ["previous", "prev" as const, reports => reports[0]],
+      ["next", "next" as const, reports => reports[1]],
+    ] as const)("%s button is disabled at boundary report", (_, direction, selectReport) => {
       const reports = [makeReport({ id: "r1" }), makeReport({ id: "r2" })];
-      mockFetchOnly(reports[0]);
-      renderDialog({ selectedReport: reports[0], filteredReports: reports });
-      const prevBtn = screen.getAllByRole("button").find(
-        (b) =>
-          b.querySelector("polyline[points='15 18 9 12 15 6']") !== null,
-      )!;
-      expect(prevBtn).toBeDisabled();
+      const selected = selectReport(reports);
+      mockFetchOnly(selected);
+      renderDialog({ selectedReport: selected, filteredReports: reports });
+      expect(getNavButton(direction)).toBeDisabled();
     });
+});
 
-    it("next button is disabled at last report", () => {
-      const reports = [makeReport({ id: "r1" }), makeReport({ id: "r2" })];
-      mockFetchOnly(reports[1]);
-      renderDialog({ selectedReport: reports[1], filteredReports: reports });
-      const nextBtn = screen.getAllByRole("button").find(
-        (b) =>
-          b.querySelector("polyline[points='9 18 15 12 9 6']") !== null,
-      )!;
-      expect(nextBtn).toBeDisabled();
-    });
-  });
-
-  describe("reactions", () => {
+describe("DailyReportCarouselDialog > reactions", () => {
     it("renders GOOD reaction button after report loads", async () => {
       const report = makeReport();
       mockFetchOnly(report);
@@ -530,9 +519,9 @@ describe("DailyReportCarouselDialog", () => {
         expect(mockGraphql.mock.calls.length).toBeGreaterThanOrEqual(2);
       });
     });
-  });
+});
 
-  describe("comments", () => {
+describe("DailyReportCarouselDialog > comments", () => {
     it("renders textarea for comment input", async () => {
       const report = makeReport();
       mockFetchOnly(report);
@@ -587,24 +576,8 @@ describe("DailyReportCarouselDialog", () => {
           },
         ],
       });
-
       renderDialog({ selectedReport: report, filteredReports: [report] });
-
-      await waitFor(() => {
-        expect(
-          screen.getByPlaceholderText("コメントを入力"),
-        ).toBeInTheDocument();
-      });
-
-      const textarea = screen.getByPlaceholderText("コメントを入力");
-      await user.type(textarea, "テストコメント");
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "追加" }),
-        ).not.toBeDisabled();
-      });
-      await user.click(screen.getByRole("button", { name: "追加" }));
-
+      await fillAndSubmitComment(user);
       await waitFor(() => {
         expect(mockGraphql.mock.calls.length).toBeGreaterThanOrEqual(2);
       });
@@ -614,56 +587,25 @@ describe("DailyReportCarouselDialog", () => {
       const user = userEvent.setup();
       const report = makeReport();
       mockFetchAndUpdate(report, { comments: [] });
-
       renderDialog({ selectedReport: report, filteredReports: [report] });
-
-      await waitFor(() => {
-        expect(
-          screen.getByPlaceholderText("コメントを入力"),
-        ).toBeInTheDocument();
-      });
-
-      const textarea = screen.getByPlaceholderText("コメントを入力");
-      await user.type(textarea, "テストコメント");
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole("button", { name: "追加" }),
-        ).not.toBeDisabled();
-      });
-
-      await user.click(screen.getByRole("button", { name: "追加" }));
-
-      // Wait for the mutation call to complete and input to be cleared
-      await waitFor(
-        () => {
-          expect(textarea).toHaveValue("");
-        },
-        { timeout: 3000 },
-      );
+      const textarea = await fillAndSubmitComment(user);
+      await waitFor(() => expect(textarea).toHaveValue(""), { timeout: 3000 });
     });
 
     it("shows existing comments from fetched report", async () => {
       const report = makeReport();
-      mockGraphql.mockImplementation(() =>
-        Promise.resolve({
-          data: {
-            getDailyReport: {
-              ...makeFetchResponse(report).data.getDailyReport,
-              comments: [
-                {
-                  __typename: "DailyReportComment",
-                  id: "c1",
-                  staffId: "staff-1",
-                  authorName: "管理者A",
-                  body: "既存コメント内容",
-                  createdAt: "2024-04-01T10:00:00.000Z",
-                },
-              ],
-            },
+      mockFetchWith(report, {
+        comments: [
+          {
+            __typename: "DailyReportComment",
+            id: "c1",
+            staffId: "staff-1",
+            authorName: "管理者A",
+            body: "既存コメント内容",
+            createdAt: "2024-04-01T10:00:00.000Z",
           },
-        }),
-      );
+        ],
+      });
       renderDialog({ selectedReport: report, filteredReports: [report] });
       await waitFor(() => {
         expect(screen.getByText("既存コメント内容")).toBeInTheDocument();
@@ -674,41 +616,23 @@ describe("DailyReportCarouselDialog", () => {
     it("actionError clears when comment input changes after an error", async () => {
       const user = userEvent.setup();
       const report = makeReport();
-      let _callCount = 0;
       mockGraphql.mockImplementation((params: GraphqlCallParams) => {
-        if (isMutationCall(params)) {
-          _callCount++;
-          return Promise.reject(new Error("更新エラー"));
-        }
+        if (isMutationCall(params)) return Promise.reject(new Error("更新エラー"));
         return Promise.resolve(makeFetchResponse(report));
       });
-
       renderDialog({ selectedReport: report, filteredReports: [report] });
-
-      await waitFor(() => {
-        expect(
-          screen.getByPlaceholderText("コメントを入力"),
-        ).toBeInTheDocument();
-      });
-
-      const textarea = screen.getByPlaceholderText("コメントを入力");
-      await user.type(textarea, "テストコメント");
-      await user.click(screen.getByRole("button", { name: "追加" }));
-
-      // Error shown
+      const textarea = await fillAndSubmitComment(user);
       await waitFor(() => {
         expect(screen.getByText("更新エラー")).toBeInTheDocument();
       });
-
-      // Typing in the comment input clears the action error
       await user.type(textarea, "x");
       await waitFor(() => {
         expect(screen.queryByText("更新エラー")).not.toBeInTheDocument();
       });
     });
-  });
+});
 
-  describe("action error on reaction toggle", () => {
+describe("DailyReportCarouselDialog > action error on reaction toggle", () => {
     it("shows action error when reaction toggle fails", async () => {
       const user = userEvent.setup();
       const report = makeReport();
@@ -768,5 +692,4 @@ describe("DailyReportCarouselDialog", () => {
         expect(screen.queryByText("更新エラー")).not.toBeInTheDocument();
       });
     });
-  });
 });

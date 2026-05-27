@@ -43,6 +43,146 @@ import {
 import DesktopList from "./DesktopList";
 import MobileList from "./MobileList/MobileList";
 
+function useAttendanceSubscription({
+  currentStaffId,
+  shouldFetchAttendances,
+  startDate,
+  endDate,
+  refetchAttendances,
+}: {
+  currentStaffId: string | undefined;
+  shouldFetchAttendances: boolean;
+  startDate: string;
+  endDate: string;
+  refetchAttendances: () => Promise<unknown>;
+}) {
+  useEffect(() => {
+    if (!currentStaffId || !shouldFetchAttendances) return;
+    let refetchTimer: ReturnType<typeof setTimeout> | null = null;
+    const queryRange = { start: dayjs(startDate), end: dayjs(endDate) };
+    const scheduleRefetch = () => {
+      if (refetchTimer) {
+        clearTimeout(refetchTimer);
+      }
+      refetchTimer = setTimeout(() => {
+        void refetchAttendances();
+      }, 300);
+    };
+    const createSubscription = graphqlClient
+      .graphql({ query: onCreateAttendance, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnCreateAttendanceSubscription }) => {
+          const attendance = data?.onCreateAttendance;
+          if (
+            !shouldRefetchForAttendanceEvent(
+              currentStaffId,
+              queryRange,
+              attendance?.staffId,
+              attendance?.workDate,
+            )
+          ) {
+            return;
+          }
+          scheduleRefetch();
+        },
+      });
+    const updateSubscription = graphqlClient
+      .graphql({ query: onUpdateAttendance, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnUpdateAttendanceSubscription }) => {
+          const attendance = data?.onUpdateAttendance;
+          if (
+            !shouldRefetchForAttendanceEvent(
+              currentStaffId,
+              queryRange,
+              attendance?.staffId,
+              attendance?.workDate,
+            )
+          ) {
+            return;
+          }
+          scheduleRefetch();
+        },
+      });
+    const deleteSubscription = graphqlClient
+      .graphql({ query: onDeleteAttendance, authMode: "userPool" })
+      .subscribe({
+        next: ({ data }: { data?: OnDeleteAttendanceSubscription }) => {
+          const attendance = data?.onDeleteAttendance;
+          if (
+            !shouldRefetchForAttendanceEvent(
+              currentStaffId,
+              queryRange,
+              attendance?.staffId,
+              attendance?.workDate,
+            )
+          ) {
+            return;
+          }
+          scheduleRefetch();
+        },
+      });
+    return () => {
+      createSubscription.unsubscribe();
+      updateSubscription.unsubscribe();
+      deleteSubscription.unsubscribe();
+      if (refetchTimer) {
+        clearTimeout(refetchTimer);
+      }
+    };
+  }, [currentStaffId, shouldFetchAttendances, startDate, endDate, refetchAttendances]);
+}
+
+function useAttendanceListErrorNotifications({
+  attendancesError,
+  calendarsError,
+  closeDatesError,
+  logger,
+  dispatch,
+}: {
+  attendancesError: unknown;
+  calendarsError: unknown;
+  closeDatesError: unknown;
+  logger: Logger;
+  dispatch: ReturnType<typeof useDispatch>;
+}) {
+  useEffect(() => {
+    if (calendarsError) {
+      logger.debug(calendarsError);
+      dispatch(
+        pushNotification({
+          tone: "error",
+          message: MESSAGE_CODE.E00001,
+        }),
+      );
+    }
+  }, [calendarsError, dispatch, logger]);
+
+  useEffect(() => {
+    if (closeDatesError) {
+      logger.debug(closeDatesError);
+      dispatch(
+        pushNotification({
+          tone: "error",
+          message: MESSAGE_CODE.E00001,
+        }),
+      );
+    }
+  }, [closeDatesError, dispatch, logger]);
+
+  useEffect(() => {
+    if (attendancesError) {
+      logger.debug(attendancesError);
+      dispatch(
+        pushNotification({
+          tone: "error",
+          message: MESSAGE_CODE.E02001,
+        }),
+      );
+    }
+  }, [attendancesError, dispatch, logger]);
+}
+
 export default function AttendanceTable() {
   const { cognitoUser } = useContext(AuthContext);
   const [isDesktop, setIsDesktop] = useState(
@@ -121,88 +261,13 @@ export default function AttendanceTable() {
     isAttendancesFetching ||
     isAttendancesUninitialized;
 
-  useEffect(() => {
-    const currentStaffId = cognitoUser?.id;
-    if (!currentStaffId || !shouldFetchAttendances) return;
-    let refetchTimer: ReturnType<typeof setTimeout> | null = null;
-    const queryRange = { start: dayjs(startDate), end: dayjs(endDate) };
-    const scheduleRefetch = () => {
-      if (refetchTimer) {
-        clearTimeout(refetchTimer);
-      }
-      refetchTimer = setTimeout(() => {
-        void refetchAttendances();
-      }, 300);
-    };
-    const createSubscription = graphqlClient
-      .graphql({ query: onCreateAttendance, authMode: "userPool" })
-      .subscribe({
-        next: ({ data }: { data?: OnCreateAttendanceSubscription }) => {
-          const attendance = data?.onCreateAttendance;
-          if (
-            !shouldRefetchForAttendanceEvent(
-              currentStaffId,
-              queryRange,
-              attendance?.staffId,
-              attendance?.workDate,
-            )
-          ) {
-            return;
-          }
-          scheduleRefetch();
-        },
-      });
-    const updateSubscription = graphqlClient
-      .graphql({ query: onUpdateAttendance, authMode: "userPool" })
-      .subscribe({
-        next: ({ data }: { data?: OnUpdateAttendanceSubscription }) => {
-          const attendance = data?.onUpdateAttendance;
-          if (
-            !shouldRefetchForAttendanceEvent(
-              currentStaffId,
-              queryRange,
-              attendance?.staffId,
-              attendance?.workDate,
-            )
-          ) {
-            return;
-          }
-          scheduleRefetch();
-        },
-      });
-    const deleteSubscription = graphqlClient
-      .graphql({ query: onDeleteAttendance, authMode: "userPool" })
-      .subscribe({
-        next: ({ data }: { data?: OnDeleteAttendanceSubscription }) => {
-          const attendance = data?.onDeleteAttendance;
-          if (
-            !shouldRefetchForAttendanceEvent(
-              currentStaffId,
-              queryRange,
-              attendance?.staffId,
-              attendance?.workDate,
-            )
-          ) {
-            return;
-          }
-          scheduleRefetch();
-        },
-      });
-    return () => {
-      createSubscription.unsubscribe();
-      updateSubscription.unsubscribe();
-      deleteSubscription.unsubscribe();
-      if (refetchTimer) {
-        clearTimeout(refetchTimer);
-      }
-    };
-  }, [
-    cognitoUser?.id,
+  useAttendanceSubscription({
+    currentStaffId: cognitoUser?.id,
     shouldFetchAttendances,
     startDate,
     endDate,
     refetchAttendances,
-  ]);
+  });
   const logger = useMemo(
     () => new Logger("AttendanceList", import.meta.env.DEV ? "DEBUG" : "ERROR"),
     [],
@@ -224,39 +289,13 @@ export default function AttendanceTable() {
         );
       });
   }, [cognitoUser, dispatch, logger]);
-  useEffect(() => {
-    if (calendarsError) {
-      logger.debug(calendarsError);
-      dispatch(
-        pushNotification({
-          tone: "error",
-          message: MESSAGE_CODE.E00001,
-        }),
-      );
-    }
-  }, [calendarsError, dispatch, logger]);
-  useEffect(() => {
-    if (closeDatesError) {
-      logger.debug(closeDatesError);
-      dispatch(
-        pushNotification({
-          tone: "error",
-          message: MESSAGE_CODE.E00001,
-        }),
-      );
-    }
-  }, [closeDatesError, dispatch, logger]);
-  useEffect(() => {
-    if (attendancesError) {
-      logger.debug(attendancesError);
-      dispatch(
-        pushNotification({
-          tone: "error",
-          message: MESSAGE_CODE.E02001,
-        }),
-      );
-    }
-  }, [attendancesError, dispatch, logger]);
+  useAttendanceListErrorNotifications({
+    attendancesError,
+    calendarsError,
+    closeDatesError,
+    logger,
+    dispatch,
+  });
   const rangeLabelForDisplay = useMemo(
     () => formatDateRangeLabel(effectiveDateRange),
     [effectiveDateRange],

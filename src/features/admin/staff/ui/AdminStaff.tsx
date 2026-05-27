@@ -7,6 +7,7 @@ import { getWorkTypeLabel } from "@entities/staff/lib/workTypeOptions";
 import {
   roleLabelMap,
   StaffRole,
+  StaffType,
   useStaffs,
 } from "@entities/staff/model/useStaffs/useStaffs";
 import {
@@ -25,12 +26,98 @@ const STATUS_LABEL_MAP = new Map<string, string>([
   ["CONFIRMED", "確認済み"],
   ["FORCE_CHANGE_PASSWORD", "パスワード変更必要"],
 ]);
+
 function getRoleLabel(role: StaffRole, owner?: boolean | null) {
   if (owner) {
     return roleLabelMap.get(StaffRole.OWNER) ?? "オーナー";
   }
   return roleLabelMap.get(role) ?? roleLabelMap.get(StaffRole.NONE) ?? "未設定";
 }
+
+type StaffTableRowProps = {
+  staff: StaffType;
+  updateStaff: ReturnType<typeof useStaffs>["updateStaff"];
+  deleteStaff: ReturnType<typeof useStaffs>["deleteStaff"];
+};
+
+function StaffTableRow({ staff, updateStaff, deleteStaff }: StaffTableRowProps) {
+  const fullName =
+    `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim();
+  const accountStatusLabel = staff.enabled ? "有効" : "無効";
+  const statusLabel = STATUS_LABEL_MAP.get(staff.status) ?? "***";
+  const roleLabel = getRoleLabel(staff.role, staff.owner);
+  const attendanceManaged = isAttendanceManagementEnabled(staff);
+  const workTypeLabel = getWorkTypeLabel(
+    (staff as unknown as Record<string, unknown>).workType as string | null,
+  );
+  return (
+    <tr key={staff.id} className="admin-staff-table-row">
+      <td className="admin-staff-action-cell whitespace-nowrap px-3 py-1.5">
+        <div className="flex items-center gap-0.5">
+          <EditButton staff={staff} />
+          <MoreActionButton
+            staff={staff}
+            updateStaff={updateStaff}
+            deleteStaff={deleteStaff}
+          />
+        </div>
+      </td>
+      <td className="whitespace-nowrap px-4 py-2">
+        <span
+          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${
+            staff.enabled
+              ? "border-teal-200 bg-teal-50 text-teal-700"
+              : "border-slate-300 bg-white text-slate-600"
+          }`}
+        >
+          {accountStatusLabel}
+        </span>
+      </td>
+      <td className="whitespace-nowrap px-4 py-2">
+        <span
+          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${
+            staff.status === "CONFIRMED"
+              ? "border-teal-200 bg-teal-50 text-teal-700"
+              : "border-amber-300 bg-amber-50 text-amber-800"
+          }`}
+        >
+          {statusLabel}
+        </span>
+      </td>
+      <td className="whitespace-nowrap px-4 py-2">
+        <p className="admin-staff-name text-sm">{fullName || "(未設定)"}</p>
+      </td>
+      <td className="whitespace-nowrap px-4 py-2">{staff.mailAddress}</td>
+      <td className="whitespace-nowrap px-4 py-2">
+        <span className="inline-flex items-center rounded-full border border-slate-300 px-2 py-0.5 text-xs text-slate-700">
+          {roleLabel}
+        </span>
+      </td>
+      <td className="whitespace-nowrap px-4 py-2">
+        <span
+          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${
+            attendanceManaged
+              ? "border-teal-200 bg-teal-50 text-teal-700"
+              : "border-slate-300 bg-white text-slate-600"
+          }`}
+        >
+          {attendanceManaged ? "対象" : "対象外"}
+        </span>
+      </td>
+      <td className="whitespace-nowrap px-4 py-2">{workTypeLabel}</td>
+      <td className="admin-staff-sort-key whitespace-nowrap px-4 py-2">
+        {staff.sortKey || ""}
+      </td>
+      <td className="whitespace-nowrap px-4 py-2">
+        {dayjs(staff.createdAt).format("YYYY/MM/DD HH:mm")}
+      </td>
+      <td className="whitespace-nowrap px-4 py-2">
+        {dayjs(staff.updatedAt).format("YYYY/MM/DD HH:mm")}
+      </td>
+    </tr>
+  );
+}
+
 export default function AdminStaff() {
   const dispatch = useAppDispatchV2();
   const { authStatus } = useContext(AuthContext);
@@ -222,93 +309,14 @@ export default function AdminStaff() {
                   </td>
                 </tr>
               ) : (
-                filteredStaffs.map((staff) => {
-                  const fullName =
-                    `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim();
-                  const accountStatusLabel = staff.enabled ? "有効" : "無効";
-                  const statusLabel =
-                    STATUS_LABEL_MAP.get(staff.status) ?? "***";
-                  const roleLabel = getRoleLabel(staff.role, staff.owner);
-                  const attendanceManaged =
-                    isAttendanceManagementEnabled(staff);
-                  const workTypeLabel = getWorkTypeLabel(
-                    (staff as unknown as Record<string, unknown>).workType as
-                      | string
-                      | null,
-                  );
-                  return (
-                    <tr key={staff.id} className="admin-staff-table-row">
-                      <td className="admin-staff-action-cell whitespace-nowrap px-3 py-1.5">
-                        <div className="flex items-center gap-0.5">
-                          <EditButton staff={staff} />
-                          <MoreActionButton
-                            staff={staff}
-                            updateStaff={updateStaff}
-                            deleteStaff={deleteStaff}
-                          />
-                        </div>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-2">
-                        <span
-                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${
-                            staff.enabled
-                              ? "border-teal-200 bg-teal-50 text-teal-700"
-                              : "border-slate-300 bg-white text-slate-600"
-                          }`}
-                        >
-                          {accountStatusLabel}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-2">
-                        <span
-                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${
-                            staff.status === "CONFIRMED"
-                              ? "border-teal-200 bg-teal-50 text-teal-700"
-                              : "border-amber-300 bg-amber-50 text-amber-800"
-                          }`}
-                        >
-                          {statusLabel}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-2">
-                        <p className="admin-staff-name text-sm">
-                          {fullName || "(未設定)"}
-                        </p>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-2">
-                        {staff.mailAddress}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-2">
-                        <span className="inline-flex items-center rounded-full border border-slate-300 px-2 py-0.5 text-xs text-slate-700">
-                          {roleLabel}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-2">
-                        <span
-                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${
-                            attendanceManaged
-                              ? "border-teal-200 bg-teal-50 text-teal-700"
-                              : "border-slate-300 bg-white text-slate-600"
-                          }`}
-                        >
-                          {attendanceManaged ? "対象" : "対象外"}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-2">
-                        {workTypeLabel}
-                      </td>
-                      <td className="admin-staff-sort-key whitespace-nowrap px-4 py-2">
-                        {staff.sortKey || ""}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-2">
-                        {dayjs(staff.createdAt).format("YYYY/MM/DD HH:mm")}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-2">
-                        {dayjs(staff.updatedAt).format("YYYY/MM/DD HH:mm")}
-                      </td>
-                    </tr>
-                  );
-                })
+                filteredStaffs.map((staff) => (
+                  <StaffTableRow
+                    key={staff.id}
+                    staff={staff}
+                    updateStaff={updateStaff}
+                    deleteStaff={deleteStaff}
+                  />
+                ))
               )}
             </tbody>
           </table>
@@ -317,3 +325,4 @@ export default function AdminStaff() {
     </div>
   );
 }
+

@@ -28,9 +28,7 @@ import {
   TextField,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
-import {
-  ApproverSettingMode,
-} from "@shared/api/graphql/types";
+import { ApproverSettingMode } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { ProgressBar } from "@shared/ui/feedback";
 import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
@@ -38,7 +36,14 @@ import { AppTabs } from "@shared/ui/tabs";
 import { PageTitle } from "@shared/ui/typography";
 import dayjs from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Controller, useForm, UseFormRegister } from "react-hook-form";
+import {
+  Control,
+  Controller,
+  useForm,
+  UseFormRegister,
+  UseFormSetValue,
+  UseFormWatch,
+} from "react-hook-form";
 import { useParams } from "react-router-dom";
 
 import * as MESSAGE_CODE from "@/errors";
@@ -52,6 +57,318 @@ type ExtendedStaff = StaffType & {
 const LABEL_CELL_CLASS =
   "w-[220px] min-w-[180px] border-b border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900";
 const VALUE_CELL_CLASS = "border-b border-slate-200 px-4 py-3 align-middle";
+
+function WorkTypeRow({
+  control,
+  setValue,
+}: {
+  control: Control<Inputs>;
+  setValue: UseFormSetValue<Inputs>;
+}) {
+  return (
+    <tr>
+      <td className={LABEL_CELL_CLASS}>勤務形態</td>
+      <td className={VALUE_CELL_CLASS}>
+        <Controller
+          name="workType"
+          control={control}
+          render={({ field }) => (
+            <Autocomplete
+              {...field}
+              value={
+                WORK_TYPE_OPTIONS.find(
+                  (option) => option.value === field.value,
+                ) ?? null
+              }
+              options={WORK_TYPE_OPTIONS}
+              getOptionLabel={(option) => option.label}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="small"
+                  sx={{ width: { xs: "100%", sm: 400 } }}
+                />
+              )}
+              onChange={(_, data) => {
+                if (!data) return;
+                setValue("workType", data.value);
+                field.onChange(data.value);
+              }}
+            />
+          )}
+        />
+      </td>
+    </tr>
+  );
+}
+
+function ShiftGroupRow({
+  control,
+  shiftGroupOptions,
+}: {
+  control: Control<Inputs>;
+  shiftGroupOptions: { value: string; label: string }[];
+}) {
+  return (
+    <tr>
+      <td className={LABEL_CELL_CLASS}>シフトグループ</td>
+      <td className={VALUE_CELL_CLASS}>
+        {shiftGroupOptions.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            利用可能なシフトグループがありません。管理画面の「シフト設定」で登録してください。
+          </p>
+        ) : (
+          <Controller
+            name="shiftGroup"
+            control={control}
+            render={({ field }) => {
+              const selectedOption =
+                shiftGroupOptions.find(
+                  (option) => option.value === field.value,
+                ) ?? null;
+              return (
+                <Autocomplete
+                  value={selectedOption}
+                  options={shiftGroupOptions}
+                  onChange={(_, newValue) => {
+                    field.onChange(newValue?.value ?? null);
+                  }}
+                  isOptionEqualToValue={(option, value) =>
+                    option.value === value.value
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      sx={{ width: { xs: "100%", sm: 400 } }}
+                      placeholder="所属させるシフトグループを選択"
+                      onBlur={field.onBlur}
+                    />
+                  )}
+                />
+              );
+            }}
+          />
+        )}
+      </td>
+    </tr>
+  );
+}
+
+type GeneralTabContentProps = {
+  register: UseFormRegister<Inputs>;
+  control: Control<Inputs>;
+  setValue: UseFormSetValue<Inputs>;
+  watch: UseFormWatch<Inputs>;
+  cognitoUser: { id?: string; owner?: boolean | null } | null | undefined;
+  staffs: StaffType[];
+  shiftGroupOptions: { value: string; label: string }[];
+};
+
+function GeneralTabContent({
+  register,
+  control,
+  setValue,
+  watch,
+  cognitoUser,
+  staffs,
+  shiftGroupOptions,
+}: GeneralTabContentProps) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[860px]">
+        <tbody>
+          <>
+            <tr>
+              <td className={LABEL_CELL_CLASS}>汎用コード</td>
+              <td className={VALUE_CELL_CLASS}>
+                <TextField
+                  {...register("sortKey")}
+                  size="small"
+                  sx={{ width: { xs: "100%", sm: 400 } }}
+                  placeholder="例：1、2、3...やZZ001、ZZ002...など"
+                />
+              </td>
+            </tr>
+
+            <tr>
+              <td className={LABEL_CELL_CLASS}>スタッフ名</td>
+              <StaffNameTableCell register={register} />
+            </tr>
+
+            <tr>
+              <td className={LABEL_CELL_CLASS}>メールアドレス</td>
+              <MailAddressTableCell register={register} />
+            </tr>
+
+            <tr>
+              <td className={LABEL_CELL_CLASS}>権限</td>
+              <StaffRoleTableCell control={control} setValue={setValue} />
+            </tr>
+
+            {cognitoUser?.owner && (
+              <tr>
+                <td className={LABEL_CELL_CLASS}>オーナー権限</td>
+                <td className={VALUE_CELL_CLASS}>
+                  <Controller
+                    name="owner"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        checked={Boolean(field.value)}
+                        onChange={(e) => {
+                          setValue("owner", e.target.checked);
+                          field.onChange(e.target.checked);
+                        }}
+                      />
+                    )}
+                  />
+                </td>
+              </tr>
+            )}
+
+            <tr>
+              <td className={LABEL_CELL_CLASS}>利用開始日</td>
+              <td className={VALUE_CELL_CLASS}>
+                <Controller
+                  name="usageStartDate"
+                  control={control}
+                  render={({ field }) => (
+                    <DatePicker
+                      value={field.value ? dayjs(field.value) : null}
+                      onChange={(v) => {
+                        const next = v ? v.format("YYYY-MM-DD") : null;
+                        field.onChange(next);
+                      }}
+                      format="YYYY/M/D"
+                      slotProps={{
+                        textField: {
+                          onBlur: field.onBlur,
+                          size: "small",
+                        },
+                      }}
+                    />
+                  )}
+                />
+              </td>
+            </tr>
+
+            <tr>
+              <td className={LABEL_CELL_CLASS}>勤怠管理対象</td>
+              <td className={VALUE_CELL_CLASS}>
+                <Controller
+                  name="attendanceManagementEnabled"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="space-y-1">
+                      <Checkbox
+                        checked={field.value ?? true}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                      <p className="text-xs text-slate-500">
+                        オフにすると勤怠チェックでエラーとして扱われなくなります
+                      </p>
+                    </div>
+                  )}
+                />
+              </td>
+            </tr>
+
+            <WorkTypeRow control={control} setValue={setValue} />
+
+            <ShiftGroupRow control={control} shiftGroupOptions={shiftGroupOptions} />
+
+            <tr>
+              <td className={LABEL_CELL_CLASS}>承認者設定</td>
+              <td className={VALUE_CELL_CLASS}>
+                <Controller
+                  name="approverSetting"
+                  control={control}
+                  render={({ field }) => (
+                    <RadioGroup
+                      row
+                      value={field.value}
+                      onChange={(e) => {
+                        const v = e.target.value as ApproverSettingMode;
+                        field.onChange(v);
+                      }}
+                    >
+                      <FormControlLabel
+                        value={ApproverSettingMode.ADMINS}
+                        control={<Radio />}
+                        label="管理者全員 (デフォルト)"
+                      />
+                      <FormControlLabel
+                        value={ApproverSettingMode.SINGLE}
+                        control={<Radio />}
+                        label="特定の承認者を1名に限定"
+                      />
+                      <FormControlLabel
+                        value={ApproverSettingMode.MULTIPLE}
+                        control={<Radio />}
+                        label="特定の承認者を複数選択"
+                      />
+                    </RadioGroup>
+                  )}
+                />
+              </td>
+            </tr>
+
+            <ApproverSettingTableRows
+              control={control}
+              watch={watch}
+              staffs={staffs}
+              currentCognitoUserId={cognitoUser?.id}
+              labelCellClassName={LABEL_CELL_CLASS}
+              valueCellClassName={VALUE_CELL_CLASS}
+            />
+          </>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+type AdvancedTabContentProps = {
+  control: Control<Inputs>;
+  setValue: UseFormSetValue<Inputs>;
+};
+
+function AdvancedTabContent({ control, setValue }: AdvancedTabContentProps) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[860px]">
+        <tbody>
+          <tr>
+            <td className={LABEL_CELL_CLASS}>開発者フラグ</td>
+            <td className="px-4 py-3 align-middle">
+              <Controller
+                name="developer"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    data-testid="developer-flag-checkbox"
+                    checked={Boolean(field.value)}
+                    onChange={(e) => {
+                      setValue("developer", e.target.checked, {
+                        shouldDirty: true,
+                      });
+                      field.onChange(e.target.checked);
+                    }}
+                  />
+                )}
+              />
+              <p className="text-sm text-slate-500">
+                開発用の機能を表示するための設定です。
+              </p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function AdminStaffEditor() {
   const { staffId } = useParams();
   const dispatch = useAppDispatchV2();
@@ -195,230 +512,15 @@ export default function AdminStaffEditor() {
                 value: 0,
                 label: "全般",
                 content: (
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[860px]">
-                      <tbody>
-                        <>
-                          <tr>
-                            <td className={LABEL_CELL_CLASS}>汎用コード</td>
-                            <td className={VALUE_CELL_CLASS}>
-                              <TextField
-                                {...register("sortKey")}
-                                size="small"
-                                sx={{ width: { xs: "100%", sm: 400 } }}
-                                placeholder="例：1、2、3...やZZ001、ZZ002...など"
-                              />
-                            </td>
-                          </tr>
-
-                          <tr>
-                            <td className={LABEL_CELL_CLASS}>スタッフ名</td>
-                            <StaffNameTableCell register={register} />
-                          </tr>
-
-                          <tr>
-                            <td className={LABEL_CELL_CLASS}>メールアドレス</td>
-                            <MailAddressTableCell register={register} />
-                          </tr>
-
-                          <tr>
-                            <td className={LABEL_CELL_CLASS}>権限</td>
-                            <StaffRoleTableCell control={control} setValue={setValue} />
-                          </tr>
-
-                          {cognitoUser?.owner && (
-                            <tr>
-                              <td className={LABEL_CELL_CLASS}>オーナー権限</td>
-                              <td className={VALUE_CELL_CLASS}>
-                                <Controller
-                                  name="owner"
-                                  control={control}
-                                  render={({ field }) => (
-                                    <Checkbox
-                                      checked={Boolean(field.value)}
-                                      onChange={(e) => {
-                                        setValue("owner", e.target.checked);
-                                        field.onChange(e.target.checked);
-                                      }}
-                                    />
-                                  )}
-                                />
-                              </td>
-                            </tr>
-                          )}
-
-                          <tr>
-                            <td className={LABEL_CELL_CLASS}>利用開始日</td>
-                            <td className={VALUE_CELL_CLASS}>
-                              <Controller
-                                name="usageStartDate"
-                                control={control}
-                                render={({ field }) => (
-                                  <DatePicker
-                                    value={field.value ? dayjs(field.value) : null}
-                                    onChange={(v) => {
-                                      const next = v ? v.format("YYYY-MM-DD") : null;
-                                      field.onChange(next);
-                                    }}
-                                    format="YYYY/M/D"
-                                    slotProps={{
-                                      textField: {
-                                        onBlur: field.onBlur,
-                                        size: "small",
-                                      },
-                                    }}
-                                  />
-                                )}
-                              />
-                            </td>
-                          </tr>
-
-                          <tr>
-                            <td className={LABEL_CELL_CLASS}>勤怠管理対象</td>
-                            <td className={VALUE_CELL_CLASS}>
-                              <Controller
-                                name="attendanceManagementEnabled"
-                                control={control}
-                                render={({ field }) => (
-                                  <div className="space-y-1">
-                                    <Checkbox
-                                      checked={field.value ?? true}
-                                      onChange={(e) => field.onChange(e.target.checked)}
-                                    />
-                                    <p className="text-xs text-slate-500">
-                                      オフにすると勤怠チェックでエラーとして扱われなくなります
-                                    </p>
-                                  </div>
-                                )}
-                              />
-                            </td>
-                          </tr>
-
-                          <tr>
-                            <td className={LABEL_CELL_CLASS}>勤務形態</td>
-                            <td className={VALUE_CELL_CLASS}>
-                              <Controller
-                                name="workType"
-                                control={control}
-                                render={({ field }) => (
-                                  <Autocomplete
-                                    {...field}
-                                    value={
-                                      WORK_TYPE_OPTIONS.find(
-                                        (option) => option.value === field.value,
-                                      ) ?? null
-                                    }
-                                    options={WORK_TYPE_OPTIONS}
-                                    getOptionLabel={(option) => option.label}
-                                    renderInput={(params) => (
-                                      <TextField
-                                        {...params}
-                                        size="small"
-                                        sx={{ width: { xs: "100%", sm: 400 } }}
-                                      />
-                                    )}
-                                    onChange={(_, data) => {
-                                      if (!data) return;
-                                      setValue("workType", data.value);
-                                      field.onChange(data.value);
-                                    }}
-                                  />
-                                )}
-                              />
-                            </td>
-                          </tr>
-
-                          <tr>
-                            <td className={LABEL_CELL_CLASS}>シフトグループ</td>
-                            <td className={VALUE_CELL_CLASS}>
-                              {shiftGroupOptions.length === 0 ? (
-                                <p className="text-sm text-slate-500">
-                                  利用可能なシフトグループがありません。管理画面の「シフト設定」で登録してください。
-                                </p>
-                              ) : (
-                                <Controller
-                                  name="shiftGroup"
-                                  control={control}
-                                  render={({ field }) => {
-                                    const selectedOption =
-                                      shiftGroupOptions.find(
-                                        (option) => option.value === field.value,
-                                      ) ?? null;
-                                    return (
-                                      <Autocomplete
-                                        value={selectedOption}
-                                        options={shiftGroupOptions}
-                                        onChange={(_, newValue) => {
-                                          field.onChange(newValue?.value ?? null);
-                                        }}
-                                        isOptionEqualToValue={(option, value) =>
-                                          option.value === value.value
-                                        }
-                                        renderInput={(params) => (
-                                          <TextField
-                                            {...params}
-                                            size="small"
-                                            sx={{ width: { xs: "100%", sm: 400 } }}
-                                            placeholder="所属させるシフトグループを選択"
-                                            onBlur={field.onBlur}
-                                          />
-                                        )}
-                                      />
-                                    );
-                                  }}
-                                />
-                              )}
-                            </td>
-                          </tr>
-
-                          <tr>
-                            <td className={LABEL_CELL_CLASS}>承認者設定</td>
-                            <td className={VALUE_CELL_CLASS}>
-                              <Controller
-                                name="approverSetting"
-                                control={control}
-                                render={({ field }) => (
-                                  <RadioGroup
-                                    row
-                                    value={field.value}
-                                    onChange={(e) => {
-                                      const v = e.target.value as ApproverSettingMode;
-                                      field.onChange(v);
-                                    }}
-                                  >
-                                    <FormControlLabel
-                                      value={ApproverSettingMode.ADMINS}
-                                      control={<Radio />}
-                                      label="管理者全員 (デフォルト)"
-                                    />
-                                    <FormControlLabel
-                                      value={ApproverSettingMode.SINGLE}
-                                      control={<Radio />}
-                                      label="特定の承認者を1名に限定"
-                                    />
-                                    <FormControlLabel
-                                      value={ApproverSettingMode.MULTIPLE}
-                                      control={<Radio />}
-                                      label="特定の承認者を複数選択"
-                                    />
-                                  </RadioGroup>
-                                )}
-                              />
-                            </td>
-                          </tr>
-
-                          <ApproverSettingTableRows
-                            control={control}
-                            watch={watch}
-                            staffs={staffs}
-                            currentCognitoUserId={cognitoUser?.id}
-                            labelCellClassName={LABEL_CELL_CLASS}
-                            valueCellClassName={VALUE_CELL_CLASS}
-                          />
-                        </>
-                      </tbody>
-                    </table>
-                  </div>
+                  <GeneralTabContent
+                    register={register}
+                    control={control}
+                    setValue={setValue}
+                    watch={watch}
+                    cognitoUser={cognitoUser}
+                    staffs={staffs}
+                    shiftGroupOptions={shiftGroupOptions}
+                  />
                 ),
               },
               {
@@ -426,36 +528,7 @@ export default function AdminStaffEditor() {
                 label: "高度設定",
                 disabled: !cognitoUser?.owner,
                 content: (
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[860px]">
-                      <tbody>
-                        <tr>
-                          <td className={LABEL_CELL_CLASS}>開発者フラグ</td>
-                          <td className="px-4 py-3 align-middle">
-                            <Controller
-                              name="developer"
-                              control={control}
-                              render={({ field }) => (
-                                <Checkbox
-                                  data-testid="developer-flag-checkbox"
-                                  checked={Boolean(field.value)}
-                                  onChange={(e) => {
-                                    setValue("developer", e.target.checked, {
-                                      shouldDirty: true,
-                                    });
-                                    field.onChange(e.target.checked);
-                                  }}
-                                />
-                              )}
-                            />
-                            <p className="text-sm text-slate-500">
-                              開発用の機能を表示するための設定です。
-                            </p>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
+                  <AdvancedTabContent control={control} setValue={setValue} />
                 ),
               },
             ]}
@@ -478,6 +551,7 @@ export default function AdminStaffEditor() {
     </div>
   );
 }
+
 function MailAddressTableCell({
   register,
 }: {

@@ -24,7 +24,7 @@ import {
 import { Attendance } from "@shared/api/graphql/types";
 import { AppIconButton } from "@shared/ui/button";
 import dayjs from "dayjs";
-import { useCallback, useContext } from "react";
+import { type ReactNode,useCallback, useContext } from "react";
 
 import { formatMinutesToHHmm } from "../lib/overtimeUtils";
 import { useAttendanceDailyListData } from "../model/useAttendanceDailyListData";
@@ -94,6 +94,60 @@ const pendingWarningBoxSx = {
 const sectionTitleSx = { mb: 1 } as const;
 const alertTitleBoldSx = { fontWeight: "bold" } as const;
 
+function renderAttendanceSummaryMessage(
+  attendance: Attendance | null | undefined,
+): ReactNode {
+  if (!attendance) {
+    return "";
+  }
+
+  const {
+    substituteHolidayDate,
+    remarks,
+    specialHolidayFlag,
+    paidHolidayFlag,
+    absentFlag,
+  } = attendance;
+  const isSubstituteHoliday = substituteHolidayDate
+    ? dayjs(substituteHolidayDate).isValid()
+    : false;
+  const full = (() => {
+    const parts: string[] = [];
+    if (isSubstituteHoliday) {
+      parts.push("振替休日");
+    }
+    if (remarks) {
+      parts.push(remarks);
+    }
+    return parts.join(" ");
+  })();
+
+  const maxLength = 32;
+  const needTruncate = full && full.length > maxLength;
+  const visible = needTruncate ? `${full.slice(0, maxLength)}...` : full;
+
+  return (
+    <Box component="span">
+      <Stack direction="row" spacing={0.5} alignItems="center">
+        {specialHolidayFlag && <Chip size="small" label="特別休暇" color="info" />}
+        {paidHolidayFlag && <Chip size="small" label="有給休暇" color="success" />}
+        {absentFlag && <Chip size="small" label="欠勤" color="error" />}
+        {needTruncate ? (
+          <Tooltip title={full} arrow placement="top">
+            <Box component="span" sx={remarksTruncatedBoxSx}>
+              {visible}
+            </Box>
+          </Tooltip>
+        ) : (
+          <Box component="span" sx={remarksBoxSx}>
+            {visible}
+          </Box>
+        )}
+      </Stack>
+    </Box>
+  );
+}
+
 export default function AttendanceDailyList() {
   const { authStatus } = useContext(AuthContext);
   const { getEndTime } = useContext(AppConfigContext);
@@ -133,58 +187,6 @@ export default function AttendanceDailyList() {
     [getOvertimeMinutes],
   );
 
-  const renderSummaryMessage = useCallback((attendance: Attendance | null | undefined) => {
-    if (!attendance) {
-      return "";
-    }
-
-    const {
-      substituteHolidayDate,
-      remarks,
-      specialHolidayFlag,
-      paidHolidayFlag,
-      absentFlag,
-    } = attendance;
-    const isSubstituteHoliday = substituteHolidayDate
-      ? dayjs(substituteHolidayDate).isValid()
-      : false;
-    const full = (() => {
-      const parts: string[] = [];
-      if (isSubstituteHoliday) {
-        parts.push("振替休日");
-      }
-      if (remarks) {
-        parts.push(remarks);
-      }
-      return parts.join(" ");
-    })();
-
-    const maxLength = 32;
-    const needTruncate = full && full.length > maxLength;
-    const visible = needTruncate ? `${full.slice(0, maxLength)}...` : full;
-
-    return (
-      <Box component="span">
-        <Stack direction="row" spacing={0.5} alignItems="center">
-          {specialHolidayFlag && <Chip size="small" label="特別休暇" color="info" />}
-          {paidHolidayFlag && <Chip size="small" label="有給休暇" color="success" />}
-          {absentFlag && <Chip size="small" label="欠勤" color="error" />}
-          {needTruncate ? (
-            <Tooltip title={full} arrow placement="top">
-              <Box component="span" sx={remarksTruncatedBoxSx}>
-                {visible}
-              </Box>
-            </Tooltip>
-          ) : (
-            <Box component="span" sx={remarksBoxSx}>
-              {visible}
-            </Box>
-          )}
-        </Stack>
-      </Box>
-    );
-  }, []);
-
   const renderAttendanceRow = useCallback(
     (row: AttendanceDaily, key: string) => (
       <TableRow key={key} className="attendance-row">
@@ -214,7 +216,7 @@ export default function AttendanceDailyList() {
         />
         <TableCell sx={overtimeCellSx}>{renderOvertimeValue(row)}</TableCell>
         <TableCell sx={summaryCellSx}>
-          {renderSummaryMessage(getAttendanceForDisplayDate(row))}
+          {renderAttendanceSummaryMessage(getAttendanceForDisplayDate(row))}
         </TableCell>
         <TableCell sx={noWrapCellSx} />
       </TableRow>
@@ -230,7 +232,6 @@ export default function AttendanceDailyList() {
       getAttendanceForDisplayDate,
       holidayCalendars,
       renderOvertimeValue,
-      renderSummaryMessage,
     ],
   );
 

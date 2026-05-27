@@ -162,8 +162,7 @@ function useReportInteractions({
   buildStaffName,
   staffs,
 }: ReportInteractionDeps) {
-  const handleToggleReaction = useCallback(
-    async (type: ReactionType) => {
+  const handleToggleReaction = async (type: ReactionType) => {
       if (!state.report) return;
       if (!state.reactionEntries) {
         dispatch({
@@ -221,19 +220,9 @@ function useReportInteractions({
               : "リアクションの登録に失敗しました。",
         });
       }
-    },
-    [
-      state.report,
-      state.reactionEntries,
-      state.commentEntries,
-      state.isSavingReaction,
-      currentStaffId,
-      isResolvingCurrentStaff,
-      buildStaffName,
-    ],
-  );
+  };
 
-  const handleSubmitComment = useCallback(async () => {
+  const handleSubmitComment = async () => {
     const body = state.commentInput.trim();
     if (!body || !state.report) return;
     if (!state.commentEntries) {
@@ -305,18 +294,7 @@ function useReportInteractions({
             : "コメントの登録に失敗しました。",
       });
     }
-  }, [
-    state.commentInput,
-    state.report,
-    state.commentEntries,
-    state.reactionEntries,
-    state.isSavingComment,
-    currentStaffId,
-    currentStaffName,
-    isResolvingCurrentStaff,
-    buildStaffName,
-    staffs,
-  ]);
+  };
 
   return { handleToggleReaction, handleSubmitComment };
 }

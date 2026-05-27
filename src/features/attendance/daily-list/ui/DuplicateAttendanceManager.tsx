@@ -106,6 +106,121 @@ type DuplicateAttendanceBadgeProps = {
   duplicateInfoByStaff: Record<string, DuplicateAttendanceDaily[]>;
 };
 
+function buildConfirmFieldRows(): ConfirmFieldRow[] {
+  const formatTime = (value?: string | null) =>
+    value ? dayjs(value).format("HH:mm") : "-";
+  const formatDate = (value?: string | null) =>
+    value ? dayjs(value).format("YYYY/MM/DD") : "-";
+  const formatBool = (value?: boolean | null) => (value ? "○" : "-");
+  const formatRests = (rests?: Attendance["rests"]) => {
+    const items = (rests ?? []).filter(Boolean).map((rest) => {
+      const start = rest?.startTime ? dayjs(rest.startTime).format("HH:mm") : "-";
+      const end = rest?.endTime ? dayjs(rest.endTime).format("HH:mm") : "-";
+      return `${start}-${end}`;
+    });
+    return items.length ? items.join(" / ") : "-";
+  };
+  const formatHourlyTimes = (
+    hourlyTimes?: Attendance["hourlyPaidHolidayTimes"],
+  ) => {
+    const items = (hourlyTimes ?? []).filter(Boolean).map((time) => {
+      const start = time?.startTime ? dayjs(time.startTime).format("HH:mm") : "-";
+      const end = time?.endTime ? dayjs(time.endTime).format("HH:mm") : "-";
+      return `${start}-${end}`;
+    });
+    return items.length ? items.join(" / ") : "-";
+  };
+  const formatChangeRequests = (
+    changeRequests?: Attendance["changeRequests"],
+  ) => {
+    const items = (changeRequests ?? []).filter(Boolean).map((request, idx) => {
+      const start = request?.startTime
+        ? dayjs(request.startTime).format("HH:mm")
+        : "-";
+      const end = request?.endTime ? dayjs(request.endTime).format("HH:mm") : "-";
+      const completed = request?.completed ? "済" : "未";
+      return `#${idx + 1}: ${start}-${end} / ${completed}`;
+    });
+    return items.length ? items.join(" | ") : "-";
+  };
+  const row = (label: string, value: (record: Attendance) => string) => ({
+    label,
+    value,
+    render: value,
+  });
+
+  return [
+    row("対象日", (record) => (record.workDate ? formatDate(record.workDate) : "-")),
+    row("スタッフID", (record) => record.staffId || "-"),
+    row("出勤", (record) => formatTime(record.startTime)),
+    row("退勤", (record) => formatTime(record.endTime)),
+    row("直行", (record) => formatBool(record.goDirectlyFlag)),
+    row("直帰", (record) => formatBool(record.returnDirectlyFlag)),
+    row("欠勤", (record) => formatBool(record.absentFlag)),
+    row("休憩", (record) => formatRests(record.rests)),
+    row("時間有休", (record) => formatHourlyTimes(record.hourlyPaidHolidayTimes)),
+    row("備考", (record) => record.remarks || "-"),
+    row("有給", (record) => formatBool(record.paidHolidayFlag)),
+    row("特別休暇", (record) => formatBool(record.specialHolidayFlag)),
+    row("指定休日", (record) => formatBool(record.isDeemedHoliday)),
+    row("時間有休(時間)", (record) =>
+      typeof record.hourlyPaidHolidayHours === "number"
+        ? `${record.hourlyPaidHolidayHours}h`
+        : "-",
+    ),
+    row("振替日", (record) => formatDate(record.substituteHolidayDate)),
+    row("変更申請", (record) => formatChangeRequests(record.changeRequests)),
+    row("改訂番号", (record) =>
+      typeof record.revision === "number" ? `${record.revision}` : "-",
+    ),
+    row("作成日時", (record) =>
+      record.createdAt ? dayjs(record.createdAt).format("YYYY/MM/DD HH:mm") : "-",
+    ),
+    row("更新日時", (record) =>
+      record.updatedAt ? dayjs(record.updatedAt).format("YYYY/MM/DD HH:mm") : "-",
+    ),
+    row("ID", (record) => record.id || "-"),
+  ];
+}
+
+function renderInlineDiff(base: string, target: string): React.ReactNode {
+  if (base === target) {
+    return target || "-";
+  }
+
+  const a = base ?? "";
+  const b = target ?? "";
+  let prefix = 0;
+  while (prefix < a.length && prefix < b.length && a[prefix] === b[prefix]) {
+    prefix += 1;
+  }
+
+  let suffix = 0;
+  while (
+    suffix < a.length - prefix &&
+    suffix < b.length - prefix &&
+    a[a.length - 1 - suffix] === b[b.length - 1 - suffix]
+  ) {
+    suffix += 1;
+  }
+
+  const sameStart = b.slice(0, prefix);
+  const diffMid = b.slice(prefix, b.length - suffix);
+  const sameEnd = b.slice(b.length - suffix);
+
+  return (
+    <Box component="span" sx={diffWrapperSx}>
+      {sameStart}
+      {diffMid ? (
+        <Box component="span" sx={diffHighlightSx}>
+          {diffMid || " "}
+        </Box>
+      ) : null}
+      {sameEnd}
+    </Box>
+  );
+}
+
 export function DuplicateAttendanceBadge({
   row,
   duplicateInfoByStaff,
@@ -258,14 +373,27 @@ function DuplicateComparisonTable({
   );
 }
 
-export function DuplicateAttendanceManager({
+type UseDuplicateConfirmStateParams = {
+  dispatch: ReturnType<typeof useDispatch>;
+  duplicates: DuplicateAttendanceDaily[];
+  staffNameMap: Record<string, string>;
+  triggerGetAttendanceById: ReturnType<typeof useLazyGetAttendanceByIdQuery>[0];
+  deleteAttendance: ReturnType<typeof useDeleteAttendanceMutation>[0];
+  resetToRecordMode: () => void;
+  resetSelection: () => void;
+  selectedRecordIndex: number | null;
+};
+
+function useDuplicateConfirmState({
+  dispatch,
   duplicates,
   staffNameMap,
-}: DuplicateAttendanceManagerProps) {
-  const dispatch = useDispatch();
-  const [triggerGetAttendanceById] = useLazyGetAttendanceByIdQuery();
-  const [deleteAttendance] = useDeleteAttendanceMutation();
-
+  triggerGetAttendanceById,
+  deleteAttendance,
+  resetToRecordMode,
+  resetSelection,
+  selectedRecordIndex,
+}: UseDuplicateConfirmStateParams) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmTargetStaffId, setConfirmTargetStaffId] = useState<string | null>(
     null,
@@ -273,136 +401,6 @@ export function DuplicateAttendanceManager({
   const [confirmTargetName, setConfirmTargetName] = useState("");
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [confirmRecords, setConfirmRecords] = useState<Attendance[]>([]);
-
-  const confirmFieldRows = useMemo<ConfirmFieldRow[]>(() => {
-    const formatTime = (value?: string | null) =>
-      value ? dayjs(value).format("HH:mm") : "-";
-    const formatDate = (value?: string | null) =>
-      value ? dayjs(value).format("YYYY/MM/DD") : "-";
-    const formatBool = (value?: boolean | null) => (value ? "○" : "-");
-    const formatRests = (rests?: Attendance["rests"]) => {
-      const items = (rests ?? []).filter(Boolean).map((rest) => {
-        const start = rest?.startTime ? dayjs(rest.startTime).format("HH:mm") : "-";
-        const end = rest?.endTime ? dayjs(rest.endTime).format("HH:mm") : "-";
-        return `${start}-${end}`;
-      });
-      return items.length ? items.join(" / ") : "-";
-    };
-    const formatHourlyTimes = (
-      hourlyTimes?: Attendance["hourlyPaidHolidayTimes"],
-    ) => {
-      const items = (hourlyTimes ?? []).filter(Boolean).map((time) => {
-        const start = time?.startTime ? dayjs(time.startTime).format("HH:mm") : "-";
-        const end = time?.endTime ? dayjs(time.endTime).format("HH:mm") : "-";
-        return `${start}-${end}`;
-      });
-      return items.length ? items.join(" / ") : "-";
-    };
-    const formatChangeRequests = (
-      changeRequests?: Attendance["changeRequests"],
-    ) => {
-      const items = (changeRequests ?? []).filter(Boolean).map((request, idx) => {
-        const start = request?.startTime
-          ? dayjs(request.startTime).format("HH:mm")
-          : "-";
-        const end = request?.endTime ? dayjs(request.endTime).format("HH:mm") : "-";
-        const completed = request?.completed ? "済" : "未";
-        return `#${idx + 1}: ${start}-${end} / ${completed}`;
-      });
-      return items.length ? items.join(" | ") : "-";
-    };
-    const row = (label: string, value: (record: Attendance) => string) => ({
-      label,
-      value,
-      render: value,
-    });
-
-    return [
-      row("対象日", (record) =>
-        record.workDate ? formatDate(record.workDate) : "-",
-      ),
-      row("スタッフID", (record) => record.staffId || "-"),
-      row("出勤", (record) => formatTime(record.startTime)),
-      row("退勤", (record) => formatTime(record.endTime)),
-      row("直行", (record) => formatBool(record.goDirectlyFlag)),
-      row("直帰", (record) => formatBool(record.returnDirectlyFlag)),
-      row("欠勤", (record) => formatBool(record.absentFlag)),
-      row("休憩", (record) => formatRests(record.rests)),
-      row("時間有休", (record) => formatHourlyTimes(record.hourlyPaidHolidayTimes)),
-      row("備考", (record) => record.remarks || "-"),
-      row("有給", (record) => formatBool(record.paidHolidayFlag)),
-      row("特別休暇", (record) => formatBool(record.specialHolidayFlag)),
-      row("指定休日", (record) => formatBool(record.isDeemedHoliday)),
-      row("時間有休(時間)", (record) =>
-        typeof record.hourlyPaidHolidayHours === "number"
-          ? `${record.hourlyPaidHolidayHours}h`
-          : "-",
-      ),
-      row("振替日", (record) => formatDate(record.substituteHolidayDate)),
-      row("変更申請", (record) => formatChangeRequests(record.changeRequests)),
-      row("改訂番号", (record) =>
-        typeof record.revision === "number" ? `${record.revision}` : "-",
-      ),
-      row("作成日時", (record) =>
-        record.createdAt ? dayjs(record.createdAt).format("YYYY/MM/DD HH:mm") : "-",
-      ),
-      row("更新日時", (record) =>
-        record.updatedAt ? dayjs(record.updatedAt).format("YYYY/MM/DD HH:mm") : "-",
-      ),
-      row("ID", (record) => record.id || "-"),
-    ];
-  }, []);
-
-  const {
-    selectionMode,
-    selectedRecordIndex,
-    fieldSelections,
-    resetSelection,
-    resetToRecordMode,
-    handleChangeSelectionMode,
-    handleSelectRecord,
-    handleSelectField,
-  } = useDuplicateSelectionModel({
-    fieldLabels: confirmFieldRows.map((row) => row.label),
-  });
-
-  const renderInlineDiff = useCallback((base: string, target: string) => {
-    if (base === target) {
-      return target || "-";
-    }
-
-    const a = base ?? "";
-    const b = target ?? "";
-    let prefix = 0;
-    while (prefix < a.length && prefix < b.length && a[prefix] === b[prefix]) {
-      prefix += 1;
-    }
-
-    let suffix = 0;
-    while (
-      suffix < a.length - prefix &&
-      suffix < b.length - prefix &&
-      a[a.length - 1 - suffix] === b[b.length - 1 - suffix]
-    ) {
-      suffix += 1;
-    }
-
-    const sameStart = b.slice(0, prefix);
-    const diffMid = b.slice(prefix, b.length - suffix);
-    const sameEnd = b.slice(b.length - suffix);
-
-    return (
-      <Box component="span" sx={diffWrapperSx}>
-        {sameStart}
-        {diffMid ? (
-          <Box component="span" sx={diffHighlightSx}>
-            {diffMid || " "}
-          </Box>
-        ) : null}
-        {sameEnd}
-      </Box>
-    );
-  }, []);
 
   const handleOpenConfirm = useCallback(
     async (staffId: string) => {
@@ -433,12 +431,8 @@ export function DuplicateAttendanceManager({
         const validRecords = records
           .filter((record): record is Attendance => Boolean(record))
           .toSorted((a, b) => {
-            const aTime = dayjs(
-              `${a.workDate} ${a.startTime || "00:00"}`,
-            ).valueOf();
-            const bTime = dayjs(
-              `${b.workDate} ${b.startTime || "00:00"}`,
-            ).valueOf();
+            const aTime = dayjs(`${a.workDate} ${a.startTime || "00:00"}`).valueOf();
+            const bTime = dayjs(`${b.workDate} ${b.startTime || "00:00"}`).valueOf();
             return aTime - bTime;
           });
         setConfirmRecords(validRecords);
@@ -489,7 +483,9 @@ export function DuplicateAttendanceManager({
     }
 
     const ok = window.confirm(
-      `選択したデータのみを残し、他の重複レコードを削除します。対象件数: ${toDelete.length}\n削除対象ID: ${toDelete.join(", ")}\nこの操作は取り消せません。実行しますか？`,
+      `選択したデータのみを残し、他の重複レコードを削除します。対象件数: ${toDelete.length}
+削除対象ID: ${toDelete.join(", ")}
+この操作は取り消せません。実行しますか？`,
     );
     if (!ok) {
       return;
@@ -522,6 +518,62 @@ export function DuplicateAttendanceManager({
       setConfirmLoading(false);
     }
   }, [confirmRecords, deleteAttendance, dispatch, selectedRecordIndex]);
+
+  return {
+    confirmOpen,
+    confirmTargetStaffId,
+    confirmTargetName,
+    confirmLoading,
+    confirmRecords,
+    handleOpenConfirm,
+    handleOpenConfirmClick,
+    handleCloseConfirm,
+    handleDeleteDuplicates,
+  };
+}
+
+export function DuplicateAttendanceManager({
+  duplicates,
+  staffNameMap,
+}: DuplicateAttendanceManagerProps) {
+  const dispatch = useDispatch();
+  const [triggerGetAttendanceById] = useLazyGetAttendanceByIdQuery();
+  const [deleteAttendance] = useDeleteAttendanceMutation();
+
+  const confirmFieldRows = useMemo(() => buildConfirmFieldRows(), []);
+
+  const {
+    selectionMode,
+    selectedRecordIndex,
+    fieldSelections,
+    resetSelection,
+    resetToRecordMode,
+    handleChangeSelectionMode,
+    handleSelectRecord,
+    handleSelectField,
+  } = useDuplicateSelectionModel({
+    fieldLabels: confirmFieldRows.map((row) => row.label),
+  });
+
+  const {
+    confirmOpen,
+    confirmTargetStaffId,
+    confirmTargetName,
+    confirmLoading,
+    confirmRecords,
+    handleOpenConfirmClick,
+    handleCloseConfirm,
+    handleDeleteDuplicates,
+  } = useDuplicateConfirmState({
+    dispatch,
+    duplicates,
+    staffNameMap,
+    triggerGetAttendanceById,
+    deleteAttendance,
+    resetToRecordMode,
+    resetSelection,
+    selectedRecordIndex,
+  });
 
   if (duplicates.length === 0) {
     return null;
