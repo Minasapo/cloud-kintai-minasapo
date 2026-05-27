@@ -1,5 +1,10 @@
 import { expect, Page, test } from "@playwright/test";
 import dayjs from "dayjs";
+import {
+  assertNoPageErrors as assertNoErrors,
+  collectPageErrors as collectErrors,
+  waitForOptionalLayoutLoading as waitForLoading,
+} from "../helpers/pageTestHelpers";
 
 /**
  * 日報フロー E2E テスト
@@ -14,62 +19,6 @@ import dayjs from "dayjs";
 // ---------------------------------------------------------------------------
 // ヘルパー
 // ---------------------------------------------------------------------------
-
-function collectErrors(page: Page) {
-  const errors = {
-    console: [] as string[],
-    network: [] as string[],
-    pageErrors: [] as Error[],
-  };
-
-  page.on("console", (msg) => {
-    if (msg.type() === "error") {
-      const text = msg.text();
-      if (
-        !text.includes("status of 400") &&
-        !text.includes("status of 404")
-      ) {
-        errors.console.push(text);
-      }
-    }
-  });
-
-  page.on("response", (response) => {
-    if (response.status() >= 500) {
-      errors.network.push(`[${response.status()}] ${response.url()}`);
-    }
-  });
-
-  page.on("pageerror", (error: Error) => {
-    errors.pageErrors.push(error);
-  });
-
-  return errors;
-}
-
-async function waitForLoading(page: Page) {
-  try {
-    const loading = page.getByTestId("layout-linear-progress");
-    await expect(loading).toBeHidden({ timeout: 10000 });
-  } catch {
-    // ローディング要素がないページでは無視する
-  }
-}
-
-function assertNoErrors(errors: ReturnType<typeof collectErrors>) {
-  expect(errors.console.length).toBe(
-    0,
-    `JavaScriptコンソールエラーが検出されました:\n${errors.console.join("\n")}`,
-  );
-  expect(errors.network.length).toBe(
-    0,
-    `サーバーエラーが検出されました:\n${errors.network.join("\n")}`,
-  );
-  expect(errors.pageErrors.length).toBe(
-    0,
-    `ページエラーが検出されました:\n${errors.pageErrors.map((e) => e.message).join("\n")}`,
-  );
-}
 
 // ---------------------------------------------------------------------------
 // テストスイート

@@ -1,4 +1,8 @@
 import { expect, Page, test } from "@playwright/test";
+import {
+  collectPageErrors as collectErrors,
+  waitForOptionalLayoutLoading as waitForLoading,
+} from "../helpers/pageTestHelpers";
 
 /**
  * E2E テスト: 管理者設定変更フロー（AppConfig）
@@ -19,47 +23,6 @@ import { expect, Page, test } from "@playwright/test";
 // ---------------------------------------------------------------------------
 // ヘルパー
 // ---------------------------------------------------------------------------
-
-function collectErrors(page: Page) {
-  const errors = {
-    console: [] as string[],
-    network: [] as string[],
-    pageErrors: [] as Error[],
-  };
-
-  page.on("console", (msg) => {
-    if (msg.type() === "error") {
-      const text = msg.text();
-      if (
-        !text.includes("status of 400") &&
-        !text.includes("status of 404")
-      ) {
-        errors.console.push(text);
-      }
-    }
-  });
-
-  page.on("response", (response) => {
-    if (response.status() >= 500) {
-      errors.network.push(`[${response.status()}] ${response.url()}`);
-    }
-  });
-
-  page.on("pageerror", (error: Error) => {
-    errors.pageErrors.push(error);
-  });
-
-  return errors;
-}
-
-async function waitForLoading(page: Page) {
-  try {
-    const loading = page.getByTestId("layout-linear-progress");
-    await expect(loading).toBeHidden({ timeout: 10000 });
-  } catch {
-    // ローディング要素がないページでは無視する
-  }
-}
 
 async function waitForNotification(page: Page, message: string) {
   const notification = page.locator('[role="alert"]').filter({

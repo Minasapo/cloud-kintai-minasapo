@@ -1,5 +1,10 @@
 import { expect, Page, test } from "@playwright/test";
 import dayjs from "dayjs";
+import {
+  assertNoPageErrors as assertNoErrors,
+  collectPageErrors as collectErrorsForPage,
+  waitForShiftCollaborativeLoading as waitForLoading,
+} from "../helpers/pageTestHelpers";
 
 /**
  * シフト共同編集フロー E2E テスト
@@ -18,69 +23,7 @@ import dayjs from "dayjs";
  * - grep タグ:      npm run test:e2e -- --grep "@smoke-test" --project=chromium-admin
  */
 
-// ページごとのエラーを収集するヘルパー
-function collectErrorsForPage(page: Page) {
-  const errors = {
-    console: [] as string[],
-    network: [] as string[],
-    pageErrors: [] as Error[],
-  };
-
-  page.on("console", (msg) => {
-    if (msg.type() === "error") {
-      const text = msg.text();
-      if (
-        !text.includes("status of 400") &&
-        !text.includes("status of 404")
-      ) {
-        errors.console.push(text);
-      }
-    }
-  });
-
-  page.on("response", (response) => {
-    if (response.status() >= 500) {
-      errors.network.push(`[${response.status()}] ${response.url()}`);
-    }
-  });
-
-  page.on("pageerror", (error: Error) => {
-    errors.pageErrors.push(error);
-  });
-
-  return errors;
-}
-
-function assertNoErrors(errors: ReturnType<typeof collectErrorsForPage>) {
-  expect(errors.console.length).toBe(
-    0,
-    `JavaScriptコンソールエラーが検出されました:\n${errors.console.join("\n")}`,
-  );
-  expect(errors.network.length).toBe(
-    0,
-    `サーバーエラー（5xx）が検出されました:\n${errors.network.join("\n")}`,
-  );
-  expect(errors.pageErrors.length).toBe(
-    0,
-    `ページエラーが検出されました:\n${errors.pageErrors.map((e) => e.message).join("\n")}`,
-  );
-}
-
-async function waitForLoading(page: Page) {
-  try {
-    const modeLoading = page.getByTestId("shift-mode-loading");
-    await modeLoading.waitFor({ state: "hidden", timeout: 10000 });
-  } catch {
-    // ローディング要素が存在しない場合は無視
-  }
-
-  try {
-    const layoutLoading = page.getByTestId("layout-linear-progress");
-    await expect(layoutLoading).toBeHidden({ timeout: 10000 });
-  } catch {
-    // ローディング要素が存在しない場合は無視
-  }
-}
+// 共通ヘルパーは ../helpers/pageTestHelpers.ts を利用する
 
 /**
  * shiftDefaultMode が collaborative でない場合 /shift へリダイレクトされる。
