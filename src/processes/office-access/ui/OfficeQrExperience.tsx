@@ -15,6 +15,7 @@ export function OfficeQrExperience() {
     qrUrl,
     timeLeft,
     progress,
+    errorMessage,
     isRegisterMode,
     tooltipOpen,
     handleModeChange,
@@ -37,6 +38,7 @@ export function OfficeQrExperience() {
       timeLeft={timeLeft}
       progress={progress}
       qrUrl={qrUrl}
+      errorMessage={errorMessage}
       tooltipOpen={tooltipOpen}
       onModeChange={handleModeChange}
       onCopyUrl={handleCopyUrl}
