@@ -1,4 +1,4 @@
-import { Button } from "@mui/material";
+import { AppButton } from "@shared/ui/button";
 
 type ChangeRequestQuickViewButtonProps = {
   badgeContent: number;
@@ -14,15 +14,14 @@ export function ChangeRequestQuickViewButton({
   }
 
   return (
-    <Button
-      size="small"
-      variant="contained"
-      color="warning"
+    <AppButton
+      size="sm"
+      variant="solid"
       sx={{ fontWeight: "bold" }}
       onClick={onClick}
       data-testid="quick-view-change-request"
     >
       申請確認
-    </Button>
+    </AppButton>
   );
 }
