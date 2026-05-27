@@ -33,6 +33,33 @@ type ListGroupsForUserResponse = {
   Groups?: CognitoGroup[];
 };
 
+// Cognito AdminQueries の瞬間的なスパイクを避けるため同時実行数を制御する
+const LIST_GROUPS_FOR_USER_MAX_CONCURRENCY = 4;
+
+const mapWithConcurrencyLimit = async <T, R>(
+  items: readonly T[],
+  worker: (item: T, index: number) => Promise<R>,
+  concurrency: number,
+): Promise<R[]> => {
+  const results = new Array<R>(items.length);
+  let cursor = 0;
+
+  const runWorker = async () => {
+    while (cursor < items.length) {
+      const currentIndex = cursor;
+      cursor += 1;
+      results[currentIndex] = await worker(items[currentIndex], currentIndex);
+    }
+  };
+
+  const workerCount = Math.min(concurrency, items.length);
+  await Promise.all(
+    Array.from({ length: workerCount }, () => runWorker()),
+  );
+
+  return results;
+};
+
 export function mapAdminCognitoGroupsToRoles(groups: readonly CognitoGroup[]): StaffRole[] {
   return groups.map((group) =>
     mapStaffRoleFromCognitoGroup(group.GroupName, { fallback: StaffRole.NONE }),
@@ -49,8 +76,9 @@ export default async function fetchCognitoUsers(): Promise<Staff[]> {
   const response = await adminGet<ListUsersResponse>("/listUsers", params);
   const users = response?.Users ?? [];
 
-  return await Promise.all(
-    users.map(async (user) => {
+  return await mapWithConcurrencyLimit(
+    users,
+    async (user) => {
       const attributes = user.Attributes ?? [];
       const sub = attributes.find((attr) => attr.Name === "sub")?.Value;
 
@@ -113,6 +141,7 @@ export default async function fetchCognitoUsers(): Promise<Staff[]> {
         createdAt: dayjs(user.UserCreateDate as string),
         updatedAt: dayjs(user.UserLastModifiedDate as string),
       } as Staff;
-    })
+    },
+    LIST_GROUPS_FOR_USER_MAX_CONCURRENCY,
   );
 }
