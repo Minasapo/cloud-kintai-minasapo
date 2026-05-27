@@ -142,7 +142,9 @@ export const isRetryableListGroupsForUserError = (error: unknown): boolean => {
   }
 
   const message =
-    error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+    error instanceof Error
+      ? error.message.toLowerCase()
+      : String(error).toLowerCase();
 
   return NETWORK_ERROR_MESSAGES.some((text) => message.includes(text));
 };
@@ -164,14 +166,14 @@ const mapWithConcurrencyLimit = async <T, R>(
   };
 
   const workerCount = Math.min(concurrency, items.length);
-  await Promise.all(
-    Array.from({ length: workerCount }, () => runWorker()),
-  );
+  await Promise.all(Array.from({ length: workerCount }, () => runWorker()));
 
   return results;
 };
 
-export function mapAdminCognitoGroupsToRoles(groups: readonly CognitoGroup[]): StaffRole[] {
+export function mapAdminCognitoGroupsToRoles(
+  groups: readonly CognitoGroup[],
+): StaffRole[] {
   return groups.map((group) =>
     mapStaffRoleFromCognitoGroup(group.GroupName, { fallback: StaffRole.NONE }),
   );
@@ -184,15 +186,16 @@ export default async function fetchCognitoUsers(): Promise<Staff[]> {
     },
   };
 
-  const response = await adminGet<ListUsersResponse>("/listUsers", params).catch(
-    (error) => {
-      logger.error("Failed to list Cognito users", {
-        phase: "listUsers",
-        status: extractHttpStatus(error),
-      });
-      throw error;
-    },
-  );
+  const response = await adminGet<ListUsersResponse>(
+    "/listUsers",
+    params,
+  ).catch((error) => {
+    logger.error("Failed to list Cognito users", {
+      phase: "listUsers",
+      status: extractHttpStatus(error),
+    });
+    throw error;
+  });
   const users = response?.Users ?? [];
 
   return await mapWithConcurrencyLimit(
@@ -258,7 +261,7 @@ export default async function fetchCognitoUsers(): Promise<Staff[]> {
 
       // オーナー権限
       const ownerAttribute = attributes.find(
-        (attr) => attr.Name === "custom:owner"
+        (attr) => attr.Name === "custom:owner",
       );
 
       const owner = (() => {

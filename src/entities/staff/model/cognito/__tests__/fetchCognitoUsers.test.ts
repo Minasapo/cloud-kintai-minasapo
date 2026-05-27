@@ -90,11 +90,15 @@ describe("isRetryableListGroupsForUserError", () => {
   });
 
   it("5xx は再試行対象になること", () => {
-    expect(isRetryableListGroupsForUserError({ response: { status: 503 } })).toBe(true);
+    expect(
+      isRetryableListGroupsForUserError({ response: { status: 503 } }),
+    ).toBe(true);
   });
 
   it("ネットワーク系メッセージは再試行対象になること", () => {
-    expect(isRetryableListGroupsForUserError(new Error("Failed to fetch"))).toBe(true);
+    expect(
+      isRetryableListGroupsForUserError(new Error("Failed to fetch")),
+    ).toBe(true);
   });
 
   it("4xx は再試行対象外になること", () => {

@@ -35,15 +35,18 @@ export default function TimeRecorderRemarks({
 
   const isChanged = useMemo(
     () => attendance?.remarks !== formState,
-    [attendance?.remarks, formState]
+    [attendance?.remarks, formState],
   );
 
-  const handleChange = useCallback((value: string) => {
-    setDraft({
-      key: attendanceKey,
-      value,
-    });
-  }, [attendanceKey]);
+  const handleChange = useCallback(
+    (value: string) => {
+      setDraft({
+        key: attendanceKey,
+        value,
+      });
+    },
+    [attendanceKey],
+  );
 
   const handleSave = useCallback(() => {
     onSave(formState);

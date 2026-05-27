@@ -28,7 +28,9 @@ export default function ShiftDisplaySettingsPanel({
           </SubsectionTitle>
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium text-slate-700">表示モード</span>
+              <span className="text-sm font-medium text-slate-700">
+                表示モード
+              </span>
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
@@ -64,7 +66,10 @@ export default function ShiftDisplaySettingsPanel({
       </div>
 
       <div className="flex flex-row justify-end pb-8">
-        <SettingsButton onClick={onSaveShiftDisplay} disabled={savingShiftDisplay}>
+        <SettingsButton
+          onClick={onSaveShiftDisplay}
+          disabled={savingShiftDisplay}
+        >
           {savingShiftDisplay ? "保存中..." : "保存"}
         </SettingsButton>
       </div>
