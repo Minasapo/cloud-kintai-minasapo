@@ -4,6 +4,7 @@ import {
 } from "@entities/staff/lib/staffRoleMapping";
 import { Staff } from "@entities/staff/model/useStaffs/common";
 import { adminGet } from "@shared/api/amplify/adminQueriesClient";
+import { createLogger } from "@shared/lib/logger";
 import { retryAsync } from "@shared/lib/retry";
 import dayjs from "dayjs";
 
@@ -40,6 +41,7 @@ const LIST_GROUPS_FOR_USER_RETRY_ATTEMPTS = 3;
 const LIST_GROUPS_FOR_USER_RETRY_BASE_DELAY_MS = 300;
 const LIST_GROUPS_FOR_USER_RETRY_MAX_DELAY_MS = 1500;
 const LIST_GROUPS_FOR_USER_RETRY_JITTER_RATIO = 0.2;
+const logger = createLogger("fetchCognitoUsers");
 
 const NETWORK_ERROR_MESSAGES = [
   "network error",
@@ -140,7 +142,15 @@ export default async function fetchCognitoUsers(): Promise<Staff[]> {
     },
   };
 
-  const response = await adminGet<ListUsersResponse>("/listUsers", params);
+  const response = await adminGet<ListUsersResponse>("/listUsers", params).catch(
+    (error) => {
+      logger.error("Failed to list Cognito users", {
+        phase: "listUsers",
+        status: extractHttpStatus(error),
+      });
+      throw error;
+    },
+  );
   const users = response?.Users ?? [];
 
   return await mapWithConcurrencyLimit(
@@ -150,6 +160,9 @@ export default async function fetchCognitoUsers(): Promise<Staff[]> {
       const sub = attributes.find((attr) => attr.Name === "sub")?.Value;
 
       if (!sub) {
+        logger.error("Cognito user has no sub attribute", {
+          phase: "validateAttributes",
+        });
         throw new Error(MESSAGE_CODE.E05007);
       }
 
@@ -167,8 +180,24 @@ export default async function fetchCognitoUsers(): Promise<Staff[]> {
           maxDelayMs: LIST_GROUPS_FOR_USER_RETRY_MAX_DELAY_MS,
           jitterRatio: LIST_GROUPS_FOR_USER_RETRY_JITTER_RATIO,
           shouldRetry: isRetryableListGroupsForUserError,
+          onRetry: ({ attempt, delayMs, error }) => {
+            logger.warn("Retrying listGroupsForUser", {
+              phase: "listGroupsForUser",
+              sub,
+              attempt,
+              maxAttempts: LIST_GROUPS_FOR_USER_RETRY_ATTEMPTS,
+              delayMs,
+              status: extractHttpStatus(error),
+            });
+          },
         },
-      ).catch(() => {
+      ).catch((error) => {
+        logger.error("Failed to fetch Cognito groups after retries", {
+          phase: "listGroupsForUser",
+          sub,
+          maxAttempts: LIST_GROUPS_FOR_USER_RETRY_ATTEMPTS,
+          status: extractHttpStatus(error),
+        });
         throw new Error(MESSAGE_CODE.E05008);
       });
 
@@ -176,6 +205,10 @@ export default async function fetchCognitoUsers(): Promise<Staff[]> {
 
       // 権限
       if (groups.length === 0) {
+        logger.error("No Cognito groups found for user", {
+          phase: "validateGroups",
+          sub,
+        });
         throw new Error(MESSAGE_CODE.E05008);
       }
 
