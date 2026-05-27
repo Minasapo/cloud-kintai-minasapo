@@ -49,17 +49,33 @@ describe("AdminShiftSettings", () => {
 
     renderWithRouter(<AdminShiftSettings />);
 
-    expect(screen.getByRole("tab", { name: shiftGroupTab })).toHaveAttribute(
+    const shiftGroupTabElement = screen.getByRole("tab", { name: shiftGroupTab });
+    const shiftDisplayTabElement = screen.getByRole("tab", {
+      name: shiftDisplayTab,
+    });
+
+    expect(shiftGroupTabElement).toHaveAttribute(
       "aria-selected",
       "true",
     );
+    expect(shiftGroupTabElement).toHaveAttribute(
+      "aria-controls",
+      "admin-shift-settings-panel-shift-group",
+    );
+    expect(shiftDisplayTabElement).toHaveAttribute(
+      "aria-controls",
+      "admin-shift-settings-panel-shift-display",
+    );
+    expect(
+      screen.getByRole("tabpanel", { name: shiftGroupTab }),
+    ).toHaveAttribute("id", "admin-shift-settings-panel-shift-group");
     expect(
       screen.getByRole("heading", { name: shiftGroupTab }),
     ).toBeInTheDocument();
 
-    await user.click(screen.getByRole("tab", { name: shiftDisplayTab }));
+    await user.click(shiftDisplayTabElement);
 
-    expect(screen.getByRole("tab", { name: shiftDisplayTab })).toHaveAttribute(
+    expect(shiftDisplayTabElement).toHaveAttribute(
       "aria-selected",
       "true",
     );
@@ -67,5 +83,23 @@ describe("AdminShiftSettings", () => {
     expect(
       screen.getByRole("button", { name: "共同編集モード" }),
     ).toBeEnabled();
+  });
+
+  it("moves focus and selection with arrow keys in tablist", async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<AdminShiftSettings />);
+
+    const shiftGroupTab = screen.getByRole("tab", { name: "シフトグループ" });
+    const shiftDisplayTab = screen.getByRole("tab", { name: "シフト表示" });
+
+    shiftGroupTab.focus();
+    await user.keyboard("{ArrowRight}");
+
+    expect(shiftDisplayTab).toHaveFocus();
+    expect(shiftDisplayTab).toHaveAttribute("aria-selected", "true");
+
+    await user.keyboard("{ArrowLeft}");
+    expect(shiftGroupTab).toHaveFocus();
+    expect(shiftGroupTab).toHaveAttribute("aria-selected", "true");
   });
 });

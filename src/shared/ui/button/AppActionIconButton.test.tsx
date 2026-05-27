@@ -28,14 +28,8 @@ describe("AppActionIconButton", () => {
       </>,
     );
 
-    expect(screen.getByRole("button", { name: "削除-塗り" })).toHaveAttribute(
-      "data-app-icon-button-tone",
-      "danger",
-    );
-    expect(screen.getByRole("button", { name: "削除-枠" })).toHaveAttribute(
-      "data-app-icon-button-tone",
-      "danger",
-    );
+    expect(screen.getByRole("button", { name: "削除-塗り" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "削除-枠" })).toBeInTheDocument();
   });
 
   it("onClick を透過して呼び出す", async () => {

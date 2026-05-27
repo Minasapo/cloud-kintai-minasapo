@@ -1,11 +1,11 @@
-import { TextField } from "@mui/material";
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { CopyCalendarItem } from "@features/admin/holidayCalendar/ui/components/CopyCalendarItem";
+import { TextField } from "@mui/material";
 import {
   CreateEventCalendarInput,
   EventCalendar,
 } from "@shared/api/graphql/types";
 import { EventCalendarMessage } from "@shared/lib/message/EventCalendarMessage";
-import { CopyCalendarItem } from "@features/admin/holidayCalendar/ui/components/CopyCalendarItem";
 
 export default function EventCalendarCopy({
   eventCalendar,

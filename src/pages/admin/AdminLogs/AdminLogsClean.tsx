@@ -46,6 +46,17 @@ type StaffOption = {
   value: string;
 };
 
+type LogRow = {
+  rowKey: string;
+  log: OperationLog;
+  timestampDisplay: string;
+  actionLabel: string;
+  actorDisplay: string;
+  targetDisplay: string;
+  resourceDisplay: string;
+  summaryDisplay: string;
+};
+
 const resolveStaffDisplay = (
   id: unknown,
   staffMap: Record<string, Staff | null>,
@@ -74,8 +85,7 @@ const resolveStaffDisplay = (
   return fullName || idText;
 };
 
-export default function AdminLogsClean() {
-  const isMobile = useIsMobile();
+function useAdminLogsData() {
   const [resourceFilter, setResourceFilter] = useState("");
   const [actorFilter, setActorFilter] = useState("");
   const [targetFilter, setTargetFilter] = useState("");
@@ -163,6 +173,7 @@ export default function AdminLogsClean() {
       targetFilter,
       toDate,
     ]);
+
   const {
     logs,
     excludedInvalidRecords,
@@ -204,7 +215,6 @@ export default function AdminLogsClean() {
           if (r.status === "fulfilled" && r.value) {
             updates[id] = r.value as Staff;
           } else {
-            // treat fulfilled-but-empty and rejected results as null
             updates[id] = null;
           }
         });
@@ -232,7 +242,7 @@ export default function AdminLogsClean() {
     return () => obs.disconnect();
   }, [nextToken, loadMore, loading]);
 
-  const logRows = useMemo(
+  const logRows = useMemo<LogRow[]>(
     () =>
       logs.map((log, index) => ({
         rowKey: `${log.id}-${log.timestamp ?? ""}-${index}`,
@@ -256,94 +266,356 @@ export default function AdminLogsClean() {
     [logs, staffMap],
   );
 
+  return {
+    resourceFilter,
+    setResourceFilter,
+    actorFilter,
+    setActorFilter,
+    targetFilter,
+    setTargetFilter,
+    actionFilter,
+    setActionFilter,
+    fromDate,
+    setFromDate,
+    toDate,
+    setToDate,
+    staffListLoading,
+    staffOptions,
+    logs,
+    excludedInvalidRecords,
+    excludedInvalidRecordCount,
+    loading,
+    error,
+    nextToken,
+    sentinelRef,
+    staffMap,
+    selectedLog,
+    setSelectedLog,
+    logRows,
+  };
+}
+
+type AdminLogsFilterBarProps = {
+  resourceFilter: string;
+  actorFilter: string;
+  targetFilter: string;
+  actionFilter: string;
+  fromDate: string;
+  toDate: string;
+  staffOptions: StaffOption[];
+  staffListLoading: boolean;
+  onResourceFilterChange: (value: string) => void;
+  onActorFilterChange: (value: string | undefined) => void;
+  onTargetFilterChange: (value: string | undefined) => void;
+  onActionFilterChange: (value: string) => void;
+  onFromDateChange: (value: string) => void;
+  onToDateChange: (value: string) => void;
+};
+
+function AdminLogsFilterBar({
+  resourceFilter,
+  actorFilter,
+  targetFilter,
+  actionFilter,
+  fromDate,
+  toDate,
+  staffOptions,
+  staffListLoading,
+  onResourceFilterChange,
+  onActorFilterChange,
+  onTargetFilterChange,
+  onActionFilterChange,
+  onFromDateChange,
+  onToDateChange,
+}: AdminLogsFilterBarProps) {
+  return (
+    <Stack
+      direction={{ xs: "column", sm: "row" }}
+      spacing={1.5}
+      sx={{ mb: 2 }}
+    >
+      <TextField
+        size="small"
+        label="リソース"
+        value={resourceFilter}
+        onChange={(event) => onResourceFilterChange(event.target.value)}
+      />
+      <Autocomplete
+        size="small"
+        options={staffOptions}
+        value={
+          staffOptions.find((option) => option.value === actorFilter) ?? null
+        }
+        loading={staffListLoading}
+        onChange={(_, newValue) => onActorFilterChange(newValue?.value)}
+        isOptionEqualToValue={(option, value) => option.value === value.value}
+        getOptionLabel={(option) => option.label}
+        sx={{ minWidth: 220 }}
+        renderInput={(params) => (
+          <TextField {...params} label="操作者" placeholder="スタッフ名で検索" />
+        )}
+      />
+      <Autocomplete
+        size="small"
+        options={staffOptions}
+        value={
+          staffOptions.find((option) => option.value === targetFilter) ?? null
+        }
+        loading={staffListLoading}
+        onChange={(_, newValue) => onTargetFilterChange(newValue?.value)}
+        isOptionEqualToValue={(option, value) => option.value === value.value}
+        getOptionLabel={(option) => option.label}
+        sx={{ minWidth: 220 }}
+        renderInput={(params) => (
+          <TextField {...params} label="対象者" placeholder="スタッフ名で検索" />
+        )}
+      />
+      <TextField
+        size="small"
+        label="アクション"
+        value={actionFilter}
+        onChange={(event) => onActionFilterChange(event.target.value)}
+      />
+      <TextField
+        size="small"
+        type="date"
+        label="開始日"
+        value={fromDate}
+        onChange={(event) => onFromDateChange(event.target.value)}
+        InputLabelProps={{ shrink: true }}
+      />
+      <TextField
+        size="small"
+        type="date"
+        label="終了日"
+        value={toDate}
+        onChange={(event) => onToDateChange(event.target.value)}
+        InputLabelProps={{ shrink: true }}
+      />
+    </Stack>
+  );
+}
+
+type AdminLogsMobileListProps = {
+  logRows: LogRow[];
+  onSelectLog: (log: OperationLog) => void;
+};
+
+function AdminLogsMobileList({ logRows, onSelectLog }: AdminLogsMobileListProps) {
+  return (
+    <List sx={{ py: 0 }}>
+      {logRows.map((row) => (
+        <ListItem
+          key={row.rowKey}
+          divider
+          alignItems="flex-start"
+          sx={{ px: 0, py: 1.5 }}
+        >
+          <Stack spacing={1} sx={{ width: "100%" }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="center"
+              flexWrap="wrap"
+            >
+              <Typography variant="caption" color="text.secondary">
+                {row.timestampDisplay}
+              </Typography>
+              <Chip size="small" label={row.actionLabel} />
+            </Stack>
+
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                操作者
+              </Typography>
+              <Typography variant="body2">{row.actorDisplay}</Typography>
+            </Box>
+
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                対象者
+              </Typography>
+              <Typography variant="body2">{row.targetDisplay}</Typography>
+            </Box>
+
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                対象
+              </Typography>
+              <Typography
+                variant="subtitle2"
+                sx={{ wordBreak: "break-word" }}
+              >
+                {row.resourceDisplay}
+              </Typography>
+            </Box>
+
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                概要
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {row.summaryDisplay}
+              </Typography>
+            </Box>
+
+            <Box sx={{ alignSelf: "flex-end" }}>
+              <Tooltip title="詳細を表示">
+                <AppIconButton
+                  aria-label="詳細を表示"
+                  onClick={() => onSelectLog(row.log)}
+                >
+                  <InfoOutlinedIcon fontSize="small" />
+                </AppIconButton>
+              </Tooltip>
+            </Box>
+          </Stack>
+        </ListItem>
+      ))}
+    </List>
+  );
+}
+
+type AdminLogsDesktopTableProps = {
+  logRows: LogRow[];
+  onSelectLog: (log: OperationLog) => void;
+};
+
+function AdminLogsDesktopTable({
+  logRows,
+  onSelectLog,
+}: AdminLogsDesktopTableProps) {
+  return (
+    <TableContainer>
+      <Table
+        aria-label="operation-log-table"
+        size="small"
+        sx={{ tableLayout: "fixed" }}
+      >
+        <TableHead>
+          <TableRow>
+            <TableCell sx={{ width: 180 }}>日時</TableCell>
+            <TableCell sx={{ width: 120 }}>アクション</TableCell>
+            <TableCell sx={{ width: 170 }}>操作者</TableCell>
+            <TableCell sx={{ width: 170 }}>対象者</TableCell>
+            <TableCell sx={{ width: 240 }}>対象</TableCell>
+            <TableCell>概要</TableCell>
+            <TableCell align="center" sx={{ width: 72 }}>
+              詳細
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {logRows.map((row) => (
+            <TableRow key={row.rowKey} hover>
+              <TableCell sx={{ verticalAlign: "top" }}>
+                <Typography variant="caption" color="text.secondary">
+                  {row.timestampDisplay}
+                </Typography>
+              </TableCell>
+              <TableCell sx={{ verticalAlign: "top" }}>
+                <Chip size="small" label={row.actionLabel} />
+              </TableCell>
+              <TableCell sx={{ verticalAlign: "top" }}>
+                <Tooltip title={row.actorDisplay}>
+                  <Typography variant="body2" noWrap>
+                    {row.actorDisplay}
+                  </Typography>
+                </Tooltip>
+              </TableCell>
+              <TableCell sx={{ verticalAlign: "top" }}>
+                <Tooltip title={row.targetDisplay}>
+                  <Typography variant="body2" noWrap>
+                    {row.targetDisplay}
+                  </Typography>
+                </Tooltip>
+              </TableCell>
+              <TableCell sx={{ verticalAlign: "top" }}>
+                <Tooltip title={row.resourceDisplay}>
+                  <Typography variant="subtitle2" noWrap>
+                    {row.resourceDisplay}
+                  </Typography>
+                </Tooltip>
+              </TableCell>
+              <TableCell sx={{ verticalAlign: "top" }}>
+                <Tooltip title={row.summaryDisplay}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    noWrap
+                  >
+                    {row.summaryDisplay}
+                  </Typography>
+                </Tooltip>
+              </TableCell>
+              <TableCell align="center" sx={{ verticalAlign: "top" }}>
+                <Tooltip title="詳細を表示">
+                  <AppIconButton
+                    aria-label="詳細を表示"
+                    onClick={() => onSelectLog(row.log)}
+                  >
+                    <InfoOutlinedIcon fontSize="small" />
+                  </AppIconButton>
+                </Tooltip>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
+
+export default function AdminLogsClean() {
+  const isMobile = useIsMobile();
+  const {
+    resourceFilter,
+    setResourceFilter,
+    actorFilter,
+    setActorFilter,
+    targetFilter,
+    setTargetFilter,
+    actionFilter,
+    setActionFilter,
+    fromDate,
+    setFromDate,
+    toDate,
+    setToDate,
+    staffListLoading,
+    staffOptions,
+    excludedInvalidRecords,
+    excludedInvalidRecordCount,
+    loading,
+    error,
+    nextToken,
+    sentinelRef,
+    staffMap,
+    selectedLog,
+    setSelectedLog,
+    logRows,
+  } = useAdminLogsData();
+
   return (
     <PageContent width="full">
       <Stack spacing={2} sx={{ pt: 1 }}>
         <Stack spacing={1}>
           <Box>
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={1.5}
-              sx={{ mb: 2 }}
-            >
-              <TextField
-                size="small"
-                label="リソース"
-                value={resourceFilter}
-                onChange={(event) => setResourceFilter(event.target.value)}
-              />
-              <Autocomplete
-                size="small"
-                options={staffOptions}
-                value={
-                  staffOptions.find((option) => option.value === actorFilter) ??
-                  null
-                }
-                loading={staffListLoading}
-                onChange={(_, newValue) =>
-                  setActorFilter(newValue?.value ?? "")
-                }
-                isOptionEqualToValue={(option, value) =>
-                  option.value === value.value
-                }
-                getOptionLabel={(option) => option.label}
-                sx={{ minWidth: 220 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="操作者"
-                    placeholder="スタッフ名で検索"
-                  />
-                )}
-              />
-              <Autocomplete
-                size="small"
-                options={staffOptions}
-                value={
-                  staffOptions.find(
-                    (option) => option.value === targetFilter,
-                  ) ?? null
-                }
-                loading={staffListLoading}
-                onChange={(_, newValue) =>
-                  setTargetFilter(newValue?.value ?? "")
-                }
-                isOptionEqualToValue={(option, value) =>
-                  option.value === value.value
-                }
-                getOptionLabel={(option) => option.label}
-                sx={{ minWidth: 220 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="対象者"
-                    placeholder="スタッフ名で検索"
-                  />
-                )}
-              />
-              <TextField
-                size="small"
-                label="アクション"
-                value={actionFilter}
-                onChange={(event) => setActionFilter(event.target.value)}
-              />
-              <TextField
-                size="small"
-                type="date"
-                label="開始日"
-                value={fromDate}
-                onChange={(event) => setFromDate(event.target.value)}
-                InputLabelProps={{ shrink: true }}
-              />
-              <TextField
-                size="small"
-                type="date"
-                label="終了日"
-                value={toDate}
-                onChange={(event) => setToDate(event.target.value)}
-                InputLabelProps={{ shrink: true }}
-              />
-            </Stack>
+            <AdminLogsFilterBar
+              resourceFilter={resourceFilter}
+              actorFilter={actorFilter}
+              targetFilter={targetFilter}
+              actionFilter={actionFilter}
+              fromDate={fromDate}
+              toDate={toDate}
+              staffOptions={staffOptions}
+              staffListLoading={staffListLoading}
+              onResourceFilterChange={setResourceFilter}
+              onActorFilterChange={(v) => setActorFilter(v ?? "")}
+              onTargetFilterChange={(v) => setTargetFilter(v ?? "")}
+              onActionFilterChange={setActionFilter}
+              onFromDateChange={setFromDate}
+              onToDateChange={setToDate}
+            />
 
             <Typography variant="body2" sx={{ mb: 2 }}>
               新形式ログを新しい順に表示します。詳細は各行の JSON
@@ -360,165 +632,21 @@ export default function AdminLogsClean() {
             )}
 
             {isMobile ? (
-              <List sx={{ py: 0 }}>
-                {logRows.map((row) => (
-                  <ListItem
-                    key={row.rowKey}
-                    divider
-                    alignItems="flex-start"
-                    sx={{ px: 0, py: 1.5 }}
-                  >
-                    <Stack spacing={1} sx={{ width: "100%" }}>
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        alignItems="center"
-                        flexWrap="wrap"
-                      >
-                        <Typography variant="caption" color="text.secondary">
-                          {row.timestampDisplay}
-                        </Typography>
-                        <Chip size="small" label={row.actionLabel} />
-                      </Stack>
-
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          操作者
-                        </Typography>
-                        <Typography variant="body2">
-                          {row.actorDisplay}
-                        </Typography>
-                      </Box>
-
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          対象者
-                        </Typography>
-                        <Typography variant="body2">
-                          {row.targetDisplay}
-                        </Typography>
-                      </Box>
-
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          対象
-                        </Typography>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{ wordBreak: "break-word" }}
-                        >
-                          {row.resourceDisplay}
-                        </Typography>
-                      </Box>
-
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          概要
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {row.summaryDisplay}
-                        </Typography>
-                      </Box>
-
-                      <Box sx={{ alignSelf: "flex-end" }}>
-                        <Tooltip title="詳細を表示">
-                          <AppIconButton
-                            aria-label="詳細を表示"
-                            onClick={() => setSelectedLog(row.log)}
-                          >
-                            <InfoOutlinedIcon fontSize="small" />
-                          </AppIconButton>
-                        </Tooltip>
-                      </Box>
-                    </Stack>
-                  </ListItem>
-                ))}
-              </List>
+              <AdminLogsMobileList
+                logRows={logRows}
+                onSelectLog={setSelectedLog}
+              />
             ) : (
-              <TableContainer>
-                <Table
-                  aria-label="operation-log-table"
-                  size="small"
-                  sx={{ tableLayout: "fixed" }}
-                >
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ width: 180 }}>日時</TableCell>
-                      <TableCell sx={{ width: 120 }}>アクション</TableCell>
-                      <TableCell sx={{ width: 170 }}>操作者</TableCell>
-                      <TableCell sx={{ width: 170 }}>対象者</TableCell>
-                      <TableCell sx={{ width: 240 }}>対象</TableCell>
-                      <TableCell>概要</TableCell>
-                      <TableCell align="center" sx={{ width: 72 }}>
-                        詳細
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {logRows.map((row) => (
-                      <TableRow key={row.rowKey} hover>
-                        <TableCell sx={{ verticalAlign: "top" }}>
-                          <Typography variant="caption" color="text.secondary">
-                            {row.timestampDisplay}
-                          </Typography>
-                        </TableCell>
-                        <TableCell sx={{ verticalAlign: "top" }}>
-                          <Chip size="small" label={row.actionLabel} />
-                        </TableCell>
-                        <TableCell sx={{ verticalAlign: "top" }}>
-                          <Tooltip title={row.actorDisplay}>
-                            <Typography variant="body2" noWrap>
-                              {row.actorDisplay}
-                            </Typography>
-                          </Tooltip>
-                        </TableCell>
-                        <TableCell sx={{ verticalAlign: "top" }}>
-                          <Tooltip title={row.targetDisplay}>
-                            <Typography variant="body2" noWrap>
-                              {row.targetDisplay}
-                            </Typography>
-                          </Tooltip>
-                        </TableCell>
-                        <TableCell sx={{ verticalAlign: "top" }}>
-                          <Tooltip title={row.resourceDisplay}>
-                            <Typography variant="subtitle2" noWrap>
-                              {row.resourceDisplay}
-                            </Typography>
-                          </Tooltip>
-                        </TableCell>
-                        <TableCell sx={{ verticalAlign: "top" }}>
-                          <Tooltip title={row.summaryDisplay}>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              noWrap
-                            >
-                              {row.summaryDisplay}
-                            </Typography>
-                          </Tooltip>
-                        </TableCell>
-                        <TableCell align="center" sx={{ verticalAlign: "top" }}>
-                          <Tooltip title="詳細を表示">
-                            <AppIconButton
-                              aria-label="詳細を表示"
-                              onClick={() => setSelectedLog(row.log)}
-                            >
-                              <InfoOutlinedIcon fontSize="small" />
-                            </AppIconButton>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <AdminLogsDesktopTable
+                logRows={logRows}
+                onSelectLog={setSelectedLog}
+              />
             )}
 
             {loading && <CenteredSpinner size={24} />}
 
             {error && <Typography color="error">{error.message}</Typography>}
 
-            {/* sentinel for infinite scroll */}
             <div ref={sentinelRef} style={{ height: 1 }} />
             {!nextToken && !loading && (
               <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>

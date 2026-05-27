@@ -3,6 +3,7 @@ import {
   EventCalendar,
 } from "@shared/api/graphql/types";
 import { EventCalendarMessage } from "@shared/lib/message/EventCalendarMessage";
+
 import { CalendarItemDelete } from "./CalendarItemDelete";
 
 export default function EventCalendarDelete({

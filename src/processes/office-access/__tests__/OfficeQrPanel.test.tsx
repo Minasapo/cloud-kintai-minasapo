@@ -23,6 +23,7 @@ const defaultProps = {
   timeLeft: 25,
   progress: 83,
   qrUrl: "https://example.com/office/qr/register?token=abc",
+  errorMessage: "",
   tooltipOpen: false,
   onModeChange: jest.fn(),
   onCopyUrl: jest.fn(),
@@ -78,6 +79,22 @@ describe("OfficeQrPanel", () => {
         "00:25",
       );
       expect(screen.getByTestId("office-qr-progress")).toBeInTheDocument();
+      expect(screen.getByRole("progressbar", { name: "QRコードの更新進捗" })).toBeInTheDocument();
+      expect(screen.getByTestId("office-qr-live-status")).toBeInTheDocument();
+    });
+
+    it("エラー時にアラートと再試行導線を表示する", () => {
+      render(
+        <OfficeQrPanel
+          {...defaultProps}
+          errorMessage="QRコードの更新に失敗しました。"
+        />,
+      );
+
+      expect(screen.getByTestId("office-qr-error-alert")).toBeInTheDocument();
+      expect(
+        screen.getByText("「QRコードを手動更新」ボタンから再試行してください。"),
+      ).toBeInTheDocument();
     });
 
     it("URL コピーボタンと手動更新ボタンを表示する", () => {

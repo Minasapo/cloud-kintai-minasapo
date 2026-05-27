@@ -18,7 +18,7 @@ import {
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { AppButton } from "@shared/ui/button";
 import { SectionTitle } from "@shared/ui/typography";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { type RefObject,useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { useWorkflowApprovalActions } from "../hooks/useWorkflowApprovalActions";
 import { useWorkflowDetailData } from "../hooks/useWorkflowDetailData";
@@ -142,136 +142,40 @@ function WorkflowCarouselActionButtons({
 const FOCUSABLE_SELECTOR =
   "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])";
 
-export default function WorkflowCarouselDialog({
+type UseWorkflowCarouselKeyboardParams = {
+  open: boolean;
+  onClose: () => void;
+  isCompleted: boolean;
+  canGoPrev: boolean;
+  canGoNext: boolean;
+  currentWorkflowId: string | null;
+  handlePrev: () => void;
+  handleNext: () => void;
+  handleApproveAndNext: () => Promise<void>;
+  handleRejectAndNext: () => Promise<void>;
+  enableApprovalActions: boolean;
+  onOpenInRightPanel: (workflowId: string) => void;
+  dialogRef: RefObject<HTMLDivElement | null>;
+  closeButtonRef: RefObject<HTMLButtonElement | null>;
+};
+
+function useWorkflowCarouselKeyboard({
   open,
   onClose,
-  selectedWorkflowId,
-  filteredWorkflowIds,
-  workflowsById,
-  staffNamesById,
+  isCompleted,
+  canGoPrev,
+  canGoNext,
+  currentWorkflowId,
+  handlePrev,
+  handleNext,
+  handleApproveAndNext,
+  handleRejectAndNext,
+  enableApprovalActions,
   onOpenInRightPanel,
-  enableApprovalActions = false,
-}: WorkflowCarouselDialogProps) {
-  const initialIndex = useMemo(
-    () =>
-      Math.max(
-        filteredWorkflowIds.findIndex(
-          (workflowId) => workflowId === selectedWorkflowId,
-        ),
-        0,
-      ),
-    [filteredWorkflowIds, selectedWorkflowId],
-  );
-  const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const dialogRef = useRef<HTMLDivElement | null>(null);
-  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  dialogRef,
+  closeButtonRef,
+}: UseWorkflowCarouselKeyboardParams) {
   const previousActiveElementRef = useRef<Element | null>(null);
-  const { authStatus, cognitoUser } = useContext(AuthContext);
-  const isAuthenticated = authStatus === "authenticated";
-  const { staffs } = useStaffs({ isAuthenticated });
-  const {
-    getStartTime,
-    getEndTime,
-    getLunchRestStartTime,
-    getLunchRestEndTime,
-  } = useContext(AppConfigContext);
-  const { update: updateWorkflow } = useWorkflows({ isAuthenticated });
-  const [createAttendance] = useCreateAttendanceMutation();
-  const [getAttendanceByStaffAndDate] =
-    useLazyGetAttendanceByStaffAndDateQuery();
-  const [updateAttendance] = useUpdateAttendanceMutation();
-  const dispatch = useAppDispatchV2();
-
-  const currentWorkflowId = filteredWorkflowIds[currentIndex] ?? null;
-  const { workflow: workflowDetail, setWorkflow } = useWorkflowDetailData(
-    currentWorkflowId ?? "",
-  );
-  const currentWorkflow = currentWorkflowId
-    ? workflowsById.get(currentWorkflowId)
-    : undefined;
-  const canGoPrev = currentIndex > 0;
-  const canGoNext = currentIndex < filteredWorkflowIds.length - 1;
-  const { handleApprove, handleReject } = useWorkflowApprovalActions({
-    workflow: workflowDetail,
-    cognitoUser,
-    staffs,
-    updateWorkflow: (input) =>
-      updateWorkflow(input) as Promise<
-        NonNullable<GetWorkflowQuery["getWorkflow"]>
-      >,
-    setWorkflow,
-    notifySuccess: (message) =>
-      dispatch(
-        pushNotification({
-          tone: "success",
-          message,
-        }),
-      ),
-    notifyError: (message) =>
-      dispatch(
-        pushNotification({
-          tone: "error",
-          message,
-        }),
-      ),
-    notifyInfo: (title, description) =>
-      dispatch(
-        pushNotification({
-          tone: "info",
-          message: title,
-          description,
-          autoHideMs: null,
-        }),
-      ),
-    getStartTime,
-    getEndTime,
-    getLunchRestStartTime,
-    getLunchRestEndTime,
-    getAttendanceByStaffAndDate,
-    createAttendance,
-    updateAttendance,
-  });
-  const isApproveDisabled =
-    !workflowDetail?.id ||
-    workflowDetail.status === WorkflowStatus.APPROVED ||
-    workflowDetail.status === WorkflowStatus.CANCELLED;
-  const isRejectDisabled =
-    !workflowDetail?.id ||
-    workflowDetail.status === WorkflowStatus.REJECTED ||
-    workflowDetail.status === WorkflowStatus.CANCELLED;
-
-  const handlePrev = () => {
-    if (!canGoPrev) return;
-    setCurrentIndex((previous) => previous - 1);
-  };
-
-  const handleNext = () => {
-    if (!canGoNext) return;
-    setCurrentIndex((previous) => previous + 1);
-  };
-
-  const moveToNextStep = () => {
-    if (!canGoNext) {
-      setIsCompleted(true);
-      return;
-    }
-    handleNext();
-  };
-
-  const handleApproveAndNext = async () => {
-    if (!enableApprovalActions || isApproveDisabled || isCompleted) return;
-    const succeeded = await handleApprove();
-    if (!succeeded) return;
-    moveToNextStep();
-  };
-
-  const handleRejectAndNext = async () => {
-    if (!enableApprovalActions || isRejectDisabled || isCompleted) return;
-    const succeeded = await handleReject();
-    if (!succeeded) return;
-    moveToNextStep();
-  };
 
   useEffect(() => {
     if (!open) return;
@@ -287,7 +191,7 @@ export default function WorkflowCarouselDialog({
         previousActiveElementRef.current.focus();
       }
     };
-  }, [open]);
+  }, [open, closeButtonRef]);
 
   useEffect(() => {
     if (!open) return;
@@ -383,7 +287,249 @@ export default function WorkflowCarouselDialog({
     onClose,
     onOpenInRightPanel,
     open,
+    dialogRef,
   ]);
+}
+
+type WorkflowDetailGridProps = {
+  currentWorkflow: WorkflowType;
+  staffNamesById: Map<string, string>;
+  currentIndex: number;
+  totalCount: number;
+};
+
+function WorkflowDetailGrid({
+  currentWorkflow,
+  staffNamesById,
+  currentIndex,
+  totalCount,
+}: WorkflowDetailGridProps) {
+  return (
+    <>
+      <span className="inline-flex h-7 items-center rounded-full border border-slate-300 bg-slate-50 px-3 text-xs font-medium text-slate-700">
+        {currentIndex + 1} / {totalCount}
+      </span>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div>
+          <p className="m-0 text-xs text-slate-500">申請種別</p>
+          <p className="m-0 mt-1 text-sm font-medium text-slate-900">
+            {getWorkflowCategoryLabel(currentWorkflow)}
+          </p>
+        </div>
+
+        <div>
+          <p className="m-0 text-xs text-slate-500">申請者</p>
+          <p className="m-0 mt-1 text-sm font-medium text-slate-900">
+            {staffNamesById.get(currentWorkflow.staffId || "") || "不明"}
+          </p>
+        </div>
+
+        <div>
+          <p className="m-0 text-xs text-slate-500">申請日</p>
+          <p className="m-0 mt-1 text-sm font-medium text-slate-900">
+            {currentWorkflow.createdAt
+              ? currentWorkflow.createdAt.split("T")[0]
+              : "-"}
+          </p>
+        </div>
+
+        <div>
+          <p className="m-0 text-xs text-slate-500">ステータス</p>
+          <div className="mt-1">
+            <WorkflowStatusChip status={currentWorkflow.status} />
+          </div>
+        </div>
+
+        <div>
+          <p className="m-0 text-xs text-slate-500">承認ステップ</p>
+          <p className="m-0 mt-1 text-sm font-medium text-slate-900">
+            {(currentWorkflow.approvalSteps?.length ?? 0) > 0
+              ? `${currentWorkflow.approvalSteps?.length} 件`
+              : "未設定"}
+          </p>
+        </div>
+
+        <div>
+          <p className="m-0 text-xs text-slate-500">コメント</p>
+          <p className="m-0 mt-1 text-sm font-medium text-slate-900">
+            {(currentWorkflow.comments?.length ?? 0) > 0
+              ? `${currentWorkflow.comments?.length} 件`
+              : "コメントなし"}
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+type UseWorkflowCarouselStateParams = {
+  selectedWorkflowId: string;
+  filteredWorkflowIds: string[];
+  workflowsById: Map<string, WorkflowType>;
+  enableApprovalActions: boolean;
+};
+
+function useWorkflowCarouselState({
+  selectedWorkflowId,
+  filteredWorkflowIds,
+  workflowsById,
+  enableApprovalActions,
+}: UseWorkflowCarouselStateParams) {
+  const initialIndex = useMemo(
+    () =>
+      Math.max(
+        filteredWorkflowIds.findIndex((id) => id === selectedWorkflowId),
+        0,
+      ),
+    [filteredWorkflowIds, selectedWorkflowId],
+  );
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const { authStatus, cognitoUser } = useContext(AuthContext);
+  const isAuthenticated = authStatus === "authenticated";
+  const { staffs } = useStaffs({ isAuthenticated });
+  const { getStartTime, getEndTime, getLunchRestStartTime, getLunchRestEndTime } =
+    useContext(AppConfigContext);
+  const { update: updateWorkflow } = useWorkflows({ isAuthenticated });
+  const [createAttendance] = useCreateAttendanceMutation();
+  const [getAttendanceByStaffAndDate] = useLazyGetAttendanceByStaffAndDateQuery();
+  const [updateAttendance] = useUpdateAttendanceMutation();
+  const dispatch = useAppDispatchV2();
+
+  const currentWorkflowId = filteredWorkflowIds[currentIndex] ?? null;
+  const { workflow: workflowDetail, setWorkflow } = useWorkflowDetailData(
+    currentWorkflowId ?? "",
+  );
+  const currentWorkflow = currentWorkflowId
+    ? workflowsById.get(currentWorkflowId)
+    : undefined;
+  const canGoPrev = currentIndex > 0;
+  const canGoNext = currentIndex < filteredWorkflowIds.length - 1;
+  const { handleApprove, handleReject } = useWorkflowApprovalActions({
+    workflow: workflowDetail,
+    cognitoUser,
+    staffs,
+    updateWorkflow: (input) =>
+      updateWorkflow(input) as Promise<NonNullable<GetWorkflowQuery["getWorkflow"]>>,
+    setWorkflow,
+    notifySuccess: (message) => dispatch(pushNotification({ tone: "success", message })),
+    notifyError: (message) => dispatch(pushNotification({ tone: "error", message })),
+    notifyInfo: (title, description) =>
+      dispatch(pushNotification({ tone: "info", message: title, description, autoHideMs: null })),
+    getStartTime,
+    getEndTime,
+    getLunchRestStartTime,
+    getLunchRestEndTime,
+    getAttendanceByStaffAndDate,
+    createAttendance,
+    updateAttendance,
+  });
+  const isApproveDisabled =
+    !workflowDetail?.id ||
+    workflowDetail.status === WorkflowStatus.APPROVED ||
+    workflowDetail.status === WorkflowStatus.CANCELLED;
+  const isRejectDisabled =
+    !workflowDetail?.id ||
+    workflowDetail.status === WorkflowStatus.REJECTED ||
+    workflowDetail.status === WorkflowStatus.CANCELLED;
+
+  const handlePrev = () => {
+    if (!canGoPrev) return;
+    setCurrentIndex((previous) => previous - 1);
+  };
+
+  const handleNext = () => {
+    if (!canGoNext) return;
+    setCurrentIndex((previous) => previous + 1);
+  };
+
+  const moveToNextStep = () => {
+    if (!canGoNext) { setIsCompleted(true); return; }
+    handleNext();
+  };
+
+  const handleApproveAndNext = async () => {
+    if (!enableApprovalActions || isApproveDisabled || isCompleted) return;
+    if (!(await handleApprove())) return;
+    moveToNextStep();
+  };
+
+  const handleRejectAndNext = async () => {
+    if (!enableApprovalActions || isRejectDisabled || isCompleted) return;
+    if (!(await handleReject())) return;
+    moveToNextStep();
+  };
+
+  return {
+    currentIndex,
+    isCompleted,
+    dialogRef,
+    closeButtonRef,
+    currentWorkflowId,
+    currentWorkflow,
+    canGoPrev,
+    canGoNext,
+    workflowDetail,
+    isApproveDisabled,
+    isRejectDisabled,
+    handlePrev,
+    handleNext,
+    handleApproveAndNext,
+    handleRejectAndNext,
+  };
+}
+
+export default function WorkflowCarouselDialog({
+  open,
+  onClose,
+  selectedWorkflowId,
+  filteredWorkflowIds,
+  workflowsById,
+  staffNamesById,
+  onOpenInRightPanel,
+  enableApprovalActions = false,
+}: WorkflowCarouselDialogProps) {
+  const {
+    currentIndex,
+    isCompleted,
+    dialogRef,
+    closeButtonRef,
+    currentWorkflowId,
+    currentWorkflow,
+    canGoPrev,
+    canGoNext,
+    isApproveDisabled,
+    isRejectDisabled,
+    handlePrev,
+    handleNext,
+    handleApproveAndNext,
+    handleRejectAndNext,
+  } = useWorkflowCarouselState({
+    selectedWorkflowId,
+    filteredWorkflowIds,
+    workflowsById,
+    enableApprovalActions,
+  });
+
+  useWorkflowCarouselKeyboard({
+    open,
+    onClose,
+    isCompleted,
+    canGoPrev,
+    canGoNext,
+    currentWorkflowId,
+    handlePrev,
+    handleNext,
+    handleApproveAndNext,
+    handleRejectAndNext,
+    enableApprovalActions,
+    onOpenInRightPanel,
+    dialogRef,
+    closeButtonRef,
+  });
 
   if (!open) {
     return null;
@@ -451,9 +597,12 @@ export default function WorkflowCarouselDialog({
           ) : currentWorkflow ? (
             <div className="space-y-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <span className="inline-flex h-7 items-center rounded-full border border-slate-300 bg-slate-50 px-3 text-xs font-medium text-slate-700">
-                  {currentIndex + 1} / {filteredWorkflowIds.length}
-                </span>
+                <WorkflowDetailGrid
+                  currentWorkflow={currentWorkflow}
+                  staffNamesById={staffNamesById}
+                  currentIndex={currentIndex}
+                  totalCount={filteredWorkflowIds.length}
+                />
 
                 <AppButton
                   variant="outline"
@@ -478,57 +627,6 @@ export default function WorkflowCarouselDialog({
                   isRejectDisabled={isRejectDisabled}
                 />
               )}
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <p className="m-0 text-xs text-slate-500">申請種別</p>
-                  <p className="m-0 mt-1 text-sm font-medium text-slate-900">
-                    {getWorkflowCategoryLabel(currentWorkflow)}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="m-0 text-xs text-slate-500">申請者</p>
-                  <p className="m-0 mt-1 text-sm font-medium text-slate-900">
-                    {staffNamesById.get(currentWorkflow.staffId || "") ||
-                      "不明"}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="m-0 text-xs text-slate-500">申請日</p>
-                  <p className="m-0 mt-1 text-sm font-medium text-slate-900">
-                    {currentWorkflow.createdAt
-                      ? currentWorkflow.createdAt.split("T")[0]
-                      : "-"}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="m-0 text-xs text-slate-500">ステータス</p>
-                  <div className="mt-1">
-                    <WorkflowStatusChip status={currentWorkflow.status} />
-                  </div>
-                </div>
-
-                <div>
-                  <p className="m-0 text-xs text-slate-500">承認ステップ</p>
-                  <p className="m-0 mt-1 text-sm font-medium text-slate-900">
-                    {(currentWorkflow.approvalSteps?.length ?? 0) > 0
-                      ? `${currentWorkflow.approvalSteps?.length} 件`
-                      : "未設定"}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="m-0 text-xs text-slate-500">コメント</p>
-                  <p className="m-0 mt-1 text-sm font-medium text-slate-900">
-                    {(currentWorkflow.comments?.length ?? 0) > 0
-                      ? `${currentWorkflow.comments?.length} 件`
-                      : "コメントなし"}
-                  </p>
-                </div>
-              </div>
 
               <div className="flex items-center justify-between border-t border-slate-200 pt-3">
                 <AppButton

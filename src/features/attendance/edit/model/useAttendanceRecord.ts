@@ -3,7 +3,7 @@ import { AttendanceDateTime } from "@entities/attendance/lib/AttendanceDateTime"
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceEditInputs, defaultValues, HourlyPaidHolidayTimeInputs, RestInputs, } from "@features/attendance/edit/model/common";
-import { AttendanceHistory, } from "@shared/api/graphql/types";
+import { Attendance,AttendanceHistory } from "@shared/api/graphql/types";
 import { Logger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import dayjs from "dayjs";
@@ -51,6 +51,95 @@ const hasSameStaffSnapshot = (next: StaffType | null | undefined, prev: StaffTyp
         next.role === prev.role &&
         next.mailAddress === prev.mailAddress);
 };
+
+function applyHistoryToForm(
+    sortedHistories: AttendanceHistory[],
+    index: number,
+    setValue: UseFormSetValue<AttendanceEditInputs>,
+    restReplace: ReplaceFn<RestInputs>,
+    hourlyPaidHolidayTimeReplace: ReplaceFn<HourlyPaidHolidayTimeInputs>,
+) {
+    if (!sortedHistories || !sortedHistories[index]) return;
+    const h = sortedHistories[index];
+    try {
+        setValue("startTime", h.startTime ?? "");
+        setValue("endTime", h.endTime ?? "");
+        setValue("goDirectlyFlag", h.goDirectlyFlag ?? false);
+        setValue("returnDirectlyFlag", h.returnDirectlyFlag ?? false);
+        setValue("paidHolidayFlag", h.paidHolidayFlag ?? false);
+        setValue("specialHolidayFlag", h.specialHolidayFlag ?? false);
+        setValue("remarks", h.remarks ?? "");
+        setValue("substituteHolidayDate", h.substituteHolidayDate ?? undefined);
+        const rests: RestInputs[] = h.rests
+            ? h.rests
+                .filter((r): r is NonNullable<typeof r> => r !== null)
+                .map((r) => ({
+                startTime: r.startTime ?? null,
+                endTime: r.endTime ?? null,
+            }))
+            : [];
+        restReplace(rests);
+        const hourly: HourlyPaidHolidayTimeInputs[] = h.hourlyPaidHolidayTimes
+            ? h.hourlyPaidHolidayTimes
+                .filter((r): r is NonNullable<typeof r> => r !== null)
+                .map((r) => ({
+                startTime: r.startTime ?? null,
+                endTime: r.endTime ?? null,
+            }))
+            : [];
+        hourlyPaidHolidayTimeReplace(hourly);
+    }
+    catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("Failed to apply history to form:", e);
+    }
+}
+
+function initFormFromAttendance(
+    attendance: Attendance,
+    reset: UseFormReset<AttendanceEditInputs>,
+) {
+    const initTags: string[] = [];
+    if (attendance.paidHolidayFlag) initTags.push("有給休暇");
+    if (attendance.specialHolidayFlag) initTags.push("特別休暇");
+    if (attendance.absentFlag) initTags.push("欠勤");
+    const rests = attendance.rests
+        ? attendance.rests
+            .filter((item): item is NonNullable<typeof item> => item !== null)
+            .map((item) => ({ startTime: item.startTime, endTime: item.endTime }))
+        : [];
+    const hourlyPaidHolidayTimes = attendance.hourlyPaidHolidayTimes
+        ? attendance.hourlyPaidHolidayTimes
+            .filter((item): item is NonNullable<typeof item> => item !== null)
+            .map((item) => ({ startTime: item.startTime, endTime: item.endTime }))
+        : [];
+    const histories = attendance.histories
+        ? attendance.histories.filter((item): item is NonNullable<typeof item> => item !== null)
+        : [];
+    const changeRequests = attendance.changeRequests
+        ? attendance.changeRequests.filter((item): item is NonNullable<typeof item> => item !== null)
+        : [];
+    reset({
+        workDate: attendance.workDate,
+        startTime: attendance.startTime,
+        isDeemedHoliday: attendance.isDeemedHoliday ?? false,
+        specialHolidayFlag: attendance.specialHolidayFlag ?? false,
+        endTime: attendance.endTime,
+        remarks: attendance.remarks || "",
+        remarkTags: initTags,
+        goDirectlyFlag: attendance.goDirectlyFlag || false,
+        returnDirectlyFlag: attendance.returnDirectlyFlag || false,
+        paidHolidayFlag: attendance.paidHolidayFlag || false,
+        absentFlag: attendance.absentFlag || false,
+        substituteHolidayDate: attendance.substituteHolidayDate,
+        revision: attendance.revision,
+        rests,
+        hourlyPaidHolidayTimes,
+        histories,
+        changeRequests,
+    });
+}
+
 export const useAttendanceRecord = ({ targetStaffId, targetWorkDate, readOnly, setValue, reset, restReplace, hourlyPaidHolidayTimeReplace, logger, }: UseAttendanceRecordParams) => {
     const dispatch = useDispatch();
     const [triggerGetAttendance, { data: attendanceData }] = useLazyGetAttendanceByStaffAndDateQuery();
@@ -71,41 +160,7 @@ export const useAttendanceRecord = ({ targetStaffId, targetWorkDate, readOnly, s
             .toSorted((a, b) => dayjs(b.createdAt).isBefore(dayjs(a.createdAt)) ? -1 : 1) as AttendanceHistory[];
     }, [attendance?.histories]);
     const applyHistory = useCallback((index: number) => {
-        if (!sortedHistories || !sortedHistories[index])
-            return;
-        const h = sortedHistories[index];
-        try {
-            setValue("startTime", h.startTime ?? "");
-            setValue("endTime", h.endTime ?? "");
-            setValue("goDirectlyFlag", h.goDirectlyFlag ?? false);
-            setValue("returnDirectlyFlag", h.returnDirectlyFlag ?? false);
-            setValue("paidHolidayFlag", h.paidHolidayFlag ?? false);
-            setValue("specialHolidayFlag", h.specialHolidayFlag ?? false);
-            setValue("remarks", h.remarks ?? "");
-            setValue("substituteHolidayDate", h.substituteHolidayDate ?? undefined);
-            const rests: RestInputs[] = h.rests
-                ? h.rests
-                    .filter((r): r is NonNullable<typeof r> => r !== null)
-                    .map((r) => ({
-                    startTime: r.startTime ?? null,
-                    endTime: r.endTime ?? null,
-                }))
-                : [];
-            restReplace(rests);
-            const hourly: HourlyPaidHolidayTimeInputs[] = h.hourlyPaidHolidayTimes
-                ? h.hourlyPaidHolidayTimes
-                    .filter((r): r is NonNullable<typeof r> => r !== null)
-                    .map((r) => ({
-                    startTime: r.startTime ?? null,
-                    endTime: r.endTime ?? null,
-                }))
-                : [];
-            hourlyPaidHolidayTimeReplace(hourly);
-        }
-        catch (e) {
-            // eslint-disable-next-line no-console
-            console.error("Failed to apply history to form:", e);
-        }
+        applyHistoryToForm(sortedHistories, index, setValue, restReplace, hourlyPaidHolidayTimeReplace);
     }, [sortedHistories, setValue, restReplace, hourlyPaidHolidayTimeReplace]);
     useEffect(() => {
         if (!sortedHistories || sortedHistories.length === 0)
@@ -243,48 +298,7 @@ export const useAttendanceRecord = ({ targetStaffId, targetWorkDate, readOnly, s
         if (!attendance)
             return;
         setWorkDate(AttendanceDateTime.convertToDayjs(attendance.workDate));
-        const initTags: string[] = [];
-        if (attendance.paidHolidayFlag)
-            initTags.push("有給休暇");
-        if (attendance.specialHolidayFlag)
-            initTags.push("特別休暇");
-        if (attendance.absentFlag)
-            initTags.push("欠勤");
-        const rests = attendance.rests
-            ? attendance.rests
-                .filter((item): item is NonNullable<typeof item> => item !== null)
-                .map((item) => ({ startTime: item.startTime, endTime: item.endTime }))
-            : [];
-        const hourlyPaidHolidayTimes = attendance.hourlyPaidHolidayTimes
-            ? attendance.hourlyPaidHolidayTimes
-                .filter((item): item is NonNullable<typeof item> => item !== null)
-                .map((item) => ({ startTime: item.startTime, endTime: item.endTime }))
-            : [];
-        const histories = attendance.histories
-            ? attendance.histories.filter((item): item is NonNullable<typeof item> => item !== null)
-            : [];
-        const changeRequests = attendance.changeRequests
-            ? attendance.changeRequests.filter((item): item is NonNullable<typeof item> => item !== null)
-            : [];
-        reset({
-            workDate: attendance.workDate,
-            startTime: attendance.startTime,
-            isDeemedHoliday: attendance.isDeemedHoliday ?? false,
-            specialHolidayFlag: attendance.specialHolidayFlag ?? false,
-            endTime: attendance.endTime,
-            remarks: attendance.remarks || "",
-            remarkTags: initTags,
-            goDirectlyFlag: attendance.goDirectlyFlag || false,
-            returnDirectlyFlag: attendance.returnDirectlyFlag || false,
-            paidHolidayFlag: attendance.paidHolidayFlag || false,
-            absentFlag: attendance.absentFlag || false,
-            substituteHolidayDate: attendance.substituteHolidayDate,
-            revision: attendance.revision,
-            rests,
-            hourlyPaidHolidayTimes,
-            histories,
-            changeRequests,
-        });
+        initFormFromAttendance(attendance, reset);
     }, [attendance, reset]);
     const refetchAttendance = useCallback(async () => {
         if (!staff || !targetWorkDate)

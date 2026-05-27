@@ -8,7 +8,7 @@ import DateField from "@shared/ui/form/DateField";
 import { SubsectionTitle } from "@shared/ui/typography";
 import dayjs from "dayjs";
 import { useCallback, useMemo, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { type Control, Controller, useForm, type UseFormSetValue } from "react-hook-form";
 
 type BulkFormValues = {
   startMonth: dayjs.Dayjs | null;
@@ -234,216 +234,212 @@ export default function JobTermBulkRegister({
         </p>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Controller
-          name="startMonth"
-          control={control}
-          rules={{ required: true }}
-          render={({ field, fieldState }) => (
-            <DateField
-              label="開始月"
-              format="YYYY/MM"
-              monthOnly
-              value={field.value}
-              onChange={(value) =>
-                field.onChange(value?.startOf("month") ?? null)
-              }
-              errorText={fieldState.error ? "必須項目です" : undefined}
-            />
-          )}
-        />
+      <BulkRegisterFormFields control={control} />
 
-        <Controller
-          name="closingDay"
-          control={control}
-          rules={{ required: true, min: 1, max: 31 }}
-          render={({ field, fieldState }) => (
-            <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium text-slate-700">締め日</span>
-              <input
-                type="number"
-                min={1}
-                max={31}
-                value={field.value ?? ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  field.onChange(value === "" ? null : Number(value));
-                }}
-                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
-              />
-              {fieldState.error ? (
-                <p className="m-0 text-xs leading-5 text-rose-600">
-                  1〜31で入力してください
-                </p>
-              ) : null}
-            </label>
-          )}
-        />
+      <BulkRegisterAdjustmentSection
+        adjustDirection={adjustDirection}
+        considerWeekend={considerWeekend}
+        considerHolidayCalendar={considerHolidayCalendar}
+        considerCompanyHolidayCalendar={considerCompanyHolidayCalendar}
+        loadingCalendars={loadingCalendars}
+        setValue={setValue}
+      />
 
-        <Controller
-          name="monthCount"
-          control={control}
-          rules={{ required: true, min: 1, max: 12 }}
-          render={({ field, fieldState }) => (
-            <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium text-slate-700">
-                登録月数
-              </span>
-              <input
-                type="number"
-                min={1}
-                max={12}
-                value={field.value ?? ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  field.onChange(value === "" ? null : Number(value));
-                }}
-                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
-              />
-              {fieldState.error ? (
-                <p className="m-0 text-xs leading-5 text-rose-600">
-                  1〜12で入力してください
-                </p>
-              ) : null}
-            </label>
-          )}
-        />
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <p className="text-sm font-semibold text-slate-800">非稼働日の調整</p>
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex flex-wrap gap-3">
-            {[
-              {
-                value: "previous",
-                label: "前倒し（直近の稼働日）",
-              },
-              {
-                value: "next",
-                label: "後ろ倒し（次の稼働日）",
-              },
-            ].map((option) => (
-              <label
-                key={option.value}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700"
-              >
-                <input
-                  type="radio"
-                  name="adjust-direction"
-                  value={option.value}
-                  checked={adjustDirection === option.value}
-                  onChange={(e) =>
-                    setValue(
-                      "adjustDirection",
-                      e.target.value as "previous" | "next",
-                      {
-                        shouldValidate: true,
-                        shouldDirty: true,
-                      },
-                    )
-                  }
-                />
-                {option.label}
-              </label>
-            ))}
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <label className="inline-flex items-center gap-2 text-sm text-slate-700">
-              <input
-                type="checkbox"
-                checked={considerWeekend}
-                onChange={(e) =>
-                  setValue("considerWeekend", e.target.checked, {
-                    shouldDirty: true,
-                  })
-                }
-              />
-              土日を考慮
-            </label>
-            <label className="inline-flex items-center gap-2 text-sm text-slate-700">
-              <input
-                type="checkbox"
-                checked={considerHolidayCalendar}
-                onChange={(e) =>
-                  setValue("considerHolidayCalendar", e.target.checked, {
-                    shouldDirty: true,
-                  })
-                }
-              />
-              休日カレンダーを考慮
-            </label>
-            <label className="inline-flex items-center gap-2 text-sm text-slate-700">
-              <input
-                type="checkbox"
-                checked={considerCompanyHolidayCalendar}
-                onChange={(e) =>
-                  setValue("considerCompanyHolidayCalendar", e.target.checked, {
-                    shouldDirty: true,
-                  })
-                }
-              />
-              会社休日カレンダーを考慮
-            </label>
-          </div>
-        </div>
-        {loadingCalendars && (
-          <p className="text-sm text-slate-500">
-            休日カレンダー情報を読み込み中です…
-          </p>
-        )}
-      </div>
-
-      <div>
-        <p className="mb-3 text-sm font-semibold text-slate-800">
-          登録内容プレビュー
-        </p>
-        {previewItems.length === 0 ? (
-          <p className="text-sm text-slate-500">
-            条件を入力するとプレビューが表示されます。
-          </p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {previewItems.map((item) => (
-              <div
-                key={item.closeMonth.format("YYYY-MM")}
-                className={[
-                  "rounded-2xl border px-4 py-3",
-                  item.isDuplicate
-                    ? "border-sky-200 bg-sky-50"
-                    : "border-emerald-200 bg-emerald-50",
-                ].join(" ")}
-              >
-                <div className="flex flex-col gap-1 text-sm text-slate-700 md:flex-row md:items-start md:gap-4">
-                  <div className="min-w-[120px] font-semibold text-slate-900">
-                    {item.closeMonth.format("YYYY年M月")}
-                    {item.isDuplicate ? " (登録済み)" : ""}
-                  </div>
-                  <div>
-                    {item.startDate.format(AttendanceDate.DisplayFormat)} 〜{" "}
-                    {item.endDate.format(AttendanceDate.DisplayFormat)}
-                    {item.baseEndDate.isSame(item.endDate, "day") ? null : (
-                      <span className="ml-1 text-slate-500">
-                        (元の締め日{" "}
-                        {item.baseEndDate.format(AttendanceDate.DisplayFormat)}{" "}
-                        → 調整後)
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-slate-500">{item.adjustmentReason}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <BulkRegisterPreviewList previewItems={previewItems} />
 
       <div>
         <SettingsButton onClick={onSubmit} disabled={disableSubmit}>
           まとめて登録
         </SettingsButton>
       </div>
+    </div>
+  );
+}
+
+type FormFieldsProps = { control: Control<BulkFormValues> };
+function BulkRegisterFormFields({ control }: FormFieldsProps) {
+  return (
+    <div className="grid gap-4 lg:grid-cols-3">
+      <Controller
+        name="startMonth"
+        control={control}
+        rules={{ required: true }}
+        render={({ field, fieldState }) => (
+          <DateField
+            label="開始月"
+            format="YYYY/MM"
+            monthOnly
+            value={field.value}
+            onChange={(value) => field.onChange(value?.startOf("month") ?? null)}
+            errorText={fieldState.error ? "必須項目です" : undefined}
+          />
+        )}
+      />
+      <Controller
+        name="closingDay"
+        control={control}
+        rules={{ required: true, min: 1, max: 31 }}
+        render={({ field, fieldState }) => (
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium text-slate-700">締め日</span>
+            <input
+              type="number"
+              min={1}
+              max={31}
+              value={field.value ?? ""}
+              onChange={(e) => {
+                const value = e.target.value;
+                field.onChange(value === "" ? null : Number(value));
+              }}
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+            />
+            {fieldState.error ? (
+              <p className="m-0 text-xs leading-5 text-rose-600">1〜31で入力してください</p>
+            ) : null}
+          </label>
+        )}
+      />
+      <Controller
+        name="monthCount"
+        control={control}
+        rules={{ required: true, min: 1, max: 12 }}
+        render={({ field, fieldState }) => (
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium text-slate-700">登録月数</span>
+            <input
+              type="number"
+              min={1}
+              max={12}
+              value={field.value ?? ""}
+              onChange={(e) => {
+                const value = e.target.value;
+                field.onChange(value === "" ? null : Number(value));
+              }}
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+            />
+            {fieldState.error ? (
+              <p className="m-0 text-xs leading-5 text-rose-600">1〜12で入力してください</p>
+            ) : null}
+          </label>
+        )}
+      />
+    </div>
+  );
+}
+
+type AdjustmentSectionProps = {
+  adjustDirection: "previous" | "next";
+  considerWeekend: boolean;
+  considerHolidayCalendar: boolean;
+  considerCompanyHolidayCalendar: boolean;
+  loadingCalendars: boolean;
+  setValue: UseFormSetValue<BulkFormValues>;
+};
+function BulkRegisterAdjustmentSection({
+  adjustDirection,
+  considerWeekend,
+  considerHolidayCalendar,
+  considerCompanyHolidayCalendar,
+  loadingCalendars,
+  setValue,
+}: AdjustmentSectionProps) {
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-sm font-semibold text-slate-800">非稼働日の調整</p>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-wrap gap-3">
+          {[
+            { value: "previous", label: "前倒し（直近の稼働日）" },
+            { value: "next", label: "後ろ倒し（次の稼働日）" },
+          ].map((option) => (
+            <label
+              key={option.value}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700"
+            >
+              <input
+                type="radio"
+                name="adjust-direction"
+                value={option.value}
+                checked={adjustDirection === option.value}
+                onChange={(e) =>
+                  setValue("adjustDirection", e.target.value as "previous" | "next", { shouldValidate: true, shouldDirty: true })
+                }
+              />
+              {option.label}
+            </label>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={considerWeekend}
+              onChange={(e) => setValue("considerWeekend", e.target.checked, { shouldDirty: true })}
+            />
+            土日を考慮
+          </label>
+          <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={considerHolidayCalendar}
+              onChange={(e) => setValue("considerHolidayCalendar", e.target.checked, { shouldDirty: true })}
+            />
+            休日カレンダーを考慮
+          </label>
+          <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={considerCompanyHolidayCalendar}
+              onChange={(e) => setValue("considerCompanyHolidayCalendar", e.target.checked, { shouldDirty: true })}
+            />
+            会社休日カレンダーを考慮
+          </label>
+        </div>
+      </div>
+      {loadingCalendars && (
+        <p className="text-sm text-slate-500">休日カレンダー情報を読み込み中です…</p>
+      )}
+    </div>
+  );
+}
+
+type PreviewListProps = { previewItems: PreviewItem[] };
+function BulkRegisterPreviewList({ previewItems }: PreviewListProps) {
+  return (
+    <div>
+      <p className="mb-3 text-sm font-semibold text-slate-800">登録内容プレビュー</p>
+      {previewItems.length === 0 ? (
+        <p className="text-sm text-slate-500">条件を入力するとプレビューが表示されます。</p>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {previewItems.map((item) => (
+            <div
+              key={item.closeMonth.format("YYYY-MM")}
+              className={[
+                "rounded-2xl border px-4 py-3",
+                item.isDuplicate ? "border-sky-200 bg-sky-50" : "border-emerald-200 bg-emerald-50",
+              ].join(" ")}
+            >
+              <div className="flex flex-col gap-1 text-sm text-slate-700 md:flex-row md:items-start md:gap-4">
+                <div className="min-w-[120px] font-semibold text-slate-900">
+                  {item.closeMonth.format("YYYY年M月")}
+                  {item.isDuplicate ? " (登録済み)" : ""}
+                </div>
+                <div>
+                  {item.startDate.format(AttendanceDate.DisplayFormat)} 〜{" "}
+                  {item.endDate.format(AttendanceDate.DisplayFormat)}
+                  {item.baseEndDate.isSame(item.endDate, "day") ? null : (
+                    <span className="ml-1 text-slate-500">
+                      (元の締め日 {item.baseEndDate.format(AttendanceDate.DisplayFormat)} → 調整後)
+                    </span>
+                  )}
+                </div>
+                <div className="text-slate-500">{item.adjustmentReason}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

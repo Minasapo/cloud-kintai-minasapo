@@ -8,24 +8,10 @@ import {
   listDailyReports,
 } from "@shared/api/graphql/documents/queries";
 import {
-  onCreateAttendance,
-  onCreateDailyReport,
-  onDeleteAttendance,
-  onDeleteDailyReport,
-  onUpdateAttendance,
-  onUpdateDailyReport,
-} from "@shared/api/graphql/documents/subscriptions";
-import {
   Attendance,
   DailyReportStatus,
   ListAttendancesQuery,
   ListDailyReportsQuery,
-  OnCreateAttendanceSubscription,
-  OnCreateDailyReportSubscription,
-  OnDeleteAttendanceSubscription,
-  OnDeleteDailyReportSubscription,
-  OnUpdateAttendanceSubscription,
-  OnUpdateDailyReportSubscription,
 } from "@shared/api/graphql/types";
 import { createLogger } from "@shared/lib/logger";
 import { GraphQLResult } from "aws-amplify/api";
@@ -48,6 +34,7 @@ import {
   isAttendanceCurrentWorking,
 } from "../lib/adminDashboardSelectors";
 import { resolveAggregationDateRange } from "../lib/resolveAggregationDateRange";
+import { useAdminDashboardSubscriptions } from "./useAdminDashboardSubscriptions";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ChartTooltip, Legend);
 
@@ -220,181 +207,15 @@ export function useAdminDashboard() {
     void fetchTodayDailyReportStatus();
   }, [fetchTodayDailyReportStatus]);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      return;
-    }
-
-    let isMounted = true;
-    let currentWorkingTimer: ReturnType<typeof setTimeout> | null = null;
-    let periodAttendancesTimer: ReturnType<typeof setTimeout> | null = null;
-    let dailyReportTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const scheduleCurrentWorkingRefresh = () => {
-      if (currentWorkingTimer) {
-        clearTimeout(currentWorkingTimer);
-      }
-      currentWorkingTimer = setTimeout(() => {
-        if (!isMounted) {
-          return;
-        }
-        void fetchCurrentWorkingStaffCount();
-      }, 300);
-    };
-
-    const schedulePeriodAttendanceRefresh = () => {
-      if (periodAttendancesTimer) {
-        clearTimeout(periodAttendancesTimer);
-      }
-      periodAttendancesTimer = setTimeout(() => {
-        if (!isMounted) {
-          return;
-        }
-        void fetchPeriodAttendances();
-      }, 300);
-    };
-
-    const scheduleDailyReportRefresh = () => {
-      if (dailyReportTimer) {
-        clearTimeout(dailyReportTimer);
-      }
-      dailyReportTimer = setTimeout(() => {
-        if (!isMounted) {
-          return;
-        }
-        void fetchTodayDailyReportStatus();
-      }, 300);
-    };
-
-    const handleAttendanceEvent = (
-      attendance?: {
-        workDate?: string | null;
-      } | null,
-    ) => {
-      const workDate = attendance?.workDate;
-      if (!workDate) {
-        return;
-      }
-
-      if (workDate === targetWorkDate) {
-        scheduleCurrentWorkingRefresh();
-      }
-
-      const isInAggregationRange = dayjs(workDate).isBetween(
-        aggregationStart,
-        aggregationEnd,
-        "day",
-        "[]",
-      );
-      if (isInAggregationRange) {
-        schedulePeriodAttendanceRefresh();
-      }
-    };
-
-    const handleDailyReportEvent = (
-      dailyReport?: {
-        reportDate?: string | null;
-      } | null,
-    ) => {
-      if (dailyReport?.reportDate !== targetWorkDate) {
-        return;
-      }
-      scheduleDailyReportRefresh();
-    };
-
-    const createAttendanceSubscription = graphqlClient
-      .graphql({ query: onCreateAttendance, authMode: "userPool" })
-      .subscribe({
-        next: ({ data }: { data?: OnCreateAttendanceSubscription }) => {
-          handleAttendanceEvent(data?.onCreateAttendance);
-        },
-        error: (error: unknown) => {
-          logger.error("Attendance create subscription error", error);
-        },
-      });
-
-    const updateAttendanceSubscription = graphqlClient
-      .graphql({ query: onUpdateAttendance, authMode: "userPool" })
-      .subscribe({
-        next: ({ data }: { data?: OnUpdateAttendanceSubscription }) => {
-          handleAttendanceEvent(data?.onUpdateAttendance);
-        },
-        error: (error: unknown) => {
-          logger.error("Attendance update subscription error", error);
-        },
-      });
-
-    const deleteAttendanceSubscription = graphqlClient
-      .graphql({ query: onDeleteAttendance, authMode: "userPool" })
-      .subscribe({
-        next: ({ data }: { data?: OnDeleteAttendanceSubscription }) => {
-          handleAttendanceEvent(data?.onDeleteAttendance);
-        },
-        error: (error: unknown) => {
-          logger.error("Attendance delete subscription error", error);
-        },
-      });
-
-    const createDailyReportSubscription = graphqlClient
-      .graphql({ query: onCreateDailyReport, authMode: "userPool" })
-      .subscribe({
-        next: ({ data }: { data?: OnCreateDailyReportSubscription }) => {
-          handleDailyReportEvent(data?.onCreateDailyReport);
-        },
-        error: (error: unknown) => {
-          logger.error("Daily report create subscription error", error);
-        },
-      });
-
-    const updateDailyReportSubscription = graphqlClient
-      .graphql({ query: onUpdateDailyReport, authMode: "userPool" })
-      .subscribe({
-        next: ({ data }: { data?: OnUpdateDailyReportSubscription }) => {
-          handleDailyReportEvent(data?.onUpdateDailyReport);
-        },
-        error: (error: unknown) => {
-          logger.error("Daily report update subscription error", error);
-        },
-      });
-
-    const deleteDailyReportSubscription = graphqlClient
-      .graphql({ query: onDeleteDailyReport, authMode: "userPool" })
-      .subscribe({
-        next: ({ data }: { data?: OnDeleteDailyReportSubscription }) => {
-          handleDailyReportEvent(data?.onDeleteDailyReport);
-        },
-        error: (error: unknown) => {
-          logger.error("Daily report delete subscription error", error);
-        },
-      });
-
-    return () => {
-      isMounted = false;
-      if (currentWorkingTimer) {
-        clearTimeout(currentWorkingTimer);
-      }
-      if (periodAttendancesTimer) {
-        clearTimeout(periodAttendancesTimer);
-      }
-      if (dailyReportTimer) {
-        clearTimeout(dailyReportTimer);
-      }
-      createAttendanceSubscription.unsubscribe();
-      updateAttendanceSubscription.unsubscribe();
-      deleteAttendanceSubscription.unsubscribe();
-      createDailyReportSubscription.unsubscribe();
-      updateDailyReportSubscription.unsubscribe();
-      deleteDailyReportSubscription.unsubscribe();
-    };
-  }, [
-    aggregationEnd,
+  useAdminDashboardSubscriptions({
+    isAuthenticated,
+    targetWorkDate,
     aggregationStart,
+    aggregationEnd,
     fetchCurrentWorkingStaffCount,
     fetchPeriodAttendances,
     fetchTodayDailyReportStatus,
-    isAuthenticated,
-    targetWorkDate,
-  ]);
+  });
 
   const staffWorkStatusSummary = useMemo(() => {
     const standardWorkHours = Math.max(getStandardWorkHours(), 0);

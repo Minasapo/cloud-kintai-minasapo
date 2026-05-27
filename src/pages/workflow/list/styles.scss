@@ -345,10 +345,15 @@
 }
 
 .workflow-desktop-results-head {
-  @apply grid items-center gap-4 border-b px-5 py-3 text-[0.74rem] font-bold uppercase tracking-[0.06em] text-slate-400;
-  grid-template-columns: minmax(180px, 1fr) minmax(160px, 0.9fr) minmax(180px, 0.9fr) minmax(160px, 0.9fr);
+  @apply w-full border-b text-[0.74rem] font-bold uppercase tracking-[0.06em] text-slate-400;
+  table-layout: fixed;
+  border-collapse: collapse;
   border-color: rgba(226, 232, 240, 0.8);
   background: linear-gradient(180deg, rgba(240, 253, 244, 0.72) 0%, rgba(248, 250, 252, 0.58) 100%);
+}
+
+.workflow-desktop-results-head th {
+  @apply px-5 py-3 text-left align-middle;
 }
 
 .workflow-desktop-results-body {
@@ -356,10 +361,14 @@
 }
 
 .workflow-desktop-row {
-  @apply grid w-full items-center gap-4 border-b px-5 py-3.5 text-left transition last:border-b-0 text-slate-900 bg-white;
-  grid-template-columns: minmax(180px, 1fr) minmax(160px, 0.9fr) minmax(180px, 0.9fr) minmax(160px, 0.9fr);
+  @apply border-b text-left transition last:border-b-0 text-slate-900 bg-white;
   border-color: rgba(226, 232, 240, 0.6);
   border-left: 3px solid transparent;
+}
+
+.workflow-desktop-row th,
+.workflow-desktop-row td {
+  @apply px-5 py-3.5 align-middle;
 }
 
 .workflow-desktop-row:hover {

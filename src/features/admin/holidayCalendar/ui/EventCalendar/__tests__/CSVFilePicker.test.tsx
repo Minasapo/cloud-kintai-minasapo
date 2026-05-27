@@ -68,7 +68,8 @@ async function openDialog() {
 
 // ── Tests ──────────────────────────────────────────────────────────────────
 
-describe("CSVFilePicker", () => {
+
+describe("CSVFilePicker - 初期表示・ダイアログ・キャンセル", () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.spyOn(window, "confirm").mockReturnValue(true);
@@ -160,6 +161,19 @@ describe("CSVFilePicker", () => {
 
     await user.click(screen.getByRole("button", { name: "登録" }));
     expect(bulkMock).not.toHaveBeenCalled();
+  });
+
+});
+
+describe("CSVFilePicker - 登録フロー", () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.spyOn(window, "confirm").mockReturnValue(true);
+    defaultBulkCreateMock.mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   // ── 登録フロー (confirm OK) ────────────────────────────────────────────────
@@ -291,6 +305,19 @@ describe("CSVFilePicker", () => {
       );
     });
     expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+});
+
+describe("CSVFilePicker - parseSummaryとリセット", () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.spyOn(window, "confirm").mockReturnValue(true);
+    defaultBulkCreateMock.mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   // ── parseSummary 表示 ─────────────────────────────────────────────────────

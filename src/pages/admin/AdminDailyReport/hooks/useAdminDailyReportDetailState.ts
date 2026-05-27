@@ -4,24 +4,19 @@ import {
   logDailyReportReactionUpdate,
 } from "@entities/operation-log/model/dailyReportOperationLog";
 import useCognitoUser from "@entities/staff/model/useCognitoUser";
+import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { sendDailyReportCommentNotification } from "@features/attendance/daily-report/lib/sendDailyReportCommentNotification";
 import { graphqlClient } from "@shared/api/amplify/graphqlClient";
-import {
-  buildVersionOrUpdatedAtCondition,
-  getGraphQLErrorMessage,
-  getNextVersion,
-} from "@shared/api/graphql/concurrency";
-import { updateDailyReport } from "@shared/api/graphql/documents/mutations";
 import { getDailyReport } from "@shared/api/graphql/documents/queries";
 import type {
   DailyReportComment,
   DailyReportReaction,
   GetDailyReportQuery,
-  UpdateDailyReportMutation,
 } from "@shared/api/graphql/types";
 import type { GraphQLResult } from "aws-amplify/api";
 import {
+  type Dispatch,
   useCallback,
   useContext,
   useEffect,
@@ -36,6 +31,11 @@ import {
   normalizeReactions,
   type ReactionType,
 } from "../data";
+import {
+  addDailyReportComment,
+  buildDailyReportBeforeSnapshot,
+  updateDailyReportReaction,
+} from "../services/dailyReportInteractionService";
 import { useCurrentStaff } from "../useCurrentStaff";
 
 type State = {
@@ -143,24 +143,160 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-function buildBeforeSnapshot(
-  report: AdminDailyReport,
-  reactionEntries: DailyReportReaction[] | null,
-  commentEntries: DailyReportComment[] | null,
-) {
-  return {
-    id: report.id,
-    staffId: report.staffId,
-    reportDate: report.date,
-    title: report.title,
-    content: report.content,
-    status: report.status,
-    reactions: reactionEntries ?? [],
-    comments: commentEntries ?? [],
-    createdAt: report.createdAt ?? null,
-    updatedAt: report.updatedAt,
-    version: report.version ?? null,
+type ReportInteractionDeps = {
+  state: State;
+  dispatch: Dispatch<Action>;
+  currentStaffId: string | null;
+  currentStaffName: string;
+  isResolvingCurrentStaff: boolean;
+  buildStaffName: (staffId: string) => string;
+  staffs: StaffType[];
+};
+
+function useReportInteractions({
+  state,
+  dispatch,
+  currentStaffId,
+  currentStaffName,
+  isResolvingCurrentStaff,
+  buildStaffName,
+  staffs,
+}: ReportInteractionDeps) {
+  const handleToggleReaction = async (type: ReactionType) => {
+      if (!state.report) return;
+      if (!state.reactionEntries) {
+        dispatch({
+          type: "SET_ACTION_ERROR",
+          error:
+            "リアクション情報の取得中です。少し待ってから再度お試しください。",
+        });
+        return;
+      }
+      if (!currentStaffId || isResolvingCurrentStaff) {
+        dispatch({
+          type: "SET_ACTION_ERROR",
+          error:
+            "スタッフ情報が取得できないため、リアクションを登録できません。",
+        });
+        return;
+      }
+      if (state.isSavingReaction) return;
+
+      dispatch({ type: "REACTION_START" });
+
+      try {
+        const beforeReport = buildDailyReportBeforeSnapshot(
+          state.report,
+          state.reactionEntries,
+          state.commentEntries,
+        );
+        const { updated, operation } = await updateDailyReportReaction({
+          report: state.report,
+          reactionEntries: state.reactionEntries,
+          currentStaffId,
+          type,
+        });
+
+        await logDailyReportReactionUpdate({
+          actorStaffId: currentStaffId,
+          before: beforeReport,
+          after: updated,
+          operation,
+          reactionType: type,
+        });
+
+        dispatch({
+          type: "REACTION_SUCCESS",
+          report: mapDailyReport(updated, buildStaffName(updated.staffId)),
+          reactionEntries: normalizeReactions(updated.reactions),
+          commentEntries: normalizeComments(updated.comments),
+        });
+      } catch (error) {
+        dispatch({
+          type: "REACTION_ERROR",
+          error:
+            error instanceof Error
+              ? error.message
+              : "リアクションの登録に失敗しました。",
+        });
+      }
   };
+
+  const handleSubmitComment = async () => {
+    const body = state.commentInput.trim();
+    if (!body || !state.report) return;
+    if (!state.commentEntries) {
+      dispatch({
+        type: "SET_ACTION_ERROR",
+        error:
+          "コメント情報の取得中です。少し待ってから再度お試しください。",
+      });
+      return;
+    }
+    if (!currentStaffId || isResolvingCurrentStaff) {
+      dispatch({
+        type: "SET_ACTION_ERROR",
+        error: "スタッフ情報が取得できないため、コメントを登録できません。",
+      });
+      return;
+    }
+    if (state.isSavingComment) return;
+
+    dispatch({ type: "COMMENT_START" });
+
+    try {
+      const beforeReport = buildDailyReportBeforeSnapshot(
+        state.report,
+        state.reactionEntries,
+        state.commentEntries,
+      );
+      const { updated, addedComment } = await addDailyReportComment({
+        report: state.report,
+        commentEntries: state.commentEntries,
+        currentStaffId,
+        currentStaffName,
+        body,
+      });
+
+      try {
+        await sendDailyReportCommentNotification({
+          staffs,
+          report: updated,
+          commentAuthorName: currentStaffName,
+          commentBody: body,
+        });
+      } catch (mailError) {
+        console.error(
+          "Failed to send daily report comment notification:",
+          mailError,
+        );
+      }
+
+      await logDailyReportCommentAdd({
+        actorStaffId: currentStaffId,
+        before: beforeReport,
+        after: updated,
+        comment: addedComment,
+      });
+
+      dispatch({
+        type: "COMMENT_SUCCESS",
+        report: mapDailyReport(updated, buildStaffName(updated.staffId)),
+        reactionEntries: normalizeReactions(updated.reactions),
+        commentEntries: normalizeComments(updated.comments),
+      });
+    } catch (error) {
+      dispatch({
+        type: "COMMENT_ERROR",
+        error:
+          error instanceof Error
+            ? error.message
+            : "コメントの登録に失敗しました。",
+      });
+    }
+  };
+
+  return { handleToggleReaction, handleSubmitComment };
 }
 
 export function useAdminDailyReportDetailState(
@@ -259,256 +395,15 @@ export function useAdminDailyReportDetailState(
     void fetchReport();
   }, [fetchReport]);
 
-  const handleToggleReaction = useCallback(
-    async (type: ReactionType) => {
-      if (!state.report) return;
-      if (!state.reactionEntries) {
-        dispatch({
-          type: "SET_ACTION_ERROR",
-          error:
-            "リアクション情報の取得中です。少し待ってから再度お試しください。",
-        });
-        return;
-      }
-      if (!currentStaffId || isResolvingCurrentStaff) {
-        dispatch({
-          type: "SET_ACTION_ERROR",
-          error:
-            "スタッフ情報が取得できないため、リアクションを登録できません。",
-        });
-        return;
-      }
-      if (state.isSavingReaction) return;
-
-      dispatch({ type: "REACTION_START" });
-
-      const hasReaction = state.reactionEntries.some(
-        (entry) => entry.staffId === currentStaffId && entry.type === type,
-      );
-      const timestamp = new Date().toISOString();
-      const nextEntries = hasReaction
-        ? state.reactionEntries.filter(
-            (entry) =>
-              entry.staffId !== currentStaffId || entry.type !== type,
-          )
-        : [
-            ...state.reactionEntries,
-            {
-              __typename: "DailyReportReaction" as const,
-              staffId: currentStaffId,
-              type,
-              createdAt: timestamp,
-            },
-          ];
-
-      try {
-        const beforeReport = buildBeforeSnapshot(
-          state.report,
-          state.reactionEntries,
-          state.commentEntries,
-        );
-        const response = (await graphqlClient.graphql({
-          query: updateDailyReport,
-          variables: {
-            condition: buildVersionOrUpdatedAtCondition(
-              state.report.version,
-              state.report.updatedAt,
-            ),
-            input: {
-              id: state.report.id,
-              reactions: nextEntries.map(
-                ({ staffId, type: reactionType, createdAt }) => ({
-                  staffId,
-                  type: reactionType,
-                  createdAt,
-                }),
-              ),
-              updatedAt: timestamp,
-              version: getNextVersion(state.report.version),
-            },
-          },
-          authMode: "userPool",
-        })) as GraphQLResult<UpdateDailyReportMutation>;
-
-        if (response.errors?.length) {
-          throw new Error(
-            getGraphQLErrorMessage(
-              response.errors,
-              "リアクションの更新に失敗しました。",
-            ),
-          );
-        }
-
-        const updated = response.data?.updateDailyReport;
-        if (!updated) throw new Error("リアクションの更新に失敗しました。");
-
-        await logDailyReportReactionUpdate({
-          actorStaffId: currentStaffId,
-          before: beforeReport,
-          after: updated,
-          operation: hasReaction ? "remove" : "add",
-          reactionType: type,
-        });
-
-        dispatch({
-          type: "REACTION_SUCCESS",
-          report: mapDailyReport(updated, buildStaffName(updated.staffId)),
-          reactionEntries: normalizeReactions(updated.reactions),
-          commentEntries: normalizeComments(updated.comments),
-        });
-      } catch (error) {
-        dispatch({
-          type: "REACTION_ERROR",
-          error:
-            error instanceof Error
-              ? error.message
-              : "リアクションの登録に失敗しました。",
-        });
-      }
-    },
-    [
-      state.report,
-      state.reactionEntries,
-      state.commentEntries,
-      state.isSavingReaction,
-      currentStaffId,
-      isResolvingCurrentStaff,
-      buildStaffName,
-    ],
-  );
-
-  const handleSubmitComment = useCallback(async () => {
-    const body = state.commentInput.trim();
-    if (!body || !state.report) return;
-    if (!state.commentEntries) {
-      dispatch({
-        type: "SET_ACTION_ERROR",
-        error:
-          "コメント情報の取得中です。少し待ってから再度お試しください。",
-      });
-      return;
-    }
-    if (!currentStaffId || isResolvingCurrentStaff) {
-      dispatch({
-        type: "SET_ACTION_ERROR",
-        error: "スタッフ情報が取得できないため、コメントを登録できません。",
-      });
-      return;
-    }
-    if (state.isSavingComment) return;
-
-    dispatch({ type: "COMMENT_START" });
-
-    const timestamp = new Date().toISOString();
-    const newCommentEntry: DailyReportComment = {
-      __typename: "DailyReportComment",
-      id: `admin-comment-${Date.now().toString(36)}-${Math.random()
-        .toString(36)
-        .slice(2, 8)}`,
-      staffId: currentStaffId,
-      authorName: currentStaffName,
-      body,
-      createdAt: timestamp,
-    };
-    const nextComments = [newCommentEntry, ...state.commentEntries];
-
-    try {
-      const beforeReport = buildBeforeSnapshot(
-        state.report,
-        state.reactionEntries,
-        state.commentEntries,
-      );
-      const response = (await graphqlClient.graphql({
-        query: updateDailyReport,
-        variables: {
-          condition: buildVersionOrUpdatedAtCondition(
-            state.report.version,
-            state.report.updatedAt,
-          ),
-          input: {
-            id: state.report.id,
-            comments: nextComments.map(
-              ({
-                id: commentId,
-                staffId,
-                authorName,
-                body: commentBody,
-                createdAt,
-              }) => ({
-                id: commentId,
-                staffId,
-                authorName,
-                body: commentBody,
-                createdAt,
-              }),
-            ),
-            updatedAt: timestamp,
-            version: getNextVersion(state.report.version),
-          },
-        },
-        authMode: "userPool",
-      })) as GraphQLResult<UpdateDailyReportMutation>;
-
-      if (response.errors?.length) {
-        throw new Error(
-          getGraphQLErrorMessage(
-            response.errors,
-            "コメントの更新に失敗しました。",
-          ),
-        );
-      }
-
-      const updated = response.data?.updateDailyReport;
-      if (!updated) throw new Error("コメントの更新に失敗しました。");
-
-      try {
-        await sendDailyReportCommentNotification({
-          staffs,
-          report: updated,
-          commentAuthorName: currentStaffName,
-          commentBody: body,
-        });
-      } catch (mailError) {
-        console.error(
-          "Failed to send daily report comment notification:",
-          mailError,
-        );
-      }
-
-      await logDailyReportCommentAdd({
-        actorStaffId: currentStaffId,
-        before: beforeReport,
-        after: updated,
-        comment: newCommentEntry,
-      });
-
-      dispatch({
-        type: "COMMENT_SUCCESS",
-        report: mapDailyReport(updated, buildStaffName(updated.staffId)),
-        reactionEntries: normalizeReactions(updated.reactions),
-        commentEntries: normalizeComments(updated.comments),
-      });
-    } catch (error) {
-      dispatch({
-        type: "COMMENT_ERROR",
-        error:
-          error instanceof Error
-            ? error.message
-            : "コメントの登録に失敗しました。",
-      });
-    }
-  }, [
-    state.commentInput,
-    state.report,
-    state.commentEntries,
-    state.reactionEntries,
-    state.isSavingComment,
+  const { handleToggleReaction, handleSubmitComment } = useReportInteractions({
+    state,
+    dispatch,
     currentStaffId,
     currentStaffName,
     isResolvingCurrentStaff,
     buildStaffName,
     staffs,
-  ]);
+  });
 
   const chipsDisabled = useMemo(
     () =>

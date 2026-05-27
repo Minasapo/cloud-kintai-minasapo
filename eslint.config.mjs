@@ -220,9 +220,21 @@ export default [
       "src/pages/admin/AdminLayout.tsx",
       "src/pages/preview/**/*.{ts,tsx,js,jsx}",
       "src/pages/shift/collaborative/ShiftCollaborativePrototype.tsx",
+      "src/shared/ui/button/AppButton.tsx",
+      "src/shared/ui/button/AppIconButton.tsx",
     ],
     rules: {
       "no-restricted-imports": "off",
+    },
+  },
+  {
+    files: [
+      "src/**/*.test.{ts,tsx}",
+      "src/**/*.spec.{ts,tsx}",
+      "playwright/**/*.spec.{ts,tsx}",
+    ],
+    rules: {
+      "max-lines-per-function": "off",
     },
   },
 ];

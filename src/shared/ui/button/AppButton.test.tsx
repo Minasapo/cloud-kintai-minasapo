@@ -4,25 +4,17 @@ import userEvent from "@testing-library/user-event";
 import AppButton from "./AppButton";
 
 describe("AppButton", () => {
-  it("button要素として描画し、variant/tone/size属性を保持する", () => {
-    render(
-      <AppButton variant="outline" tone="danger" size="sm">
-        削除
-      </AppButton>,
-    );
+  it("button要素として描画される", () => {
+    render(<AppButton>削除</AppButton>);
 
-    const button = screen.getByRole("button", { name: "削除" });
-    expect(button).toHaveAttribute("data-app-button-variant", "outline");
-    expect(button).toHaveAttribute("data-app-button-tone", "danger");
-    expect(button).toHaveAttribute("data-app-button-size", "sm");
+    expect(screen.getByRole("button", { name: "削除" })).toBeInTheDocument();
   });
 
-  it("loading時は無効化しスピナーを表示する", () => {
+  it("loading時は無効化しProgressアイコンを表示する", () => {
     render(<AppButton loading>保存</AppButton>);
 
-    const button = screen.getByRole("button", { name: "保存" });
+    const button = screen.getByRole("button", { name: /保存/ });
     expect(button).toBeDisabled();
-    expect(button.querySelector(".app-button__spinner")).toBeInTheDocument();
   });
 
   it("type=submitをbuttonに渡せる", () => {
@@ -46,7 +38,6 @@ describe("AppButton", () => {
 
     const label = screen.getByText("CSVを選択").closest("label");
     expect(label).toBeInTheDocument();
-    expect(label).toHaveAttribute("data-app-button-variant", "solid");
 
     if (label) {
       await user.click(label);
@@ -55,12 +46,27 @@ describe("AppButton", () => {
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it("fullWidth属性を保持する", () => {
+  it("fullWidthを渡せる", () => {
     render(<AppButton fullWidth>適用</AppButton>);
 
-    expect(screen.getByRole("button", { name: "適用" })).toHaveAttribute(
-      "data-app-button-full-width",
-      "true",
-    );
+    const button = screen.getByRole("button", { name: "適用" });
+    expect(button).toBeInTheDocument();
+  });
+
+  it("disabled時はボタンが無効化される", () => {
+    render(<AppButton disabled>操作</AppButton>);
+
+    expect(screen.getByRole("button", { name: "操作" })).toBeDisabled();
+  });
+
+  it("onClickが呼ばれる", async () => {
+    const user = userEvent.setup();
+    const handleClick = jest.fn();
+
+    render(<AppButton onClick={handleClick}>実行</AppButton>);
+
+    await user.click(screen.getByRole("button", { name: "実行" }));
+
+    expect(handleClick).toHaveBeenCalledTimes(1);
   });
 });

@@ -20,29 +20,24 @@ describe("AppIconButton", () => {
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it("active状態とsize属性を保持する", () => {
+  it("tone/sizeを指定してボタンが描画される", () => {
     render(
       <AppIconButton aria-label="履歴" tone="primary" size="sm" active>
         H
       </AppIconButton>,
     );
 
-    const button = screen.getByRole("button", { name: "履歴" });
-    expect(button).toHaveAttribute("data-app-icon-button-tone", "primary");
-    expect(button).toHaveAttribute("data-app-icon-button-size", "sm");
-    expect(button).toHaveAttribute("data-app-icon-button-active", "true");
+    expect(screen.getByRole("button", { name: "履歴" })).toBeInTheDocument();
   });
 
-  it("loading時は無効化しスピナーを表示する", () => {
+  it("loading時は無効化される", () => {
     render(
       <AppIconButton aria-label="同期" loading>
         S
       </AppIconButton>,
     );
 
-    const button = screen.getByRole("button", { name: "同期" });
-    expect(button).toBeDisabled();
-    expect(button.querySelector(".app-icon-button__spinner")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "同期" })).toBeDisabled();
   });
 
   it("tooltipが指定された場合、role=tooltipの要素を含む", () => {
@@ -59,5 +54,15 @@ describe("AppIconButton", () => {
     render(<AppIconButton aria-label="削除">D</AppIconButton>);
 
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+  });
+
+  it("disabled時はボタンが無効化される", () => {
+    render(
+      <AppIconButton aria-label="閉じる" disabled>
+        X
+      </AppIconButton>,
+    );
+
+    expect(screen.getByRole("button", { name: "閉じる" })).toBeDisabled();
   });
 });

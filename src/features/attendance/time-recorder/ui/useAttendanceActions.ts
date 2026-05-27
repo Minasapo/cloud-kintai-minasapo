@@ -41,51 +41,24 @@ type UseAttendanceActionsParams = {
 
 const LOCAL_ATTENDANCE_UPDATE_IGNORE_MS = 3000;
 
-export function useAttendanceActions({
-  attendance,
-  staff,
-  logger,
+type UseAttendanceMutationsParams = {
+  upsertAttendanceMutation: ReturnType<typeof useUpsertAttendanceByStaffAndDateMutation>[0];
+  updateAttendanceMutation: ReturnType<typeof useUpdateAttendanceMutation>[0];
+  shouldFetchAttendance: boolean;
+  shouldFetchAttendanceErrors: boolean;
+  refetchAttendance: () => Promise<unknown>;
+  refetchAttendances: () => Promise<unknown>;
+};
+
+function useAttendanceMutations({
+  upsertAttendanceMutation,
+  updateAttendanceMutation,
   shouldFetchAttendance,
   shouldFetchAttendanceErrors,
   refetchAttendance,
   refetchAttendances,
-}: UseAttendanceActionsParams) {
-  const { cognitoUser } = useContext(AuthContext);
-  const { getStartTime, getEndTime } = useContext(AppConfigContext);
-  const dispatch = useDispatch();
-
-  const [upsertAttendanceMutation] =
-    useUpsertAttendanceByStaffAndDateMutation();
-  const [updateAttendanceMutation] = useUpdateAttendanceMutation();
+}: UseAttendanceMutationsParams) {
   const localAttendanceUpdateIgnoreUntilRef = useRef(0);
-
-  const resolveUpsertAction = useCallback(
-    (input: CreateAttendanceInput): AttendanceUpsertAction => {
-      if (input.goDirectlyFlag) return "go_directly";
-      if (input.returnDirectlyFlag) return "return_directly";
-      if (input.startTime) return "clock_in";
-      if (input.endTime) return "clock_out";
-      const rests = input.rests ?? [];
-      if (rests.some((rest) => Boolean(rest?.startTime) && !rest?.endTime)) {
-        return "rest_start";
-      }
-      if (rests.some((rest) => Boolean(rest?.endTime))) {
-        return "rest_end";
-      }
-      return "manual";
-    },
-    [],
-  );
-
-  const resolveOccurredAtFromCreateInput = useCallback(
-    (input: CreateAttendanceInput) =>
-      input.startTime ??
-      input.endTime ??
-      input.rests?.find((rest) => rest?.startTime)?.startTime ??
-      input.rests?.find((rest) => rest?.endTime)?.endTime ??
-      getNowISOStringWithZeroSeconds(),
-    [],
-  );
 
   const createAttendance = useCallback(
     (input: CreateAttendanceInput) => {
@@ -103,11 +76,7 @@ export function useAttendanceActions({
         idempotencyKey,
       }).unwrap();
     },
-    [
-      resolveOccurredAtFromCreateInput,
-      resolveUpsertAction,
-      upsertAttendanceMutation,
-    ],
+    [upsertAttendanceMutation],
   );
 
   const updateAttendance = useCallback(
@@ -142,6 +111,71 @@ export function useAttendanceActions({
     },
     [refreshAttendanceData],
   );
+
+  return {
+    localAttendanceUpdateIgnoreUntilRef,
+    createAttendance,
+    updateAttendance,
+    refreshAttendanceData,
+    runAttendanceActionWithRefresh,
+  };
+}
+
+function resolveUpsertAction(input: CreateAttendanceInput): AttendanceUpsertAction {
+  if (input.goDirectlyFlag) return "go_directly";
+  if (input.returnDirectlyFlag) return "return_directly";
+  if (input.startTime) return "clock_in";
+  if (input.endTime) return "clock_out";
+  const rests = input.rests ?? [];
+  if (rests.some((rest) => Boolean(rest?.startTime) && !rest?.endTime)) {
+    return "rest_start";
+  }
+  if (rests.some((rest) => Boolean(rest?.endTime))) {
+    return "rest_end";
+  }
+  return "manual";
+}
+
+function resolveOccurredAtFromCreateInput(input: CreateAttendanceInput) {
+  return (
+    input.startTime ??
+    input.endTime ??
+    input.rests?.find((rest) => rest?.startTime)?.startTime ??
+    input.rests?.find((rest) => rest?.endTime)?.endTime ??
+    getNowISOStringWithZeroSeconds()
+  );
+}
+
+export function useAttendanceActions({
+  attendance,
+  staff,
+  logger,
+  shouldFetchAttendance,
+  shouldFetchAttendanceErrors,
+  refetchAttendance,
+  refetchAttendances,
+}: UseAttendanceActionsParams) {
+  const { cognitoUser } = useContext(AuthContext);
+  const { getStartTime, getEndTime } = useContext(AppConfigContext);
+  const dispatch = useDispatch();
+
+  const [upsertAttendanceMutation] =
+    useUpsertAttendanceByStaffAndDateMutation();
+  const [updateAttendanceMutation] = useUpdateAttendanceMutation();
+  const {
+    localAttendanceUpdateIgnoreUntilRef,
+    createAttendance,
+    updateAttendance,
+    refreshAttendanceData,
+    runAttendanceActionWithRefresh,
+  } = useAttendanceMutations({
+    upsertAttendanceMutation,
+    updateAttendanceMutation,
+    shouldFetchAttendance,
+    shouldFetchAttendanceErrors,
+    refetchAttendance,
+    refetchAttendances,
+  });
 
   const clockIn = useCallback(
     (

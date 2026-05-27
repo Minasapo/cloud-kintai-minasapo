@@ -7,6 +7,7 @@ export type OfficeQrPanelProps = {
   timeLeft: number;
   progress: number;
   qrUrl: string;
+  errorMessage?: string;
   tooltipOpen: boolean;
   onModeChange: () => void;
   onCopyUrl: () => void;
@@ -31,11 +32,20 @@ export function OfficeQrPanel({
   timeLeft,
   progress,
   qrUrl,
+  errorMessage = "",
   tooltipOpen,
   onModeChange,
   onCopyUrl,
   onManualRefresh,
 }: OfficeQrPanelProps) {
+  const hasError = errorMessage.length > 0;
+  const progressValue = Math.max(0, Math.min(progress, 100));
+  const liveStatusText = hasError
+    ? "QRコードの更新に失敗しました。手動更新をお試しください。"
+    : progressValue === 100
+      ? "QRコードを更新しました。"
+      : `QRコード更新まで ${formatTime(timeLeft)} です。`;
+
   if (!isOfficeModeEnabled) {
     return (
       <div className="mx-auto w-full max-w-5xl px-4 py-4">
@@ -65,6 +75,15 @@ export function OfficeQrPanel({
       )}
 
       <div className="mt-4 text-center">
+        <p
+          className="sr-only"
+          role="status"
+          aria-live={hasError ? "assertive" : "polite"}
+          data-testid="office-qr-live-status"
+        >
+          {liveStatusText}
+        </p>
+
         <button
           type="button"
           onClick={onModeChange}
@@ -86,14 +105,32 @@ export function OfficeQrPanel({
           <div
             className="h-[30px] overflow-hidden rounded-full bg-slate-200"
             data-testid="office-qr-progress"
+            role="progressbar"
+            aria-label="QRコードの更新進捗"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(progressValue)}
           >
             <div
               className="h-full rounded-full bg-emerald-600 transition-[width] duration-300"
-              style={{ width: `${Math.max(0, Math.min(progress, 100))}%` }}
+              style={{ width: `${progressValue}%` }}
             />
           </div>
         </div>
       </div>
+
+      {hasError && (
+        <div className="mt-4 text-center">
+          <div
+            role="alert"
+            className="mx-auto max-w-xl rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-900"
+            data-testid="office-qr-error-alert"
+          >
+            <p className="m-0 font-semibold">{errorMessage}</p>
+            <p className="mt-1 mb-0">「QRコードを手動更新」ボタンから再試行してください。</p>
+          </div>
+        </div>
+      )}
 
       <div className="mt-4 text-center">
         <p className="mb-2 text-base leading-7 text-slate-900">

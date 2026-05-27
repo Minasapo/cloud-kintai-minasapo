@@ -41,6 +41,189 @@ const collectUsedCommentIds = (commentsMap: CommentsMap): Set<string> => {
   return usedIds;
 };
 
+const createCommentObject = (
+  cellKey: string,
+  userId: string,
+  userName: string,
+  userColor: string,
+  content: string,
+  mentions: Mention[],
+  usedIds: Set<string>,
+): CellComment => {
+  const now = new Date().toISOString();
+  return {
+    id: ensureUniqueCommentId(generateCommentId(), usedIds),
+    cellKey,
+    userId,
+    userName,
+    userColor,
+    content,
+    mentions,
+    createdAt: now,
+    updatedAt: now,
+    isEdited: false,
+    replies: [],
+  };
+};
+
+const updateCommentInMap = (
+  commentsMap: CommentsMap,
+  commentId: string,
+  content: string,
+  mentions: Mention[],
+): { next: CommentsMap; updatedComment: CellComment | null } => {
+  for (const [cellKey, comments] of commentsMap) {
+    const commentIndex = comments.findIndex((c) => c.id === commentId);
+    if (commentIndex === -1) {
+      continue;
+    }
+
+    const updatedComment: CellComment = {
+      ...comments[commentIndex],
+      content,
+      mentions,
+      updatedAt: new Date().toISOString(),
+      isEdited: true,
+    };
+    const newComments = [...comments];
+    newComments[commentIndex] = updatedComment;
+    const next = new Map(commentsMap);
+    next.set(cellKey, newComments);
+    return { next, updatedComment };
+  }
+
+  return { next: commentsMap, updatedComment: null };
+};
+
+const deleteCommentFromMap = (
+  commentsMap: CommentsMap,
+  commentId: string,
+): { next: CommentsMap; deleted: boolean; cellKey?: string } => {
+  for (const [cellKey, comments] of commentsMap) {
+    const filteredComments = comments.filter((c) => c.id !== commentId);
+    if (filteredComments.length === comments.length) {
+      continue;
+    }
+
+    const next = new Map(commentsMap);
+    if (filteredComments.length === 0) {
+      next.delete(cellKey);
+    } else {
+      next.set(cellKey, filteredComments);
+    }
+    return { next, deleted: true, cellKey };
+  }
+
+  return { next: commentsMap, deleted: false };
+};
+
+const replyToCommentInMap = (
+  commentsMap: CommentsMap,
+  parentCommentId: string,
+  userId: string,
+  userName: string,
+  userColor: string,
+  content: string,
+  mentions: Mention[],
+): { next: CommentsMap; reply: CellComment | null } => {
+  for (const [cellKey, comments] of commentsMap) {
+    const parentIndex = comments.findIndex((c) => c.id === parentCommentId);
+    if (parentIndex === -1) {
+      continue;
+    }
+
+    const parentComment = comments[parentIndex];
+    const usedIds = collectUsedCommentIds(commentsMap);
+    const reply = createCommentObject(
+      parentComment.cellKey,
+      userId,
+      userName,
+      userColor,
+      content,
+      mentions,
+      usedIds,
+    );
+    const updatedParent: CellComment = {
+      ...parentComment,
+      replies: [...(parentComment.replies || []), reply],
+      updatedAt: new Date().toISOString(),
+    };
+    const newComments = [...comments];
+    newComments[parentIndex] = updatedParent;
+    const next = new Map(commentsMap);
+    next.set(cellKey, newComments);
+    return { next, reply };
+  }
+
+  return { next: commentsMap, reply: null };
+};
+
+const deleteCommentReplyFromMap = (
+  commentsMap: CommentsMap,
+  parentCommentId: string,
+  replyCommentId: string,
+): { next: CommentsMap; deleted: boolean } => {
+  for (const [cellKey, comments] of commentsMap) {
+    const parentIndex = comments.findIndex((c) => c.id === parentCommentId);
+    if (parentIndex === -1) {
+      continue;
+    }
+
+    const parentComment = comments[parentIndex];
+    if (!parentComment.replies) {
+      continue;
+    }
+
+    const filteredReplies = parentComment.replies.filter(
+      (r) => r.id !== replyCommentId,
+    );
+    if (filteredReplies.length === parentComment.replies.length) {
+      continue;
+    }
+
+    const updatedParent: CellComment = {
+      ...parentComment,
+      replies: filteredReplies,
+      updatedAt: new Date().toISOString(),
+    };
+    const newComments = [...comments];
+    newComments[parentIndex] = updatedParent;
+    const next = new Map(commentsMap);
+    next.set(cellKey, newComments);
+    return { next, deleted: true };
+  }
+
+  return { next: commentsMap, deleted: false };
+};
+
+const parseMentions = (
+  content: string,
+  availableUsers: { userId: string; userName: string }[],
+): Mention[] => {
+  const mentions: Mention[] = [];
+  const mentionRegex = /@([\w\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]+)/g;
+  let match;
+  while ((match = mentionRegex.exec(content)) !== null) {
+    const mentionedName = match[1];
+    const user = availableUsers.find((u) => u.userName === mentionedName);
+    if (user) {
+      mentions.push({ userId: user.userId, userName: user.userName, position: match.index });
+    }
+  }
+  return mentions;
+};
+
+const formatCommentWithMentions = (comment: CellComment): string => {
+  let result = comment.content;
+  comment.mentions.forEach((mention) => {
+    result = result.replace(
+      `@${mention.userName}`,
+      `<span class="mention" data-user-id="${mention.userId}">@${mention.userName}</span>`,
+    );
+  });
+  return result;
+};
+
 /**
  * シフトコメント管理フック
  * セルごとのコメント追加、更新、削除を管理
@@ -54,37 +237,6 @@ export const useShiftComments = () => {
     commentsMapRef.current = next;
     setCommentsMap(next);
   }, []);
-
-  /**
-   * ユーザー情報からコメント作成
-   */
-  const createCommentObject = useCallback(
-    (
-      cellKey: string,
-      userId: string,
-      userName: string,
-      userColor: string,
-      content: string,
-      mentions: Mention[],
-      usedIds: Set<string>,
-    ): CellComment => {
-      const now = new Date().toISOString();
-      return {
-        id: ensureUniqueCommentId(generateCommentId(), usedIds),
-        cellKey,
-        userId,
-        userName,
-        userColor,
-        content,
-        mentions,
-        createdAt: now,
-        updatedAt: now,
-        isEdited: false,
-        replies: [],
-      };
-    },
-    [],
-  );
 
   /**
    * コメントを追加
@@ -116,7 +268,7 @@ export const useShiftComments = () => {
 
       return comment;
     },
-    [createCommentObject, applyUpdate],
+    [applyUpdate],
   );
 
   /**
@@ -128,25 +280,16 @@ export const useShiftComments = () => {
       content: string,
       mentions: Mention[] = [],
     ): CellComment | null => {
-      for (const [cellKey, comments] of commentsMapRef.current) {
-        const commentIndex = comments.findIndex((c) => c.id === commentId);
-        if (commentIndex !== -1) {
-          const updatedComment: CellComment = {
-            ...comments[commentIndex],
-            content,
-            mentions,
-            updatedAt: new Date().toISOString(),
-            isEdited: true,
-          };
-          const newComments = [...comments];
-          newComments[commentIndex] = updatedComment;
-          const next = new Map(commentsMapRef.current);
-          next.set(cellKey, newComments);
-          applyUpdate(next);
-          return updatedComment;
-        }
+      const { next, updatedComment } = updateCommentInMap(
+        commentsMapRef.current,
+        commentId,
+        content,
+        mentions,
+      );
+      if (updatedComment) {
+        applyUpdate(next);
       }
-      return null;
+      return updatedComment;
     },
     [applyUpdate],
   );
@@ -156,20 +299,14 @@ export const useShiftComments = () => {
    */
   const deleteComment = useCallback(
     (commentId: string): { deleted: boolean; cellKey?: string } => {
-      for (const [cellKey, comments] of commentsMapRef.current) {
-        const filteredComments = comments.filter((c) => c.id !== commentId);
-        if (filteredComments.length !== comments.length) {
-          const next = new Map(commentsMapRef.current);
-          if (filteredComments.length === 0) {
-            next.delete(cellKey);
-          } else {
-            next.set(cellKey, filteredComments);
-          }
-          applyUpdate(next);
-          return { deleted: true, cellKey };
-        }
+      const { next, deleted, cellKey } = deleteCommentFromMap(
+        commentsMapRef.current,
+        commentId,
+      );
+      if (deleted) {
+        applyUpdate(next);
       }
-      return { deleted: false };
+      return { deleted, cellKey };
     },
     [applyUpdate],
   );
@@ -196,37 +333,21 @@ export const useShiftComments = () => {
       content: string,
       mentions: Mention[] = [],
     ): CellComment | null => {
-      for (const [cellKey, comments] of commentsMapRef.current) {
-        const parentIndex = comments.findIndex((c) => c.id === parentCommentId);
-        if (parentIndex !== -1) {
-          const parentComment = comments[parentIndex];
-          const usedIds = collectUsedCommentIds(commentsMapRef.current);
-          const reply = createCommentObject(
-            parentComment.cellKey,
-            userId,
-            userName,
-            userColor,
-            content,
-            mentions,
-            usedIds,
-          );
-
-          const updatedParent: CellComment = {
-            ...parentComment,
-            replies: [...(parentComment.replies || []), reply],
-            updatedAt: new Date().toISOString(),
-          };
-          const newComments = [...comments];
-          newComments[parentIndex] = updatedParent;
-          const next = new Map(commentsMapRef.current);
-          next.set(cellKey, newComments);
-          applyUpdate(next);
-          return reply;
-        }
+      const { next, reply } = replyToCommentInMap(
+        commentsMapRef.current,
+        parentCommentId,
+        userId,
+        userName,
+        userColor,
+        content,
+        mentions,
+      );
+      if (reply) {
+        applyUpdate(next);
       }
-      return null;
+      return reply;
     },
-    [createCommentObject, applyUpdate],
+    [applyUpdate],
   );
 
   /**
@@ -234,31 +355,15 @@ export const useShiftComments = () => {
    */
   const deleteCommentReply = useCallback(
     (parentCommentId: string, replyCommentId: string): boolean => {
-      for (const [cellKey, comments] of commentsMapRef.current) {
-        const parentIndex = comments.findIndex((c) => c.id === parentCommentId);
-        if (parentIndex !== -1) {
-          const parentComment = comments[parentIndex];
-          if (parentComment.replies) {
-            const filteredReplies = parentComment.replies.filter(
-              (r) => r.id !== replyCommentId,
-            );
-            if (filteredReplies.length !== parentComment.replies.length) {
-              const updatedParent: CellComment = {
-                ...parentComment,
-                replies: filteredReplies,
-                updatedAt: new Date().toISOString(),
-              };
-              const newComments = [...comments];
-              newComments[parentIndex] = updatedParent;
-              const next = new Map(commentsMapRef.current);
-              next.set(cellKey, newComments);
-              applyUpdate(next);
-              return true;
-            }
-          }
-        }
+      const { next, deleted } = deleteCommentReplyFromMap(
+        commentsMapRef.current,
+        parentCommentId,
+        replyCommentId,
+      );
+      if (deleted) {
+        applyUpdate(next);
       }
-      return false;
+      return deleted;
     },
     [applyUpdate],
   );
@@ -283,57 +388,6 @@ export const useShiftComments = () => {
     [commentsMap],
   );
 
-  /**
-   * メンションを解析
-   * @ユーザー名 形式を抽出
-   */
-  const parseMentions = useCallback(
-    (
-      content: string,
-      availableUsers: { userId: string; userName: string }[],
-    ): Mention[] => {
-      const mentions: Mention[] = [];
-      // @の後に続く単語またはユーザー名を抽出（スペースまたは終端まで）
-      const mentionRegex = /@([\w\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]+)/g;
-      let match;
-
-      while ((match = mentionRegex.exec(content)) !== null) {
-        const mentionedName = match[1];
-        const user = availableUsers.find((u) => u.userName === mentionedName);
-
-        if (user) {
-          mentions.push({
-            userId: user.userId,
-            userName: user.userName,
-            position: match.index,
-          });
-        }
-      }
-
-      return mentions;
-    },
-    [],
-  );
-
-  /**
-   * メンション付きコンテンツをHTMLに変換
-   */
-  const formatCommentWithMentions = useCallback(
-    (comment: CellComment): string => {
-      let result = comment.content;
-
-      // メンションを@userNameからリンク形式に変換
-      comment.mentions.forEach((mention) => {
-        result = result.replace(
-          `@${mention.userName}`,
-          `<span class="mention" data-user-id="${mention.userId}">@${mention.userName}</span>`,
-        );
-      });
-
-      return result;
-    },
-    [],
-  );
 
   const commentDataToCellComment = useCallback(
     (c: ShiftRequestCommentData, usedIds: Set<string>): CellComment => ({

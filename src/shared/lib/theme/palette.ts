@@ -60,6 +60,12 @@ export const createPalette = (tokens: DesignTokens) => {
       main: feedback.info.base,
       contrastText: darkText,
     },
+    neutral: {
+      main: neutral[200],
+      light: neutral[100],
+      dark: neutral[300],
+      contrastText: neutral[800],
+    },
   };
 };
 
