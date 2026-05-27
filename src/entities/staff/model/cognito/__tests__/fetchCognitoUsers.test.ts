@@ -1,7 +1,10 @@
 import { StaffRole } from "@entities/staff/lib/staffRoleMapping";
 import { adminGet } from "@shared/api/amplify/adminQueriesClient";
 
-import fetchCognitoUsers, { mapAdminCognitoGroupsToRoles } from "../fetchCognitoUsers";
+import fetchCognitoUsers, {
+  isRetryableListGroupsForUserError,
+  mapAdminCognitoGroupsToRoles,
+} from "../fetchCognitoUsers";
 
 jest.mock("@shared/api/amplify/adminQueriesClient", () => ({
   adminGet: jest.fn(),
@@ -70,5 +73,23 @@ describe("fetchCognitoUsers", () => {
 
     expect(result).toHaveLength(7);
     expect(maxActiveCount).toBeLessThanOrEqual(4);
+  });
+});
+
+describe("isRetryableListGroupsForUserError", () => {
+  it("429 は再試行対象になること", () => {
+    expect(isRetryableListGroupsForUserError({ statusCode: 429 })).toBe(true);
+  });
+
+  it("5xx は再試行対象になること", () => {
+    expect(isRetryableListGroupsForUserError({ response: { status: 503 } })).toBe(true);
+  });
+
+  it("ネットワーク系メッセージは再試行対象になること", () => {
+    expect(isRetryableListGroupsForUserError(new Error("Failed to fetch"))).toBe(true);
+  });
+
+  it("4xx は再試行対象外になること", () => {
+    expect(isRetryableListGroupsForUserError({ statusCode: 400 })).toBe(false);
   });
 });

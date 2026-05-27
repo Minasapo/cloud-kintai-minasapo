@@ -4,6 +4,7 @@ import {
 } from "@entities/staff/lib/staffRoleMapping";
 import { Staff } from "@entities/staff/model/useStaffs/common";
 import { adminGet } from "@shared/api/amplify/adminQueriesClient";
+import { retryAsync } from "@shared/lib/retry";
 import dayjs from "dayjs";
 
 import * as MESSAGE_CODE from "@/errors";
@@ -35,6 +36,72 @@ type ListGroupsForUserResponse = {
 
 // Cognito AdminQueries の瞬間的なスパイクを避けるため同時実行数を制御する
 const LIST_GROUPS_FOR_USER_MAX_CONCURRENCY = 4;
+const LIST_GROUPS_FOR_USER_RETRY_ATTEMPTS = 3;
+const LIST_GROUPS_FOR_USER_RETRY_BASE_DELAY_MS = 300;
+const LIST_GROUPS_FOR_USER_RETRY_MAX_DELAY_MS = 1500;
+const LIST_GROUPS_FOR_USER_RETRY_JITTER_RATIO = 0.2;
+
+const NETWORK_ERROR_MESSAGES = [
+  "network error",
+  "failed to fetch",
+  "fetch failed",
+  "timeout",
+];
+
+const isNumber = (value: unknown): value is number =>
+  typeof value === "number" && Number.isFinite(value);
+
+const extractHttpStatus = (error: unknown): number | undefined => {
+  if (!error || typeof error !== "object") {
+    return undefined;
+  }
+
+  const maybeError = error as {
+    status?: unknown;
+    statusCode?: unknown;
+    $metadata?: { httpStatusCode?: unknown };
+    response?: { status?: unknown; statusCode?: unknown };
+  };
+
+  if (isNumber(maybeError.statusCode)) {
+    return maybeError.statusCode;
+  }
+
+  if (isNumber(maybeError.status)) {
+    return maybeError.status;
+  }
+
+  if (isNumber(maybeError.$metadata?.httpStatusCode)) {
+    return maybeError.$metadata.httpStatusCode;
+  }
+
+  if (isNumber(maybeError.response?.statusCode)) {
+    return maybeError.response.statusCode;
+  }
+
+  if (isNumber(maybeError.response?.status)) {
+    return maybeError.response.status;
+  }
+
+  return undefined;
+};
+
+export const isRetryableListGroupsForUserError = (error: unknown): boolean => {
+  const status = extractHttpStatus(error);
+
+  if (status === 429) {
+    return true;
+  }
+
+  if (typeof status === "number" && status >= 500 && status <= 599) {
+    return true;
+  }
+
+  const message =
+    error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+
+  return NETWORK_ERROR_MESSAGES.some((text) => message.includes(text));
+};
 
 const mapWithConcurrencyLimit = async <T, R>(
   items: readonly T[],
@@ -86,28 +153,24 @@ export default async function fetchCognitoUsers(): Promise<Staff[]> {
         throw new Error(MESSAGE_CODE.E05007);
       }
 
-      let adminResponse: ListGroupsForUserResponse | undefined;
-      // TODO: 暫定措置
-      // 偶発的にエラーが発生するためリトライ処理を追加
-      for (let i = 0; i < 3; i++) {
-        try {
-          adminResponse = await adminGet<ListGroupsForUserResponse>(
-            "/listGroupsForUser",
-            {
-              ...params,
-              queryStringParameters: {
-                username: sub,
-              },
-            }
-          );
-          break;
-        } catch {
-          if (i === 2) {
-            throw new Error(MESSAGE_CODE.E05008);
-          }
-        }
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
+      const adminResponse = await retryAsync(
+        () =>
+          adminGet<ListGroupsForUserResponse>("/listGroupsForUser", {
+            ...params,
+            queryStringParameters: {
+              username: sub,
+            },
+          }),
+        {
+          maxAttempts: LIST_GROUPS_FOR_USER_RETRY_ATTEMPTS,
+          baseDelayMs: LIST_GROUPS_FOR_USER_RETRY_BASE_DELAY_MS,
+          maxDelayMs: LIST_GROUPS_FOR_USER_RETRY_MAX_DELAY_MS,
+          jitterRatio: LIST_GROUPS_FOR_USER_RETRY_JITTER_RATIO,
+          shouldRetry: isRetryableListGroupsForUserError,
+        },
+      ).catch(() => {
+        throw new Error(MESSAGE_CODE.E05008);
+      });
 
       const groups = adminResponse?.Groups ?? [];
 
