@@ -6,6 +6,7 @@ import {
   SettingsTextField,
 } from "@features/admin/layout/ui/SettingsPrimitives";
 import { formatDateSlash } from "@shared/lib/time";
+import ConfirmDialog from "@shared/ui/feedback/ConfirmDialog";
 import { AppTabs } from "@shared/ui/tabs";
 import { SectionTitle, SubsectionTitle } from "@shared/ui/typography";
 import { useState } from "react";
@@ -137,6 +138,10 @@ function WorkflowTemplateTabPanel({
     handleTemplateSubmit,
     handleTemplateEdit,
     handleTemplateDelete,
+    templateDeleteConfirmOpen,
+    templateDeleteConfirmMessage,
+    handleConfirmTemplateDelete,
+    handleCancelTemplateDelete,
   } = state;
 
   return (
@@ -274,6 +279,17 @@ function WorkflowTemplateTabPanel({
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={templateDeleteConfirmOpen}
+        title="テンプレート削除の確認"
+        message={templateDeleteConfirmMessage}
+        confirmLabel="削除"
+        onConfirm={() => {
+          void handleConfirmTemplateDelete();
+        }}
+        onCancel={handleCancelTemplateDelete}
+      />
     </div>
   );
 }

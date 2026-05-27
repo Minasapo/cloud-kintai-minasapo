@@ -5,7 +5,8 @@ import useWorkflows from "@entities/workflow/model/useWorkflows";
 import useWorkflowCommentThread from "@features/workflow/comment-thread/model/useWorkflowCommentThread";
 import { useWorkflowLoaderWorkflow } from "@features/workflow/hooks/useWorkflowLoaderWorkflow";
 import { useAppNotification } from "@shared/lib/useAppNotification";
-import { type ReactNode, useCallback, useMemo } from "react";
+import ConfirmDialog from "@shared/ui/feedback/ConfirmDialog";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 
 import { useWorkflowDetailMeta } from "./useWorkflowDetailMeta";
@@ -21,6 +22,7 @@ export function WorkflowDetailProvider({ children }: { children: ReactNode }) {
   const { workflow: initialWorkflow } =
     useLoaderData() as WorkflowDetailLoaderData;
   const { notify } = useAppNotification();
+  const [withdrawConfirmOpen, setWithdrawConfirmOpen] = useState(false);
 
   const currentStaffId = useMemo(() => {
     if (!cognitoUser?.id) return null;
@@ -84,13 +86,26 @@ export function WorkflowDetailProvider({ children }: { children: ReactNode }) {
     notifyError,
   });
 
-  const { handleWithdraw } = useWorkflowWithdraw({
+  const { executeWithdraw } = useWorkflowWithdraw({
     workflow,
     updateWorkflow,
     setWorkflow,
     notify,
     navigate,
   });
+
+  const handleOpenWithdrawConfirm = useCallback(() => {
+    setWithdrawConfirmOpen(true);
+  }, []);
+
+  const handleCloseWithdrawConfirm = useCallback(() => {
+    setWithdrawConfirmOpen(false);
+  }, []);
+
+  const handleConfirmWithdraw = useCallback(async () => {
+    setWithdrawConfirmOpen(false);
+    await executeWithdraw();
+  }, [executeWithdraw]);
 
   return (
     <WorkflowDetailContext.Provider
@@ -114,7 +129,7 @@ export function WorkflowDetailProvider({ children }: { children: ReactNode }) {
         actions: {
           permissions,
           onBack: () => navigate("/workflow"),
-          onWithdraw: handleWithdraw,
+          onWithdraw: handleOpenWithdrawConfirm,
           onEdit: () => navigate(`/workflow/${id}/edit`),
           toggleExpanded,
           setInput,
@@ -130,7 +145,7 @@ export function WorkflowDetailProvider({ children }: { children: ReactNode }) {
         approvalSteps,
         permissions,
         onBack: () => navigate("/workflow"),
-        onWithdraw: handleWithdraw,
+        onWithdraw: handleOpenWithdrawConfirm,
         onEdit: () => navigate(`/workflow/${id}/edit`),
         currentStaff,
         messages,
@@ -144,6 +159,16 @@ export function WorkflowDetailProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
+      <ConfirmDialog
+        open={withdrawConfirmOpen}
+        title="取り下げ確認"
+        message="本当に取り下げますか？"
+        confirmLabel="取り下げる"
+        onConfirm={() => {
+          void handleConfirmWithdraw();
+        }}
+        onCancel={handleCloseWithdrawConfirm}
+      />
     </WorkflowDetailContext.Provider>
   );
 }

@@ -28,6 +28,7 @@ import {
 import { Attendance } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { AppButton } from "@shared/ui/button";
+import ConfirmDialog from "@shared/ui/feedback/ConfirmDialog";
 import dayjs from "dayjs";
 import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -401,6 +402,8 @@ function useDuplicateConfirmState({
   const [confirmTargetName, setConfirmTargetName] = useState("");
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [confirmRecords, setConfirmRecords] = useState<Attendance[]>([]);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteTargetIds, setDeleteTargetIds] = useState<string[]>([]);
 
   const handleOpenConfirm = useCallback(
     async (staffId: string) => {
@@ -467,12 +470,11 @@ function useDuplicateConfirmState({
     resetSelection();
   }, [resetSelection]);
 
-  const handleDeleteDuplicates = useCallback(async () => {
+  const handleRequestDeleteDuplicates = useCallback(() => {
     if (selectedRecordIndex === null) {
       return;
     }
 
-    const selected = confirmRecords[selectedRecordIndex];
     const toDelete = confirmRecords
       .filter((_, index) => index !== selectedRecordIndex)
       .map((record) => record.id)
@@ -482,18 +484,27 @@ function useDuplicateConfirmState({
       return;
     }
 
-    const ok = window.confirm(
-      `選択したデータのみを残し、他の重複レコードを削除します。対象件数: ${toDelete.length}
-削除対象ID: ${toDelete.join(", ")}
-この操作は取り消せません。実行しますか？`,
-    );
-    if (!ok) {
+    setDeleteTargetIds(toDelete);
+    setDeleteConfirmOpen(true);
+  }, [confirmRecords, selectedRecordIndex]);
+
+  const handleCancelDeleteDuplicates = useCallback(() => {
+    setDeleteConfirmOpen(false);
+    setDeleteTargetIds([]);
+  }, []);
+
+  const handleDeleteDuplicates = useCallback(async () => {
+    if (selectedRecordIndex === null || deleteTargetIds.length === 0) {
       return;
     }
 
+    const selected = confirmRecords[selectedRecordIndex];
+    setDeleteConfirmOpen(false);
+    setDeleteTargetIds([]);
+
     setConfirmLoading(true);
     try {
-      for (const id of toDelete) {
+      for (const id of deleteTargetIds) {
         try {
           await deleteAttendance({ id }).unwrap();
         } catch (error) {
@@ -517,7 +528,15 @@ function useDuplicateConfirmState({
     } finally {
       setConfirmLoading(false);
     }
-  }, [confirmRecords, deleteAttendance, dispatch, selectedRecordIndex]);
+  }, [confirmRecords, deleteAttendance, deleteTargetIds, dispatch, selectedRecordIndex]);
+
+  const deleteConfirmMessage = useMemo(() => {
+    if (deleteTargetIds.length === 0) {
+      return "";
+    }
+
+    return `選択したデータのみを残し、他の重複レコードを削除します。対象件数: ${deleteTargetIds.length}\n削除対象ID: ${deleteTargetIds.join(", ")}\nこの操作は取り消せません。実行しますか？`;
+  }, [deleteTargetIds]);
 
   return {
     confirmOpen,
@@ -528,7 +547,11 @@ function useDuplicateConfirmState({
     handleOpenConfirm,
     handleOpenConfirmClick,
     handleCloseConfirm,
+    handleRequestDeleteDuplicates,
+    handleCancelDeleteDuplicates,
     handleDeleteDuplicates,
+    deleteConfirmOpen,
+    deleteConfirmMessage,
   };
 }
 
@@ -563,7 +586,11 @@ export function DuplicateAttendanceManager({
     confirmRecords,
     handleOpenConfirmClick,
     handleCloseConfirm,
+    handleRequestDeleteDuplicates,
+    handleCancelDeleteDuplicates,
     handleDeleteDuplicates,
+    deleteConfirmOpen,
+    deleteConfirmMessage,
   } = useDuplicateConfirmState({
     dispatch,
     duplicates,
@@ -677,7 +704,11 @@ export function DuplicateAttendanceManager({
         </DialogContent>
         <DialogActions>
           {selectionMode === "record" && selectedRecordIndex !== null && (
-            <AppButton variant="outline" tone="danger" onClick={handleDeleteDuplicates}>
+            <AppButton
+              variant="outline"
+              tone="danger"
+              onClick={handleRequestDeleteDuplicates}
+            >
               選択したデータを残す
             </AppButton>
           )}
@@ -686,6 +717,17 @@ export function DuplicateAttendanceManager({
           </AppButton>
         </DialogActions>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title="重複データ削除の確認"
+        message={deleteConfirmMessage}
+        confirmLabel="削除する"
+        onConfirm={() => {
+          void handleDeleteDuplicates();
+        }}
+        onCancel={handleCancelDeleteDuplicates}
+      />
     </>
   );
 }
