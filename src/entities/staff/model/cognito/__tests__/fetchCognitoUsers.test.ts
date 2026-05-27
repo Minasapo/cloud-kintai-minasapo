@@ -81,6 +81,14 @@ describe("isRetryableListGroupsForUserError", () => {
     expect(isRetryableListGroupsForUserError({ statusCode: 429 })).toBe(true);
   });
 
+  it("TooManyRequestsException は再試行対象になること", () => {
+    expect(
+      isRetryableListGroupsForUserError({
+        name: "TooManyRequestsException",
+      }),
+    ).toBe(true);
+  });
+
   it("5xx は再試行対象になること", () => {
     expect(isRetryableListGroupsForUserError({ response: { status: 503 } })).toBe(true);
   });

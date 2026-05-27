@@ -50,6 +50,14 @@ const NETWORK_ERROR_MESSAGES = [
   "timeout",
 ];
 
+const RETRYABLE_ERROR_NAMES = [
+  "toomanyrequestsexception",
+  "throttlingexception",
+  "serviceunavailableexception",
+  "internalfailure",
+  "internalerrorexception",
+];
+
 const isNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);
 
@@ -88,6 +96,32 @@ const extractHttpStatus = (error: unknown): number | undefined => {
   return undefined;
 };
 
+const extractErrorName = (error: unknown): string | undefined => {
+  if (!error || typeof error !== "object") {
+    return undefined;
+  }
+
+  const maybeError = error as {
+    name?: unknown;
+    code?: unknown;
+    __type?: unknown;
+  };
+
+  if (typeof maybeError.name === "string") {
+    return maybeError.name.toLowerCase();
+  }
+
+  if (typeof maybeError.code === "string") {
+    return maybeError.code.toLowerCase();
+  }
+
+  if (typeof maybeError.__type === "string") {
+    return maybeError.__type.toLowerCase();
+  }
+
+  return undefined;
+};
+
 export const isRetryableListGroupsForUserError = (error: unknown): boolean => {
   const status = extractHttpStatus(error);
 
@@ -96,6 +130,14 @@ export const isRetryableListGroupsForUserError = (error: unknown): boolean => {
   }
 
   if (typeof status === "number" && status >= 500 && status <= 599) {
+    return true;
+  }
+
+  const errorName = extractErrorName(error);
+  if (
+    typeof errorName === "string" &&
+    RETRYABLE_ERROR_NAMES.some((name) => errorName.includes(name))
+  ) {
     return true;
   }
 
