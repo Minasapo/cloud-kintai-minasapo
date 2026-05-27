@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { CollaborativeUser } from "../types/collaborative.types";
 
@@ -70,7 +76,10 @@ const buildPresenceSnapshot = (
   records: PresenceData[],
 ): {
   nextUsers: CollaborativeUser[];
-  nextEditingCells: Map<string, { userId: string; userName: string; startTime: number }>;
+  nextEditingCells: Map<
+    string,
+    { userId: string; userName: string; startTime: number }
+  >;
 } => {
   const now = Date.now();
   const activeUserMap = new Map<string, CollaborativeUser>();
@@ -174,7 +183,13 @@ const usePresenceHeartbeat = ({
       window.removeEventListener("beforeunload", removeOwnPresence);
       removeOwnPresence();
     };
-  }, [loadPresenceFromStorage, storageKey, storageKeyPrefix, updateActiveUsers, updateActivity]);
+  }, [
+    loadPresenceFromStorage,
+    storageKey,
+    storageKeyPrefix,
+    updateActiveUsers,
+    updateActivity,
+  ]);
 };
 
 const usePresenceCellOperations = ({
@@ -304,12 +319,8 @@ const usePresencePeriodicEffects = ({
   setActiveUsers: React.Dispatch<React.SetStateAction<CollaborativeUser[]>>;
   setEditingCellsState: React.Dispatch<React.SetStateAction<EditingCellsMap>>;
 }) => {
-  const heartbeatIntervalRef = useRef<ReturnType<typeof window.setInterval> | undefined>(
-    undefined,
-  );
-  const editTimeoutCheckIntervalRef = useRef<
-    ReturnType<typeof window.setInterval> | undefined
-  >(undefined);
+  const heartbeatIntervalRef = useRef<number | undefined>(undefined);
+  const editTimeoutCheckIntervalRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     lastActivityRef.current = Date.now();
