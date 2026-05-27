@@ -35,9 +35,8 @@ export default function WorkflowFiltersArea() {
   const { filterRowRef } = useWorkflowListUi();
   const [dialogOpen, setDialogOpen] = useState(false);
   const titleId = useId();
-  const triggerButtonRef = useRef<HTMLButtonElement | null>(null);
+  const triggerElementRef = useRef<HTMLElement | null>(null);
   const dialogPanelRef = useRef<HTMLDivElement | null>(null);
-  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -67,11 +66,6 @@ export default function WorkflowFiltersArea() {
   };
 
   const focusFirstElementInDialog = () => {
-    if (closeButtonRef.current) {
-      closeButtonRef.current.focus();
-      return;
-    }
-
     const panel = dialogPanelRef.current;
     if (!panel) {
       return;
@@ -91,12 +85,18 @@ export default function WorkflowFiltersArea() {
     focusableElements[0]?.focus();
   };
 
+  const handleOpenDialog = (event: React.MouseEvent<HTMLElement>) => {
+    triggerElementRef.current = event.currentTarget;
+    setDialogOpen(true);
+  };
+
   useEffect(() => {
     if (!dialogOpen) {
       return;
     }
 
-    const previouslyFocusedElement = document.activeElement as HTMLElement | null;
+    const previouslyFocusedElement =
+      document.activeElement as HTMLElement | null;
 
     focusFirstElementInDialog();
 
@@ -112,7 +112,7 @@ export default function WorkflowFiltersArea() {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
-      (triggerButtonRef.current ?? previouslyFocusedElement)?.focus();
+      (triggerElementRef.current ?? previouslyFocusedElement)?.focus();
     };
   }, [dialogOpen]);
 
@@ -165,13 +165,12 @@ export default function WorkflowFiltersArea() {
         <div className="workflow-filter-toolbar__actions">
           <AppButton
             size="sm"
-            onClick={() => setDialogOpen(true)}
+            onClick={handleOpenDialog}
             className="workflow-filter-trigger-button"
             aria-haspopup="dialog"
             aria-expanded={dialogOpen}
             aria-controls={dialogOpen ? titleId : undefined}
             startIcon={<FilterIcon />}
-            ref={triggerButtonRef}
           >
             <span>フィルター</span>
             {anyFilterActive ? (
@@ -214,7 +213,6 @@ export default function WorkflowFiltersArea() {
                 className="workflow-filter-dialog__close"
                 aria-label="フィルターダイアログを閉じる"
                 tone="neutral"
-                ref={closeButtonRef}
               >
                 ×
               </AppIconButton>
