@@ -6,17 +6,29 @@ import {
 } from "../context/WorkflowListPageContext";
 import DesktopWorkflowRow from "./DesktopWorkflowRow";
 import MobileWorkflowCard from "./MobileWorkflowCard";
-import { cx, WORKFLOW_LIST_COLUMNS } from "./workflowListContentShared";
+import {
+  cx,
+  WORKFLOW_LIST_COLUMN_HEADER_IDS,
+  WORKFLOW_LIST_COLUMNS,
+} from "./workflowListContentShared";
 import { InfoCard, Spinner } from "./WorkflowSharedUi";
 
 function WorkflowLoadingState({ isCompact }: { isCompact: boolean }) {
+  if (!isCompact) {
+    return (
+      <tr className="workflow-loading-state workflow-loading-state--desktop">
+        <td colSpan={WORKFLOW_LIST_COLUMNS.length}>
+          <Spinner />
+        </td>
+      </tr>
+    );
+  }
+
   return (
     <div
       className={cx(
         "workflow-loading-state",
-        isCompact
-          ? "workflow-loading-state--compact"
-          : "workflow-loading-state--desktop",
+        "workflow-loading-state--compact",
       )}
     >
       <Spinner />
@@ -25,11 +37,20 @@ function WorkflowLoadingState({ isCompact }: { isCompact: boolean }) {
 }
 
 function WorkflowEmptyState({ isCompact }: { isCompact: boolean }) {
+  if (!isCompact) {
+    return (
+      <tr className="workflow-empty-state workflow-empty-state--desktop">
+        <td colSpan={WORKFLOW_LIST_COLUMNS.length}>
+          <InfoCard>該当するワークフローがありません。</InfoCard>
+        </td>
+      </tr>
+    );
+  }
+
   return (
     <div
       className={cx(
         "workflow-empty-state",
-        !isCompact && "workflow-empty-state--desktop",
       )}
     >
       <InfoCard>該当するワークフローがありません。</InfoCard>
@@ -70,28 +91,38 @@ export default function WorkflowResults() {
 
   return (
     <div className="workflow-desktop-results-shell">
-      <div className="workflow-desktop-results-head">
-        {WORKFLOW_LIST_COLUMNS.map((column) => (
-          <div key={column}>{column}</div>
-        ))}
-      </div>
-      <div className="workflow-desktop-results-body">
-        <DataStateContainer
-          isLoading={loading}
-          hasData={hasData}
-          loadingContent={loadingContent}
-          emptyContent={emptyContent}
-        >
-          <>
-            {filteredItems.map((item) => (
-              <DesktopWorkflowRow
-                key={resolveWorkflowKey(item)}
-                item={item}
-                onClick={onCardClick}
-              />
+      <table className="workflow-desktop-results-head" aria-label="ワークフロー一覧">
+        <thead>
+          <tr>
+            {WORKFLOW_LIST_COLUMNS.map((column, index) => (
+              <th key={column} id={WORKFLOW_LIST_COLUMN_HEADER_IDS[index]} scope="col">
+                {column}
+              </th>
             ))}
-          </>
-        </DataStateContainer>
+          </tr>
+        </thead>
+      </table>
+      <div className="workflow-desktop-results-body">
+        <table className="w-full" aria-label="ワークフロー一覧データ">
+          <tbody>
+            <DataStateContainer
+              isLoading={loading}
+              hasData={hasData}
+              loadingContent={loadingContent}
+              emptyContent={emptyContent}
+            >
+              <>
+                {filteredItems.map((item) => (
+                  <DesktopWorkflowRow
+                    key={resolveWorkflowKey(item)}
+                    item={item}
+                    onClick={onCardClick}
+                  />
+                ))}
+              </>
+            </DataStateContainer>
+          </tbody>
+        </table>
       </div>
     </div>
   );
