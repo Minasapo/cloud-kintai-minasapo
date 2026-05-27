@@ -1,6 +1,6 @@
 import type { Attendance } from "@shared/api/graphql/types";
 import TimeRecorderRemarksView from "@shared/ui/time-recorder/TimeRecorderRemarks";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 export interface TimeRecorderRemarksProps {
   attendance: Attendance | undefined | null;
@@ -19,19 +19,19 @@ export default function TimeRecorderRemarks({
   onSave,
 }: TimeRecorderRemarksProps) {
   // 非推奨マークは JSDoc の @deprecated のみで表現します（ランタイムの警告は表示しません）
-  const [formState, setFormState] = useState<Attendance["remarks"]>(
-    attendance?.remarks
-  );
+  const attendanceKey = `${attendance?.id ?? ""}:${attendance?.workDate ?? ""}`;
+  const [draft, setDraft] = useState<{
+    key: string;
+    value: Attendance["remarks"];
+  } | null>(null);
 
-  // attendance が変更された場合のみフォーム状態を更新（外部データとの同期）
-  const attendanceRemarks = attendance?.remarks;
-  useEffect(() => {
-    // 外部データの変更を検知してフォーム状態を更新
-    if (attendanceRemarks !== undefined) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFormState(attendanceRemarks);
+  const formState = useMemo(() => {
+    if (draft?.key === attendanceKey) {
+      return draft.value;
     }
-  }, [attendanceRemarks]);
+
+    return attendance?.remarks;
+  }, [attendance?.remarks, attendanceKey, draft]);
 
   const isChanged = useMemo(
     () => attendance?.remarks !== formState,
@@ -39,16 +39,22 @@ export default function TimeRecorderRemarks({
   );
 
   const handleChange = useCallback((value: string) => {
-    setFormState(value);
-  }, []);
+    setDraft({
+      key: attendanceKey,
+      value,
+    });
+  }, [attendanceKey]);
 
   const handleSave = useCallback(() => {
     onSave(formState);
   }, [formState, onSave]);
 
   const handleClear = useCallback(() => {
-    setFormState(attendance?.remarks);
-  }, [attendance?.remarks]);
+    setDraft({
+      key: attendanceKey,
+      value: attendance?.remarks,
+    });
+  }, [attendance?.remarks, attendanceKey]);
 
   const textFieldValue = formState ?? "";
 

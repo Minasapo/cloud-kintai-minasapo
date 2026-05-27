@@ -38,8 +38,9 @@ export function useOfficeQr() {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    updateQrValue();
+    const initialRefreshTimeoutId = window.setTimeout(() => {
+      void updateQrValue();
+    }, 0);
 
     const intervalId = window.setInterval(() => {
       setTimeLeft((prev) => {
@@ -67,6 +68,7 @@ export function useOfficeQr() {
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
+      window.clearTimeout(initialRefreshTimeoutId);
       window.clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
