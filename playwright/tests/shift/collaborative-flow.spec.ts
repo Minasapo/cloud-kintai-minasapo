@@ -45,7 +45,9 @@ test.describe("シフト共同編集フロー @smoke-test", () => {
   // ---------------------------------------------------------------------------
   // 1. ページ表示確認（smoke-test 対象）
   // ---------------------------------------------------------------------------
-  test("共同編集画面が表示されること @smoke-test", async ({ page }, testInfo) => {
+  test("共同編集画面が表示されること @smoke-test", async ({
+    page,
+  }, testInfo) => {
     if (testInfo.project.name !== "chromium-admin") testInfo.skip();
 
     const errors = collectErrorsForPage(page);
@@ -187,7 +189,8 @@ test.describe("シフト共同編集フロー @smoke-test", () => {
       if (rowCount <= 1) {
         test.info().annotations.push({
           type: "skip",
-          description: "シフト対象スタッフが存在しないためセル操作テストをスキップ",
+          description:
+            "シフト対象スタッフが存在しないためセル操作テストをスキップ",
         });
         return;
       }
@@ -281,7 +284,8 @@ test.describe("シフト共同編集フロー @smoke-test", () => {
       if (rowCount <= 1) {
         test.info().annotations.push({
           type: "skip",
-          description: "シフト対象スタッフが存在しないためロック操作テストをスキップ",
+          description:
+            "シフト対象スタッフが存在しないためロック操作テストをスキップ",
         });
         return;
       }
@@ -328,7 +332,8 @@ test.describe("シフト共同編集フロー @smoke-test", () => {
       if (rowCount <= 1) {
         test.info().annotations.push({
           type: "skip",
-          description: "シフト対象スタッフが存在しないため変更履歴テストをスキップ",
+          description:
+            "シフト対象スタッフが存在しないため変更履歴テストをスキップ",
         });
         return;
       }
