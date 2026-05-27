@@ -116,6 +116,8 @@ export default function Layout() {
   const { config: appConfig, isConfigLoading = false } =
     useContext(AppConfigContext);
   const cognitoUserLoading = sessionLoading;
+  const [emailVerificationDialogOpen, setEmailVerificationDialogOpen] =
+    useState(false);
 
   useEffect(() => {
     if (authStatus !== "authenticated" || cognitoUserLoading) {
@@ -193,15 +195,7 @@ export default function Layout() {
       return;
     }
 
-    alert(
-      "メール認証が完了していません。ログイン時にメール認証を行なってください。",
-    );
-
-    try {
-      void signOut();
-    } catch (error) {
-      logger.error("Failed to sign out:", error);
-    }
+    setEmailVerificationDialogOpen(true);
   }, [
     authStatus,
     cognitoUser,
@@ -213,6 +207,17 @@ export default function Layout() {
     navigate,
     signOut,
   ]);
+
+  const handleAcknowledgeEmailVerification = useCallback(async () => {
+    setEmailVerificationDialogOpen(false);
+    try {
+      await signOut();
+    } catch (error) {
+      logger.error("Failed to sign out:", error);
+    } finally {
+      navigate("/login", { replace: true });
+    }
+  }, [navigate, signOut]);
 
   const shouldBlockUnauthenticated =
     authStatus === "unauthenticated" && !isLoginRoute;
@@ -248,6 +253,25 @@ export default function Layout() {
           onConfirm={() => navigate("/admin/master/job_term")}
         />
       )}
+      <AppDialog
+        open={emailVerificationDialogOpen}
+        onClose={() => {
+          void handleAcknowledgeEmailVerification();
+        }}
+        title="メール認証が未完了です"
+        description="メール認証が完了していません。ログイン時にメール認証を行ってください。"
+        maxWidth="xs"
+        actions={
+          <AppButton
+            variant="solid"
+            onClick={() => {
+              void handleAcknowledgeEmailVerification();
+            }}
+          >
+            OK
+          </AppButton>
+        }
+      />
     </>
   );
 }
