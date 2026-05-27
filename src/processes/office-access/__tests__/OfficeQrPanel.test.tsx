@@ -37,9 +37,7 @@ describe("OfficeQrPanel", () => {
 
   describe("isOfficeModeEnabled=false のとき", () => {
     it("使用不可アラートを表示する", () => {
-      render(
-        <OfficeQrPanel {...defaultProps} isOfficeModeEnabled={false} />,
-      );
+      render(<OfficeQrPanel {...defaultProps} isOfficeModeEnabled={false} />);
       expect(
         screen.getByTestId("office-qr-disabled-alert"),
       ).toBeInTheDocument();
@@ -49,9 +47,7 @@ describe("OfficeQrPanel", () => {
     });
 
     it("モード切り替えボタンを表示しない", () => {
-      render(
-        <OfficeQrPanel {...defaultProps} isOfficeModeEnabled={false} />,
-      );
+      render(<OfficeQrPanel {...defaultProps} isOfficeModeEnabled={false} />);
       expect(
         screen.queryByTestId("office-qr-mode-toggle"),
       ).not.toBeInTheDocument();
@@ -75,11 +71,11 @@ describe("OfficeQrPanel", () => {
 
     it("タイマーと進捗バーを表示する", () => {
       render(<OfficeQrPanel {...defaultProps} timeLeft={25} />);
-      expect(screen.getByTestId("office-qr-timer")).toHaveTextContent(
-        "00:25",
-      );
+      expect(screen.getByTestId("office-qr-timer")).toHaveTextContent("00:25");
       expect(screen.getByTestId("office-qr-progress")).toBeInTheDocument();
-      expect(screen.getByRole("progressbar", { name: "QRコードの更新進捗" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("progressbar", { name: "QRコードの更新進捗" }),
+      ).toBeInTheDocument();
       expect(screen.getByTestId("office-qr-live-status")).toBeInTheDocument();
     });
 
@@ -93,15 +89,15 @@ describe("OfficeQrPanel", () => {
 
       expect(screen.getByTestId("office-qr-error-alert")).toBeInTheDocument();
       expect(
-        screen.getByText("「QRコードを手動更新」ボタンから再試行してください。"),
+        screen.getByText(
+          "「QRコードを手動更新」ボタンから再試行してください。",
+        ),
       ).toBeInTheDocument();
     });
 
     it("URL コピーボタンと手動更新ボタンを表示する", () => {
       render(<OfficeQrPanel {...defaultProps} />);
-      expect(
-        screen.getByTestId("office-qr-copy-button"),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("office-qr-copy-button")).toBeInTheDocument();
       expect(
         screen.getByTestId("office-qr-refresh-button"),
       ).toBeInTheDocument();
@@ -134,9 +130,7 @@ describe("OfficeQrPanel", () => {
   describe("管理者アラート", () => {
     it("showAdminAlert=true のとき、管理者アラートを表示する", () => {
       render(<OfficeQrPanel {...defaultProps} showAdminAlert={true} />);
-      expect(
-        screen.getByTestId("office-qr-admin-alert"),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("office-qr-admin-alert")).toBeInTheDocument();
       expect(
         screen.getByText(/管理者権限で表示されています/),
       ).toBeInTheDocument();

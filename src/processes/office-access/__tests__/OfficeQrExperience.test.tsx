@@ -48,9 +48,7 @@ describe("OfficeQrExperience", () => {
   it("クラッシュせずにレンダリングされる", () => {
     // デフォルト: officeMode=false（FALLBACK_DERIVED）
     renderWithProviders(<OfficeQrExperience />);
-    expect(
-      screen.getByTestId("office-qr-disabled-alert"),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("office-qr-disabled-alert")).toBeInTheDocument();
   });
 
   it("officeMode=false のとき、使用不可メッセージを表示する", () => {
@@ -85,9 +83,7 @@ describe("OfficeQrExperience", () => {
       },
       appConfigContext: { derived: { officeMode: true } as never },
     });
-    expect(
-      screen.getByTestId("office-qr-admin-alert"),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("office-qr-admin-alert")).toBeInTheDocument();
   });
 
   it("スタッフユーザー（非管理者）の場合、管理者アラートを表示しない", () => {

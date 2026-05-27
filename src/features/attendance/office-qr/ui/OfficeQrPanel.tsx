@@ -127,7 +127,9 @@ export function OfficeQrPanel({
             data-testid="office-qr-error-alert"
           >
             <p className="m-0 font-semibold">{errorMessage}</p>
-            <p className="mt-1 mb-0">「QRコードを手動更新」ボタンから再試行してください。</p>
+            <p className="mt-1 mb-0">
+              「QRコードを手動更新」ボタンから再試行してください。
+            </p>
           </div>
         </div>
       )}

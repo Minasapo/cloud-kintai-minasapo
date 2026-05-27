@@ -2,7 +2,10 @@ import { useAppDispatchV2 } from "@app/hooks";
 import type { ShiftDisplayMode } from "@entities/app-config/model/useAppConfig";
 import AdminSettingsLayout from "@features/admin/layout/ui/AdminSettingsLayout";
 import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
-import { SettingsAlert, SettingsButton } from "@features/admin/layout/ui/SettingsPrimitives";
+import {
+  SettingsAlert,
+  SettingsButton,
+} from "@features/admin/layout/ui/SettingsPrimitives";
 import { useAdminShiftSettings } from "@features/admin-config-shift/useAdminShiftSettings";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
@@ -24,7 +27,8 @@ const SHIFT_SETTINGS_TABS: ReadonlyArray<{
 ];
 
 const getTabId = (tab: ShiftSettingsTab) => `admin-shift-settings-tab-${tab}`;
-const getPanelId = (tab: ShiftSettingsTab) => `admin-shift-settings-panel-${tab}`;
+const getPanelId = (tab: ShiftSettingsTab) =>
+  `admin-shift-settings-panel-${tab}`;
 
 export default function AdminShiftSettings() {
   const dispatch = useAppDispatchV2();
@@ -106,7 +110,8 @@ export default function AdminShiftSettings() {
     if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
       event.preventDefault();
       moveFocusTo(
-        (currentIndex - 1 + SHIFT_SETTINGS_TABS.length) % SHIFT_SETTINGS_TABS.length,
+        (currentIndex - 1 + SHIFT_SETTINGS_TABS.length) %
+          SHIFT_SETTINGS_TABS.length,
       );
       return;
     }
@@ -128,7 +133,11 @@ export default function AdminShiftSettings() {
       {dialog}
       <div className="flex flex-col gap-6">
         <div className="rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
-          <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="シフト設定タブ">
+          <div
+            className="grid grid-cols-2 gap-2"
+            role="tablist"
+            aria-label="シフト設定タブ"
+          >
             {SHIFT_SETTINGS_TABS.map((tab) => (
               <button
                 key={tab.value}
@@ -183,7 +192,9 @@ export default function AdminShiftSettings() {
                   </SubsectionTitle>
                   <div className="flex flex-col gap-4">
                     {fields.length === 0 ? (
-                      <SettingsAlert>{SHIFT_GROUP_UI_TEXTS.emptyGroups}</SettingsAlert>
+                      <SettingsAlert>
+                        {SHIFT_GROUP_UI_TEXTS.emptyGroups}
+                      </SettingsAlert>
                     ) : (
                       fields.map((group, index) => (
                         <ShiftGroupRow
@@ -240,7 +251,9 @@ export default function AdminShiftSettings() {
         >
           {activeTab === "shift-display" && (
             <div className="flex flex-col gap-6">
-              <SettingsAlert>シフト管理画面の表示モードを設定します。</SettingsAlert>
+              <SettingsAlert>
+                シフト管理画面の表示モードを設定します。
+              </SettingsAlert>
               <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
                 <div className="flex flex-col gap-6">
                   <SubsectionTitle className="border-b border-slate-100 pb-2 text-lg font-semibold text-slate-800">
@@ -248,7 +261,9 @@ export default function AdminShiftSettings() {
                   </SubsectionTitle>
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-2">
-                      <span className="text-sm font-medium text-slate-700">表示モード</span>
+                      <span className="text-sm font-medium text-slate-700">
+                        表示モード
+                      </span>
                       <div className="flex flex-wrap gap-3">
                         <button
                           type="button"
@@ -264,7 +279,9 @@ export default function AdminShiftSettings() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleSwitchShiftDefaultMode("collaborative")}
+                          onClick={() =>
+                            handleSwitchShiftDefaultMode("collaborative")
+                          }
                           className={[
                             "rounded-xl border px-4 py-2 text-sm font-medium transition",
                             shiftDefaultMode === "collaborative"
