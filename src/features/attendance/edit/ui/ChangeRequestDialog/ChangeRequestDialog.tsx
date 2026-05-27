@@ -8,7 +8,7 @@ import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { AppButton } from "@shared/ui/button";
 import AppDialog from "@shared/ui/feedback/AppDialog";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -48,6 +48,16 @@ function getActiveChangeRequest(attendance: Attendance | null): {
   return { open: true, changeRequest: changeRequests[0] };
 }
 
+const getChangeRequestSignature = (
+  changeRequest: ActiveChangeRequest | null,
+): string | null => {
+  if (!changeRequest) {
+    return null;
+  }
+
+  return JSON.stringify(changeRequest);
+};
+
 export default function ChangeRequestDialog({
   attendance,
   updateAttendance,
@@ -56,19 +66,25 @@ export default function ChangeRequestDialog({
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [comment, setComment] = useState<string | undefined>(undefined);
-  const [closedChangeRequest, setClosedChangeRequest] = useState<
-    ActiveChangeRequest | null
-  >(null);
+  const [closedChangeRequestSignature, setClosedChangeRequestSignature] =
+    useState<string | null>(null);
 
   const { open: hasPendingChangeRequest, changeRequest } =
     getActiveChangeRequest(attendance);
-  const open = hasPendingChangeRequest && changeRequest !== closedChangeRequest;
+  const changeRequestSignature = useMemo(
+    () => getChangeRequestSignature(changeRequest),
+    [changeRequest],
+  );
+  const open =
+    hasPendingChangeRequest &&
+    changeRequestSignature !== null &&
+    changeRequestSignature !== closedChangeRequestSignature;
 
-  const handleClose = () => {
-    setClosedChangeRequest(changeRequest);
-  };
+  const handleClose = useCallback(() => {
+    setClosedChangeRequestSignature(changeRequestSignature);
+  }, [changeRequestSignature]);
 
-  const getWorkDate = () => {
+  const workDate = useMemo(() => {
     if (!attendance) {
       return "";
     }
@@ -79,7 +95,95 @@ export default function ChangeRequestDialog({
     }
 
     return dayjs(workDate).format(AttendanceDate.DisplayFormat);
-  };
+  }, [attendance]);
+
+  const handleReject = useCallback(() => {
+    void handleRejectChangeRequest(attendance, updateAttendance, comment)
+      .then(async (updatedAttendance) => {
+        if (!staff || !updatedAttendance) {
+          throw new Error(MESSAGE_CODE.E00002);
+        }
+
+        try {
+          await new GenericMailSender(
+            staff,
+            updatedAttendance,
+          ).rejectChangeRequest(comment);
+        } catch (mailError) {
+          console.error(
+            "Failed to send rejection notification mail:",
+            mailError,
+          );
+        }
+
+        dispatch(
+          pushNotification({
+            tone: "success",
+            message: MESSAGE_CODE.S04007,
+          }),
+        );
+        handleClose();
+      })
+      .catch(() =>
+        dispatch(
+          pushNotification({
+            tone: "error",
+            message: MESSAGE_CODE.E04007,
+          }),
+        ),
+      );
+
+    handleClose();
+  }, [attendance, comment, dispatch, handleClose, staff, updateAttendance]);
+
+  const handleApprove = useCallback(() => {
+    void handleApproveChangeRequest(attendance, updateAttendance, comment)
+      .then(async (updatedAttendance) => {
+        if (!staff || !updatedAttendance) {
+          throw new Error(MESSAGE_CODE.E00002);
+        }
+
+        try {
+          await new GenericMailSender(
+            staff,
+            updatedAttendance,
+          ).approveChangeRequest(comment);
+        } catch (mailError) {
+          console.error(
+            "Failed to send approval notification mail:",
+            mailError,
+          );
+        }
+
+        dispatch(
+          pushNotification({
+            tone: "success",
+            message: "勤怠情報の変更リクエストを承認しました",
+            description: updatedAttendance.workDate
+              ? `${updatedAttendance.workDate} の勤怠情報の変更リクエストが承認されました`
+              : undefined,
+          }),
+        );
+        navigate(`/admin/staff/${updatedAttendance.staffId}/attendance`);
+        handleClose();
+      })
+      .catch(() =>
+        dispatch(
+          pushNotification({
+            tone: "error",
+            message: MESSAGE_CODE.E04006,
+          }),
+        ),
+      );
+  }, [
+    attendance,
+    comment,
+    dispatch,
+    handleClose,
+    navigate,
+    staff,
+    updateAttendance,
+  ]);
 
   if (!attendance || !changeRequest) {
     return null;
@@ -91,99 +195,16 @@ export default function ChangeRequestDialog({
       onClose={handleClose}
       fullWidth
       maxWidth="md"
-      title={`変更リクエスト(勤務日: ${getWorkDate()})`}
+      title={`変更リクエスト(勤務日: ${workDate})`}
       actions={
         <>
           <AppButton variant="ghost" onClick={handleClose}>
             閉じる
           </AppButton>
-          <AppButton
-            variant="solid"
-            tone="danger"
-            onClick={() => {
-              handleRejectChangeRequest(attendance, updateAttendance, comment)
-                .then(async (updatedAttendance) => {
-                  if (!staff || !updatedAttendance) {
-                    throw new Error(MESSAGE_CODE.E00002);
-                  }
-
-                  try {
-                    await new GenericMailSender(
-                      staff,
-                      updatedAttendance,
-                    ).rejectChangeRequest(comment);
-                  } catch (mailError) {
-                    console.error(
-                      "Failed to send rejection notification mail:",
-                      mailError,
-                    );
-                  }
-
-                  dispatch(
-                    pushNotification({
-                      tone: "success",
-                      message: MESSAGE_CODE.S04007,
-                    }),
-                  );
-                  handleClose();
-                })
-                .catch(() =>
-                  dispatch(
-                    pushNotification({
-                      tone: "error",
-                      message: MESSAGE_CODE.E04007,
-                    }),
-                  ),
-                );
-
-              handleClose();
-            }}
-          >
+          <AppButton variant="solid" tone="danger" onClick={handleReject}>
             却下
           </AppButton>
-          <AppButton
-            variant="solid"
-            onClick={() => {
-              handleApproveChangeRequest(attendance, updateAttendance, comment)
-                .then(async (updatedAttendance) => {
-                  if (!staff || !updatedAttendance) {
-                    throw new Error(MESSAGE_CODE.E00002);
-                  }
-
-                  try {
-                    await new GenericMailSender(
-                      staff,
-                      updatedAttendance,
-                    ).approveChangeRequest(comment);
-                  } catch (mailError) {
-                    console.error(
-                      "Failed to send approval notification mail:",
-                      mailError,
-                    );
-                  }
-
-                  dispatch(
-                    pushNotification({
-                      tone: "success",
-                      message: "勤怠情報の変更リクエストを承認しました",
-                      description: updatedAttendance.workDate
-                        ? `${updatedAttendance.workDate} の勤怠情報の変更リクエストが承認されました`
-                        : undefined,
-                    }),
-                  );
-                  navigate(`/admin/staff/${updatedAttendance.staffId}/attendance`);
-                  handleClose();
-                })
-                .catch(() =>
-                  dispatch(
-                    pushNotification({
-                      tone: "error",
-                      message: MESSAGE_CODE.E04006,
-                    }),
-                  ),
-                );
-            }}
-          >
+          <AppButton variant="solid" onClick={handleApprove}>
             承認
           </AppButton>
         </>
