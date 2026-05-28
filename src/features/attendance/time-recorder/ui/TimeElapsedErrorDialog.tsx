@@ -1,5 +1,6 @@
+import { useDialogFocusManagement } from "@shared/ui/feedback/useDialogFocusManagement";
 import { SectionTitle } from "@shared/ui/typography";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
 type TimeElapsedErrorDialogProps = {
@@ -11,8 +12,10 @@ type TimeElapsedErrorDialogProps = {
  */
 export default function TimeElapsedErrorDialog({
   isTimeElapsedError,
-}: TimeElapsedErrorDialogProps): JSX.Element {
+}: TimeElapsedErrorDialogProps): JSX.Element | null {
   const [open, setOpen] = useState(false);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const laterButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     setOpen(isTimeElapsedError);
@@ -22,16 +25,31 @@ export default function TimeElapsedErrorDialog({
     setOpen(false);
   };
 
+  useDialogFocusManagement({
+    open,
+    onClose: handleClose,
+    dialogRef,
+    initialFocusRef: laterButtonRef,
+  });
+
+  if (!open) return null;
+
   return (
     <div
-      aria-labelledby="alert-dialog-title"
-      aria-describedby="alert-dialog-description"
-      aria-modal="true"
-      role="dialog"
       data-testid="time-elapsed-error-dialog"
-      className={`${open ? "flex" : "hidden"} fixed inset-0 z-50 items-center justify-center bg-slate-950/50 p-4`}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"
+      role="presentation"
     >
-      <div className="w-full max-w-md rounded-[4px] bg-white p-6 shadow-xl">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        aria-label="1週間以上経過した打刻エラーがあります"
+        tabIndex={-1}
+        className="w-full max-w-md rounded-[4px] bg-white p-6 shadow-xl"
+      >
         <SectionTitle
           id="alert-dialog-title"
           className="m-0 text-lg font-semibold text-slate-900"
@@ -54,6 +72,7 @@ export default function TimeElapsedErrorDialog({
         </div>
         <div className="mt-6 flex justify-end gap-3">
           <button
+            ref={laterButtonRef}
             type="button"
             onClick={handleClose}
             data-testid="time-elapsed-error-dialog-later-btn"
