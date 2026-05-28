@@ -1,7 +1,9 @@
-import { Button, ButtonGroup } from "@mui/material";
+import { Box } from "@mui/material";
+import { alpha, useTheme } from "@mui/material/styles";
+import { AppButton } from "@shared/ui/button";
 
 import { ShiftRequestDayStatus } from "../model/statusMapping";
-import { STATUS_COLOR_MAP, STATUS_LABEL_MAP } from "./constants";
+import { STATUS_LABEL_MAP } from "./constants";
 
 type ShiftStatusButtonsProps = {
   selected?: ShiftRequestDayStatus;
@@ -16,26 +18,62 @@ export function ShiftStatusButtons({
   isMobile,
   onSelect,
 }: ShiftStatusButtonsProps) {
+  const theme = useTheme();
+
   return (
-    <ButtonGroup
-      size="small"
-      variant="outlined"
-      sx={{ flexWrap: isMobile ? "wrap" : "nowrap" }}
+    <Box
+      sx={{
+        display: "flex",
+        flexWrap: isMobile ? "wrap" : "nowrap",
+        gap: 1,
+      }}
     >
       {(
         ["work", "fixedOff", "requestedOff", "auto"] as ShiftRequestDayStatus[]
-      ).map((status) => (
-        <Button
-          key={status}
-          variant={selected === status ? "contained" : "outlined"}
-          color={STATUS_COLOR_MAP[status]}
-          disabled={disabled}
-          onClick={() => onSelect(status)}
-        >
-          {STATUS_LABEL_MAP[status]}
-        </Button>
-      ))}
-    </ButtonGroup>
+      ).map((status) => {
+        const palette = {
+          work: theme.palette.success,
+          fixedOff: theme.palette.error,
+          requestedOff: theme.palette.warning,
+          auto: theme.palette.info,
+        }[status];
+        const isSelected = selected === status;
+
+        return (
+          <AppButton
+            key={status}
+            variant={isSelected ? "solid" : "outline"}
+            tone="neutral"
+            size="sm"
+            disabled={disabled}
+            onClick={() => onSelect(status)}
+            sx={
+              isSelected
+                ? {
+                    backgroundColor: `${palette.main} !important`,
+                    borderColor: `${palette.dark ?? palette.main} !important`,
+                    color: `${palette.contrastText} !important`,
+                    "&:hover": {
+                      backgroundColor: `${palette.dark ?? palette.main} !important`,
+                      boxShadow:
+                        "inset 0 -2px 0 rgba(0,0,0,0.12), 0 12px 24px -18px rgba(0,0,0,0.25)",
+                    },
+                  }
+                : {
+                    backgroundColor: `${theme.palette.background.paper} !important`,
+                    borderColor: `${palette.main} !important`,
+                    color: `${(palette as { dark?: string }).dark ?? palette.main} !important`,
+                    "&:hover": {
+                      backgroundColor: `${alpha(palette.main, 0.12)} !important`,
+                      boxShadow: "none",
+                    },
+                  }
+            }
+          >
+            {STATUS_LABEL_MAP[status]}
+          </AppButton>
+        );
+      })}
+    </Box>
   );
 }
-

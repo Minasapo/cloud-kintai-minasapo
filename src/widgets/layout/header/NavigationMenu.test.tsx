@@ -1,12 +1,11 @@
+import { AuthContext } from "@app/providers/auth/AuthContext";
+import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
 import {
   StaffRole,
   useStaffs,
 } from "@entities/staff/model/useStaffs/useStaffs";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-
-import { AppConfigContext } from "@/context/AppConfigContext";
-import { AuthContext } from "@/context/AuthContext";
 
 import NavigationMenu from "./NavigationMenu";
 
@@ -62,9 +61,11 @@ const mockedUseStaffs = jest.mocked(useStaffs);
 function renderMenu({
   roles,
   workType,
+  attendanceStatisticsEnabled = true,
 }: {
   roles: StaffRole[];
   workType: "shift" | "weekday";
+  attendanceStatisticsEnabled?: boolean;
 }) {
   mockedUseStaffs.mockReturnValue({
     staffs: [
@@ -121,7 +122,9 @@ function renderMenu({
             getLinks: jest.fn(() => []),
             getReasons: jest.fn(() => []),
             getOfficeMode: jest.fn(() => false),
-            getAttendanceStatisticsEnabled: jest.fn(() => true),
+            getAttendanceStatisticsEnabled: jest.fn(
+              () => attendanceStatisticsEnabled,
+            ),
             getWorkflowNotificationEnabled: jest.fn(() => false),
             getTimeRecorderAnnouncement: jest.fn(() => ({
               enabled: false,
@@ -184,5 +187,25 @@ describe("NavigationMenu", () => {
 
     expect(screen.getByTestId("desktop-menu")).not.toHaveTextContent("シフト");
     expect(screen.getByTestId("desktop-menu")).toHaveTextContent("管理");
+  });
+
+  it("shows statistics menu when feature flag is enabled", () => {
+    renderMenu({
+      roles: [StaffRole.STAFF],
+      workType: "shift",
+      attendanceStatisticsEnabled: true,
+    });
+
+    expect(screen.getByTestId("desktop-menu")).toHaveTextContent("稼働統計");
+  });
+
+  it("hides statistics menu when feature flag is disabled", () => {
+    renderMenu({
+      roles: [StaffRole.STAFF],
+      workType: "shift",
+      attendanceStatisticsEnabled: false,
+    });
+
+    expect(screen.getByTestId("desktop-menu")).not.toHaveTextContent("稼働統計");
   });
 });

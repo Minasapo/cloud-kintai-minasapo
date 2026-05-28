@@ -1,23 +1,17 @@
 import { TableHead } from "@aws-amplify/ui-react";
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
-import { CreatedAtTableCell } from "@entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
-import { RestTimeTableCell } from "@entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
-import { SummaryTableCell } from "@entities/attendance/ui/adminStaffAttendance/SummaryTableCell";
-import { UpdatedAtTableCell } from "@entities/attendance/ui/adminStaffAttendance/UpdatedAtTableCell";
-import { WorkDateTableCell } from "@entities/attendance/ui/adminStaffAttendance/WorkDateTableCell";
-import { WorkTimeTableCell } from "@entities/attendance/ui/adminStaffAttendance/WorkTimeTableCell";
+import { AttendanceRecordTableRow } from "@entities/attendance/ui/adminStaffAttendance/AttendanceRecordTableRow";
 import {
   AttendanceRowVariant,
-  attendanceRowVariantStyles,
   getAttendanceRowVariant,
 } from "@entities/attendance/ui/rowVariant";
-import EditIcon from "@mui/icons-material/Edit";
+import { AttendanceRecordActionCell } from "@features/attendance/list/ui/AttendanceRecordActionCell";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Alert,
   AlertTitle,
   Box,
-  IconButton,
-  Stack,
   Table,
   TableBody,
   TableCell,
@@ -26,13 +20,16 @@ import {
   Typography,
 } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
+import { createMonthSearchParamsFromDate } from "@shared/lib/monthQuery";
+import { AppButton } from "@shared/ui/button";
 import dayjs from "dayjs";
+import { useMemo, useState } from "react";
 
 import { useAttendanceListContext } from "./AttendanceListContext";
-import { MONTH_QUERY_KEY } from "./attendanceListUtils";
-import { AttendanceStatusTooltip } from "./AttendanceStatusTooltip";
 import DesktopCalendarView from "./DesktopCalendarView";
 import { useErrorAttendances } from "./useErrorAttendances";
+
+const MAX_VISIBLE_ERROR_ATTENDANCES = 5;
 
 export default function DesktopList() {
   const {
@@ -52,6 +49,19 @@ export default function DesktopList() {
     companyHolidayCalendars,
     effectiveDateRange,
   });
+  const [isErrorListExpanded, setIsErrorListExpanded] = useState(false);
+
+  const hasHiddenErrorAttendances =
+    errorAttendances.length > MAX_VISIBLE_ERROR_ATTENDANCES;
+  const visibleErrorAttendances = useMemo(
+    () =>
+      hasHiddenErrorAttendances && !isErrorListExpanded
+        ? errorAttendances.slice(0, MAX_VISIBLE_ERROR_ATTENDANCES)
+        : errorAttendances,
+    [errorAttendances, hasHiddenErrorAttendances, isErrorListExpanded],
+  );
+  const hiddenErrorAttendanceCount =
+    errorAttendances.length - MAX_VISIBLE_ERROR_ATTENDANCES;
 
   const getRowVariant = (attendance: Attendance): AttendanceRowVariant => {
     if (staff?.workType === "shift" && attendance.isDeemedHoliday) {
@@ -78,9 +88,7 @@ export default function DesktopList() {
   };
 
   const buildNavigatePath = (formattedWorkDate: string) => {
-    const monthQuery = new URLSearchParams({
-      [MONTH_QUERY_KEY]: currentMonth.startOf("month").format("YYYY-MM"),
-    }).toString();
+    const monthQuery = createMonthSearchParamsFromDate(currentMonth).toString();
     return `/attendance/${formattedWorkDate}/edit?${monthQuery}`;
   };
 
@@ -123,6 +131,28 @@ export default function DesktopList() {
               </AlertTitle>
               打刻エラーがあります
             </Alert>
+            {hasHiddenErrorAttendances && (
+              <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
+                <AppButton
+                  variant="outline"
+                  tone="neutral"
+                  size="sm"
+                  aria-expanded={isErrorListExpanded}
+                  onClick={() => setIsErrorListExpanded((current) => !current)}
+                  endIcon={
+                    isErrorListExpanded ? (
+                      <ExpandLessIcon fontSize="small" />
+                    ) : (
+                      <ExpandMoreIcon fontSize="small" />
+                    )
+                  }
+                >
+                  {isErrorListExpanded
+                    ? "5件表示に戻す"
+                    : `残り${hiddenErrorAttendanceCount}件を表示`}
+                </AppButton>
+              </Box>
+            )}
             <TableContainer
               sx={{
                 borderRadius: "18px",
@@ -193,62 +223,26 @@ export default function DesktopList() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {errorAttendances.map((attendance, index) => {
+                  {visibleErrorAttendances.map((attendance, index) => {
                     const rowVariant = getRowVariant(attendance);
                     return (
-                      <TableRow
+                      <AttendanceRecordTableRow
                         key={`error-${index}`}
-                        sx={attendanceRowVariantStyles[rowVariant]}
-                      >
-                        <TableCell>
-                          <Stack
-                            direction="row"
+                        attendance={attendance}
+                        rowVariant={rowVariant}
+                        holidayCalendars={holidayCalendars}
+                        companyHolidayCalendars={companyHolidayCalendars}
+                        actionCell={
+                          <AttendanceRecordActionCell
+                            staff={staff}
+                            attendance={attendance}
+                            holidayCalendars={holidayCalendars}
+                            companyHolidayCalendars={companyHolidayCalendars}
+                            onEdit={() => handleEdit(attendance)}
                             spacing={0}
-                            alignItems="center"
-                          >
-                            <AttendanceStatusTooltip
-                              staff={staff}
-                              attendance={attendance}
-                              holidayCalendars={holidayCalendars}
-                              companyHolidayCalendars={companyHolidayCalendars}
-                            />
-                            <IconButton onClick={() => handleEdit(attendance)}>
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                          </Stack>
-                        </TableCell>
-
-                        {/* 勤務日 */}
-                        <WorkDateTableCell
-                          workDate={attendance.workDate}
-                          holidayCalendars={holidayCalendars}
-                          companyHolidayCalendars={companyHolidayCalendars}
-                        />
-
-                        {/* 勤務時間 */}
-                        <WorkTimeTableCell attendance={attendance} />
-
-                        {/* 休憩時間(最近) */}
-                        <RestTimeTableCell attendance={attendance} />
-
-                        {/* 摘要 */}
-                        <SummaryTableCell
-                          substituteHolidayDate={
-                            attendance.substituteHolidayDate
-                          }
-                          specialHolidayFlag={attendance.specialHolidayFlag}
-                          paidHolidayFlag={attendance.paidHolidayFlag}
-                          absentFlag={attendance.absentFlag}
-                        />
-
-                        {/* 作成日時 */}
-                        <CreatedAtTableCell createdAt={attendance.createdAt} />
-
-                        {/* 更新日時 */}
-                        <UpdatedAtTableCell updatedAt={attendance.updatedAt} />
-
-                        <TableCell sx={{ width: 1 }} />
-                      </TableRow>
+                          />
+                        }
+                      />
                     );
                   })}
                 </TableBody>

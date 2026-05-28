@@ -1,15 +1,14 @@
 import { type DuplicateAttendanceInfo, useListAttendancesByDateRangeQuery, useUpdateAttendanceMutation, } from "@entities/attendance/api/attendanceApi";
+import { getAttendancePreviousMonthToCurrentMonthRangeInput } from "@entities/attendance/lib/attendanceQueryRange";
 import { ChangeRequest, hasUnapprovedChangeRequest, } from "@entities/attendance/lib/ChangeRequest";
 import useCloseDates from "@entities/attendance/model/useCloseDates";
 import { AttendanceRowVariant, getAttendanceRowVariant, } from "@entities/attendance/ui/rowVariant";
 import { useCalendars } from "@entities/calendar/model/useCalendars";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType, } from "@entities/staff/model/useStaffs/useStaffs";
-import { graphqlClient } from "@shared/api/amplify/graphqlClient";
-import { onCreateAttendance, onDeleteAttendance, onUpdateAttendance, } from "@shared/api/graphql/documents/subscriptions";
-import { Attendance, CloseDate, CompanyHolidayCalendar, HolidayCalendar, OnCreateAttendanceSubscription, OnDeleteAttendanceSubscription, OnUpdateAttendanceSubscription, Staff, } from "@shared/api/graphql/types";
+import { Attendance, CloseDate, CompanyHolidayCalendar, HolidayCalendar, Staff, } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
-import dayjs, { Dayjs } from "dayjs";
+import type { Dayjs } from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 
@@ -17,6 +16,7 @@ import * as MESSAGE_CODE from "@/errors";
 
 import type { PendingAttendanceControls } from "../ui/components";
 import { useAdminAttendanceChangeRequests } from "./useAdminAttendanceChangeRequests";
+import { useAttendanceSubscription } from "./useAttendanceSubscription";
 
 export type AdminStaffAttendanceListViewModel = ReturnType<typeof useAdminStaffAttendanceListViewModel>;
 export const useAdminStaffAttendanceListViewModel = (staffId?: string, currentMonth?: Dayjs) => {
@@ -30,13 +30,7 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string, currentMo
     // 例：今日が1月1日で1月を表示している場合 → 12月1日～1月31日のデータを取得
     // 例：2月を表示している場合 → 1月1日～2月28日のデータを取得
     const dateRange = useMemo(() => {
-        const month = currentMonth ?? dayjs().startOf("month");
-        const startDate = month.subtract(1, "month").startOf("month");
-        const endDate = month.endOf("month");
-        return {
-            startDate: startDate.format("YYYY-MM-DD"),
-            endDate: endDate.format("YYYY-MM-DD"),
-        };
+        return getAttendancePreviousMonthToCurrentMonthRangeInput(currentMonth);
     }, [currentMonth]);
     const shouldFetchAttendances = Boolean(staffId);
     const queryResult = useListAttendancesByDateRangeQuery({
@@ -50,84 +44,7 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string, currentMo
         refetchOnReconnect: true,
     });
     const { data: attendancesData, isLoading: isAttendancesInitialLoading, isUninitialized: isAttendancesUninitialized, error: attendancesError, refetch: refetchAttendances, } = queryResult;
-    useEffect(() => {
-        if (!staffId || !shouldFetchAttendances)
-            return;
-        let refetchTimer: ReturnType<typeof setTimeout> | null = null;
-        const shouldRefetch = (eventStaffId?: string | null, workDate?: string | null) => {
-            if (!eventStaffId || !workDate)
-                return false;
-            if (eventStaffId !== staffId)
-                return false;
-            const eventDate = dayjs(workDate);
-            const start = dayjs(dateRange.startDate);
-            const end = dayjs(dateRange.endDate);
-            return eventDate.isBetween(start, end, "day", "[]");
-        };
-        const scheduleRefetch = () => {
-            if (isBulkApprovingRef.current)
-                return;
-            if (refetchTimer) {
-                clearTimeout(refetchTimer);
-            }
-            refetchTimer = setTimeout(() => {
-                void refetchAttendances();
-            }, 300);
-        };
-        const createSubscription = graphqlClient
-            .graphql({ query: onCreateAttendance, authMode: "userPool" })
-            .subscribe({
-            next: ({ data }: {
-                data?: OnCreateAttendanceSubscription;
-            }) => {
-                const attendance = data?.onCreateAttendance;
-                if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
-                    return;
-                }
-                scheduleRefetch();
-            },
-        });
-        const updateSubscription = graphqlClient
-            .graphql({ query: onUpdateAttendance, authMode: "userPool" })
-            .subscribe({
-            next: ({ data }: {
-                data?: OnUpdateAttendanceSubscription;
-            }) => {
-                const attendance = data?.onUpdateAttendance;
-                if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
-                    return;
-                }
-                scheduleRefetch();
-            },
-        });
-        const deleteSubscription = graphqlClient
-            .graphql({ query: onDeleteAttendance, authMode: "userPool" })
-            .subscribe({
-            next: ({ data }: {
-                data?: OnDeleteAttendanceSubscription;
-            }) => {
-                const attendance = data?.onDeleteAttendance;
-                if (!shouldRefetch(attendance?.staffId, attendance?.workDate)) {
-                    return;
-                }
-                scheduleRefetch();
-            },
-        });
-        return () => {
-            createSubscription.unsubscribe();
-            updateSubscription.unsubscribe();
-            deleteSubscription.unsubscribe();
-            if (refetchTimer) {
-                clearTimeout(refetchTimer);
-            }
-        };
-    }, [
-        staffId,
-        shouldFetchAttendances,
-        dateRange.startDate,
-        dateRange.endDate,
-        refetchAttendances,
-    ]);
+    useAttendanceSubscription({ staffId, shouldFetchAttendances, dateRange, refetchAttendances, isBulkApprovingRef });
     // 日付範囲内のすべての日付に対してAttendanceを生成（空の日も含む）
     const attendances: Attendance[] = useMemo(() => {
         // 実際にデータがあるAttendanceのみを返す（登録なしは含めない）

@@ -1,6 +1,5 @@
+import { AuthContext } from "@app/providers/auth/AuthContext";
 import { render, screen } from "@testing-library/react";
-
-import { AuthContext } from "@/context/AuthContext";
 
 import RegisterAttendanceSummaryCard from "../RegisterAttendanceSummaryCard";
 
@@ -137,7 +136,7 @@ describe("RegisterAttendanceSummaryCard", () => {
       screen.getByTestId("register-dashboard-work-status-chart-info"),
     ).toHaveAttribute(
       "aria-label",
-      "勤務状況チャートの算出根拠: 勤務時間=退勤時刻-出勤時刻-休憩時間、残業時間=max(勤務時間-所定労働時間,0)、休憩時間=休憩終了時刻-休憩開始時刻の合計",
+      "勤務状況チャートの算出根拠: 勤務時間=退勤時刻-出勤時刻-休憩時間（通常勤務）、有給休暇=有給フラグ付きの勤務時間（休憩時間は表示しない）、残業時間=max(勤務時間-所定労働時間,0)、休憩時間=休憩終了時刻-休憩開始時刻の合計（通常勤務のみ）",
     );
     expect(screen.getByText("打刻エラー件数")).toBeInTheDocument();
     expect(
@@ -175,7 +174,11 @@ describe("RegisterAttendanceSummaryCard", () => {
     const restDataset = barProps.data.datasets.find(
       (dataset) => dataset.label === "休憩時間",
     );
+    const paidHolidayDataset = barProps.data.datasets.find(
+      (dataset) => dataset.label === "有給休暇",
+    );
     expect(overtimeDataset?.data).toContain(-1);
+    expect(paidHolidayDataset?.data.every((value) => value === 0)).toBe(true);
     expect(workDataset?.data[10]).toBe(8);
     expect(restDataset?.data[9]).toBe(1);
     expect(restDataset?.data[10]).toBe(1);
@@ -219,7 +222,11 @@ describe("RegisterAttendanceSummaryCard", () => {
     const restDataset = capturedBarProps.data.datasets.find(
       (dataset) => dataset.label === "休憩時間",
     );
+    const paidHolidayDataset = capturedBarProps.data.datasets.find(
+      (dataset) => dataset.label === "有給休暇",
+    );
     expect(workDataset?.data.every((value) => value === 0)).toBe(true);
+    expect(paidHolidayDataset?.data.every((value) => value === 0)).toBe(true);
     expect(overtimeDataset?.data.every((value) => value === 0)).toBe(true);
     expect(restDataset?.data.every((value) => value === 0)).toBe(true);
   });
@@ -290,7 +297,7 @@ describe("RegisterAttendanceSummaryCard", () => {
     ).toHaveAttribute("aria-label", "集計期間について: 2/26〜3/25");
   });
 
-  it("当日の勤務はサマリーとチャートの集計対象から除外する", () => {
+  it("退勤時刻がある当日の勤務はサマリーとチャートの集計対象に含める", () => {
     mockUseListAttendancesByDateRangeQuery.mockReturnValue({
       data: [
         {
@@ -316,6 +323,70 @@ describe("RegisterAttendanceSummaryCard", () => {
               endTime: "2026-03-12T13:00:00+09:00",
             },
           ],
+        },
+      ],
+      isLoading: false,
+      isFetching: false,
+      isUninitialized: false,
+      error: null,
+    });
+
+    render(
+      <AuthContext.Provider
+        value={{
+          signOut: jest.fn(),
+          signIn: jest.fn(),
+          isCognitoUserRole: () => false,
+          cognitoUser: { id: "staff-1" } as never,
+        }}
+      >
+        <RegisterAttendanceSummaryCard attendanceErrorCount={0} />
+      </AuthContext.Provider>,
+    );
+
+    expect(screen.getByText("17.0h")).toBeInTheDocument();
+    expect(screen.getByText("2日")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("register-dashboard-work-status-chart-count"),
+    ).toHaveTextContent("対象データ 2件");
+
+    if (!capturedBarProps) {
+      throw new Error("Bar props were not captured");
+    }
+
+    const workDataset = capturedBarProps.data.datasets.find(
+      (dataset) => dataset.label === "勤務時間",
+    );
+    const restDataset = capturedBarProps.data.datasets.find(
+      (dataset) => dataset.label === "休憩時間",
+    );
+    expect(workDataset?.data[10]).toBe(8);
+    expect(workDataset?.data[11]).toBe(8);
+    expect(restDataset?.data[10]).toBe(1);
+    expect(restDataset?.data[11]).toBe(1);
+  });
+
+  it("退勤時刻がない当日の勤務はサマリーとチャートの集計対象から除外する", () => {
+    mockUseListAttendancesByDateRangeQuery.mockReturnValue({
+      data: [
+        {
+          id: "a-1",
+          workDate: "2026-03-11",
+          startTime: "2026-03-11T09:00:00+09:00",
+          endTime: "2026-03-11T18:00:00+09:00",
+          rests: [
+            {
+              startTime: "2026-03-11T12:00:00+09:00",
+              endTime: "2026-03-11T13:00:00+09:00",
+            },
+          ],
+        },
+        {
+          id: "a-2",
+          workDate: "2026-03-12",
+          startTime: "2026-03-12T09:00:00+09:00",
+          endTime: null,
+          rests: [],
         },
       ],
       isLoading: false,

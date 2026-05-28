@@ -1,11 +1,10 @@
 import { useLazyListAttendancesByDateRangeQuery } from "@entities/attendance/api/attendanceApi";
-import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { getAttendanceMonthRangeInput } from "@entities/attendance/lib/attendanceQueryRange";
 import {
   AttendanceDaily,
   DuplicateAttendanceDaily,
 } from "@entities/attendance/model/useAttendanceDaily";
 import { Attendance } from "@shared/api/graphql/types";
-import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { calculateTotalOvertimeMinutes } from "../lib/overtimeUtils";
@@ -32,6 +31,59 @@ type UseAttendanceDailyFetchResult = {
   mergedDuplicateAttendances: DuplicateAttendanceDaily[];
   duplicateInfoByStaff: Record<string, DuplicateAttendanceDaily[]>;
 };
+
+function parseDuplicateListFromError(
+  err: unknown,
+  staffId: string,
+  staffNameMap: Record<string, string>,
+): DuplicateAttendanceDaily[] {
+  const details =
+    typeof err === "object" &&
+    err !== null &&
+    "details" in err &&
+    typeof (err as { details?: unknown }).details === "object" &&
+    (err as { details?: unknown }).details !== null
+      ? (err as {
+          details: {
+            duplicates?: unknown;
+          };
+        }).details.duplicates ?? []
+      : [];
+
+  if (!Array.isArray(details)) {
+    return [];
+  }
+
+  return details
+    .map((dup) => {
+      if (
+        !dup ||
+        typeof dup !== "object" ||
+        !("workDate" in dup) ||
+        !("ids" in dup)
+      ) {
+        return null;
+      }
+      const candidate = dup as {
+        workDate?: unknown;
+        ids?: unknown;
+        staffId?: unknown;
+      };
+      if (typeof candidate.workDate !== "string" || !Array.isArray(candidate.ids)) {
+        return null;
+      }
+      const ids = candidate.ids.filter((id): id is string => typeof id === "string");
+      return {
+        staffId: typeof candidate.staffId === "string" ? candidate.staffId : staffId,
+        staffName: staffNameMap[staffId] ?? staffId,
+        workDate: candidate.workDate,
+        ids,
+      } satisfies DuplicateAttendanceDaily;
+    })
+    .filter(
+      (dup): dup is DuplicateAttendanceDaily => dup !== null && dup.ids.length > 1,
+    );
+}
 
 export function useAttendanceDailyFetch({
   attendanceDailyList,
@@ -72,14 +124,9 @@ export function useAttendanceDailyFetch({
       setAttendanceLoadingMap((state) => ({ ...state, [staffId]: true }));
       setAttendanceErrorMap((state) => ({ ...state, [staffId]: null }));
 
-      const baseDate =
-        displayDateFormatted ?? dayjs().format(AttendanceDate.DataFormat);
-      const startDate = dayjs(baseDate)
-        .startOf("month")
-        .format(AttendanceDate.DataFormat);
-      const endDate = dayjs(baseDate)
-        .endOf("month")
-        .format(AttendanceDate.DataFormat);
+      const { startDate, endDate } = getAttendanceMonthRangeInput(
+        displayDateFormatted,
+      );
 
       triggerListAttendancesByDateRange({ staffId, startDate, endDate })
         .unwrap()
@@ -103,65 +150,9 @@ export function useAttendanceDailyFetch({
             [staffId]: errorInstance,
           }));
 
-          const details =
-            typeof err === "object" &&
-            err !== null &&
-            "details" in err &&
-            typeof (err as { details?: unknown }).details === "object" &&
-            (err as { details?: unknown }).details !== null
-              ? ((
-                  err as {
-                    details: {
-                      duplicates?: unknown;
-                    };
-                  }
-                ).details.duplicates ?? [])
-              : [];
-
-          const duplicateList = Array.isArray(details)
-            ? details
-                .map((dup) => {
-                  if (
-                    !dup ||
-                    typeof dup !== "object" ||
-                    !("workDate" in dup) ||
-                    !("ids" in dup)
-                  ) {
-                    return null;
-                  }
-                  const candidate = dup as {
-                    workDate?: unknown;
-                    ids?: unknown;
-                    staffId?: unknown;
-                  };
-                  if (
-                    typeof candidate.workDate !== "string" ||
-                    !Array.isArray(candidate.ids)
-                  ) {
-                    return null;
-                  }
-                  const ids = candidate.ids.filter(
-                    (id): id is string => typeof id === "string",
-                  );
-                  return {
-                    staffId:
-                      typeof candidate.staffId === "string"
-                        ? candidate.staffId
-                        : staffId,
-                    staffName: staffNameMap[staffId] ?? staffId,
-                    workDate: candidate.workDate,
-                    ids,
-                  } satisfies DuplicateAttendanceDaily;
-                })
-                .filter(
-                  (dup): dup is DuplicateAttendanceDaily =>
-                    dup !== null && dup.ids.length > 1,
-                )
-            : [];
-
           setDuplicateSummaryMap((state) => ({
             ...state,
-            [staffId]: duplicateList,
+            [staffId]: parseDuplicateListFromError(err, staffId, staffNameMap),
           }));
         })
         .finally(() => {

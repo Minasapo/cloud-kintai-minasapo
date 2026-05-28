@@ -1,13 +1,11 @@
 import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
 import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, Stack, Typography } from "@mui/material";
-import { AppIconButton } from "@shared/ui/button";
+import { AppDeleteIconButton } from "@shared/ui/button/AppActionIconButton";
+import { TimeRangeInput } from "@shared/ui/form";
 import { useContext } from "react";
-import { FieldArrayWithId } from "react-hook-form";
+import { Controller, FieldArrayWithId } from "react-hook-form";
 
-import HourlyPaidHolidayEndTimeInput from "./HourlyPaidHolidayEndTimeInput";
-import HourlyPaidHolidayStartTimeInput from "./HourlyPaidHolidayStartTimeInput";
 import { calcTotalHourlyPaidHolidayTime } from "./HourlyPaidHolidayTimeItem";
 
 /**
@@ -32,14 +30,17 @@ export default function HourlyPaidHolidayTimeItemMobile({
   time,
   index,
 }: HourlyPaidHolidayTimeItemMobileProps) {
-  const { hourlyPaidHolidayTimeRemove, readOnly } = useContext(
-    AttendanceEditContext
-  );
+  const { hourlyPaidHolidayTimeRemove, readOnly, workDate, control } =
+    useContext(AttendanceEditContext);
 
   const totalHourlyPaidHolidayTime = calcTotalHourlyPaidHolidayTime(
     time.startTime,
-    time.endTime
+    time.endTime,
   );
+
+  const baseDateStr = workDate ? workDate.format("YYYY-MM-DD") : "";
+
+  if (!workDate || !control) return null;
 
   return (
     <Box sx={{ mb: 1 }}>
@@ -54,11 +55,35 @@ export default function HourlyPaidHolidayTimeItemMobile({
           backgroundColor: "background.paper",
         }}
       >
-        {/* 開始時刻 */}
-        <HourlyPaidHolidayStartTimeInput index={index} time={time} />
-
-        {/* 終了時刻 */}
-        <HourlyPaidHolidayEndTimeInput index={index} time={time} />
+        {/* 開始・終了時刻 */}
+        <Controller
+          name={`hourlyPaidHolidayTimes.${index}.startTime`}
+          control={control}
+          render={({ field: startField }) => (
+            <Controller
+              name={`hourlyPaidHolidayTimes.${index}.endTime`}
+              control={control}
+              render={({ field: endField }) => (
+                <TimeRangeInput
+                  variant="mobile"
+                  startLabel="開始時刻"
+                  endLabel="終了時刻"
+                  startValue={startField.value as string | null}
+                  endValue={endField.value as string | null}
+                  baseDate={baseDateStr}
+                  onStartChange={(v) => {
+                    startField.onChange(v);
+                  }}
+                  onEndChange={(v) => {
+                    endField.onChange(v);
+                  }}
+                  disabled={!!readOnly}
+                  size="small"
+                />
+              )}
+            />
+          )}
+        />
 
         {/* 削除ボタン + 合計時間 */}
         <Stack
@@ -66,20 +91,17 @@ export default function HourlyPaidHolidayTimeItemMobile({
           alignItems="center"
           justifyContent="space-between"
         >
-          <AppIconButton
+          <AppDeleteIconButton
             aria-label={ARIA_LABEL_DELETE}
             onClick={() => hourlyPaidHolidayTimeRemove(index)}
             size="sm"
             disabled={!!readOnly}
-            tone="danger"
-          >
-            <DeleteIcon />
-          </AppIconButton>
+          />
           <Box textAlign="right">
             <Typography variant="body2" color="text.secondary">
               {totalHourlyPaidHolidayTime > 0
                 ? `${totalHourlyPaidHolidayTime.toFixed(
-                    HOURS_DECIMAL_PLACES
+                    HOURS_DECIMAL_PLACES,
                   )} 時間`
                 : "―"}
             </Typography>

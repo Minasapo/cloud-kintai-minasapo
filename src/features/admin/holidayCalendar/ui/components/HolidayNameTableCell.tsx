@@ -1,10 +1,12 @@
-import { TableCell } from "@mui/material";
 import { HolidayCalendar } from "@shared/api/graphql/types";
+
+import { CalendarNameTableCell } from "./CalendarTableCells";
 
 export default function HolidayNameTableCell({
   holidayCalendar,
 }: {
   holidayCalendar: HolidayCalendar;
 }) {
-  return <TableCell>{holidayCalendar.name}</TableCell>;
+  return <CalendarNameTableCell name={holidayCalendar.name} />;
 }
+

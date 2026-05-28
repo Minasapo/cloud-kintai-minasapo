@@ -1,3 +1,4 @@
+import { AuthContext } from "@app/providers/auth/AuthContext";
 import useAppConfig from "@entities/app-config/model/useAppConfig";
 import {
   StaffType,
@@ -27,6 +28,8 @@ import {
 } from "@shared/api/graphql/types";
 import { createLogger } from "@shared/lib/logger";
 import { parseTimeToISO } from "@shared/lib/time";
+import { useAppNotification } from "@shared/lib/useAppNotification";
+import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
 import {
   DashboardInnerSurface,
   PageContent,
@@ -36,10 +39,6 @@ import Page from "@shared/ui/page/Page";
 import { SectionTitle } from "@shared/ui/typography";
 import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-import { AuthContext } from "@/context/AuthContext";
-import { useAppNotification } from "@/hooks/useAppNotification";
-import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 
 import styles from "./NewWorkflow.module.scss";
 
@@ -180,6 +179,109 @@ const FormRow = ({
     {label && <div className={styles.formLabel}>{label}</div>}
     {children}
   </div>
+);
+
+type WorkflowFormContentProps = {
+  category: string;
+  enabledCategoryOptions: ReturnType<typeof getEnabledWorkflowCategories>;
+  staff: StaffType | null | undefined;
+  applicationDate: string;
+  fields: ReturnType<typeof useDynamicWorkflowForm>["fields"];
+  setFieldValue: ReturnType<typeof useDynamicWorkflowForm>["setFieldValue"];
+  fieldErrors: Record<string, string>;
+  draftMode: boolean;
+  isSaving: boolean;
+  onCategoryChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onDraftToggle: (e: React.ChangeEvent<HTMLInputElement>) => void;
+};
+
+const WorkflowFormContent = ({
+  category, enabledCategoryOptions, staff, applicationDate,
+  fields, setFieldValue, fieldErrors, draftMode, isSaving,
+  onCategoryChange, onDraftToggle,
+}: WorkflowFormContentProps) => (
+  <DashboardInnerSurface>
+    <div className={styles.formRows}>
+      <FormRow label="種別">
+        <div>
+          <div className={styles.selectWrap}>
+            <select
+              className={styles.select}
+              value={category}
+              onChange={onCategoryChange}
+            >
+              <option value="">種別を選択</option>
+              {buildCategoryOptions(enabledCategoryOptions)}
+            </select>
+            <span className={styles.selectIcon} aria-hidden="true">
+              ▼
+            </span>
+          </div>
+        </div>
+      </FormRow>
+
+      <FormRow label="申請者">
+        <p className={styles.formValue}>
+          {staff ? `${staff.familyName} ${staff.givenName}` : "—"}
+        </p>
+      </FormRow>
+
+      <FormRow label="申請日">
+        <div>
+          <input
+            className={styles.readonlyInput}
+            value={applicationDate}
+            readOnly
+          />
+        </div>
+      </FormRow>
+
+      <DynamicWorkflowFormProvider
+        value={{
+          category,
+          disabled: category === "",
+          fields,
+          setFieldValue,
+          fieldErrors,
+        }}
+      >
+        <DynamicWorkflowTypeFields />
+      </DynamicWorkflowFormProvider>
+
+      <FormRow label="下書き">
+        <div>
+          <label className={styles.toggleWrap}>
+            <input
+              type="checkbox"
+              className={styles.toggleInput}
+              checked={draftMode}
+              onChange={onDraftToggle}
+            />
+            <span className={styles.toggleTrack} />
+            {draftMode && (
+              <span className={styles.toggleLabelText}>
+                下書きとして保存
+              </span>
+            )}
+          </label>
+        </div>
+      </FormRow>
+
+      <FormRow>
+        <div className={styles.formActions}>
+          <div className={styles.actionsGroup}>
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={category === "" || isSaving}
+            >
+              {isSaving ? "処理中..." : "作成"}
+            </button>
+          </div>
+        </div>
+      </FormRow>
+    </div>
+  </DashboardInnerSurface>
 );
 
 export default function NewWorkflow() {
@@ -387,88 +489,19 @@ export default function NewWorkflow() {
             </div>
           </div>
 
-          <DashboardInnerSurface>
-            <div className={styles.formRows}>
-              <FormRow label="種別">
-                <div>
-                  <div className={styles.selectWrap}>
-                    <select
-                      className={styles.select}
-                      value={category}
-                      onChange={handleCategoryChange}
-                    >
-                      <option value="">種別を選択</option>
-                      {buildCategoryOptions(enabledCategoryOptions)}
-                    </select>
-                    <span className={styles.selectIcon} aria-hidden="true">
-                      ▼
-                    </span>
-                  </div>
-                </div>
-              </FormRow>
-
-              <FormRow label="申請者">
-                <p className={styles.formValue}>
-                  {staff ? `${staff.familyName} ${staff.givenName}` : "—"}
-                </p>
-              </FormRow>
-
-              <FormRow label="申請日">
-                <div>
-                  <input
-                    className={styles.readonlyInput}
-                    value={applicationDate}
-                    readOnly
-                  />
-                </div>
-              </FormRow>
-
-              <DynamicWorkflowFormProvider
-                value={{
-                  category,
-                  disabled: category === "",
-                  fields,
-                  setFieldValue,
-                  fieldErrors,
-                }}
-              >
-                <DynamicWorkflowTypeFields />
-              </DynamicWorkflowFormProvider>
-
-              <FormRow label="下書き">
-                <div>
-                  <label className={styles.toggleWrap}>
-                    <input
-                      type="checkbox"
-                      className={styles.toggleInput}
-                      checked={draftMode}
-                      onChange={handleDraftToggle}
-                    />
-                    <span className={styles.toggleTrack} />
-                    {draftMode && (
-                      <span className={styles.toggleLabelText}>
-                        下書きとして保存
-                      </span>
-                    )}
-                  </label>
-                </div>
-              </FormRow>
-
-              <FormRow>
-                <div className={styles.formActions}>
-                  <div className={styles.actionsGroup}>
-                    <button
-                      type="submit"
-                      className={styles.submitButton}
-                      disabled={category === "" || isSaving}
-                    >
-                      {isSaving ? "処理中..." : "作成"}
-                    </button>
-                  </div>
-                </div>
-              </FormRow>
-            </div>
-          </DashboardInnerSurface>
+          <WorkflowFormContent
+            category={category}
+            enabledCategoryOptions={enabledCategoryOptions}
+            staff={staff}
+            applicationDate={applicationDate}
+            fields={fields}
+            setFieldValue={setFieldValue}
+            fieldErrors={fieldErrors}
+            draftMode={draftMode}
+            isSaving={isSaving}
+            onCategoryChange={handleCategoryChange}
+            onDraftToggle={handleDraftToggle}
+          />
         </PageSection>
       </PageContent>
     </Page>

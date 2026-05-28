@@ -1,20 +1,26 @@
 import type { ShiftRequestLite } from "@entities/shift/api/shiftApi";
+import {
+  shiftRequestStatusToShiftStateWithEmpty,
+  shiftStateWithEmptyToShiftRequestStatus,
+} from "@entities/shift/lib/statusMapping";
 import type {
   ModelShiftRequestConditionInput,
   ShiftRequest,
   ShiftRequestDayPreferenceInput,
+  ShiftRequestHistoryInput,
+  ShiftRequestStatus,
   UpdateShiftRequestInput,
 } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
 import {
+  CellChangeRecord,
   ShiftCellData,
   ShiftCellUpdate,
   ShiftDataMap,
   ShiftRequestData,
-  shiftRequestStatusToShiftState,
+  ShiftRequestHistoryEntry,
   ShiftState,
-  shiftStateToShiftRequestStatus,
 } from "../types/collaborative.types";
 
 const buildDayKeys = (targetMonth: string) => {
@@ -44,7 +50,7 @@ const buildStaffShiftMap = (
   dayKeys.forEach((dayKey) => {
     const entry = entryMap.get(dayKey);
     const state = entry
-      ? shiftRequestStatusToShiftState(entry.status)
+      ? shiftRequestStatusToShiftStateWithEmpty(entry.status)
       : "empty";
 
     map.set(dayKey, {
@@ -99,6 +105,23 @@ export const normalizeShiftRequest = (
     }
   ).comments;
 
+  const rawHistories = (shiftRequest as ShiftRequestLite).histories;
+
+  const histories: ShiftRequestHistoryEntry[] | undefined = rawHistories
+    ?.filter((h): h is NonNullable<typeof h> => h !== null)
+    .map((h) => ({
+      version: h.version,
+      recordedAt: h.recordedAt,
+      recordedByStaffId: h.recordedByStaffId ?? undefined,
+      entries: h.entries
+        ?.filter((e): e is NonNullable<typeof e> => e !== null)
+        .map((e) => ({
+          date: e.date,
+          status: e.status as ShiftRequestStatus,
+          isLocked: e.isLocked ?? undefined,
+        })),
+    }));
+
   return {
     id: shiftRequest.id,
     staffId: shiftRequest.staffId,
@@ -114,6 +137,7 @@ export const normalizeShiftRequest = (
         body: c.body,
         createdAt: c.createdAt,
       })),
+    histories,
     updatedAt: shiftRequest.updatedAt ?? undefined,
     updatedBy: shiftRequest.updatedBy ?? undefined,
     version: shiftRequest.version ?? undefined,
@@ -209,7 +233,7 @@ export const transformShiftCellUpdateToGraphQLInput = ({
   const entries: ShiftRequestDayPreferenceInput[] = [];
 
   staffData.forEach((cell, dayKey) => {
-    const status = shiftStateToShiftRequestStatus(cell.state);
+    const status = shiftStateWithEmptyToShiftRequestStatus(cell.state);
     if (!status) {
       return;
     }
@@ -225,6 +249,31 @@ export const transformShiftCellUpdateToGraphQLInput = ({
     a.date.localeCompare(b.date),
   );
 
+  const timestamp = new Date().toISOString();
+  const baseHistories: ShiftRequestHistoryInput[] = (
+    shiftRequest.histories ?? []
+  ).map((history) => ({
+    version: history.version,
+    entries: (history.entries ?? []).map((entry) => ({
+      date: entry.date,
+      status: entry.status,
+      isLocked: entry.isLocked,
+    })),
+    recordedAt: history.recordedAt,
+    recordedByStaffId: history.recordedByStaffId,
+  }));
+  const maxHistoryVersion = baseHistories.reduce(
+    (acc, history) => Math.max(acc, history.version ?? 0),
+    0,
+  );
+  const historySnapshot: ShiftRequestHistoryInput = {
+    version: maxHistoryVersion + 1,
+    entries: sortedEntries,
+    recordedAt: timestamp,
+    recordedByStaffId: updatedBy,
+  };
+  const nextHistories = [...baseHistories, historySnapshot];
+
   const expectedVersion = shiftRequest.version ?? null;
   const nextVersion =
     expectedVersion !== null ? expectedVersion + 1 : undefined;
@@ -235,7 +284,9 @@ export const transformShiftCellUpdateToGraphQLInput = ({
       staffId: shiftRequest.staffId,
       targetMonth,
       entries: sortedEntries,
+      histories: nextHistories,
       updatedBy,
+      updatedAt: timestamp,
       version: nextVersion,
     },
     condition:
@@ -246,3 +297,115 @@ export const transformShiftCellUpdateToGraphQLInput = ({
         : undefined,
   };
 };
+
+const createRecordId = () =>
+  `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
+/**
+ * ShiftRequestHistory スナップショット配列をセル単位の CellChangeRecord[] に変換する。
+ *
+ * histories は「新しい順（先頭が最新）」で格納されている前提。
+ * 連続するスナップショットを差分比較し、変化があったセルのみレコードを生成する。
+ */
+export function deriveHistoryCellChanges(
+  staffId: string,
+  histories: ShiftRequestHistoryEntry[],
+  getStaffName: (staffId: string) => string,
+): CellChangeRecord[] {
+  if (histories.length === 0) return [];
+
+  // 古い順にソート（recordedAt の昇順）
+  const sorted = histories.toSorted(
+    (a, b) => Date.parse(a.recordedAt) - Date.parse(b.recordedAt),
+  );
+
+  const records: CellChangeRecord[] = [];
+
+  for (let i = 0; i < sorted.length; i++) {
+    const current = sorted[i];
+    const prev = sorted[i - 1];
+
+    const currentEntryMap = new Map(
+      (current.entries ?? []).map((e) => [dayjs(e.date).format("DD"), e]),
+    );
+    const prevEntryMap = new Map(
+      (prev?.entries ?? []).map((e) => [dayjs(e.date).format("DD"), e]),
+    );
+
+    const allDates = new Set([
+      ...currentEntryMap.keys(),
+      ...prevEntryMap.keys(),
+    ]);
+
+    const changedAt = Date.parse(current.recordedAt);
+    const changedBy = current.recordedByStaffId ?? "unknown";
+    const changedByName = current.recordedByStaffId
+      ? getStaffName(current.recordedByStaffId)
+      : "不明";
+
+    for (const date of allDates) {
+      const currentEntry = currentEntryMap.get(date);
+      const prevEntry = prevEntryMap.get(date);
+
+      const newState = currentEntry
+        ? shiftRequestStatusToShiftStateWithEmpty(currentEntry.status)
+        : "empty";
+      const previousState = prevEntry
+        ? shiftRequestStatusToShiftStateWithEmpty(prevEntry.status)
+        : i === 0
+          ? undefined // 最古スナップショットは「変更前不明」
+          : "empty";
+      const newLocked = currentEntry?.isLocked;
+      const previousLocked = prevEntry?.isLocked;
+
+      const stateChanged = newState !== previousState;
+      const lockChanged =
+        newLocked !== undefined &&
+        previousLocked !== undefined &&
+        newLocked !== previousLocked;
+
+      if (!stateChanged && !lockChanged) continue;
+
+      const cellKey = `${staffId}#${date}`;
+      records.push({
+        id: createRecordId(),
+        cellKey,
+        staffId,
+        date,
+        previousState,
+        newState,
+        previousLocked,
+        newLocked,
+        changedBy,
+        changedByName,
+        changedAt,
+        source: "db-history",
+      });
+    }
+  }
+
+  return records;
+}
+
+/**
+ * スタッフのシフトセルマップから GraphQL 入力用エントリ配列を構築する純粋関数
+ */
+export function buildShiftRequestEntries(
+  staffData: Map<string, ShiftCellData>,
+  targetMonth: string,
+): ShiftRequestDayPreferenceInput[] {
+  return Array.from(staffData.entries())
+    .map(([dayKey, cell]): ShiftRequestDayPreferenceInput | null => {
+      const status = shiftStateWithEmptyToShiftRequestStatus(cell.state);
+      if (!status) return null;
+      return {
+        date: dayjs(`${targetMonth}-${dayKey}`).format("YYYY-MM-DD"),
+        status,
+        isLocked: cell.isLocked || undefined,
+      };
+    })
+    .filter(
+      (entry): entry is ShiftRequestDayPreferenceInput => entry !== null,
+    )
+    .toSorted((a, b) => a.date.localeCompare(b.date));
+}

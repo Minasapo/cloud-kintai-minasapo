@@ -1,18 +1,15 @@
 import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
 import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, Stack, Typography } from "@mui/material";
-import { AppIconButton } from "@shared/ui/button";
+import { AppDeleteIconButton } from "@shared/ui/button/AppActionIconButton";
+import { TimeRangeInput } from "@shared/ui/form";
 import dayjs from "dayjs";
 import { useContext, useMemo } from "react";
-import { FieldArrayWithId } from "react-hook-form";
-
-import HourlyPaidHolidayEndTimeInput from "./HourlyPaidHolidayEndTimeInput";
-import HourlyPaidHolidayStartTimeInput from "./HourlyPaidHolidayStartTimeInput";
+import { Controller, FieldArrayWithId } from "react-hook-form";
 
 export function calcTotalHourlyPaidHolidayTime(
   startTime: string | null | undefined,
-  endTime: string | null | undefined
+  endTime: string | null | undefined,
 ) {
   if (!startTime) return 0;
 
@@ -39,9 +36,16 @@ export default function HourlyPaidHolidayTimeItem({
   time: FieldArrayWithId<AttendanceEditInputs, "hourlyPaidHolidayTimes", "id">;
   index: number;
 }) {
-  const { hourlyPaidHolidayTimeRemove, changeRequests, readOnly } = useContext(
-    AttendanceEditContext
-  );
+  const {
+    hourlyPaidHolidayTimeRemove,
+    changeRequests,
+    readOnly,
+    workDate,
+    control,
+  } = useContext(AttendanceEditContext);
+
+  const baseDateStr = workDate ? workDate.format("YYYY-MM-DD") : "";
+  const disabled = changeRequests.length > 0 || !!readOnly;
 
   // 派生状態として計算：時給有給休暇の合計時間
   const totalHourlyPaidHolidayTime = useMemo(() => {
@@ -55,26 +59,45 @@ export default function HourlyPaidHolidayTimeItem({
     return calcTotalHourlyPaidHolidayTime(start, end);
   }, [time.startTime, time.endTime]);
 
+  if (!workDate || !control) return null;
+
   return (
     <Box>
-      <Stack direction="row" spacing={1}>
-        <HourlyPaidHolidayStartTimeInput index={index} time={time} />
+      <Stack direction="row" spacing={1} alignItems="center">
+        <Controller
+          name={`hourlyPaidHolidayTimes.${index}.startTime`}
+          control={control}
+          render={({ field: startField }) => (
+            <Controller
+              name={`hourlyPaidHolidayTimes.${index}.endTime`}
+              control={control}
+              render={({ field: endField }) => (
+                <TimeRangeInput
+                  startLabel="開始時刻"
+                  endLabel="終了時刻"
+                  startValue={startField.value as string | null}
+                  endValue={endField.value as string | null}
+                  baseDate={baseDateStr}
+                  onStartChange={(v) => {
+                    startField.onChange(v);
+                  }}
+                  onEndChange={(v) => {
+                    endField.onChange(v);
+                  }}
+                  disabled={disabled}
+                  size="small"
+                />
+              )}
+            />
+          )}
+        />
         <Box>
-          <Typography variant="body1" sx={{ my: 1 }}>
-            ～
-          </Typography>
-        </Box>
-        <HourlyPaidHolidayEndTimeInput index={index} time={time} />
-        <Box>
-          <AppIconButton
-            aria-label="delete-hourly-paid-holiday-time"
+          <AppDeleteIconButton
+            aria-label="時間単位休暇を削除"
             onClick={() => hourlyPaidHolidayTimeRemove(index)}
-            disabled={changeRequests.length > 0 || !!readOnly}
-            aria-disabled={changeRequests.length > 0 || !!readOnly}
-            tone="danger"
-          >
-            <DeleteIcon />
-          </AppIconButton>
+            disabled={disabled}
+            aria-disabled={disabled}
+          />
         </Box>
         <Box sx={{ flexGrow: 1 }} textAlign={"right"}>
           <Typography variant="body1">

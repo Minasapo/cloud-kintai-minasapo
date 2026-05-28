@@ -1,3 +1,4 @@
+import { AuthContext } from "@app/providers/auth/AuthContext";
 import { useLazyListRecentAttendancesQuery } from "@entities/attendance/api/attendanceApi";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import {
@@ -18,7 +19,274 @@ import dayjs from "dayjs";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { AuthContext } from "@/context/AuthContext";
+function formatHours(v: number | null | undefined): string {
+  if (v === null || v === undefined) return "ー";
+  return `${(Math.round(v * 10) / 10).toFixed(1)}h`;
+}
+
+function buildScheduleSegments(
+  range: { start: number; end: number } | undefined,
+  breaksForStaff: Array<{ start: number; end: number }>,
+): string[] {
+  const segments: string[] = [];
+
+  if (range) {
+    const firstBreak = breaksForStaff[0];
+    if (firstBreak && firstBreak.start > range.start) {
+      segments.push(`${range.start}:00 - ${firstBreak.start}:00 (勤務)`);
+      segments.push(`${firstBreak.start}:00 - ${firstBreak.end}:00 (休憩)`);
+      if (firstBreak.end < range.end) {
+        segments.push(`${firstBreak.end}:00 - ${range.end}:00 (勤務)`);
+      }
+    } else if (
+      firstBreak &&
+      firstBreak.start <= range.start &&
+      firstBreak.end < range.end
+    ) {
+      segments.push(`${firstBreak.end}:00 - ${range.end}:00 (勤務)`);
+    } else {
+      segments.push(`${range.start}:00 - ${range.end}:00 (勤務)`);
+    }
+
+    if (breaksForStaff.length > 1) {
+      breaksForStaff.slice(1).forEach((breakItem) => {
+        segments.push(`${breakItem.start}:00 - ${breakItem.end}:00 (休憩)`);
+      });
+    }
+  }
+
+  return segments;
+}
+
+function isRestWithTimes(
+  rest: Rest | null | undefined,
+): rest is Rest & { startTime: string; endTime: string } {
+  return Boolean(rest?.startTime && rest?.endTime);
+}
+
+type ShiftRange = { start: number; end: number };
+
+async function fetchAttendanceMap({
+  shiftStaffs,
+  dateKey,
+  triggerListAttendances,
+}: {
+  shiftStaffs: Array<{ id: string }>;
+  dateKey: string;
+  triggerListAttendances: ReturnType<
+    typeof useLazyListRecentAttendancesQuery
+  >[0];
+}) {
+  const map = new Map<string, Attendance | null>();
+
+  for (const s of shiftStaffs) {
+    try {
+      const response = await triggerListAttendances({
+        staffId: String(s.id),
+      }).unwrap();
+
+      const attendances = response.attendances ?? [];
+      const matched = attendances.find((a) => a.workDate === dateKey) ?? null;
+      map.set(s.id, matched);
+    } catch {
+      map.set(s.id, null);
+    }
+  }
+
+  return map;
+}
+
+function buildMockTimeRanges(
+  shiftStaffs: Array<{ id: string }>,
+  attendanceMap: Map<string, Attendance | null>,
+): Map<string, ShiftRange> {
+  const map = new Map<string, ShiftRange>();
+  for (const [idx, s] of shiftStaffs.entries()) {
+    const attendance = attendanceMap.get(s.id);
+    if (attendance && attendance.startTime && attendance.endTime) {
+      const start = dayjs(attendance.startTime).hour();
+      const end = dayjs(attendance.endTime).hour();
+      map.set(s.id, { start, end: Math.max(start + 1, end) });
+      continue;
+    }
+
+    const start = 9 + ((idx * 2) % 5);
+    const duration = 7 + (idx % 3);
+    const end = Math.min(18, start + duration);
+    map.set(s.id, { start, end });
+  }
+  return map;
+}
+
+function buildMockBreaks({
+  shiftStaffs,
+  attendanceMap,
+  mockTimeRanges,
+}: {
+  shiftStaffs: Array<{ id: string }>;
+  attendanceMap: Map<string, Attendance | null>;
+  mockTimeRanges: Map<string, ShiftRange>;
+}): Map<string, Array<{ start: number; end: number }>> {
+  const map = new Map<string, Array<{ start: number; end: number }>>();
+  for (const [idx, s] of shiftStaffs.entries()) {
+    const breaks: Array<{ start: number; end: number }> = [];
+    const attendance = attendanceMap.get(s.id);
+    if (attendance && Array.isArray(attendance.rests) && attendance.rests.length > 0) {
+      for (const rest of attendance.rests.filter(isRestWithTimes)) {
+        const rs = dayjs(rest.startTime).hour();
+        const re = dayjs(rest.endTime).hour();
+        breaks.push({ start: rs, end: Math.max(rs + 1, re) });
+      }
+    } else {
+      const range = mockTimeRanges.get(s.id);
+      if (range && range.start <= 12 && range.end >= 13) {
+        breaks.push({ start: 12, end: 13 });
+      }
+      if (idx % 4 === 2 && range && range.start <= 15 && range.end >= 16) {
+        breaks.push({ start: 15, end: 16 });
+      }
+    }
+
+    map.set(s.id, breaks);
+  }
+  return map;
+}
+
+function useShiftDayViewAttendanceMap({
+  shiftStaffs,
+  dateKey,
+  triggerListAttendances,
+}: {
+  shiftStaffs: Array<{ id: string }>;
+  dateKey: string;
+  triggerListAttendances: ReturnType<
+    typeof useLazyListRecentAttendancesQuery
+  >[0];
+}) {
+  const [attendanceMap, setAttendanceMap] = useState<
+    Map<string, Attendance | null>
+  >(new Map());
+
+  useEffect(() => {
+    let mounted = true;
+
+    void fetchAttendanceMap({
+      shiftStaffs,
+      dateKey,
+      triggerListAttendances,
+    }).then((map) => {
+      if (mounted) {
+        setAttendanceMap(map);
+      }
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [shiftStaffs, dateKey, triggerListAttendances]);
+
+  return attendanceMap;
+}
+
+type StaffTimelineRowProps = {
+  staff: { id: string; familyName?: string | null; givenName?: string | null };
+  range: { start: number; end: number } | undefined;
+  breaksForStaff: Array<{ start: number; end: number }>;
+  hours: number[];
+};
+
+function StaffTimelineRow({
+  staff,
+  range,
+  breaksForStaff,
+  hours,
+}: StaffTimelineRowProps) {
+  const displayName = `${staff.familyName ?? ""} ${staff.givenName ?? ""}`.trim();
+  const breaksDuration = breaksForStaff.reduce(
+    (acc, breakItem) => acc + Math.max(0, breakItem.end - breakItem.start),
+    0,
+  );
+  const workTotal = range
+    ? Math.max(0, range.end - range.start - breaksDuration)
+    : null;
+
+  return (
+    <TableRow hover>
+      <TableCell
+        sx={{
+          position: "sticky",
+          left: 0,
+          zIndex: 2,
+          bgcolor: "background.paper",
+          minWidth: 160,
+        }}
+      >
+        <Typography variant="body2">{displayName}</Typography>
+      </TableCell>
+
+      <TableCell align="center" sx={{ minWidth: 80 }}>
+        {formatHours(workTotal)}
+      </TableCell>
+
+      <TableCell align="center" sx={{ minWidth: 80 }}>
+        {formatHours(breaksDuration)}
+      </TableCell>
+
+      {hours.map((h, i) => {
+        const working = range ? h >= range.start && h < range.end : false;
+        const inBreak = breaksForStaff.some((breakItem) => h >= breakItem.start && h < breakItem.end);
+        const segments = buildScheduleSegments(range, breaksForStaff);
+        const title = segments.length > 0 ? segments.join(" / ") : "休み";
+
+        return (
+          <TableCell
+            key={h}
+            sx={(theme) => ({
+              p: 0,
+              width: 28,
+              height: 40,
+              borderLeft:
+                i === 0 ? "none" : `1px dotted ${theme.palette.divider}`,
+            })}
+            align="center"
+          >
+            {working && !inBreak ? (
+              <Tooltip title={title}>
+                <Box
+                  sx={{
+                    bgcolor: "primary.main",
+                    color: "primary.contrastText",
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                />
+              </Tooltip>
+            ) : inBreak ? (
+              <Tooltip title={title}>
+                <Box
+                  sx={{
+                    bgcolor: "info.light",
+                    color: "text.primary",
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                />
+              </Tooltip>
+            ) : null}
+          </TableCell>
+        );
+      })}
+    </TableRow>
+  );
+}
 
 // 日付ごとの時間軸ビュー（デモ用のモック表示）
 export default function ShiftDayView() {
@@ -37,109 +305,22 @@ export default function ShiftDayView() {
 
   const shiftStaffs = useMemo(
     () => staffs.filter((s) => s.workType === "shift"),
-    [staffs]
+    [staffs],
   );
 
-  // 出勤データがあればそれを利用し、なければ既存のモックを利用する
-  const [attendanceMap, setAttendanceMap] = useState<
-    Map<string, Attendance | null>
-  >(new Map());
+  const attendanceMap = useShiftDayViewAttendanceMap({
+    shiftStaffs,
+    dateKey,
+    triggerListAttendances,
+  });
 
-  useEffect(() => {
-    let mounted = true;
-
-    async function load() {
-      const map = new Map<string, Attendance | null>();
-
-      await Promise.all(
-        shiftStaffs.map(async (s) => {
-          try {
-            const response = await triggerListAttendances({
-              staffId: String(s.id),
-            }).unwrap();
-
-            const attendances = response.attendances ?? [];
-            const matched =
-              attendances.find((a) => a.workDate === dateKey) ?? null;
-            map.set(s.id, matched);
-          } catch {
-            map.set(s.id, null);
-          }
-        })
-      );
-
-      if (mounted) {
-        setAttendanceMap(map);
-      }
-    }
-
-    load();
-
-    return () => {
-      mounted = false;
-    };
-  }, [shiftStaffs, dateKey, triggerListAttendances]);
-
-  // モック: 各スタッフに対して安定した開始時刻・勤務時間・休憩を割り当てる（attendance が無い場合のフォールバック）
   const mockTimeRanges = useMemo(() => {
-    const map = new Map<string, { start: number; end: number }>();
-    shiftStaffs.forEach((s, idx) => {
-      const attendance = attendanceMap.get(s.id);
-      if (attendance && attendance.startTime && attendance.endTime) {
-        // startTime/endTime は ISO 文字列の想定。時刻のみで扱うため hour を取り出す
-        const start = dayjs(attendance.startTime).hour();
-        const end = dayjs(attendance.endTime).hour();
-        map.set(s.id, { start, end: Math.max(start + 1, end) });
-        return;
-      }
-
-      // フォールバック: 9..13 開始、7..9 時間、18 時でクリップ
-      const start = 9 + ((idx * 2) % 5); // 9..13
-      const duration = 7 + (idx % 3); // 7..9 時間
-      const end = Math.min(18, start + duration);
-      map.set(s.id, { start, end });
-    });
-    return map;
+    return buildMockTimeRanges(shiftStaffs, attendanceMap);
   }, [shiftStaffs, attendanceMap]);
 
-  // 休憩情報: attendance.rests があればそれを利用、無ければ簡易的な昼休みを割当
   const mockBreaks = useMemo(() => {
-    const map = new Map<string, Array<{ start: number; end: number }>>();
-    shiftStaffs.forEach((s, idx) => {
-      const breaks: Array<{ start: number; end: number }> = [];
-      const attendance = attendanceMap.get(s.id);
-      if (
-        attendance &&
-        Array.isArray(attendance.rests) &&
-        attendance.rests.length > 0
-      ) {
-        attendance.rests.filter(isRestWithTimes).forEach((rest) => {
-          const rs = dayjs(rest.startTime).hour();
-          const re = dayjs(rest.endTime).hour();
-          breaks.push({ start: rs, end: Math.max(rs + 1, re) });
-        });
-      } else {
-        // フォールバック: 基本の昼休み（勤務時間内に収まる場合のみ追加）
-        const range = mockTimeRanges.get(s.id);
-        if (range && range.start <= 12 && range.end >= 13) {
-          breaks.push({ start: 12, end: 13 });
-        }
-        // まれに午後休憩
-        if (idx % 4 === 2 && range && range.start <= 15 && range.end >= 16) {
-          breaks.push({ start: 15, end: 16 });
-        }
-      }
-
-      map.set(s.id, breaks);
-    });
-    return map;
+    return buildMockBreaks({ shiftStaffs, attendanceMap, mockTimeRanges });
   }, [shiftStaffs, mockTimeRanges, attendanceMap]);
-
-  // 合計表示を x.xh のフォーマットにするユーティリティ
-  const formatHours = (v: number | null | undefined) => {
-    if (v === null || v === undefined) return "ー";
-    return `${(Math.round(v * 10) / 10).toFixed(1)}h`;
-  };
 
   // 表示ヘッダー: 24時間（0..23）を表示
   const hours = Array.from({ length: 24 }).map((_, i) => i);
@@ -264,138 +445,15 @@ export default function ShiftDayView() {
                 </TableRow>
               )}
 
-              {shiftStaffs.map((s) => {
-                const range = mockTimeRanges.get(s.id);
-                const breaksForStaff = mockBreaks.get(s.id) || [];
-                const breaksDuration = breaksForStaff.reduce(
-                  (acc, b) => acc + Math.max(0, b.end - b.start),
-                  0
-                );
-                const workTotal = range
-                  ? Math.max(0, range.end - range.start - breaksDuration)
-                  : null;
-
-                return (
-                  <TableRow key={s.id} hover>
-                    <TableCell
-                      sx={{
-                        position: "sticky",
-                        left: 0,
-                        zIndex: 2,
-                        bgcolor: "background.paper",
-                        minWidth: 160,
-                      }}
-                    >
-                      <Typography variant="body2">{`${s.familyName} ${s.givenName}`}</Typography>
-                    </TableCell>
-
-                    <TableCell align="center" sx={{ minWidth: 80 }}>
-                      {formatHours(workTotal)}
-                    </TableCell>
-
-                    <TableCell align="center" sx={{ minWidth: 80 }}>
-                      {formatHours(breaksDuration)}
-                    </TableCell>
-
-                    {hours.map((h, i) => {
-                      const working = range
-                        ? h >= range.start && h < range.end
-                        : false;
-                      const inBreak = breaksForStaff.some(
-                        (b) => h >= b.start && h < b.end
-                      );
-
-                      // ツールチップ用にそのスタッフの勤務/休憩の区間を組み立てる
-                      const segments: string[] = [];
-                      if (range) {
-                        // 集合的に勤務 - 休憩 を示すためにシンプルに前半/休憩/後半を作る
-                        const b = breaksForStaff[0];
-                        if (b && b.start > range.start) {
-                          segments.push(
-                            `${range.start}:00 - ${b.start}:00 (勤務)`
-                          );
-                          segments.push(`${b.start}:00 - ${b.end}:00 (休憩)`);
-                          if (b.end < range.end) {
-                            segments.push(
-                              `${b.end}:00 - ${range.end}:00 (勤務)`
-                            );
-                          }
-                        } else if (
-                          b &&
-                          b.start <= range.start &&
-                          b.end < range.end
-                        ) {
-                          // 休憩が勤務開始直後など特殊ケース
-                          segments.push(`${b.end}:00 - ${range.end}:00 (勤務)`);
-                        } else {
-                          segments.push(
-                            `${range.start}:00 - ${range.end}:00 (勤務)`
-                          );
-                        }
-                        // 追加の休憩があれば追記
-                        if (breaksForStaff.length > 1) {
-                          breaksForStaff.slice(1).forEach((bb) => {
-                            segments.push(
-                              `${bb.start}:00 - ${bb.end}:00 (休憩)`
-                            );
-                          });
-                        }
-                      }
-
-                      const title =
-                        segments.length > 0 ? segments.join(" / ") : "休み";
-
-                      return (
-                        <TableCell
-                          key={h}
-                          sx={(theme) => ({
-                            p: 0,
-                            width: 28,
-                            height: 40,
-                            borderLeft:
-                              i === 0
-                                ? "none"
-                                : `1px dotted ${theme.palette.divider}`,
-                          })}
-                          align="center"
-                        >
-                          {working && !inBreak ? (
-                            <Tooltip title={title}>
-                              <Box
-                                sx={{
-                                  bgcolor: "primary.main",
-                                  color: "primary.contrastText",
-                                  width: "100%",
-                                  height: "100%",
-                                  borderRadius: 0,
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                }}
-                              />
-                            </Tooltip>
-                          ) : inBreak ? (
-                            <Tooltip title={title}>
-                              <Box
-                                sx={{
-                                  bgcolor: "info.light",
-                                  color: "text.primary",
-                                  width: "100%",
-                                  height: "100%",
-                                  borderRadius: 0,
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                }}
-                              />
-                            </Tooltip>
-                          ) : null}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
+              {shiftStaffs.map((s) => (
+                <StaffTimelineRow
+                  key={s.id}
+                  staff={s}
+                  range={mockTimeRanges.get(s.id)}
+                  breaksForStaff={mockBreaks.get(s.id) || []}
+                  hours={hours}
+                />
+              ))}
             </TableBody>
           </Table>
         </Box>
@@ -403,8 +461,3 @@ export default function ShiftDayView() {
     </Container>
   );
 }
-
-const isRestWithTimes = (
-  rest: Rest | null | undefined
-): rest is Rest & { startTime: string; endTime: string } =>
-  Boolean(rest?.startTime && rest?.endTime);

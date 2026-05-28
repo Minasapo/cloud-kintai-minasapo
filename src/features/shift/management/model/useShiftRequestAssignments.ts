@@ -50,6 +50,173 @@ type UseShiftRequestAssignmentsResult = {
   ) => Promise<void>;
 };
 
+type BuildShiftRequestInputParams = {
+  assignments: Record<string, ShiftState>;
+  baseHistories: ShiftRequestHistoryInput[];
+  note: string | null | undefined;
+  timestamp: string;
+  cognitoUserId?: string | null;
+};
+
+function buildShiftHistoryEntry({
+  entriesInput,
+  baseHistories,
+  note,
+  summary,
+  timestamp,
+  cognitoUserId,
+}: {
+  entriesInput: ShiftRequestDayPreferenceInput[];
+  baseHistories: ShiftRequestHistoryInput[];
+  note: string | null | undefined;
+  summary: ReturnType<typeof buildSummaryFromAssignments>;
+  timestamp: string;
+  cognitoUserId?: string | null;
+}): ShiftRequestHistoryInput {
+  const maxVersion = baseHistories.reduce(
+    (acc, history) => Math.max(acc, history.version ?? 0),
+    0,
+  );
+
+  return {
+    version: maxVersion + 1,
+    note: note ?? undefined,
+    entries: entriesInput,
+    summary,
+    submittedAt: timestamp,
+    updatedAt: timestamp,
+    recordedAt: timestamp,
+    recordedByStaffId: cognitoUserId ?? undefined,
+    changeReason: SHIFT_MANUAL_CHANGE_REASON,
+  };
+}
+
+function buildShiftRequestInput({
+  assignments,
+  baseHistories,
+  note,
+  timestamp,
+  cognitoUserId,
+}: BuildShiftRequestInputParams) {
+  const entriesInput: ShiftRequestDayPreferenceInput[] = Object.entries(
+    assignments,
+  )
+    .map(([date, state]) => ({
+      date,
+      status: shiftStateToShiftRequestStatus(state),
+    }))
+    .toSorted((a, b) => a.date.localeCompare(b.date));
+
+  const summary = buildSummaryFromAssignments(assignments);
+  const historyEntry = buildShiftHistoryEntry({
+    entriesInput,
+    baseHistories,
+    note,
+    summary,
+    timestamp,
+    cognitoUserId,
+  });
+  const historiesInput = [...baseHistories, historyEntry];
+  const inputBase = {
+    entries: entriesInput,
+    summary,
+    histories: historiesInput,
+    submittedAt: timestamp,
+    updatedAt: timestamp,
+  };
+
+  return {
+    entriesInput,
+    summary,
+    historyEntry,
+    historiesInput,
+    inputBase,
+  };
+}
+
+async function resolveVersionConflict({
+  record,
+  updatedAssignments,
+  timestamp,
+  cognitoUserId,
+}: {
+  record: ShiftRequestRecordSnapshot;
+  updatedAssignments: Record<string, ShiftState>;
+  timestamp: string;
+  cognitoUserId?: string | null;
+}): Promise<UpdateShiftRequestMutation["updateShiftRequest"] | undefined> {
+  const latestResponse = (await graphqlClient.graphql({
+    query: listShiftRequests,
+    variables: {
+      filter: {
+        id: { eq: record.id },
+      },
+    },
+    authMode: "userPool",
+  })) as GraphQLResult<ListShiftRequestsQuery>;
+
+  if (!latestResponse.data?.listShiftRequests?.items?.[0]) {
+    return undefined;
+  }
+
+  const latestRecord = latestResponse.data.listShiftRequests.items[0];
+  const latestAssignments: Record<string, ShiftState> = {};
+  latestRecord.entries
+    ?.filter(
+      (entry): entry is NonNullable<typeof entry> => entry !== null,
+    )
+    .forEach((entry) => {
+      latestAssignments[entry.date] = shiftRequestStatusToShiftState(
+        entry.status,
+      );
+    });
+
+  const mergedAssignments = {
+    ...latestAssignments,
+    ...updatedAssignments,
+  };
+  const mergedHistories = (latestRecord.histories ?? [])
+    .filter(
+      (history): history is NonNullable<typeof history> => history !== null,
+    )
+    .map(convertHistoryToInput);
+  const mergedInput = buildShiftRequestInput({
+    assignments: mergedAssignments,
+    baseHistories: mergedHistories,
+    note: record.note ?? undefined,
+    timestamp,
+    cognitoUserId,
+  });
+
+  const recordId = record.id;
+  if (!recordId) {
+    return undefined;
+  }
+
+  const retryResponse = (await graphqlClient.graphql({
+    query: updateShiftRequest,
+    variables: {
+      input: {
+        id: recordId,
+        ...mergedInput.inputBase,
+      },
+      condition:
+        latestRecord.version !== undefined
+          ? {
+              version: { eq: latestRecord.version },
+            }
+          : undefined,
+    },
+    authMode: "userPool",
+  })) as GraphQLResult<UpdateShiftRequestMutation>;
+
+  if (retryResponse.errors?.length) {
+    throw new Error(retryResponse.errors.map((e) => e.message).join(","));
+  }
+
+  return retryResponse.data?.updateShiftRequest;
+}
+
 export default function useShiftRequestAssignments({
   shiftStaffs,
   monthStart,
@@ -169,54 +336,25 @@ export default function useShiftRequestAssignments({
         updatedAssignments[key] = nextState;
       });
 
-      const entriesInput: ShiftRequestDayPreferenceInput[] = Object.entries(
-        updatedAssignments,
-      )
-        .map(([date, state]) => ({
-          date,
-          status: shiftStateToShiftRequestStatus(state),
-        }))
-        .toSorted((a, b) => a.date.localeCompare(b.date));
-
-      const summary = buildSummaryFromAssignments(updatedAssignments);
       const record = shiftRequestRecords.get(staffId);
       const baseHistories = record?.histories ?? [];
-      const maxVersion = baseHistories.reduce(
-        (acc, history) => Math.max(acc, history.version ?? 0),
-        0,
-      );
-      const historyEntry: ShiftRequestHistoryInput = {
-        version: maxVersion + 1,
+      const {
+        historiesInput,
+        inputBase,
+      } = buildShiftRequestInput({
+        assignments: updatedAssignments,
+        baseHistories,
         note: record?.note ?? undefined,
-        entries: entriesInput,
-        summary,
-        submittedAt: timestamp,
-        updatedAt: timestamp,
-        recordedAt: timestamp,
-        recordedByStaffId: cognitoUserId ?? undefined,
-        changeReason: SHIFT_MANUAL_CHANGE_REASON,
-      };
-      const historiesInput: ShiftRequestHistoryInput[] = [
-        ...baseHistories,
-        historyEntry,
-      ];
-
-      const inputBase = {
-        entries: entriesInput,
-        summary,
-        histories: historiesInput,
-        submittedAt: timestamp,
-        updatedAt: timestamp,
-      };
+        timestamp,
+        cognitoUserId,
+      });
 
       let responseShiftRequest:
         | UpdateShiftRequestMutation["updateShiftRequest"]
         | CreateShiftRequestMutation["createShiftRequest"]
         | null
         | undefined;
-
       if (record?.id) {
-        // Try update with version condition to detect concurrent modifications
         const currentVersion = record.version;
         const response = (await graphqlClient.graphql({
           query: updateShiftRequest,
@@ -237,105 +375,14 @@ export default function useShiftRequestAssignments({
 
         if (response.errors?.length) {
           const errorMessage = response.errors.map((e) => e.message).join(",");
-          // Check if this is a version conflict (condition failed)
           if (errorMessage.includes("The conditional request failed")) {
-            // Version conflict detected - fetch latest and merge changes
             try {
-              const latestResponse = (await graphqlClient.graphql({
-                query: listShiftRequests,
-                variables: {
-                  filter: {
-                    id: { eq: record.id },
-                  },
-                },
-                authMode: "userPool",
-              })) as GraphQLResult<ListShiftRequestsQuery>;
-
-              if (latestResponse.data?.listShiftRequests?.items?.[0]) {
-                const latestRecord =
-                  latestResponse.data.listShiftRequests.items[0];
-                const latestAssignments: Record<string, ShiftState> = {};
-                latestRecord.entries
-                  ?.filter(
-                    (entry): entry is NonNullable<typeof entry> =>
-                      entry !== null,
-                  )
-                  .forEach((entry) => {
-                    latestAssignments[entry.date] =
-                      shiftRequestStatusToShiftState(entry.status);
-                  });
-
-                // Merge: keep our changes for the days we modified
-                const mergedAssignments = {
-                  ...latestAssignments,
-                  ...updatedAssignments,
-                };
-
-                const mergedEntriesInput: ShiftRequestDayPreferenceInput[] =
-                  Object.entries(mergedAssignments)
-                    .map(([date, state]) => ({
-                      date,
-                      status: shiftStateToShiftRequestStatus(state),
-                    }))
-                    .toSorted((a, b) => a.date.localeCompare(b.date));
-
-                const mergedSummary =
-                  buildSummaryFromAssignments(mergedAssignments);
-                const mergedHistories = (latestRecord.histories ?? [])
-                  .filter(
-                    (history): history is NonNullable<typeof history> =>
-                      history !== null,
-                  )
-                  .map(convertHistoryToInput);
-
-                const mergedHistoryEntry: ShiftRequestHistoryInput = {
-                  version:
-                    (mergedHistories.length > 0
-                      ? Math.max(...mergedHistories.map((h) => h.version ?? 0))
-                      : 0) + 1,
-                  note: record?.note ?? undefined,
-                  entries: mergedEntriesInput,
-                  summary: mergedSummary,
-                  submittedAt: timestamp,
-                  updatedAt: timestamp,
-                  recordedAt: timestamp,
-                  recordedByStaffId: cognitoUserId ?? undefined,
-                  changeReason: SHIFT_MANUAL_CHANGE_REASON,
-                };
-                const mergedHistoriesInput = [
-                  ...mergedHistories,
-                  mergedHistoryEntry,
-                ];
-
-                // Retry with merged data
-                const retryResponse = (await graphqlClient.graphql({
-                  query: updateShiftRequest,
-                  variables: {
-                    input: {
-                      id: record.id,
-                      entries: mergedEntriesInput,
-                      summary: mergedSummary,
-                      histories: mergedHistoriesInput,
-                      submittedAt: timestamp,
-                      updatedAt: timestamp,
-                    },
-                    condition:
-                      latestRecord.version !== undefined
-                        ? {
-                            version: { eq: latestRecord.version },
-                          }
-                        : undefined,
-                  },
-                  authMode: "userPool",
-                })) as GraphQLResult<UpdateShiftRequestMutation>;
-
-                if (retryResponse.errors?.length) {
-                  throw new Error(
-                    retryResponse.errors.map((e) => e.message).join(","),
-                  );
-                }
-                responseShiftRequest = retryResponse.data?.updateShiftRequest;
-              }
+              responseShiftRequest = await resolveVersionConflict({
+                record,
+                updatedAssignments,
+                timestamp,
+                cognitoUserId,
+              });
             } catch {
               throw new Error(
                 `Failed to resolve version conflict: ${errorMessage}`,

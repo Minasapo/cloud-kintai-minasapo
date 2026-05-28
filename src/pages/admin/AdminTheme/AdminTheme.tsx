@@ -1,18 +1,21 @@
+import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
 import AdminSettingsLayout from "@features/admin/layout/ui/AdminSettingsLayout";
 import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
-import { SettingsButton, SettingsTextField } from "@features/admin/layout/ui/SettingsPrimitives";
+import {
+  SettingsButton,
+  SettingsTextField,
+} from "@features/admin/layout/ui/SettingsPrimitives";
 import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
 import { resolveThemeColor } from "@shared/config/theme";
+import { useAppNotification } from "@shared/lib/useAppNotification";
+import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
 import { SubsectionTitle } from "@shared/ui/typography";
 import { useContext, useEffect, useMemo, useState } from "react";
 
-import { AppConfigContext } from "@/context/AppConfigContext";
 import { E15001, S15001 } from "@/errors";
-import { useAppNotification } from "@/hooks/useAppNotification";
-import { usePageLeaveGuard } from "@/hooks/usePageLeaveGuard";
 
 const basePalette = [
   "#1976d2",
@@ -67,6 +70,91 @@ const presetPalette = paletteCandidates
 const TILE_SIZE = 44;
 const MAX_TILES_PER_ROW = 10;
 
+function normalizeColor(value: string) {
+  if (!value) return "";
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  const formatted = trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
+  return formatted.toUpperCase();
+}
+
+type PaletteTileSectionProps = {
+  paletteTileGap: number;
+  normalizedColorCode: string;
+  brandPrimary: string;
+  previewPanelDividerColor: string;
+  focusRingColor: string;
+  customMode: boolean;
+  onSelectPreset: (color: string) => void;
+  onCustomMode: () => void;
+};
+
+function PaletteTileSection({
+  paletteTileGap,
+  normalizedColorCode,
+  brandPrimary,
+  previewPanelDividerColor,
+  focusRingColor,
+  customMode,
+  onSelectPreset,
+  onCustomMode,
+}: PaletteTileSectionProps) {
+  return (
+    <div className="flex flex-col gap-4">
+      <SubsectionTitle className="text-sm font-semibold text-slate-800">
+        テーマカラー
+      </SubsectionTitle>
+      <div
+        className="grid gap-2"
+        style={{
+          gridTemplateColumns: `repeat(auto-fill, minmax(${TILE_SIZE}px, 1fr))`,
+          maxWidth: `${
+            MAX_TILES_PER_ROW * TILE_SIZE +
+            (MAX_TILES_PER_ROW - 1) * paletteTileGap
+          }px`,
+        }}
+      >
+        {presetPalette.map((color) => {
+          const isSelected =
+            normalizedColorCode !== "" &&
+            normalizedColorCode === normalizeColor(color);
+          return (
+            <button
+              key={color}
+              onClick={() => onSelectPreset(color)}
+              type="button"
+              className="rounded-md border-2 transition focus:outline-none"
+              aria-label={`テーマカラー ${color}`}
+              style={{
+                width: TILE_SIZE,
+                height: TILE_SIZE,
+                borderColor: isSelected ? brandPrimary : previewPanelDividerColor,
+                backgroundColor: color,
+                boxShadow: isSelected ? `0 0 0 2px ${focusRingColor}` : "none",
+              }}
+            />
+          );
+        })}
+        <button
+          onClick={onCustomMode}
+          type="button"
+          className="flex items-center justify-center rounded-md border-2 border-dashed bg-transparent focus:outline-none"
+          aria-label="その他のカラーコードを入力"
+          style={{
+            width: TILE_SIZE,
+            height: TILE_SIZE,
+            borderColor: customMode ? brandPrimary : previewPanelDividerColor,
+            color: customMode ? brandPrimary : "#64748b",
+            boxShadow: customMode ? `0 0 0 2px ${focusRingColor}` : "none",
+          }}
+        >
+          <SettingsIcon name="plus" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminTheme() {
   const { notify } = useAppNotification();
   const {
@@ -102,12 +190,17 @@ export default function AdminTheme() {
     setCustomMode(!matchesPreset);
   }, [getThemeColor]);
 
-  const normalizeColor = (value: string) => {
-    if (!value) return "";
-    const trimmed = value.trim();
-    if (!trimmed) return "";
-    const formatted = trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
-    return formatted.toUpperCase();
+  const handleHexInput = (value: string) => {
+    if (!value) {
+      setColorCode("");
+      return;
+    }
+    setColorCode(value.startsWith("#") ? value : `#${value}`);
+  };
+
+  const handlePresetSelect = (color: string) => {
+    setColorCode(color.toUpperCase());
+    setCustomMode(false);
   };
 
   const normalizedColorCode = normalizeColor(colorCode);
@@ -129,19 +222,6 @@ export default function AdminTheme() {
   const brandPrimary = previewTokens.color.brand.primary.base;
   const focusRingColor = previewTokens.color.brand.primary.focusRing;
   const paletteTileGap = panelSpacing / 2;
-
-  const handleHexInput = (value: string) => {
-    if (!value) {
-      setColorCode("");
-      return;
-    }
-    setColorCode(value.startsWith("#") ? value : `#${value}`);
-  };
-
-  const handlePresetSelect = (color: string) => {
-    setColorCode(color.toUpperCase());
-    setCustomMode(false);
-  };
 
   const handleSave = async () => {
     if (!isValidHex) {
@@ -197,56 +277,16 @@ export default function AdminTheme() {
       {dialog}
       <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-slate-200">
         <div className="flex flex-col gap-8">
-          <div className="flex flex-col gap-4">
-            <SubsectionTitle className="text-sm font-semibold text-slate-800">テーマカラー</SubsectionTitle>
-            <div
-              className="grid gap-2"
-              style={{
-                gridTemplateColumns: `repeat(auto-fill, minmax(${TILE_SIZE}px, 1fr))`,
-                maxWidth: `${
-                  MAX_TILES_PER_ROW * TILE_SIZE +
-                  (MAX_TILES_PER_ROW - 1) * paletteTileGap
-                }px`,
-              }}
-            >
-              {presetPalette.map((color) => {
-                const isSelected =
-                  normalizedColorCode !== "" &&
-                  normalizedColorCode === normalizeColor(color);
-                return (
-                  <button
-                    key={color}
-                    onClick={() => handlePresetSelect(color)}
-                    type="button"
-                    className="rounded-md border-2 transition focus:outline-none"
-                    aria-label={`テーマカラー ${color}`}
-                    style={{
-                      width: TILE_SIZE,
-                      height: TILE_SIZE,
-                      borderColor: isSelected ? brandPrimary : previewPanelDividerColor,
-                      backgroundColor: color,
-                      boxShadow: isSelected ? `0 0 0 2px ${focusRingColor}` : "none",
-                    }}
-                  />
-                );
-              })}
-              <button
-                onClick={() => setCustomMode(true)}
-                type="button"
-                className="flex items-center justify-center rounded-md border-2 border-dashed bg-transparent focus:outline-none"
-                aria-label="その他のカラーコードを入力"
-                style={{
-                  width: TILE_SIZE,
-                  height: TILE_SIZE,
-                  borderColor: customMode ? brandPrimary : previewPanelDividerColor,
-                  color: customMode ? brandPrimary : "#64748b",
-                  boxShadow: customMode ? `0 0 0 2px ${focusRingColor}` : "none",
-                }}
-              >
-                <SettingsIcon name="plus" />
-              </button>
-            </div>
-          </div>
+          <PaletteTileSection
+            paletteTileGap={paletteTileGap}
+            normalizedColorCode={normalizedColorCode}
+            brandPrimary={brandPrimary}
+            previewPanelDividerColor={previewPanelDividerColor}
+            focusRingColor={focusRingColor}
+            customMode={customMode}
+            onSelectPreset={handlePresetSelect}
+            onCustomMode={() => setCustomMode(true)}
+          />
 
           {customMode && (
             <div className="flex flex-col gap-2">
@@ -267,7 +307,9 @@ export default function AdminTheme() {
           )}
 
           <div className="flex flex-col gap-2">
-            <SubsectionTitle className="text-sm font-semibold text-slate-800">プレビュー</SubsectionTitle>
+            <SubsectionTitle className="text-sm font-semibold text-slate-800">
+              プレビュー
+            </SubsectionTitle>
             <div
               className="p-4 rounded-lg border max-w-sm flex flex-col gap-2"
               style={{
@@ -278,20 +320,30 @@ export default function AdminTheme() {
               <h4 className="text-base font-medium text-slate-800">
                 管理パネルプレビュー
               </h4>
-              <p className="text-xs text-slate-500 pb-2 border-b" style={{ borderColor: previewPanelDividerColor }}>
+              <p
+                className="text-xs text-slate-500 pb-2 border-b"
+                style={{ borderColor: previewPanelDividerColor }}
+              >
                 選択したカラーがフォーカスリングやボタンにどう反映されるかを確認できます。
               </p>
-              <button
-                type="button"
-                className="mt-1 self-start rounded-lg px-4 py-2 text-sm font-medium focus:outline-none"
-                style={{
-                  backgroundColor: brandPrimary,
-                  color: previewTokens.color.brand.primary.contrastText,
-                  boxShadow: `0 0 0 0 ${focusRingColor}`,
+              <SettingsButton
+                className="mt-1 self-start"
+                sx={{
+                  backgroundColor: `${brandPrimary} !important`,
+                  borderColor: `${brandPrimary} !important`,
+                  color: `${previewTokens.color.brand.primary.contrastText} !important`,
+                  "&:hover": {
+                    backgroundColor: `${brandPrimary} !important`,
+                    borderColor: `${brandPrimary} !important`,
+                    color: `${previewTokens.color.brand.primary.contrastText} !important`,
+                  },
+                  "&:focus-visible": {
+                    boxShadow: `0 0 0 2px ${focusRingColor}`,
+                  },
                 }}
               >
                 プライマリボタン
-              </button>
+              </SettingsButton>
             </div>
           </div>
 

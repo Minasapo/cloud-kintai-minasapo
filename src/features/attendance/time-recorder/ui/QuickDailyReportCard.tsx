@@ -40,6 +40,109 @@ const extractErrorMessage = (errors: readonly {
 }[]): string => {
     return errors.map((err) => err.message).join("\n");
 };
+
+type UseSaveParams = {
+    staffId: string | null | undefined;
+    content: string;
+    savedContent: string;
+    reportId: string | null;
+    reportUpdatedAt: string | null;
+    reportStatus: DailyReportStatus | null;
+    reportVersion: number | null;
+    date: string;
+    defaultTitle: string;
+    dispatch: ReturnType<typeof useDispatch>;
+    setSavedContent: React.Dispatch<React.SetStateAction<string>>;
+    setContent: React.Dispatch<React.SetStateAction<string>>;
+    setReportId: React.Dispatch<React.SetStateAction<string | null>>;
+    setReportVersion: React.Dispatch<React.SetStateAction<number | null>>;
+    setReportUpdatedAt: React.Dispatch<React.SetStateAction<string | null>>;
+    setReportStatus: React.Dispatch<React.SetStateAction<DailyReportStatus | null>>;
+    setError: React.Dispatch<React.SetStateAction<string | null>>;
+    setLastSavedAt: React.Dispatch<React.SetStateAction<string | null>>;
+};
+
+function useQuickDailyReportSave({
+    staffId, content, savedContent, reportId, reportUpdatedAt, reportStatus, reportVersion, date, defaultTitle, dispatch,
+    setSavedContent, setContent, setReportId, setReportVersion, setReportUpdatedAt, setReportStatus, setError, setLastSavedAt,
+}: UseSaveParams) {
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSave = useCallback(async (showNotification = true, isManualSave = false) => {
+        if (!staffId) return;
+        if (!isManualSave && content === savedContent) return;
+        setIsSaving(true);
+        setError(null);
+        const status = isManualSave
+            ? DailyReportStatus.SUBMITTED
+            : reportStatus === DailyReportStatus.SUBMITTED
+                ? DailyReportStatus.SUBMITTED
+                : DailyReportStatus.DRAFT;
+        try {
+            if (reportId) {
+                const beforeReport = { id: reportId, staffId, reportDate: date, title: defaultTitle, content: savedContent, status: reportStatus ?? DailyReportStatus.DRAFT, updatedAt: reportUpdatedAt, version: reportVersion };
+                const response = (await graphqlClient.graphql({
+                    query: updateDailyReport,
+                    variables: {
+                        condition: buildVersionOrUpdatedAtCondition(reportVersion, reportUpdatedAt),
+                        input: { id: reportId, content, status, updatedAt: new Date().toISOString(), version: getNextVersion(reportVersion) },
+                    },
+                    authMode: "userPool",
+                })) as GraphQLResult<UpdateDailyReportMutation>;
+                if (response.errors?.length) {
+                    throw new Error(getGraphQLErrorMessage(response.errors, ERROR_MESSAGES.SAVE_FAILED));
+                }
+                const updatedReport = response.data?.updateDailyReport;
+                if (updatedReport && showNotification) {
+                    await logDailyReportMutation({ actorStaffId: staffId, before: beforeReport, after: updatedReport, action: status === DailyReportStatus.SUBMITTED ? "submit" : "update" });
+                }
+                const updatedContent = updatedReport?.content ?? content;
+                setSavedContent(updatedContent);
+                setContent(updatedContent);
+                setReportStatus(status);
+                setReportVersion(updatedReport?.version ?? reportVersion);
+                setReportUpdatedAt(updatedReport?.updatedAt ?? reportUpdatedAt);
+            } else {
+                const response = (await graphqlClient.graphql({
+                    query: createDailyReport,
+                    variables: {
+                        input: { staffId, reportDate: date, title: defaultTitle, content, status, updatedAt: new Date().toISOString(), version: 1, reactions: [], comments: [] },
+                    },
+                    authMode: "userPool",
+                })) as GraphQLResult<CreateDailyReportMutation>;
+                if (response.errors?.length) {
+                    throw new Error(extractErrorMessage(response.errors));
+                }
+                const created = response.data?.createDailyReport;
+                if (created && showNotification) {
+                    await logDailyReportMutation({ actorStaffId: staffId, before: null, after: created, action: status === DailyReportStatus.SUBMITTED ? "submit" : "create" });
+                }
+                const nextContent = created?.content ?? content;
+                setReportId(created?.id ?? null);
+                setReportVersion(created?.version ?? 1);
+                setReportUpdatedAt(created?.updatedAt ?? new Date().toISOString());
+                setSavedContent(nextContent);
+                setContent(nextContent);
+                setReportStatus(status);
+            }
+            setLastSavedAt(dayjs().format(TIME_FORMAT));
+            if (showNotification) {
+                dispatch(pushNotification({ tone: "success", message: ERROR_MESSAGES.SAVE_SUCCESS }));
+            }
+        } catch (err) {
+            const message = err instanceof Error ? err.message : "日報の保存に失敗しました。";
+            setError(message);
+            if (showNotification) {
+                dispatch(pushNotification({ tone: "error", message: "日報の保存に失敗しました" }));
+            }
+        } finally {
+            setIsSaving(false);
+        }
+    }, [staffId, content, savedContent, reportId, reportUpdatedAt, reportStatus, reportVersion, date, defaultTitle, dispatch, setSavedContent, setContent, setReportId, setReportVersion, setReportUpdatedAt, setReportStatus, setError, setLastSavedAt]);
+
+    return { isSaving, handleSave };
+}
+
 export default function QuickDailyReportCard({ staffId, date, }: QuickDailyReportCardProps) {
     const dispatch = useDispatch();
     const [content, setContent] = useState("");
@@ -49,7 +152,6 @@ export default function QuickDailyReportCard({ staffId, date, }: QuickDailyRepor
     const [reportUpdatedAt, setReportUpdatedAt] = useState<string | null>(null);
     const [reportStatus, setReportStatus] = useState<DailyReportStatus | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isOpen, setIsOpen] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -60,6 +162,10 @@ export default function QuickDailyReportCard({ staffId, date, }: QuickDailyRepor
     const isEditable = hasStaff && !isLoading;
     const isDirty = content !== savedContent;
     const contentPanelId = useMemo(() => `quick-daily-report-${date}`, [date]);
+    const { isSaving, handleSave } = useQuickDailyReportSave({
+        staffId, content, savedContent, reportId, reportUpdatedAt, reportStatus, reportVersion, date, defaultTitle, dispatch,
+        setSavedContent, setContent, setReportId, setReportVersion, setReportUpdatedAt, setReportStatus, setError, setLastSavedAt,
+    });
     /**
      * ページ離脱時の警告
      * 保存中または未保存の変更がある場合、ユーザーに確認を促す
@@ -157,157 +263,11 @@ export default function QuickDailyReportCard({ staffId, date, }: QuickDailyRepor
             setIsOpen(true);
         }
     }, [error]);
-    /**
-     * staffIdがない場合はダイアログを閉じる
-     */
     useEffect(() => {
         if (!staffId) {
             setIsDialogOpen(false);
         }
     }, [staffId]);
-    /**
-     * 日報の保存処理
-     * @param showNotification - 保存完了時に通知を表示するかどうか
-     * @param isManualSave - 手動保存かどうか（提出ボタン、自動保存で区別）
-     */
-    const handleSave = useCallback(async (showNotification = true, isManualSave = false) => {
-        // 保存が不要な場合は早期リターン
-        // 手動保存の場合は内容の変更有無を問わず実行、自動保存の場合は変更があれば実行
-        if (!staffId)
-            return;
-        if (!isManualSave && content === savedContent)
-            return;
-        setIsSaving(true);
-        setError(null);
-        // 提出ボタンで保存する場合は提出モード、自動保存の場合はステータスに基づいて決定
-        const status = isManualSave
-            ? DailyReportStatus.SUBMITTED
-            : reportStatus === DailyReportStatus.SUBMITTED
-                ? DailyReportStatus.SUBMITTED
-                : DailyReportStatus.DRAFT;
-        try {
-            if (reportId) {
-                const beforeReport = {
-                    id: reportId,
-                    staffId,
-                    reportDate: date,
-                    title: defaultTitle,
-                    content: savedContent,
-                    status: reportStatus ?? DailyReportStatus.DRAFT,
-                    updatedAt: reportUpdatedAt,
-                    version: reportVersion,
-                };
-                // 既存の日報を更新
-                const response = (await graphqlClient.graphql({
-                    query: updateDailyReport,
-                    variables: {
-                        condition: buildVersionOrUpdatedAtCondition(reportVersion, reportUpdatedAt),
-                        input: {
-                            id: reportId,
-                            content,
-                            status,
-                            updatedAt: new Date().toISOString(),
-                            version: getNextVersion(reportVersion),
-                        },
-                    },
-                    authMode: "userPool",
-                })) as GraphQLResult<UpdateDailyReportMutation>;
-                if (response.errors?.length) {
-                    throw new Error(getGraphQLErrorMessage(response.errors, ERROR_MESSAGES.SAVE_FAILED));
-                }
-                const updatedReport = response.data?.updateDailyReport;
-                if (updatedReport && showNotification) {
-                    await logDailyReportMutation({
-                        actorStaffId: staffId,
-                        before: beforeReport,
-                        after: updatedReport,
-                        action: status === DailyReportStatus.SUBMITTED ? "submit" : "update",
-                    });
-                }
-                const updatedContent = updatedReport?.content ?? content;
-                setSavedContent(updatedContent);
-                setContent(updatedContent);
-                setReportStatus(status);
-                setReportVersion(updatedReport?.version ?? reportVersion);
-                setReportUpdatedAt(updatedReport?.updatedAt ?? reportUpdatedAt);
-            }
-            else {
-                // 新規日報を作成
-                const response = (await graphqlClient.graphql({
-                    query: createDailyReport,
-                    variables: {
-                        input: {
-                            staffId,
-                            reportDate: date,
-                            title: defaultTitle,
-                            content,
-                            status,
-                            updatedAt: new Date().toISOString(),
-                            version: 1,
-                            reactions: [],
-                            comments: [],
-                        },
-                    },
-                    authMode: "userPool",
-                })) as GraphQLResult<CreateDailyReportMutation>;
-                if (response.errors?.length) {
-                    throw new Error(extractErrorMessage(response.errors));
-                }
-                const created = response.data?.createDailyReport;
-                if (created && showNotification) {
-                    await logDailyReportMutation({
-                        actorStaffId: staffId,
-                        before: null,
-                        after: created,
-                        action: status === DailyReportStatus.SUBMITTED ? "submit" : "create",
-                    });
-                }
-                const nextContent = created?.content ?? content;
-                setReportId(created?.id ?? null);
-                setReportVersion(created?.version ?? 1);
-                setReportUpdatedAt(created?.updatedAt ?? new Date().toISOString());
-                setSavedContent(nextContent);
-                setContent(nextContent);
-                setReportStatus(status);
-            }
-            // 保存時刻を記録
-            setLastSavedAt(dayjs().format(TIME_FORMAT));
-            if (showNotification) {
-                dispatch(pushNotification({
-                    tone: "success",
-                    message: ERROR_MESSAGES.SAVE_SUCCESS
-                }));
-            }
-        }
-        catch (err) {
-            const message = err instanceof Error ? err.message : "日報の保存に失敗しました。";
-            setError(message);
-            if (showNotification) {
-                dispatch(pushNotification({
-                    tone: "error",
-                    message: "日報の保存に失敗しました"
-                }));
-            }
-        }
-        finally {
-            setIsSaving(false);
-        }
-    }, [
-        staffId,
-        content,
-        savedContent,
-        reportId,
-        reportUpdatedAt,
-        reportStatus,
-        reportVersion,
-        date,
-        defaultTitle,
-        dispatch,
-    ]);
-    /**
-     * 自動保存機能
-     * デバウンス処理により、入力停止後AUTO_SAVE_DELAY(3秒)経過後に自動保存
-     */
     useEffect(() => {
         // 既存のタイマーをクリア（デバウンス処理）
         if (autoSaveTimerRef.current) {

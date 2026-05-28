@@ -1,21 +1,13 @@
-import { CreatedAtTableCell } from "@entities/attendance/ui/adminStaffAttendance/CreatedAtTableCell";
-import { RestTimeTableCell } from "@entities/attendance/ui/adminStaffAttendance/RestTimeTableCell";
-import { SummaryTableCell } from "@entities/attendance/ui/adminStaffAttendance/SummaryTableCell";
-import { UpdatedAtTableCell } from "@entities/attendance/ui/adminStaffAttendance/UpdatedAtTableCell";
-import { WorkDateTableCell } from "@entities/attendance/ui/adminStaffAttendance/WorkDateTableCell";
-import { WorkTimeTableCell } from "@entities/attendance/ui/adminStaffAttendance/WorkTimeTableCell";
+import { AttendanceRecordTableRow } from "@entities/attendance/ui/adminStaffAttendance/AttendanceRecordTableRow";
 import {
   AttendanceRowVariant,
-  attendanceRowVariantStyles,
 } from "@entities/attendance/ui/rowVariant";
-import { AttendanceStatusTooltip } from "@features/attendance/list/ui/AttendanceStatusTooltip";
-import EditIcon from "@mui/icons-material/Edit";
+import { AttendanceRecordActionCell } from "@features/attendance/list/ui/AttendanceRecordActionCell";
 import {
   Alert,
   AlertTitle,
   Button,
   Checkbox,
-  IconButton,
   Stack,
   Table,
   TableBody,
@@ -33,13 +25,15 @@ import {
 } from "@shared/api/graphql/types";
 import { designTokenVar } from "@shared/designSystem";
 
+import { ChangeRequestQuickViewButton } from "./ChangeRequestQuickViewButton";
+
 const HIGHLIGHT_BORDER = designTokenVar(
   "color.feedback.warning.base",
-  "#E8A447"
+  "#E8A447",
 );
 const HIGHLIGHT_BACKGROUND = designTokenVar(
   "color.feedback.warning.surface",
-  "#FFF7EA"
+  "#FFF7EA",
 );
 const STACK_SPACING = designTokenVar("spacing.md", "12px");
 
@@ -54,7 +48,7 @@ export type PendingAttendanceSectionProps = {
   getRowVariant: (
     attendance: Attendance,
     holidayCalendars?: HolidayCalendar[],
-    companyHolidayCalendars?: CompanyHolidayCalendar[]
+    companyHolidayCalendars?: CompanyHolidayCalendar[],
   ) => AttendanceRowVariant;
 };
 
@@ -166,87 +160,47 @@ export function PendingAttendanceSection({
               const rowVariant = getRowVariant(
                 attendance,
                 holidayCalendars,
-                companyHolidayCalendars
+                companyHolidayCalendars,
               );
               const rowKey = attendance.id || `${attendance.workDate}-${index}`;
               return (
-                <TableRow
+                <AttendanceRecordTableRow
                   key={`pending-${rowKey}`}
-                  sx={attendanceRowVariantStyles[rowVariant]}
-                  data-testid={
+                  attendance={attendance}
+                  rowVariant={rowVariant}
+                  holidayCalendars={holidayCalendars}
+                  companyHolidayCalendars={companyHolidayCalendars}
+                  rowTestId={
                     index === attendances.length - 1
                       ? "last-row-pending"
                       : undefined
                   }
-                >
-                  <TableCell padding="checkbox">
+                  applyCheckAlign="right"
+                  selectionCell={
                     <Checkbox
                       color="primary"
                       checked={isAttendanceSelected(attendance.id)}
                       onChange={() => toggleAttendanceSelection(attendance.id)}
                       inputProps={{ "aria-label": "select change request" }}
                     />
-                  </TableCell>
-                  <TableCell>
-                    <Stack direction="row" spacing={1} alignItems="center">
-                      <AttendanceStatusTooltip
-                        staff={staff}
-                        attendance={attendance}
-                        holidayCalendars={holidayCalendars}
-                        companyHolidayCalendars={companyHolidayCalendars}
-                      />
-                      <IconButton
-                        size="small"
-                        onClick={() => onEdit(attendance)}
-                        data-testid="edit-attendance"
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </Stack>
-                  </TableCell>
-
-                  {/* 勤務日 */}
-                  <WorkDateTableCell
-                    workDate={attendance.workDate}
-                    holidayCalendars={holidayCalendars}
-                    companyHolidayCalendars={companyHolidayCalendars}
-                  />
-
-                  {/* 勤務時間 */}
-                  <WorkTimeTableCell attendance={attendance} />
-
-                  {/* 休憩時間(最近) */}
-                  <RestTimeTableCell attendance={attendance} />
-
-                  {/* 摘要 */}
-                  <SummaryTableCell
-                    substituteHolidayDate={attendance.substituteHolidayDate}
-                    specialHolidayFlag={attendance.specialHolidayFlag}
-                    paidHolidayFlag={attendance.paidHolidayFlag}
-                    absentFlag={attendance.absentFlag}
-                  />
-
-                  {/* 作成日時 */}
-                  <CreatedAtTableCell createdAt={attendance.createdAt} />
-
-                  {/* 更新日時 */}
-                  <UpdatedAtTableCell updatedAt={attendance.updatedAt} />
-
-                  <TableCell sx={{ width: 1 }} align="right">
-                    {badgeContent > 0 && (
-                      <Button
-                        size="small"
-                        variant="contained"
-                        color="warning"
-                        sx={{ fontWeight: "bold" }}
-                        onClick={() => onOpenQuickView(attendance)}
-                        data-testid="quick-view-change-request"
-                      >
-                        申請確認
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
+                  }
+                  actionCell={
+                    <AttendanceRecordActionCell
+                      staff={staff}
+                      attendance={attendance}
+                      holidayCalendars={holidayCalendars}
+                      companyHolidayCalendars={companyHolidayCalendars}
+                      onEdit={() => onEdit(attendance)}
+                      editButtonTestId="edit-attendance"
+                    />
+                  }
+                  applyCheckCell={
+                    <ChangeRequestQuickViewButton
+                      badgeContent={badgeContent}
+                      onClick={() => onOpenQuickView(attendance)}
+                    />
+                  }
+                />
               );
             })}
           </TableBody>

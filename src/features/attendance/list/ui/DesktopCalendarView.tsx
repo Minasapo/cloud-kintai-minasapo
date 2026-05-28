@@ -1,19 +1,10 @@
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
-import { AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
+import AttendanceStatusChip from "@entities/attendance/ui/AttendanceStatusChip";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
-import {
-  Box,
-  Chip,
-  Divider,
-  IconButton,
-  Stack,
-  styled,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-import { alpha, useTheme } from "@mui/material/styles";
+import { Box, Chip, Divider, Stack, styled, Typography } from "@mui/material";
+import { alpha, Theme,useTheme  } from "@mui/material/styles";
 import {
   Attendance,
   CloseDate,
@@ -22,22 +13,142 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 import { PANEL_HEIGHTS } from "@shared/config/uiDimensions";
+import { AppIconButton } from "@shared/ui/button";
 import dayjs, { Dayjs } from "dayjs";
 import { useMemo } from "react";
 
 import {
+  buildHolidayLabels,
   buildWeeks,
   formatTimeRange,
+  getCalendarDaySurfaceState,
   getHolidayNames,
   getNetWorkingHours,
   getStatus,
   getTotalRestHours,
-  isHolidayLike,
 } from "../lib/attendanceStatusUtils";
-import { resolveMonthlyTerms } from "../lib/monthlyTermUtils";
+import { MonthTerm, resolveMonthlyTerms } from "../lib/monthlyTermUtils";
 import { useOptionalAttendanceListContext } from "./AttendanceListContext";
 
 const DAYS_OF_WEEK = ["日", "月", "火", "水", "木", "金", "土"];
+
+type CalendarDayCardProps = {
+  date: Dayjs;
+  resolvedCurrentMonth: Dayjs;
+  attendance: Attendance | undefined;
+  staff: Staff | null | undefined;
+  holidayCalendars: HolidayCalendar[];
+  companyHolidayCalendars: CompanyHolidayCalendar[];
+  monthlyTerms: MonthTerm[];
+  theme: Theme;
+  handleDayClick: (date: Dayjs) => void;
+  onOpenInRightPanel?: Props["onOpenInRightPanel"];
+};
+
+function CalendarDayCard({
+  date,
+  resolvedCurrentMonth,
+  attendance,
+  staff,
+  holidayCalendars,
+  companyHolidayCalendars,
+  monthlyTerms,
+  theme,
+  handleDayClick,
+  onOpenInRightPanel,
+}: CalendarDayCardProps) {
+  const workDate = date.format(AttendanceDate.DataFormat);
+  const status = getStatus(attendance, staff, holidayCalendars, companyHolidayCalendars, date);
+  const netHours = getNetWorkingHours(attendance);
+  const totalRestHours = getTotalRestHours(attendance);
+  const timeRangeLabel = attendance ? formatTimeRange(attendance) : undefined;
+  const daySurfaceState = getCalendarDaySurfaceState({ date, staff, holidayCalendars, companyHolidayCalendars });
+  const { isToday, holidayLike, isWeekend } = daySurfaceState;
+  const isCurrentMonth = date.isSame(resolvedCurrentMonth, "month");
+  const { holidayName, companyHolidayName } = getHolidayNames(date, holidayCalendars, companyHolidayCalendars);
+  const holidayLabels = buildHolidayLabels({ holidayName, companyHolidayName, attendance });
+  const termsForDay = monthlyTerms.filter(
+    (term) => !date.isBefore(term.start, "day") && !date.isAfter(term.end, "day"),
+  );
+  const allowTermHighlight = staff?.workType === "shift" ? true : !holidayLike && !isWeekend;
+  const primaryTerm = allowTermHighlight ? termsForDay[0] : undefined;
+  const termBackground = primaryTerm ? alpha(primaryTerm.color, 0.08) : undefined;
+  const termBorder = primaryTerm ? `3px solid ${alpha(primaryTerm.color, 0.35)}` : undefined;
+  const hasOverlap = allowTermHighlight && termsForDay.length > 1;
+
+  return (
+    <DayCell
+      key={workDate}
+      onClick={() => handleDayClick(date)}
+      $isCurrentMonth={isCurrentMonth}
+      $isToday={isToday}
+      $isHoliday={holidayLike}
+      sx={{ backgroundColor: termBackground, borderLeft: termBorder }}
+    >
+      {hasOverlap && primaryTerm && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 6,
+            right: 6,
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            bgcolor: alpha(primaryTerm.color, 0.9),
+            border: `1px solid ${alpha(theme.palette.common.white, 0.9)}`,
+          }}
+        />
+      )}
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+          {date.date()}
+        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          {onOpenInRightPanel && attendance && (
+            <AppIconButton
+              size="sm"
+              aria-label="右側で開く"
+              tooltip="右側で開く"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenInRightPanel(attendance, date);
+              }}
+            >
+              <OpenInNewOutlinedIcon sx={{ fontSize: "16px" }} />
+            </AppIconButton>
+          )}
+          <AttendanceStatusChip status={status} />
+        </Box>
+      </Stack>
+      {timeRangeLabel && (
+        <Typography variant="caption" color="text.secondary" noWrap>
+          {timeRangeLabel}
+        </Typography>
+      )}
+      {attendance?.paidHolidayFlag ? (
+        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+          有給休暇
+        </Typography>
+      ) : (
+        netHours > 0 && (
+          <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+            {`${netHours.toFixed(1)}h`}
+          </Typography>
+        )
+      )}
+      {attendance && !attendance.paidHolidayFlag && totalRestHours > 0 && (
+        <Typography variant="caption" color="text.secondary">
+          {`休憩 ${totalRestHours.toFixed(1)}h`}
+        </Typography>
+      )}
+      {holidayLabels.map((label) => (
+        <Typography key={label} variant="caption" color="error.main" sx={{ fontWeight: "bold" }}>
+          {label}
+        </Typography>
+      ))}
+    </DayCell>
+  );
+}
 
 const DayCell = styled(Box, {
   shouldForwardProp: (prop) =>
@@ -55,8 +166,8 @@ const DayCell = styled(Box, {
   backgroundColor: $isToday
     ? alpha(theme.palette.success.main, 0.08)
     : $isHoliday
-    ? alpha(theme.palette.warning.main, 0.08)
-    : "rgba(255,255,255,0.92)",
+      ? alpha(theme.palette.warning.main, 0.08)
+      : "rgba(255,255,255,0.92)",
   display: "flex",
   flexDirection: "column",
   gap: theme.spacing(1),
@@ -73,27 +184,6 @@ const DayCell = styled(Box, {
   },
 }));
 
-const statusLabelMap: Record<AttendanceStatus, string> = {
-  [AttendanceStatus.Ok]: "OK",
-  [AttendanceStatus.Error]: "要確認",
-  [AttendanceStatus.Requesting]: "申請中",
-  [AttendanceStatus.Late]: "遅刻",
-  [AttendanceStatus.Working]: "勤務中",
-  [AttendanceStatus.None]: "",
-};
-
-const statusChipColor: Record<
-  AttendanceStatus,
-  "default" | "success" | "error" | "warning" | "info"
-> = {
-  [AttendanceStatus.Ok]: "success",
-  [AttendanceStatus.Error]: "error",
-  [AttendanceStatus.Requesting]: "warning",
-  [AttendanceStatus.Late]: "error",
-  [AttendanceStatus.Working]: "info",
-  [AttendanceStatus.None]: "default",
-};
-
 type Props = {
   attendances?: Attendance[];
   staff?: Staff | null | undefined;
@@ -108,7 +198,7 @@ type Props = {
   onMonthChange?: (nextMonth: Dayjs) => void;
   onOpenInRightPanel?: (
     attendance: Attendance | undefined,
-    date: Dayjs
+    date: Dayjs,
   ) => void;
 };
 
@@ -129,14 +219,18 @@ export default function DesktopCalendarView({
   const context = useOptionalAttendanceListContext();
   const attendances = attendancesProp ?? context?.attendances ?? [];
   const staff = staffProp ?? context?.staff;
-  const holidayCalendars = holidayCalendarsProp ?? context?.holidayCalendars ?? [];
+  const holidayCalendars =
+    holidayCalendarsProp ?? context?.holidayCalendars ?? [];
   const companyHolidayCalendars =
     companyHolidayCalendarsProp ?? context?.companyHolidayCalendars ?? [];
   const navigate = navigateProp ?? context?.navigate;
   const closeDates = closeDatesProp ?? context?.closeDates ?? [];
-  const closeDatesLoading = closeDatesLoadingProp ?? context?.closeDatesLoading ?? false;
-  const closeDatesError = closeDatesErrorProp ?? context?.closeDatesError ?? null;
-  const currentMonth = currentMonthProp ?? context?.currentMonth ?? dayjs().startOf("month");
+  const closeDatesLoading =
+    closeDatesLoadingProp ?? context?.closeDatesLoading ?? false;
+  const closeDatesError =
+    closeDatesErrorProp ?? context?.closeDatesError ?? null;
+  const currentMonth =
+    currentMonthProp ?? context?.currentMonth ?? dayjs().startOf("month");
   const onMonthChange = onMonthChangeProp ?? context?.onMonthChange;
   const theme = useTheme();
   const resolvedCurrentMonth = currentMonth;
@@ -158,7 +252,7 @@ export default function DesktopCalendarView({
 
   const weeks = useMemo(
     () => buildWeeks(resolvedCurrentMonth),
-    [resolvedCurrentMonth]
+    [resolvedCurrentMonth],
   );
 
   const handleDayClick = (date: Dayjs) => {
@@ -182,12 +276,12 @@ export default function DesktopCalendarView({
       theme.palette.success.main,
       theme.palette.warning.main,
       theme.palette.secondary.main,
-    ]
+    ],
   );
 
   const monthlyTerms = useMemo(
     () => resolveMonthlyTerms(resolvedCurrentMonth, closeDates, termPalette),
-    [closeDates, resolvedCurrentMonth, termPalette]
+    [closeDates, resolvedCurrentMonth, termPalette],
   );
   const showFallbackNotice =
     monthlyTerms.length === 1 &&
@@ -204,45 +298,34 @@ export default function DesktopCalendarView({
           justifyContent="space-between"
         >
           <Stack direction="row" spacing={1} alignItems="center">
-            <IconButton
+            <AppIconButton
               aria-label="previous-month"
               onClick={() => updateMonth((prev) => prev.add(-1, "month"))}
-              sx={{
-                border: "1px solid rgba(148,163,184,0.18)",
-                bgcolor: "rgba(255,255,255,0.88)",
-              }}
+              size="sm"
             >
               <ChevronLeftIcon />
-            </IconButton>
-            <IconButton
+            </AppIconButton>
+            <AppIconButton
               aria-label="next-month"
               onClick={() => updateMonth((prev) => prev.add(1, "month"))}
-              sx={{
-                border: "1px solid rgba(148,163,184,0.18)",
-                bgcolor: "rgba(255,255,255,0.88)",
-              }}
+              size="sm"
             >
               <ChevronRightIcon />
-            </IconButton>
+            </AppIconButton>
             <Divider orientation="vertical" flexItem />
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
               {resolvedCurrentMonth.format("YYYY年M月")}
             </Typography>
           </Stack>
           <Box>
-            <Tooltip title="今月に戻る">
-              <IconButton
-                onClick={() => updateMonth(() => dayjs().startOf("month"))}
-                sx={{
-                  px: 1.5,
-                  borderRadius: "9999px",
-                  border: "1px solid rgba(148,163,184,0.18)",
-                  bgcolor: "rgba(255,255,255,0.88)",
-                }}
-              >
-                <Typography variant="body2">今月</Typography>
-              </IconButton>
-            </Tooltip>
+            <AppIconButton
+              onClick={() => updateMonth(() => dayjs().startOf("month"))}
+              aria-label="今月に戻る"
+              size="sm"
+              tooltip="今月に戻る"
+            >
+              <Typography variant="body2">今月</Typography>
+            </AppIconButton>
           </Box>
         </Stack>
 
@@ -297,8 +380,8 @@ export default function DesktopCalendarView({
                 index === 0
                   ? "error.main"
                   : index === 6
-                  ? "info.main"
-                  : "text.secondary",
+                    ? "info.main"
+                    : "text.secondary",
             }}
           >
             {label}
@@ -308,166 +391,25 @@ export default function DesktopCalendarView({
 
       <Stack spacing={1.5}>
         {weeks.map((week, weekIndex) => (
-          <div key={`week-${weekIndex}`} className="grid grid-cols-7 gap-3 lg:gap-2.5">
-            {week.map((date) => {
-              const workDate = date.format(AttendanceDate.DataFormat);
-              const attendance = attendanceMap.get(workDate);
-              const status = getStatus(
-                attendance,
-                staff,
-                holidayCalendars,
-                companyHolidayCalendars,
-                date
-              );
-              const netHours = getNetWorkingHours(attendance);
-              const totalRestHours = getTotalRestHours(attendance);
-              const timeRangeLabel = attendance
-                ? formatTimeRange(attendance)
-                : undefined;
-              const isToday = date.isSame(dayjs(), "day");
-              const isCurrentMonth = date.isSame(resolvedCurrentMonth, "month");
-              const holidayLike = isHolidayLike(
-                date,
-                staff,
-                holidayCalendars,
-                companyHolidayCalendars
-              );
-              const isWeekend = date.day() === 0 || date.day() === 6;
-              const { holidayName, companyHolidayName } = getHolidayNames(
-                date,
-                holidayCalendars,
-                companyHolidayCalendars
-              );
-              const holidayLabels = [
-                holidayName,
-                companyHolidayName
-                  ? `会社休日 ${companyHolidayName}`
-                  : undefined,
-              ].filter((label): label is string => Boolean(label));
-
-              const termsForDay = monthlyTerms.filter(
-                (term) =>
-                  !date.isBefore(term.start, "day") &&
-                  !date.isAfter(term.end, "day")
-              );
-              // シフト勤務の場合は休日関係なく集計期間の色を表示
-              const allowTermHighlight =
-                staff?.workType === "shift" ? true : !holidayLike && !isWeekend;
-              const primaryTerm = allowTermHighlight
-                ? termsForDay[0]
-                : undefined;
-              const termBackground = primaryTerm
-                ? alpha(primaryTerm.color, 0.08)
-                : undefined;
-              const termBorder = primaryTerm
-                ? `3px solid ${alpha(primaryTerm.color, 0.35)}`
-                : undefined;
-              const hasOverlap = allowTermHighlight && termsForDay.length > 1;
-
-              return (
-                <DayCell
-                  key={workDate}
-                  onClick={() => handleDayClick(date)}
-                  $isCurrentMonth={isCurrentMonth}
-                  $isToday={isToday}
-                  $isHoliday={holidayLike}
-                  sx={{
-                    backgroundColor: termBackground,
-                    borderLeft: termBorder,
-                  }}
-                >
-                  {hasOverlap && primaryTerm && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 6,
-                        right: 6,
-                        width: 10,
-                        height: 10,
-                        borderRadius: "50%",
-                        bgcolor: alpha(primaryTerm.color, 0.9),
-                        border: `1px solid ${alpha(
-                          theme.palette.common.white,
-                          0.9
-                        )}`,
-                      }}
-                    />
-                  )}
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                      {date.date()}
-                    </Typography>
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-                    >
-                      {onOpenInRightPanel && attendance && (
-                        <Tooltip title="右側で開く">
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onOpenInRightPanel(attendance, date);
-                            }}
-                            sx={{
-                              padding: "2px",
-                              "&:hover": {
-                                backgroundColor: "rgba(0, 0, 0, 0.04)",
-                              },
-                            }}
-                          >
-                            <OpenInNewOutlinedIcon sx={{ fontSize: "16px" }} />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                      {status !== AttendanceStatus.None && (
-                        <Chip
-                          size="small"
-                          label={statusLabelMap[status]}
-                          color={statusChipColor[status]}
-                        />
-                      )}
-                    </Box>
-                  </Stack>
-                  {timeRangeLabel && (
-                    <Typography variant="caption" color="text.secondary" noWrap>
-                      {timeRangeLabel}
-                    </Typography>
-                  )}
-                  {attendance?.paidHolidayFlag ? (
-                    <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                      有給休暇
-                    </Typography>
-                  ) : (
-                    netHours > 0 && (
-                      <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                        {`${netHours.toFixed(1)}h`}
-                      </Typography>
-                    )
-                  )}
-                  {attendance &&
-                    !attendance.paidHolidayFlag &&
-                    totalRestHours > 0 && (
-                      <Typography variant="caption" color="text.secondary">
-                        {`休憩 ${totalRestHours.toFixed(1)}h`}
-                      </Typography>
-                    )}
-                  {holidayLabels.map((label) => (
-                    <Typography
-                      key={label}
-                      variant="caption"
-                      color="error.main"
-                      sx={{ fontWeight: "bold" }}
-                    >
-                      {label}
-                    </Typography>
-                  ))}
-                </DayCell>
-              );
-            })}
+          <div
+            key={`week-${weekIndex}`}
+            className="grid grid-cols-7 gap-3 lg:gap-2.5"
+          >
+            {week.map((date) => (
+              <CalendarDayCard
+                key={date.format(AttendanceDate.DataFormat)}
+                date={date}
+                resolvedCurrentMonth={resolvedCurrentMonth}
+                attendance={attendanceMap.get(date.format(AttendanceDate.DataFormat))}
+                staff={staff}
+                holidayCalendars={holidayCalendars}
+                companyHolidayCalendars={companyHolidayCalendars}
+                monthlyTerms={monthlyTerms}
+                theme={theme}
+                handleDayClick={handleDayClick}
+                onOpenInRightPanel={onOpenInRightPanel}
+              />
+            ))}
           </div>
         ))}
       </Stack>

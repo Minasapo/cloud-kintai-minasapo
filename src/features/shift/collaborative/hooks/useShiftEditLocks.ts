@@ -10,7 +10,7 @@ import {
   updateShiftEditLock,
 } from "@shared/api/graphql/documents/shiftEditLock";
 import { GraphQLResult } from "aws-amplify/api";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import type {
   CollaborativeUser,
@@ -112,140 +112,173 @@ export const buildEditLockConflictMessage = (lock?: ShiftEditLockData | null) =>
     return "編集ロックの取得に失敗しました。最新状態を確認してから再度お試しください。";
   }
 
-  return `${lock.holderUserName} が ${lock.staffId} の ${lock.date} 日セルを編集中です。`;
+  return `${lock.holderUserName} が ${lock.date} 日セルを編集中です。`;
 };
 
-interface UseShiftEditLocksProps {
-  currentUserId: string;
-  currentUserName: string;
-  targetMonth?: string;
-}
+const buildEditLockInput = ({
+  id,
+  targetMonth,
+  staffId,
+  date,
+  holderUserId,
+  holderUserName,
+  acquiredAt,
+  expiresAt,
+}: {
+  id: string;
+  targetMonth: string;
+  staffId: string;
+  date: string;
+  holderUserId: string;
+  holderUserName: string;
+  acquiredAt: string;
+  expiresAt: string;
+}) => ({
+  id,
+  targetMonth,
+  staffId,
+  date,
+  holderUserId,
+  holderUserName,
+  acquiredAt,
+  expiresAt,
+});
 
-export const useShiftEditLocks = ({
+const fetchEditLockById = async (
+  id: string,
+): Promise<ShiftEditLockData | null> => {
+  const result = (await graphqlClient.graphql({
+    query: getShiftEditLock,
+    variables: { id },
+    authMode: "userPool",
+  })) as GraphQLResult<ShiftEditLockItemResponse>;
+
+  const lock = result.data?.getShiftEditLock ?? null;
+  return lock && isActiveLock(lock) ? lock : null;
+};
+
+const fetchCurrentEditLocks = async (
+  targetMonthValue: string,
+): Promise<ShiftEditLockData[]> => {
+  const collected: ShiftEditLockData[] = [];
+  let nextToken: string | null | undefined = null;
+
+  do {
+    const result = (await graphqlClient.graphql({
+      query: listShiftEditLocks,
+      variables: {
+        filter: { targetMonth: { eq: targetMonthValue } },
+        limit: 200,
+        nextToken,
+      },
+      authMode: "userPool",
+    })) as GraphQLResult<ShiftEditLockListResponse>;
+
+    const connection = result.data?.listShiftEditLocks;
+    connection?.items
+      ?.filter((item): item is ShiftEditLockData => Boolean(item))
+      .filter((item) => isActiveLock(item))
+      .forEach((item) => {
+        collected.push(item);
+      });
+
+    nextToken = connection?.nextToken;
+  } while (nextToken);
+
+  return collected;
+};
+
+const executeAcquireEditLock = async ({
+  targetMonth,
+  staffId,
+  date,
   currentUserId,
   currentUserName,
-  targetMonth,
-}: UseShiftEditLocksProps) => {
-  const [editingCells, setEditingCells] = useState<ShiftEditLockMap>(new Map());
-  const editingCellsRef = useRef(editingCells);
+  upsertLock,
+}: {
+  targetMonth: string;
+  staffId: string;
+  date: string;
+  currentUserId: string;
+  currentUserName: string;
+  upsertLock: (lock: ShiftEditLockData) => void;
+}): Promise<EditLockAcquireResult> => {
+  const id = toLockId(targetMonth, staffId, date);
+  const now = new Date();
+  const baseInput = buildEditLockInput({
+    id,
+    targetMonth,
+    staffId,
+    date,
+    holderUserId: currentUserId,
+    holderUserName: currentUserName,
+    acquiredAt: now.toISOString(),
+    expiresAt: new Date(now.getTime() + EDIT_LOCK_TTL_MS).toISOString(),
+  });
 
-  useEffect(() => {
-    editingCellsRef.current = editingCells;
-  }, [editingCells]);
+  const existingLock = await fetchEditLockById(id);
+  if (existingLock && existingLock.holderUserId !== currentUserId) {
+    upsertLock(existingLock);
+    return { acquired: false, conflict: existingLock };
+  }
 
-  const upsertLock = useCallback(
-    (lock: ShiftEditLockData) => {
-      if (!targetMonth || lock.targetMonth !== targetMonth) {
-        return;
-      }
-
-      setEditingCells((prev) => {
-        const next = new Map(prev);
-        if (!isActiveLock(lock)) {
-          next.delete(toCellKey(lock.staffId, lock.date));
-          return next;
-        }
-
-        next.set(toCellKey(lock.staffId, lock.date), toEditingMapEntry(lock));
-        return next;
-      });
-    },
-    [targetMonth],
-  );
-
-  const removeLock = useCallback((staffId: string, date: string) => {
-    setEditingCells((prev) => {
-      const cellKey = toCellKey(staffId, date);
-      if (!prev.has(cellKey)) {
-        return prev;
-      }
-
-      const next = new Map(prev);
-      next.delete(cellKey);
-      return next;
-    });
-  }, []);
-
-  const fetchLockById = useCallback(async (id: string) => {
-    const result = (await graphqlClient.graphql({
-      query: getShiftEditLock,
-      variables: { id },
-      authMode: "userPool",
-    })) as GraphQLResult<ShiftEditLockItemResponse>;
-
-    const lock = result.data?.getShiftEditLock ?? null;
-    return lock && isActiveLock(lock) ? lock : null;
-  }, []);
-
-  const fetchCurrentLocks = useCallback(async (targetMonthValue: string) => {
-    const collected: ShiftEditLockData[] = [];
-    let nextToken: string | null | undefined = null;
-
-    do {
+  try {
+    if (!existingLock) {
       const result = (await graphqlClient.graphql({
-        query: listShiftEditLocks,
+        query: createShiftEditLock,
+        variables: { input: { ...baseInput, version: 1 } },
+        authMode: "userPool",
+      })) as GraphQLResult<ShiftEditLockItemResponse>;
+      const created = result.data?.createShiftEditLock ?? null;
+      if (created) {
+        upsertLock(created);
+        return { acquired: true, lock: created };
+      }
+    } else {
+      const result = (await graphqlClient.graphql({
+        query: updateShiftEditLock,
         variables: {
-          filter: { targetMonth: { eq: targetMonthValue } },
-          limit: 200,
-          nextToken,
+          input: { ...baseInput, version: existingLock.version + 1 },
+          condition: { version: { eq: existingLock.version } },
         },
         authMode: "userPool",
-      })) as GraphQLResult<ShiftEditLockListResponse>;
-
-      const connection = result.data?.listShiftEditLocks;
-      connection?.items
-        ?.filter((item): item is ShiftEditLockData => Boolean(item))
-        .filter((item) => isActiveLock(item))
-        .forEach((item) => {
-          collected.push(item);
-        });
-
-      nextToken = connection?.nextToken;
-    } while (nextToken);
-
-    return collected;
-  }, []);
-
-  const refreshLocks = useCallback(async () => {
-    if (!targetMonth) {
-      return [];
+      })) as GraphQLResult<ShiftEditLockItemResponse>;
+      const updated = result.data?.updateShiftEditLock ?? null;
+      if (updated) {
+        upsertLock(updated);
+        return { acquired: true, lock: updated };
+      }
+    }
+  } catch (error) {
+    const latestLock = await fetchEditLockById(id);
+    if (latestLock?.holderUserId !== currentUserId) {
+      if (latestLock) {
+        upsertLock(latestLock);
+      }
+      return { acquired: false, conflict: latestLock ?? undefined };
     }
 
-    const collected = await fetchCurrentLocks(targetMonth);
-    setEditingCells(toEditingCellsMap(collected));
-    return collected;
-  }, [fetchCurrentLocks, targetMonth]);
+    throw new Error(normalizeErrorMessage(error));
+  }
 
-  useEffect(() => {
-    if (!targetMonth) {
-      return;
-    }
+  const latestLock = await fetchEditLockById(id);
+  if (latestLock) {
+    upsertLock(latestLock);
+  }
 
-    let active = true;
+  return {
+    acquired: latestLock?.holderUserId === currentUserId,
+    lock: latestLock?.holderUserId === currentUserId ? latestLock : undefined,
+    conflict:
+      latestLock?.holderUserId !== currentUserId ? latestLock ?? undefined : undefined,
+  };
+};
 
-    void fetchCurrentLocks(targetMonth)
-      .then((collected) => {
-        if (active) {
-          setEditingCells(toEditingCellsMap(collected));
-        }
-      })
-      .catch((error) => {
-        console.error("Failed to refresh shift edit locks:", error);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [fetchCurrentLocks, targetMonth]);
-
-  const visibleEditingCells = targetMonth
-    ? new Map(
-        Array.from(editingCells.entries()).filter(([, lock]) =>
-          lock.id.startsWith(`${targetMonth}#`),
-        ),
-      )
-    : EMPTY_EDITING_CELLS;
-
+const useEditLockCleanup = ({
+  setEditingCells,
+}: {
+  setEditingCells: React.Dispatch<React.SetStateAction<ShiftEditLockMap>>;
+}) => {
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       const now = Date.now();
@@ -267,8 +300,18 @@ export const useShiftEditLocks = ({
     return () => {
       window.clearInterval(intervalId);
     };
-  }, []);
+  }, [setEditingCells]);
+};
 
+const useEditLockSubscriptions = ({
+  targetMonth,
+  upsertLock,
+  removeLock,
+}: {
+  targetMonth?: string;
+  upsertLock: (lock: ShiftEditLockData) => void;
+  removeLock: (staffId: string, date: string) => void;
+}) => {
   useEffect(() => {
     if (!targetMonth) {
       return;
@@ -351,6 +394,168 @@ export const useShiftEditLocks = ({
       deleteSubscription.unsubscribe();
     };
   }, [removeLock, targetMonth, upsertLock]);
+};
+
+const useEditLockRenewal = ({
+  currentUserId,
+  editingCellsRef,
+  renewLock,
+}: {
+  currentUserId: string;
+  editingCellsRef: React.MutableRefObject<ShiftEditLockMap>;
+  renewLock: (lock: ShiftEditLockData) => Promise<void>;
+}) => {
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      Array.from(editingCellsRef.current.values())
+        .filter(
+          (lock) => lock.userId === currentUserId && lock.expiresAt > Date.now(),
+        )
+        .forEach((lock) => {
+          const [lockTargetMonth, staffId, date] = lock.id.split("#");
+          void renewLock({
+            id: lock.id,
+            targetMonth: lockTargetMonth,
+            staffId,
+            date,
+            holderUserId: lock.userId,
+            holderUserName: lock.userName,
+            acquiredAt: new Date(lock.startTime).toISOString(),
+            expiresAt: new Date(lock.expiresAt).toISOString(),
+            version: lock.version,
+          }).catch((error) => {
+            console.error("Failed to renew shift edit lock:", error);
+          });
+        });
+    }, EDIT_LOCK_REFRESH_INTERVAL_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [currentUserId, editingCellsRef, renewLock]);
+};
+
+const executeDeleteLock = async (
+  targetMonth: string | undefined,
+  staffId: string,
+  date: string,
+  ownedByUserId: string | null,
+  removeLock: (staffId: string, date: string) => void,
+): Promise<void> => {
+  if (!targetMonth) {
+    return;
+  }
+
+  const id = toLockId(targetMonth, staffId, date);
+  const existingLock = await fetchEditLockById(id);
+
+  if (!existingLock || (ownedByUserId !== null && existingLock.holderUserId !== ownedByUserId)) {
+    removeLock(staffId, date);
+    return;
+  }
+
+  await graphqlClient.graphql({
+    query: deleteShiftEditLock,
+    variables: { input: { id }, condition: { version: { eq: existingLock.version } } },
+    authMode: "userPool",
+  });
+
+  removeLock(staffId, date);
+};
+
+interface UseShiftEditLocksProps {
+  currentUserId: string;
+  currentUserName: string;
+  targetMonth?: string;
+}
+
+export const useShiftEditLocks = ({
+  currentUserId,
+  currentUserName,
+  targetMonth,
+}: UseShiftEditLocksProps) => {
+  const [editingCells, setEditingCells] = useState<ShiftEditLockMap>(new Map());
+  const editingCellsRef = useRef(editingCells);
+
+  useEffect(() => {
+    editingCellsRef.current = editingCells;
+  }, [editingCells]);
+
+  const upsertLock = useCallback(
+    (lock: ShiftEditLockData) => {
+      if (!targetMonth || lock.targetMonth !== targetMonth) {
+        return;
+      }
+
+      setEditingCells((prev) => {
+        const next = new Map(prev);
+        if (!isActiveLock(lock)) {
+          next.delete(toCellKey(lock.staffId, lock.date));
+          return next;
+        }
+
+        next.set(toCellKey(lock.staffId, lock.date), toEditingMapEntry(lock));
+        return next;
+      });
+    },
+    [targetMonth],
+  );
+
+  const removeLock = useCallback((staffId: string, date: string) => {
+    setEditingCells((prev) => {
+      const cellKey = toCellKey(staffId, date);
+      if (!prev.has(cellKey)) {
+        return prev;
+      }
+
+      const next = new Map(prev);
+      next.delete(cellKey);
+      return next;
+    });
+  }, []);
+
+  const refreshLocks = useCallback(async () => {
+    if (!targetMonth) {
+      return [];
+    }
+
+    const collected = await fetchCurrentEditLocks(targetMonth);
+    setEditingCells(toEditingCellsMap(collected));
+    return collected;
+  }, [targetMonth]);
+
+  useEffect(() => {
+    if (!targetMonth) {
+      return;
+    }
+
+    let active = true;
+
+    void fetchCurrentEditLocks(targetMonth)
+      .then((collected) => {
+        if (active) {
+          setEditingCells(toEditingCellsMap(collected));
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to refresh shift edit locks:", error);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [targetMonth]);
+
+  const visibleEditingCells = targetMonth
+    ? new Map(
+        Array.from(editingCells.entries()).filter(([, lock]) =>
+          lock.id.startsWith(`${targetMonth}#`),
+        ),
+      )
+    : EMPTY_EDITING_CELLS;
+
+  useEditLockCleanup({ setEditingCells });
+  useEditLockSubscriptions({ targetMonth, upsertLock, removeLock });
 
   const renewLock = useCallback(
     async (lock: ShiftEditLockData) => {
@@ -384,34 +589,7 @@ export const useShiftEditLocks = ({
     [currentUserId, currentUserName, upsertLock],
   );
 
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      Array.from(editingCellsRef.current.values())
-        .filter(
-          (lock) => lock.userId === currentUserId && lock.expiresAt > Date.now(),
-        )
-        .forEach((lock) => {
-          const [lockTargetMonth, staffId, date] = lock.id.split("#");
-          void renewLock({
-            id: lock.id,
-            targetMonth: lockTargetMonth,
-            staffId,
-            date,
-            holderUserId: lock.userId,
-            holderUserName: lock.userName,
-            acquiredAt: new Date(lock.startTime).toISOString(),
-            expiresAt: new Date(lock.expiresAt).toISOString(),
-            version: lock.version,
-          }).catch((error) => {
-            console.error("Failed to renew shift edit lock:", error);
-          });
-        });
-    }, EDIT_LOCK_REFRESH_INTERVAL_MS);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [currentUserId, renewLock]);
+  useEditLockRenewal({ currentUserId, editingCellsRef, renewLock });
 
   const acquireEditLock = useCallback(
     async (staffId: string, date: string): Promise<EditLockAcquireResult> => {
@@ -419,155 +597,28 @@ export const useShiftEditLocks = ({
         return { acquired: false };
       }
 
-      const id = toLockId(targetMonth, staffId, date);
-      const now = new Date();
-      const baseInput = {
-        id,
+      return executeAcquireEditLock({
         targetMonth,
         staffId,
         date,
-        holderUserId: currentUserId,
-        holderUserName: currentUserName,
-        acquiredAt: now.toISOString(),
-        expiresAt: new Date(now.getTime() + EDIT_LOCK_TTL_MS).toISOString(),
-      };
-
-      const existingLock = await fetchLockById(id);
-      if (existingLock && existingLock.holderUserId !== currentUserId) {
-        upsertLock(existingLock);
-        return { acquired: false, conflict: existingLock };
-      }
-
-      try {
-        if (!existingLock) {
-          const result = (await graphqlClient.graphql({
-            query: createShiftEditLock,
-            variables: {
-              input: {
-                ...baseInput,
-                version: 1,
-              },
-            },
-            authMode: "userPool",
-          })) as GraphQLResult<ShiftEditLockItemResponse>;
-          const created = result.data?.createShiftEditLock ?? null;
-          if (created) {
-            upsertLock(created);
-            return { acquired: true, lock: created };
-          }
-        } else {
-          const result = (await graphqlClient.graphql({
-            query: updateShiftEditLock,
-            variables: {
-              input: {
-                ...baseInput,
-                version: existingLock.version + 1,
-              },
-              condition: {
-                version: { eq: existingLock.version },
-              },
-            },
-            authMode: "userPool",
-          })) as GraphQLResult<ShiftEditLockItemResponse>;
-          const updated = result.data?.updateShiftEditLock ?? null;
-          if (updated) {
-            upsertLock(updated);
-            return { acquired: true, lock: updated };
-          }
-        }
-      } catch (error) {
-        const latestLock = await fetchLockById(id);
-        if (latestLock?.holderUserId !== currentUserId) {
-          if (latestLock) {
-            upsertLock(latestLock);
-          }
-          return { acquired: false, conflict: latestLock ?? undefined };
-        }
-
-        throw new Error(normalizeErrorMessage(error));
-      }
-
-      const latestLock = await fetchLockById(id);
-      if (latestLock) {
-        upsertLock(latestLock);
-      }
-
-      return {
-        acquired: latestLock?.holderUserId === currentUserId,
-        lock: latestLock?.holderUserId === currentUserId ? latestLock : undefined,
-        conflict:
-          latestLock?.holderUserId !== currentUserId ? latestLock ?? undefined : undefined,
-      };
+        currentUserId,
+        currentUserName,
+        upsertLock,
+      });
     },
-    [
-      currentUserId,
-      currentUserName,
-      fetchLockById,
-      targetMonth,
-      upsertLock,
-    ],
+    [currentUserId, currentUserName, targetMonth, upsertLock],
   );
 
   const releaseEditLock = useCallback(
-    async (staffId: string, date: string) => {
-      if (!targetMonth) {
-        return;
-      }
-
-      const id = toLockId(targetMonth, staffId, date);
-      const existingLock = await fetchLockById(id);
-      if (!existingLock || existingLock.holderUserId !== currentUserId) {
-        removeLock(staffId, date);
-        return;
-      }
-
-      await graphqlClient.graphql({
-        query: deleteShiftEditLock,
-        variables: {
-          input: {
-            id,
-          },
-          condition: {
-            version: { eq: existingLock.version },
-          },
-        },
-        authMode: "userPool",
-      });
-
-      removeLock(staffId, date);
-    },
-    [currentUserId, fetchLockById, removeLock, targetMonth],
+    (staffId: string, date: string) =>
+      executeDeleteLock(targetMonth, staffId, date, currentUserId, removeLock),
+    [currentUserId, removeLock, targetMonth],
   );
 
   const forceReleaseLock = useCallback(
-    async (staffId: string, date: string) => {
-      if (!targetMonth) {
-        return;
-      }
-
-      const id = toLockId(targetMonth, staffId, date);
-      const existingLock = await fetchLockById(id);
-      if (!existingLock) {
-        removeLock(staffId, date);
-        return;
-      }
-
-      await graphqlClient.graphql({
-        query: deleteShiftEditLock,
-        variables: {
-          input: {
-            id,
-          },
-          condition: {
-            version: { eq: existingLock.version },
-          },
-        },
-        authMode: "userPool",
-      });
-
-      removeLock(staffId, date);
-    },
-    [fetchLockById, removeLock, targetMonth],
+    (staffId: string, date: string) =>
+      executeDeleteLock(targetMonth, staffId, date, null, removeLock),
+    [removeLock, targetMonth],
   );
 
   const isCellBeingEdited = useCallback(

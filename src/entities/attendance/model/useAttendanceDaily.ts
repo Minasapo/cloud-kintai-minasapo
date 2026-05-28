@@ -4,6 +4,7 @@ import {
   useLazyGetAttendanceByStaffAndDateQuery,
 } from "@entities/attendance/api/attendanceApi";
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { getAttendanceMonthRangeInput } from "@entities/attendance/lib/attendanceQueryRange";
 import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import {
   onCreateAttendance,
@@ -59,6 +60,112 @@ interface MonthlyAttendanceData {
   loadedAt: number;
 }
 
+type TriggerGetAttendance = ReturnType<
+  typeof useLazyGetAttendanceByStaffAndDateQuery
+>[0];
+
+async function fetchStaffAttendanceItem(
+  triggerGetAttendance: TriggerGetAttendance,
+  staff: AttendanceDailyStaff,
+  firstDayOfMonth: string,
+  lastDayOfMonth: string,
+  duplicateBuffer: DuplicateAttendanceDaily[],
+): Promise<AttendanceDaily> {
+  const { cognitoUserId, givenName, familyName, sortKey } = staff;
+  const safeGivenName = givenName ?? "";
+  const safeFamilyName = familyName ?? "";
+  const safeSortKey = sortKey ?? "";
+  const response = await triggerGetAttendance({
+    staffId: cognitoUserId,
+    workDate: firstDayOfMonth,
+  });
+
+  if (response.error) {
+    const details =
+      typeof response.error === "object" &&
+      response.error !== null &&
+      "details" in response.error &&
+      typeof (response.error as { details?: unknown }).details === "object" &&
+      (response.error as { details?: unknown }).details !== null
+        ? (response.error as {
+            details: {
+              code?: string;
+              duplicates?: DuplicateAttendanceInfo[];
+            };
+          }).details
+        : undefined;
+
+    if (
+      details?.code === ATTENDANCE_DUPLICATE_CONFLICT &&
+      Array.isArray(details.duplicates)
+    ) {
+      details.duplicates.forEach((dup) => {
+        if (
+          dayjs(dup.workDate).isBetween(
+            dayjs(firstDayOfMonth),
+            dayjs(lastDayOfMonth),
+            null,
+            "[]",
+          )
+        ) {
+          duplicateBuffer.push({
+            staffId: cognitoUserId,
+            staffName: `${safeFamilyName} ${safeGivenName}`.trim(),
+            workDate: dup.workDate,
+            ids: dup.ids,
+          });
+        }
+      });
+
+      return {
+        sub: cognitoUserId,
+        givenName: safeGivenName,
+        familyName: safeFamilyName,
+        attendance: null,
+        sortKey: safeSortKey,
+      } as AttendanceDaily;
+    }
+
+    throw response.error as Error;
+  }
+
+  const attendance = "data" in response ? (response.data ?? null) : null;
+
+  const duplicates = (
+    (
+      response as {
+        meta?: { duplicates?: DuplicateAttendanceInfo[] };
+      }
+    ).meta?.duplicates ?? []
+  ).filter((d) => d.ids.length > 1);
+
+  duplicates.forEach((dup) => {
+    if (
+      dayjs(dup.workDate).isBetween(
+        dayjs(firstDayOfMonth),
+        dayjs(lastDayOfMonth),
+        null,
+        "[]",
+      )
+    ) {
+      duplicateBuffer.push({
+        staffId: cognitoUserId,
+        staffName: `${safeFamilyName} ${safeGivenName}`.trim(),
+        workDate: dup.workDate,
+        ids: dup.ids,
+      });
+    }
+  });
+
+  return {
+    sub: cognitoUserId,
+    givenName: safeGivenName,
+    familyName: safeFamilyName,
+    attendance,
+    sortKey: safeSortKey,
+  } as AttendanceDaily;
+}
+
 export default function useAttendanceDaily({
   staffs,
   staffLoading = false,
@@ -86,23 +193,14 @@ export default function useAttendanceDaily({
   }, []);
 
   /**
-   * 指定日付から月の最初の日を取得
-   */
-  const getFirstDayOfMonth = useCallback((dateStr: string) => {
-    return dayjs(dateStr).startOf("month").format(AttendanceDate.DataFormat);
-  }, []);
-
-  /**
    * 指定月のデータをロード（複数月対応）
    * まだロードされていない月があれば追加ロード
    */
   const loadAttendanceDataByMonth = useCallback(
     async (targetDate: string, options?: { forceRefresh?: boolean }) => {
       const monthKey = getMonthKey(targetDate);
-      const firstDayOfMonth = getFirstDayOfMonth(targetDate);
-      const lastDayOfMonth = dayjs(targetDate)
-        .endOf("month")
-        .format(AttendanceDate.DataFormat);
+      const { startDate: firstDayOfMonth, endDate: lastDayOfMonth } =
+        getAttendanceMonthRangeInput(targetDate);
       const shouldUseCache = !options?.forceRefresh;
 
       // キャッシュに存在するかチェック
@@ -121,104 +219,14 @@ export default function useAttendanceDaily({
         const duplicateBuffer: DuplicateAttendanceDaily[] = [];
 
         const results = await Promise.all(
-          staffs.map(
-            async ({ cognitoUserId, givenName, familyName, sortKey }) => {
-              const safeGivenName = givenName ?? "";
-              const safeFamilyName = familyName ?? "";
-              const safeSortKey = sortKey ?? "";
-              const response = await triggerGetAttendance({
-                staffId: cognitoUserId,
-                workDate: firstDayOfMonth,
-              });
-
-              if (response.error) {
-                const details =
-                  typeof response.error === "object" &&
-                  response.error !== null &&
-                  "details" in response.error &&
-                  typeof (response.error as { details?: unknown }).details ===
-                    "object" &&
-                  (response.error as { details?: unknown }).details !== null
-                    ? (response.error as {
-                        details: {
-                          code?: string;
-                          duplicates?: DuplicateAttendanceInfo[];
-                        };
-                      }).details
-                    : undefined;
-
-                if (
-                  details?.code === ATTENDANCE_DUPLICATE_CONFLICT &&
-                  Array.isArray(details.duplicates)
-                ) {
-                  details.duplicates.forEach((dup) => {
-                    if (
-                      dayjs(dup.workDate).isBetween(
-                        dayjs(firstDayOfMonth),
-                        dayjs(lastDayOfMonth),
-                        null,
-                        "[]",
-                      )
-                    ) {
-                      duplicateBuffer.push({
-                        staffId: cognitoUserId,
-                        staffName: `${safeFamilyName} ${safeGivenName}`.trim(),
-                        workDate: dup.workDate,
-                        ids: dup.ids,
-                      });
-                    }
-                  });
-
-                  return {
-                    sub: cognitoUserId,
-                    givenName: safeGivenName,
-                    familyName: safeFamilyName,
-                    attendance: null,
-                    sortKey: safeSortKey,
-                  } as AttendanceDaily;
-                }
-
-                throw response.error as Error;
-              }
-
-              const attendance =
-                "data" in response ? (response.data ?? null) : null;
-
-              const duplicates = (
-                (
-                  response as {
-                    meta?: { duplicates?: DuplicateAttendanceInfo[] };
-                  }
-                ).meta?.duplicates ?? []
-              ).filter((d) => d.ids.length > 1);
-
-              duplicates.forEach((dup) => {
-                // 月範囲内のみを対象
-                if (
-                  dayjs(dup.workDate).isBetween(
-                    dayjs(firstDayOfMonth),
-                    dayjs(lastDayOfMonth),
-                    null,
-                    "[]",
-                  )
-                ) {
-                  duplicateBuffer.push({
-                    staffId: cognitoUserId,
-                    staffName: `${safeFamilyName} ${safeGivenName}`.trim(),
-                    workDate: dup.workDate,
-                    ids: dup.ids,
-                  });
-                }
-              });
-
-              return {
-                sub: cognitoUserId,
-                givenName: safeGivenName,
-                familyName: safeFamilyName,
-                attendance,
-                sortKey: safeSortKey,
-              } as AttendanceDaily;
-            },
+          staffs.map((staff) =>
+            fetchStaffAttendanceItem(
+              triggerGetAttendance,
+              staff,
+              firstDayOfMonth,
+              lastDayOfMonth,
+              duplicateBuffer,
+            ),
           ),
         );
 
@@ -239,7 +247,7 @@ export default function useAttendanceDaily({
         setLoading(false);
       }
     },
-    [staffs, triggerGetAttendance, getMonthKey, getFirstDayOfMonth],
+    [staffs, triggerGetAttendance, getMonthKey],
   );
 
   useEffect(() => {
@@ -363,10 +371,10 @@ export default function useAttendanceDaily({
 
     (async () => {
       try {
-        // 前月をロード
-        await loadAttendanceDataByMonth(previousMonth);
-        // 当月をロード
-        await loadAttendanceDataByMonth(currentMonth);
+        await Promise.all([
+          loadAttendanceDataByMonth(previousMonth),
+          loadAttendanceDataByMonth(currentMonth),
+        ]);
       } catch (e) {
         console.error("Failed to load initial attendance data", e);
       }

@@ -1,3 +1,4 @@
+import { AuthContext } from "@app/providers/auth/AuthContext";
 import {
   StaffRole,
   useStaffs,
@@ -10,8 +11,6 @@ import {
 } from "@shared/api/graphql/types";
 import { render, screen, waitFor } from "@testing-library/react";
 import type { GraphQLResult } from "aws-amplify/api";
-
-import { AuthContext } from "@/context/AuthContext";
 
 import AdminDailyReport from "./AdminDailyReport";
 
@@ -153,10 +152,6 @@ describe("AdminDailyReport", () => {
     await waitFor(() => {
       expect(button).not.toBeDisabled();
     });
-
-    expect(button).toHaveAttribute("data-app-button-variant", "solid");
-    expect(button).toHaveAttribute("data-app-button-tone", "primary");
-    expect(button).toHaveAttribute("data-app-button-size", "sm");
   });
 
   it("表示対象の日報がないときCSV出力ボタンを無効化する", async () => {

@@ -4,15 +4,14 @@ import { collectAttendanceErrorMessages } from "@entities/attendance/validation/
 import type { AttendanceEditContextProps } from "@features/attendance/edit/model/AttendanceEditProvider";
 import AttendanceEditProvider from "@features/attendance/edit/model/AttendanceEditProvider";
 import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
-import DesktopEditor from "@features/attendance/edit/ui/desktopEditor/DesktopEditor";
-import { MobileEditor } from "@features/attendance/edit/ui/mobileEditor/MobileEditor";
+import { AttendanceEditForm } from "@features/attendance/edit/ui/AttendanceEditForm";
+import { useAppNotification } from "@shared/lib/useAppNotification";
 import { PageContent } from "@shared/ui/layout";
 import dayjs from "dayjs";
 import { useMemo } from "react";
 import { UseFormHandleSubmit } from "react-hook-form";
 
 import * as MESSAGE_CODE from "@/errors";
-import { useAppNotification } from "@/hooks/useAppNotification";
 
 import { AttendanceEditErrorAlert } from "./AttendanceEditErrorAlert";
 import { useAttendanceEditData } from "./useAttendanceEditData";
@@ -60,6 +59,9 @@ export default function AttendanceEdit() {
     isOnBreak,
     dialog,
     runWithoutGuard,
+    submitErrorMessage,
+    setSubmitError,
+    clearSubmitError,
   } = useAttendanceForm({
     attendance,
     targetWorkDate,
@@ -75,6 +77,8 @@ export default function AttendanceEdit() {
     targetWorkDate,
     attendanceListPath,
     runWithoutGuard,
+    setSubmitError,
+    clearSubmitError,
   });
 
   const changeRequests = attendance?.changeRequests
@@ -130,13 +134,13 @@ export default function AttendanceEdit() {
     isDirty,
     isValid,
     isSubmitting,
+    submitErrorMessage,
     restFields,
     restAppend,
     restRemove,
     restUpdate,
     restReplace,
     changeRequests,
-    systemCommentFields: [],
     hourlyPaidHolidayTimeFields,
     hourlyPaidHolidayTimeAppend,
     hourlyPaidHolidayTimeRemove,
@@ -155,15 +159,7 @@ export default function AttendanceEdit() {
       >
         {dialog}
         <AttendanceEditErrorAlert messages={errorMessages} />
-        <div className="block md:hidden" data-testid="attendance-mobile-editor">
-          <MobileEditor />
-        </div>
-        <div
-          className="hidden md:block"
-          data-testid="attendance-desktop-editor"
-        >
-          <DesktopEditor />
-        </div>
+        <AttendanceEditForm />
       </PageContent>
     </AttendanceEditProvider>
   );

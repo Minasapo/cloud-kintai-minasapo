@@ -1,9 +1,8 @@
+import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
 import { AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
 import { SubsectionTitle } from "@shared/ui/typography";
 import dayjs from "dayjs";
 import { CSSProperties, useContext } from "react";
-
-import { AppConfigContext } from "@/context/AppConfigContext";
 
 import { useMobileCalendarUI } from "./mobileCalendarContext";
 import {
@@ -11,7 +10,6 @@ import {
   getRestTimes,
   getSelectedDateLabel,
   getSummaryText,
-  getSystemCommentTexts,
 } from "./mobileCalendarDetailsUtils";
 import { formatTimeRange, getStatusBadgeMeta, HolidayInfo } from "./mobileCalendarUtils";
 
@@ -79,7 +77,6 @@ export const SelectedDateDetails = () => {
       ? dayjs(selectedAttendance.endTime).format("HH:mm")
       : "";
   const summaryText = getSummaryText(selectedAttendance);
-  const systemCommentTexts = getSystemCommentTexts(selectedAttendance);
 
   return (
     <div className="mobile-calendar__details">
@@ -127,17 +124,6 @@ export const SelectedDateDetails = () => {
             <div>
               <p className="mobile-calendar__section-label">摘要</p>
               <p>{summaryText}</p>
-            </div>
-          )}
-
-          {systemCommentTexts.length > 0 && (
-            <div>
-              <p className="mobile-calendar__error-label">システムコメント</p>
-              {systemCommentTexts.map((comment, idx) => (
-                <p key={idx} className="mobile-calendar__error-text">
-                  {comment}
-                </p>
-              ))}
             </div>
           )}
         </div>

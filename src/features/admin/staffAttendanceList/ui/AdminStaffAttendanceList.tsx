@@ -16,7 +16,6 @@ import { useSplitView } from "@features/splitView";
 import {
   Alert,
   Box,
-  LinearProgress,
   Stack,
   Table,
   TableBody,
@@ -29,6 +28,11 @@ import {
 } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
 import { designTokenVar } from "@shared/designSystem";
+import {
+  createMonthSearchParamsFromDate,
+  formatMonthQueryValue,
+} from "@shared/lib/monthQuery";
+import { ProgressBar } from "@shared/ui/feedback";
 import { PageSection } from "@shared/ui/layout";
 import dayjs, { type Dayjs } from "dayjs";
 import type { ReactNode } from "react";
@@ -48,6 +52,80 @@ const PAGE_PADDING_Y = {
 const PAGE_SECTION_GAP = designTokenVar("spacing.xl", "24px");
 const SECTION_CONTENT_GAP = designTokenVar("spacing.md", "12px");
 
+function StandalonePageSection({ children }: { children: ReactNode }) {
+  return (
+    <Stack
+      component="section"
+      sx={{
+        flex: 1,
+        width: "100%",
+        boxSizing: "border-box",
+        px: PAGE_PADDING_X,
+        py: PAGE_PADDING_Y,
+      }}
+    >
+      <PageSection variant="surface" layoutVariant="dashboard">
+        {children}
+      </PageSection>
+    </Stack>
+  );
+}
+
+type UseAdminStaffAttendanceNavigationParams = {
+  staffId: string | undefined;
+  monthQuery: string;
+  navigate: ReturnType<typeof useNavigate>;
+  enableSplitMode: () => void;
+  setRightPanel: ReturnType<typeof useSplitView>["setRightPanel"];
+};
+
+function useAdminStaffAttendanceNavigation({
+  staffId,
+  monthQuery,
+  navigate,
+  enableSplitMode,
+  setRightPanel,
+}: UseAdminStaffAttendanceNavigationParams) {
+  const handleEdit = useCallback(
+    (attendance: Attendance) => {
+      if (!staffId) return;
+      const workDate = dayjs(attendance.workDate).format(
+        AttendanceDate.QueryParamFormat,
+      );
+      navigate(`/admin/attendances/edit/${workDate}/${staffId}?${monthQuery}`);
+    },
+    [monthQuery, navigate, staffId],
+  );
+
+  const handleOpenInRightPanel = useCallback(
+    (attendance: Attendance | undefined, _date: Dayjs) => {
+      if (!staffId || !attendance) return;
+      const workDate = dayjs(attendance.workDate).format(
+        AttendanceDate.QueryParamFormat,
+      );
+      enableSplitMode();
+      setRightPanel({
+        id: `attendance-${workDate}`,
+        title: `勤怠編集 - ${dayjs(attendance.workDate).format("YYYY/MM/DD")}`,
+        route: `/admin/attendances/edit/${workDate}/${staffId}?${monthQuery}`,
+      });
+    },
+    [staffId, enableSplitMode, monthQuery, setRightPanel],
+  );
+
+  const buildCalendarNavigatePath = useCallback(
+    (formattedWorkDate: string) => {
+      if (!staffId) {
+        return `/admin/attendances?${monthQuery}`;
+      }
+      return `/admin/attendances/edit/${formattedWorkDate}/${staffId}?${monthQuery}`;
+    },
+    [monthQuery, staffId],
+  );
+
+  return { handleEdit, handleOpenInRightPanel, buildCalendarNavigatePath };
+}
+
 export default function AdminStaffAttendanceList() {
   const { staffId } = useParams();
   const navigate = useNavigate();
@@ -62,10 +140,7 @@ export default function AdminStaffAttendanceList() {
   );
 
   const monthQuery = useMemo(
-    () =>
-      new URLSearchParams({
-        [MONTH_QUERY_KEY]: currentMonth.startOf("month").format("YYYY-MM"),
-      }).toString(),
+    () => createMonthSearchParamsFromDate(currentMonth).toString(),
     [currentMonth],
   );
 
@@ -73,7 +148,7 @@ export default function AdminStaffAttendanceList() {
     (nextMonth: Dayjs) => {
       const normalizedMonth = nextMonth.startOf("month");
       const nextParams = new URLSearchParams(searchParams);
-      nextParams.set(MONTH_QUERY_KEY, normalizedMonth.format("YYYY-MM"));
+      nextParams.set(MONTH_QUERY_KEY, formatMonthQueryValue(normalizedMonth));
       setSearchParams(nextParams, { replace: true });
     },
     [searchParams, setSearchParams],
@@ -119,58 +194,17 @@ export default function AdminStaffAttendanceList() {
     handleCloseQuickView,
   } = changeRequestControls;
 
-  const handleEdit = useCallback(
-    (attendance: Attendance) => {
-      if (!staffId) return;
-      const workDate = dayjs(attendance.workDate).format(
-        AttendanceDate.QueryParamFormat,
-      );
-      navigate(`/admin/attendances/edit/${workDate}/${staffId}?${monthQuery}`);
-    },
-    [monthQuery, navigate, staffId],
-  );
-
-  const handleOpenInRightPanel = useCallback(
-    (attendance: Attendance | undefined, _date: Dayjs) => {
-      if (!staffId || !attendance) return;
-      const workDate = dayjs(attendance.workDate).format(
-        AttendanceDate.QueryParamFormat,
-      );
-      enableSplitMode();
-      setRightPanel({
-        id: `attendance-${workDate}`,
-        title: `勤怠編集 - ${dayjs(attendance.workDate).format("YYYY/MM/DD")}`,
-        route: `/admin/attendances/edit/${workDate}/${staffId}?${monthQuery}`,
-      });
-    },
-    [staffId, enableSplitMode, monthQuery, setRightPanel],
-  );
-
-  const buildCalendarNavigatePath = useCallback(
-    (formattedWorkDate: string) => {
-      if (!staffId) {
-        return `/admin/attendances?${monthQuery}`;
-      }
-      return `/admin/attendances/edit/${formattedWorkDate}/${staffId}?${monthQuery}`;
-    },
-    [monthQuery, staffId],
-  );
+  const { handleEdit, handleOpenInRightPanel, buildCalendarNavigatePath } =
+    useAdminStaffAttendanceNavigation({
+      staffId,
+      monthQuery,
+      navigate,
+      enableSplitMode,
+      setRightPanel,
+    });
 
   const renderStandaloneSection = (content: ReactNode) => (
-    <Stack
-      component="section"
-      sx={{
-        flex: 1,
-        width: "100%",
-        boxSizing: "border-box",
-        px: PAGE_PADDING_X,
-        py: PAGE_PADDING_Y,
-      }}
-    >
-      <PageSection variant="surface" layoutVariant="dashboard">
-        {content}
-      </PageSection>
-    </Stack>
+    <StandalonePageSection>{content}</StandalonePageSection>
   );
 
   const isCalendarCompact = isMobile;
@@ -194,7 +228,7 @@ export default function AdminStaffAttendanceList() {
   }
 
   if (attendanceLoading || calendarLoading) {
-    return renderStandaloneSection(<LinearProgress />);
+    return renderStandaloneSection(<ProgressBar />);
   }
 
   return (

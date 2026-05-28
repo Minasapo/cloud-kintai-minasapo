@@ -2,11 +2,14 @@
  * 共同編集シフト調整の型定義
  */
 
+import type { ShiftStateWithEmpty as ShiftState } from "@entities/shift/lib/statusMapping";
 import {
   ModelShiftRequestConditionInput,
   ShiftRequestStatus,
   UpdateShiftRequestInput,
 } from "@shared/api/graphql/types";
+
+export type { ShiftState };
 
 /**
  * データ同期ステータス
@@ -18,16 +21,6 @@ export type DataSyncStatus =
   | "saved"
   | "synced"
   | "error";
-
-/**
- * シフト状態（内部表現）
- */
-export type ShiftState =
-  | "work"
-  | "fixedOff"
-  | "requestedOff"
-  | "auto"
-  | "empty";
 
 /**
  * 参加ユーザー情報
@@ -141,12 +134,20 @@ export interface ShiftRequestCommentData {
   createdAt: string;
 }
 
+export interface ShiftRequestHistoryEntry {
+  version: number;
+  entries?: Array<{ date: string; status: ShiftRequestStatus; isLocked?: boolean }>;
+  recordedAt: string; // ISO文字列
+  recordedByStaffId?: string;
+}
+
 export interface ShiftRequestData {
   id: string;
   staffId: string;
   targetMonth: string;
   entries?: ShiftRequestEntry[];
   comments?: ShiftRequestCommentData[];
+  histories?: ShiftRequestHistoryEntry[];
   updatedAt?: string;
   updatedBy?: string;
   version?: number;
@@ -173,40 +174,6 @@ export type ShiftRequestUpdatePayload = {
   condition?: ModelShiftRequestConditionInput;
 };
 
-export const shiftRequestStatusToShiftState = (
-  status?: ShiftRequestStatus | null,
-): ShiftState => {
-  switch (status) {
-    case ShiftRequestStatus.WORK:
-      return "work";
-    case ShiftRequestStatus.FIXED_OFF:
-      return "fixedOff";
-    case ShiftRequestStatus.REQUESTED_OFF:
-      return "requestedOff";
-    case ShiftRequestStatus.AUTO:
-      return "auto";
-    default:
-      return "empty";
-  }
-};
-
-export const shiftStateToShiftRequestStatus = (
-  state: ShiftState,
-): ShiftRequestStatus | null => {
-  switch (state) {
-    case "work":
-      return ShiftRequestStatus.WORK;
-    case "fixedOff":
-      return ShiftRequestStatus.FIXED_OFF;
-    case "requestedOff":
-      return ShiftRequestStatus.REQUESTED_OFF;
-    case "auto":
-      return ShiftRequestStatus.AUTO;
-    default:
-      return null;
-  }
-};
-
 /**
  * シフト更新リクエスト（UIからの入力）
  */
@@ -223,12 +190,11 @@ export interface ShiftCellUpdate {
  * セル変更の発生源
  */
 export type CellChangeSource =
-  | "manual"
-  | "batch"
-  | "undo"
-  | "redo"
-  | "conflict-resolution"
-  | "remote";
+  | "manual"        // ユーザーによる手動変更
+  | "batch"         // 一括変更
+  | "conflict-resolution" // 競合解決
+  | "remote"        // Subscription 経由の他ユーザー変更（リアルタイム）
+  | "db-history";   // DB のスナップショット履歴から復元した記録
 
 /**
  * セル単位の変更履歴レコード

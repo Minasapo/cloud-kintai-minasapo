@@ -3,16 +3,26 @@
  * 複数のコンポーネント間で共有されるロジックを集約
  */
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
-import { AttendanceState, AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
+import {
+  AttendanceState,
+  AttendanceStatus,
+} from "@entities/attendance/lib/AttendanceState";
 import { CompanyHoliday } from "@entities/attendance/lib/CompanyHoliday";
-import { Holiday } from "@entities/attendance/lib/Holiday";
-import { calcTotalRestTime, calcTotalWorkTime } from "@entities/attendance/lib/time";
+import {
+  Holiday,
+  normalizeHolidayName,
+} from "@entities/attendance/lib/Holiday";
+import {
+  calcTotalRestTime,
+  calcTotalWorkTime,
+} from "@entities/attendance/lib/time";
 import {
   Attendance,
   CompanyHolidayCalendar,
   HolidayCalendar,
   Staff,
 } from "@shared/api/graphql/types";
+import { formatISOTimeRange } from "@shared/lib/time";
 import dayjs, { Dayjs } from "dayjs";
 
 /**
@@ -70,18 +80,11 @@ export function getTotalRestHours(attendance: Attendance | undefined) {
  */
 export function formatTimeRange(attendance: Attendance | undefined) {
   if (!attendance) return undefined;
-
-  const format = (value?: string | null) =>
-    value ? dayjs(value).format("HH:mm") : undefined;
-
-  const start = format(attendance.startTime || undefined);
-  const end = format(attendance.endTime || undefined);
-
-  if (!start && !end) {
-    return undefined;
-  }
-
-  return `${start ?? ""} - ${end ?? ""}`.trim();
+  return formatISOTimeRange(attendance.startTime, attendance.endTime, {
+    separator: " - ",
+    missingTimeLabel: "",
+    emptyAsUndefined: true,
+  });
 }
 
 /**
@@ -90,19 +93,52 @@ export function formatTimeRange(attendance: Attendance | undefined) {
 export function getHolidayNames(
   date: Dayjs,
   holidayCalendars: HolidayCalendar[],
-  companyHolidayCalendars: CompanyHolidayCalendar[]
+  companyHolidayCalendars: CompanyHolidayCalendar[],
 ) {
   const workDate = date.format(AttendanceDate.DataFormat);
   const holiday = new Holiday(holidayCalendars, workDate).getHoliday();
   const companyHoliday = new CompanyHoliday(
     companyHolidayCalendars,
-    workDate
+    workDate,
   ).getHoliday();
 
   return {
-    holidayName: holiday?.name,
+    holidayName: holiday?.name ? normalizeHolidayName(holiday.name) : undefined,
     companyHolidayName: companyHoliday?.name,
   };
+}
+
+/**
+ * 振替休日ラベルを返す
+ */
+export function getSubstituteHolidayLabel(attendance: Attendance | undefined) {
+  if (!attendance?.substituteHolidayDate) return undefined;
+  return "振替休日";
+}
+
+/**
+ * カレンダー上に表示する休日ラベル群を組み立てる
+ */
+export function buildHolidayLabels({
+  holidayName,
+  companyHolidayName,
+  attendance,
+  includeCompanyHolidayPrefix = true,
+}: {
+  holidayName?: string;
+  companyHolidayName?: string;
+  attendance: Attendance | undefined;
+  includeCompanyHolidayPrefix?: boolean;
+}) {
+  return [
+    holidayName,
+    companyHolidayName
+      ? includeCompanyHolidayPrefix
+        ? `会社休日 ${companyHolidayName}`
+        : companyHolidayName
+      : undefined,
+    getSubstituteHolidayLabel(attendance),
+  ].filter((label): label is string => Boolean(label));
 }
 
 /**
@@ -112,13 +148,13 @@ export const isHolidayLike = (
   date: Dayjs,
   staff: Staff | null | undefined,
   holidayCalendars: HolidayCalendar[],
-  companyHolidayCalendars: CompanyHolidayCalendar[]
+  companyHolidayCalendars: CompanyHolidayCalendar[],
 ): boolean => {
   const workDate = date.format(AttendanceDate.DataFormat);
   const isHoliday = new Holiday(holidayCalendars, workDate).isHoliday();
   const isCompanyHoliday = new CompanyHoliday(
     companyHolidayCalendars,
-    workDate
+    workDate,
   ).isHoliday();
 
   if (staff?.workType === "shift") {
@@ -130,6 +166,38 @@ export const isHolidayLike = (
 };
 
 /**
+ * カレンダー日セルの背景表示で使う共通状態を返す
+ */
+export const getCalendarDaySurfaceState = ({
+  date,
+  staff,
+  holidayCalendars,
+  companyHolidayCalendars,
+  today = dayjs(),
+}: {
+  date: Dayjs;
+  staff: Staff | null | undefined;
+  holidayCalendars: HolidayCalendar[];
+  companyHolidayCalendars: CompanyHolidayCalendar[];
+  today?: Dayjs;
+}) => {
+  const isToday = date.isSame(today, "day");
+  const isWeekend = [0, 6].includes(date.day());
+  const holidayLike = isHolidayLike(
+    date,
+    staff,
+    holidayCalendars,
+    companyHolidayCalendars,
+  );
+
+  return {
+    isToday,
+    isWeekend,
+    holidayLike,
+  };
+};
+
+/**
  * 指定日付の勤怠ステータスを判定
  */
 export const getStatus = (
@@ -137,7 +205,7 @@ export const getStatus = (
   staff: Staff | null | undefined,
   holidayCalendars: HolidayCalendar[],
   companyHolidayCalendars: CompanyHolidayCalendar[],
-  date: Dayjs
+  date: Dayjs,
 ): AttendanceStatus => {
   if (!staff) return AttendanceStatus.None;
 
@@ -164,7 +232,7 @@ export const getStatus = (
         date,
         staff,
         holidayCalendars,
-        companyHolidayCalendars
+        companyHolidayCalendars,
       );
       if (holidayLike) return AttendanceStatus.None;
     }
@@ -178,6 +246,6 @@ export const getStatus = (
     staff,
     attendance,
     holidayCalendars,
-    companyHolidayCalendars
+    companyHolidayCalendars,
   ).get();
 };

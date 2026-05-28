@@ -3,16 +3,17 @@ import {
   useUpdateAttendanceMutation,
 } from "@entities/attendance/api/attendanceApi";
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { CognitoUser } from "@entities/staff/model/useCognitoUser";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
 import { Attendance } from "@shared/api/graphql/types";
 import { createLogger } from "@shared/lib/logger";
+import { useAppNotification } from "@shared/lib/useAppNotification";
 import dayjs from "dayjs";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import * as MESSAGE_CODE from "@/errors";
-import { useAppNotification } from "@/hooks/useAppNotification";
 
 import { buildChangeRequestPayload } from "./attendanceEditUtils";
 import sendChangeRequestMail from "./sendChangeRequestMail";
@@ -20,13 +21,15 @@ import sendChangeRequestMail from "./sendChangeRequestMail";
 const logger = createLogger("useSubmitAttendanceEdit");
 
 type UseSubmitAttendanceEditParams = {
-  cognitoUser: any;
+  cognitoUser: CognitoUser | null | undefined;
   attendance: Attendance | null;
   staff: StaffType | null | undefined;
   staffs: StaffType[];
   targetWorkDate: string | undefined;
   attendanceListPath: string;
   runWithoutGuard: (fn: () => void) => void;
+  setSubmitError: (message: string) => void;
+  clearSubmitError: () => void;
 };
 
 export function useSubmitAttendanceEdit({
@@ -37,6 +40,8 @@ export function useSubmitAttendanceEdit({
   targetWorkDate,
   attendanceListPath,
   runWithoutGuard,
+  setSubmitError,
+  clearSubmitError,
 }: UseSubmitAttendanceEditParams) {
   const { notify } = useAppNotification();
   const navigate = useNavigate();
@@ -56,6 +61,7 @@ export function useSubmitAttendanceEdit({
   );
 
   const onSubmit = async (data: AttendanceEditInputs) => {
+    clearSubmitError();
     const changeRequestPayload = buildChangeRequestPayload(data);
 
     if (attendance) {
@@ -97,6 +103,7 @@ export function useSubmitAttendanceEdit({
           runWithoutGuard(() => navigate(attendanceListPath));
         })
         .catch(() => {
+          setSubmitError(MESSAGE_CODE.E02005);
           notify({
             title: "修正申請エラー",
             description: MESSAGE_CODE.E02005,
@@ -105,7 +112,10 @@ export function useSubmitAttendanceEdit({
           });
         });
     } else {
-      if (!staff || !targetWorkDate) return;
+      if (!staff || !targetWorkDate) {
+        setSubmitError(MESSAGE_CODE.E02005);
+        return;
+      }
 
       await createAttendance({
         staffId: staff.cognitoUserId,
@@ -144,6 +154,7 @@ export function useSubmitAttendanceEdit({
         })
         .catch((e) => {
           logger.error("Failed to update attendance:", e);
+          setSubmitError(MESSAGE_CODE.E02005);
           notify({
             title: "修正申請エラー",
             description: MESSAGE_CODE.E02005,

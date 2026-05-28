@@ -1,6 +1,6 @@
-import "./buttonStyles.scss";
-
-import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from "react";
+import CircularProgress from "@mui/material/CircularProgress";
+import MuiIconButton from "@mui/material/IconButton";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 import type { IconButtonSize, IconButtonTone } from "./types";
 
@@ -12,16 +12,21 @@ export type AppIconButtonProps = Omit<
   size?: IconButtonSize;
   active?: boolean;
   loading?: boolean;
+  tooltip?: ReactNode;
   className?: string;
   children: ReactNode;
   "aria-label": string;
 };
 
-const joinClassNames = (...values: Array<string | undefined | false>) =>
-  values.filter(Boolean).join(" ");
+const toneMap: Record<IconButtonTone, "primary" | "error" | "neutral"> = {
+  neutral: "neutral",
+  primary: "primary",
+  danger: "error",
+};
 
-const sharedStyle: CSSProperties = {
-  fontFamily: "var(--ds-typography-font-family)",
+const sizeMap: Record<IconButtonSize, "small" | "medium"> = {
+  sm: "small",
+  md: "medium",
 };
 
 export default function AppIconButton({
@@ -30,30 +35,43 @@ export default function AppIconButton({
   active = false,
   loading = false,
   disabled = false,
+  tooltip,
   className,
   children,
   ...rest
 }: AppIconButtonProps) {
   const resolvedDisabled = disabled || loading;
+  const muiColor = toneMap[tone];
+  const muiSize = sizeMap[size];
 
-  return (
-    <button
-      {...rest}
-      type={rest.type ?? "button"}
+  const button = (
+    <MuiIconButton
+      {...(rest as object)}
+      color={muiColor}
+      size={muiSize}
       disabled={resolvedDisabled}
-      className={joinClassNames("app-icon-button", className)}
-      data-app-icon-button-tone={tone}
-      data-app-icon-button-size={size}
-      data-app-icon-button-active={String(active)}
-      style={sharedStyle}
+      className={className}
+      sx={active ? { opacity: 1, filter: "brightness(0.85)" } : undefined}
     >
       {loading ? (
-        <span className="app-icon-button__spinner" aria-hidden="true" />
+        <CircularProgress size={16} color="inherit" thickness={5} />
       ) : (
-        <span className="app-icon-button__icon" aria-hidden="true">
-          {children}
-        </span>
+        children
       )}
-    </button>
+    </MuiIconButton>
+  );
+
+  if (!tooltip) return button;
+
+  return (
+    <span className="relative inline-flex group/app-icon-tooltip">
+      {button}
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1 -translate-x-1/2 whitespace-nowrap rounded bg-slate-900 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-md transition-opacity duration-150 group-hover/app-icon-tooltip:opacity-100 group-focus-within/app-icon-tooltip:opacity-100"
+      >
+        {tooltip}
+      </span>
+    </span>
   );
 }

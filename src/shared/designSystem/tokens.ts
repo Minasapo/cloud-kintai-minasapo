@@ -1,65 +1,11 @@
-type RGB = {
-  r: number;
-  g: number;
-  b: number;
-};
-
-const clampChannel = (value: number) => Math.min(255, Math.max(0, value));
-
-const toHex = (value: number) =>
-  value.toString(16).padStart(2, "0").toUpperCase();
-
-const normalizeHex = (value: string) => {
-  const trimmed = value.trim();
-  const prefixed = trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
-  if (prefixed.length === 7) {
-    return prefixed.toUpperCase();
-  }
-
-  if (prefixed.length === 4) {
-    const [, r, g, b] = prefixed;
-    return `#${r}${r}${g}${g}${b}${b}`.toUpperCase();
-  }
-
-  return prefixed.slice(0, 7).toUpperCase();
-};
-
-const hexToRgb = (value: string): RGB => {
-  const normalized = normalizeHex(value);
-  const numeric = parseInt(normalized.slice(1), 16);
-  return {
-    r: (numeric >> 16) & 0xff,
-    g: (numeric >> 8) & 0xff,
-    b: numeric & 0xff,
-  };
-};
-
-const hexToRgba = (value: string, alpha: number) => {
-  const rgb = hexToRgb(value);
-  const clamped = Math.min(1, Math.max(0, alpha));
-  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${clamped})`;
-};
-
-const mixWithTarget = (value: string, amount: number, target: number) => {
-  const rgb = hexToRgb(value);
-  const ratio = Math.min(1, Math.max(0, Math.abs(amount)));
-  const mix = (channel: number) =>
-    clampChannel(Math.round(channel + (target - channel) * ratio));
-  return `#${toHex(mix(rgb.r))}${toHex(mix(rgb.g))}${toHex(mix(rgb.b))}`;
-};
-
-const tint = (value: string, amount: number) =>
-  mixWithTarget(value, amount, 255);
-const shade = (value: string, amount: number) =>
-  mixWithTarget(value, amount, 0);
+import { hexToRgba, normalizeHex, shade, tint } from "./colorUtils";
 
 export const BRAND_PRIMARY_HEX = "#0FA85E";
 const BRAND_SECONDARY_HEX = "#0B6D53";
 const BRAND_ACCENT_HEX = "#F5B700";
 
-const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
-  const normalizedPrimary = normalizeHex(brandPrimaryHex);
-  const color = {
+const buildColorTokens = (normalizedPrimary: string) =>
+  ({
     brand: {
       primary: {
         base: normalizedPrimary,
@@ -118,26 +64,16 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
         border: hexToRgba("#3C7EDB", 0.4),
       },
     },
-  } as const;
+  }) as const;
 
-  const spacing = {
-    unit: 4,
-    xs: 4,
-    sm: 8,
-    md: 12,
-    lg: 16,
-    xl: 24,
-    xxl: 32,
-  } as const;
+type ColorTokens = ReturnType<typeof buildColorTokens>;
+type SpacingTokens = { unit: number; xs: number; sm: number; md: number; lg: number; xl: number; xxl: number };
+type RadiusTokens = { sm: number; md: number; lg: number; pill: number };
+type TypographyTokens = ReturnType<typeof buildTypographyTokens>;
+type MotionTokens = ReturnType<typeof buildMotionTokens>;
 
-  const radius = {
-    sm: 2,
-    md: 4,
-    lg: 6,
-    pill: 999,
-  } as const;
-
-  const typography = {
+const buildTypographyTokens = () =>
+  ({
     fontFamily: "'Noto Sans JP', 'Helvetica Neue', Arial, sans-serif",
     fontSize: {
       xs: 12,
@@ -157,15 +93,17 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       comfy: 1.4,
       relaxed: 1.6,
     },
-  } as const;
+  }) as const;
 
-  const shadow = {
+const buildShadowTokens = () =>
+  ({
     card: "0 6px 16px rgba(15, 168, 94, 0.08)",
     overlay: "0 12px 34px rgba(17, 24, 39, 0.2)",
     focus: "0 0 0 3px rgba(15, 168, 94, 0.35)",
-  } as const;
+  }) as const;
 
-  const motion = {
+const buildMotionTokens = () =>
+  ({
     duration: {
       fast: 120,
       medium: 200,
@@ -175,45 +113,19 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       standard: "cubic-bezier(0.2, 0.8, 0.4, 1)",
       emphasized: "cubic-bezier(0.34, 1.56, 0.64, 1)",
     },
-  } as const;
+  }) as const;
 
+const buildHeaderComponentTokens = (
+  color: ColorTokens,
+  spacing: SpacingTokens,
+  radius: RadiusTokens,
+  typography: TypographyTokens,
+  motion: MotionTokens,
+) => {
   const headerLogoMaxHeight = 32;
   const headerPaddingY = spacing.sm;
   const headerMinHeight = headerLogoMaxHeight + headerPaddingY * 2;
-
-  const component = {
-    shiftBoard: {
-      rowGap: spacing.md,
-      columnGap: spacing.sm,
-      cellRadius: radius.sm,
-      highlightBackground: color.brand.primary.surface,
-      highlightBorder: color.brand.primary.base,
-      dropShadow: shadow.card,
-    },
-    workflowList: {
-      cardRadius: radius.md,
-      cardShadow: shadow.card,
-      statusChip: {
-        borderRadius: radius.pill,
-        fontSize: typography.fontSize.sm,
-        gap: spacing.xs,
-        paddingX: spacing.sm,
-        transitionMs: motion.duration.fast,
-        transitionEasing: motion.easing.standard,
-        fontWeight: typography.fontWeight.medium,
-        fallback: {
-          base: color.neutral[700],
-          surface: color.neutral[100],
-          border: hexToRgba(color.neutral[700], 0.4),
-        },
-      },
-    },
-    adminPanel: {
-      headerHeight: 64,
-      sectionSpacing: spacing.lg,
-      dividerColor: color.neutral[200],
-      surface: color.brand.secondary.surface,
-    },
+  return {
     headerBar: {
       minHeight: headerMinHeight,
       paddingX: spacing.lg,
@@ -265,56 +177,15 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       borderRadius: radius.sm,
       fontWeight: typography.fontWeight.medium,
     },
-    breadcrumbs: {
-      gap: spacing.sm,
-      separatorColor: color.neutral[400],
-      linkColor: color.brand.primary.base,
-      textColor: color.neutral[700],
-      fontSize: typography.fontSize.sm,
-      fontWeight: typography.fontWeight.medium,
-    },
-    groupContainer: {
-      borderWidth: 1,
-      accentWidth: 6,
-      accentWidthMobile: 4,
-      borderColor: color.neutral[200],
-      accentColor: color.neutral[200],
-      borderRadius: radius.md,
-      padding: spacing.lg,
-      paddingMobile: spacing.md,
-      background: "#FFFFFF",
-      shadow: shadow.card,
-      headerGap: spacing.sm,
-      contentGap: spacing.sm,
-      countColor: color.neutral[500],
-    },
-    timeRecorder: {
-      actionButton: {
-        size: 120,
-        borderWidth: 3,
-        borderRadius: radius.pill,
-        disabledBorderColor: color.neutral[300],
-        disabledBackground: color.neutral[200],
-      },
-      restButton: {
-        disabledBackground: color.neutral[200],
-      },
-      surface: {
-        background: "#FFFFFF",
-        borderColor: color.neutral[200],
-        borderWidth: 1,
-        borderRadius: radius.lg,
-        shadow: shadow.card,
-        padding: {
-          xs: spacing.lg,
-          md: spacing.xl,
-        },
-      },
-      layout: {
-        widthMd: 400,
-        marginXMobile: spacing.lg,
-      },
-    },
+  } as const;
+};
+
+const buildHeadingComponentTokens = (
+  color: ColorTokens,
+  spacing: SpacingTokens,
+  typography: TypographyTokens,
+) =>
+  ({
     heading: {
       level: {
         page: {
@@ -397,6 +268,120 @@ const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
       paddingLeft: spacing.sm,
       textColor: color.neutral[900],
     },
+  }) as const;
+
+const createDesignTokens = (brandPrimaryHex: string = BRAND_PRIMARY_HEX) => {
+  const color = buildColorTokens(normalizeHex(brandPrimaryHex));
+
+  const spacing = {
+    unit: 4,
+    xs: 4,
+    sm: 8,
+    md: 12,
+    lg: 16,
+    xl: 24,
+    xxl: 32,
+  } as const;
+
+  const radius = {
+    sm: 2,
+    md: 4,
+    lg: 6,
+    pill: 999,
+  } as const;
+
+  const typography = buildTypographyTokens();
+  const shadow = buildShadowTokens();
+  const motion = buildMotionTokens();
+
+  const headerComponents = buildHeaderComponentTokens(color, spacing, radius, typography, motion);
+  const headingComponents = buildHeadingComponentTokens(color, spacing, typography);
+
+  const component = {
+    shiftBoard: {
+      rowGap: spacing.md,
+      columnGap: spacing.sm,
+      cellRadius: radius.sm,
+      highlightBackground: color.brand.primary.surface,
+      highlightBorder: color.brand.primary.base,
+      dropShadow: shadow.card,
+    },
+    workflowList: {
+      cardRadius: radius.md,
+      cardShadow: shadow.card,
+      statusChip: {
+        borderRadius: radius.pill,
+        fontSize: typography.fontSize.sm,
+        gap: spacing.xs,
+        paddingX: spacing.sm,
+        transitionMs: motion.duration.fast,
+        transitionEasing: motion.easing.standard,
+        fontWeight: typography.fontWeight.medium,
+        fallback: {
+          base: color.neutral[700],
+          surface: color.neutral[100],
+          border: hexToRgba(color.neutral[700], 0.4),
+        },
+      },
+    },
+    adminPanel: {
+      headerHeight: 64,
+      sectionSpacing: spacing.lg,
+      dividerColor: color.neutral[200],
+      surface: color.brand.secondary.surface,
+    },
+    ...headerComponents,
+    breadcrumbs: {
+      gap: spacing.sm,
+      separatorColor: color.neutral[400],
+      linkColor: color.brand.primary.base,
+      textColor: color.neutral[700],
+      fontSize: typography.fontSize.sm,
+      fontWeight: typography.fontWeight.medium,
+    },
+    groupContainer: {
+      borderWidth: 1,
+      accentWidth: 6,
+      accentWidthMobile: 4,
+      borderColor: color.neutral[200],
+      accentColor: color.neutral[200],
+      borderRadius: radius.md,
+      padding: spacing.lg,
+      paddingMobile: spacing.md,
+      background: "#FFFFFF",
+      shadow: shadow.card,
+      headerGap: spacing.sm,
+      contentGap: spacing.sm,
+      countColor: color.neutral[500],
+    },
+    timeRecorder: {
+      actionButton: {
+        size: 120,
+        borderWidth: 3,
+        borderRadius: radius.pill,
+        disabledBorderColor: color.neutral[300],
+        disabledBackground: color.neutral[200],
+      },
+      restButton: {
+        disabledBackground: color.neutral[200],
+      },
+      surface: {
+        background: "#FFFFFF",
+        borderColor: color.neutral[200],
+        borderWidth: 1,
+        borderRadius: radius.lg,
+        shadow: shadow.card,
+        padding: {
+          xs: spacing.lg,
+          md: spacing.xl,
+        },
+      },
+      layout: {
+        widthMd: 400,
+        marginXMobile: spacing.lg,
+      },
+    },
+    ...headingComponents,
     appShell: {
       background: color.neutral[50],
       textColor: color.neutral[900],

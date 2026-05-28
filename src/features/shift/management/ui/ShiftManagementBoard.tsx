@@ -1,15 +1,15 @@
+import { AuthContext } from "@app/providers/auth/AuthContext";
 import { useCalendars } from "@entities/calendar/model/useCalendars";
+import useCognitoUser from "@entities/staff/model/useCognitoUser";
 import useShiftPlanYear from "@features/shift/management/model/useShiftPlanYear";
-import dayjs from "dayjs";
+import { useAppNotification } from "@shared/lib/useAppNotification";
+import { useAutoSave } from "@shared/lib/useAutoSave";
+import dayjs, { Dayjs } from "dayjs";
 import { Loader2 } from "lucide-react";
 import React, { useContext, useMemo, useState } from "react";
 
-import { AuthContext } from "@/context/AuthContext";
 import * as MESSAGE_CODE from "@/errors";
 import AdminShiftSettingsDialog from "@/features/admin-config-shift/AdminShiftSettingsDialog";
-import { useAppNotification } from "@/hooks/useAppNotification";
-import { useAutoSave } from "@/hooks/useAutoSave";
-import useCognitoUser from "@/hooks/useCognitoUser";
 
 import { ShiftState } from "../lib/generateMockShifts";
 import { useShiftDisplayData } from "../model/useShiftDisplayData";
@@ -21,6 +21,182 @@ import ShiftEditDialog from "./components/ShiftEditDialog";
 import { ShiftManagementHeader } from "./components/ShiftManagementHeader";
 import ShiftManagementLegend from "./components/ShiftManagementLegend";
 import { ShiftManagementTable } from "./components/ShiftManagementTable";
+
+function useShiftAutoSaveState({
+  scenario,
+  isAuthenticated,
+  pendingChangesRef,
+  persistShiftRequestChanges,
+  notify,
+  setMockShifts,
+}: {
+  scenario: string;
+  isAuthenticated: boolean;
+  pendingChangesRef: React.MutableRefObject<Map<string, Map<string, ShiftState>>>;
+  persistShiftRequestChanges: (
+    staffId: string,
+    dayKeys: string[],
+    nextState: ShiftState,
+  ) => Promise<void>;
+  notify: ReturnType<typeof useAppNotification>["notify"];
+  setMockShifts: React.Dispatch<
+    React.SetStateAction<Map<string, Record<string, ShiftState>>>
+  >;
+}) {
+  const [autoSaveCounter, setAutoSaveCounter] = React.useState(0);
+
+  const recordShiftChange = React.useCallback(
+    (staffId: string, dayKey: string, state: ShiftState) => {
+      if (scenario !== "actual") return;
+
+      if (!pendingChangesRef.current.has(staffId)) {
+        pendingChangesRef.current.set(staffId, new Map());
+      }
+      pendingChangesRef.current.get(staffId)!.set(dayKey, state);
+      setAutoSaveCounter((prev) => prev + 1);
+    },
+    [pendingChangesRef, scenario],
+  );
+
+  const applyShiftState = React.useCallback(
+    async (staffIds: string[], dayKeys: string[], nextState: ShiftState) => {
+      if (!staffIds.length || !dayKeys.length) return;
+
+      if (scenario === "actual") {
+        staffIds.forEach((staffId) => {
+          dayKeys.forEach((dayKey) => {
+            recordShiftChange(staffId, dayKey, nextState);
+          });
+        });
+        return;
+      }
+
+      setMockShifts((prev) => {
+        const next = new Map(prev);
+        staffIds.forEach((staffId) => {
+          const per = { ...(next.get(staffId) || {}) };
+          dayKeys.forEach((key) => {
+            per[key] = nextState;
+          });
+          next.set(staffId, per);
+        });
+        return next;
+      });
+    },
+    [recordShiftChange, scenario, setMockShifts],
+  );
+
+  const { isSaving, isPending, lastSavedAt, lastChangedAt } = useAutoSave({
+    saveFn: async () => {
+      if (scenario !== "actual") return;
+
+      const changes = pendingChangesRef.current;
+      if (changes.size === 0) return;
+
+      const changesToSave = new Map(changes);
+      pendingChangesRef.current = new Map();
+
+      const promises: Promise<void>[] = [];
+      changesToSave.forEach((dayChanges, staffId) => {
+        dayChanges.forEach((state, dayKey) => {
+          promises.push(persistShiftRequestChanges(staffId, [dayKey], state));
+        });
+      });
+
+      if (promises.length > 0) {
+        await Promise.all(promises);
+      }
+    },
+    data: autoSaveCounter,
+    enabled: scenario === "actual" && isAuthenticated,
+    delay: 2000,
+    onSaveSuccess: () => {
+      notify({
+        title: "シフトを自動保存しました",
+        tone: "success",
+        dedupeKey: "shift-autosave-success",
+      });
+    },
+    onSaveError: (error) => {
+      console.error("Auto-save error:", error);
+      notify({
+        title: "エラー",
+        description: "シフトの自動保存に失敗しました",
+        tone: "error",
+        dedupeKey: "shift-autosave-error",
+      });
+    },
+  });
+
+  return {
+    applyShiftState,
+    isSaving,
+    isPending,
+    lastSavedAt,
+    lastChangedAt,
+  };
+}
+
+function useHolidayCalendarErrorNotification({
+  calendarsError,
+  notify,
+}: {
+  calendarsError: unknown;
+  notify: ReturnType<typeof useAppNotification>["notify"];
+}) {
+  React.useEffect(() => {
+    if (calendarsError) {
+      console.error(calendarsError);
+      notify({
+        title: "エラー",
+        description: MESSAGE_CODE.E00001,
+        tone: "error",
+        dedupeKey: "holiday-load-error",
+      });
+    }
+  }, [calendarsError, notify]);
+}
+
+function useMonthNavigation(
+  setCurrentMonth: React.Dispatch<React.SetStateAction<Dayjs>>,
+) {
+  const prevMonth = React.useCallback(() => {
+    setCurrentMonth((m) => m.subtract(1, "month"));
+  }, [setCurrentMonth]);
+  const nextMonth = React.useCallback(() => {
+    setCurrentMonth((m) => m.add(1, "month"));
+  }, [setCurrentMonth]);
+
+  return { prevMonth, nextMonth };
+}
+
+function useShiftBulkEditActions({
+  hasBulkSelection,
+  openBulkEditDialog,
+  applyBulkEdit,
+  selectedStaffIds,
+  selectedDayKeys,
+}: {
+  hasBulkSelection: boolean;
+  openBulkEditDialog: () => void;
+  applyBulkEdit: (staffIds: string[], dayKeys: string[]) => Promise<void>;
+  selectedStaffIds: Set<string>;
+  selectedDayKeys: Set<string>;
+}) {
+  const handleOpenBulkEditDialog = React.useCallback(() => {
+    if (!hasBulkSelection) return;
+    openBulkEditDialog();
+  }, [hasBulkSelection, openBulkEditDialog]);
+
+  const handleApplyBulkEdit = React.useCallback(() => {
+    if (!hasBulkSelection) return;
+    const staffIds = Array.from(selectedStaffIds);
+    const selectedDayKeyList = Array.from(selectedDayKeys);
+    void applyBulkEdit(staffIds, selectedDayKeyList);
+  }, [applyBulkEdit, hasBulkSelection, selectedDayKeys, selectedStaffIds]);
+
+  return { handleOpenBulkEditDialog, handleApplyBulkEdit };
+}
 
 // ShiftManagement: シフト管理テーブル。左固定列を前面に出し、各日ごとの出勤人数を集計して表示する。
 export default function ShiftManagementBoard() {
@@ -81,17 +257,7 @@ export default function ShiftManagementBoard() {
     error: calendarsError,
   } = useCalendars({ skip: !isAuthenticated });
 
-  React.useEffect(() => {
-    if (calendarsError) {
-      console.error(calendarsError);
-      notify({
-        title: "エラー",
-        description: MESSAGE_CODE.E00001,
-        tone: "error",
-        dedupeKey: "holiday-load-error",
-      });
-    }
-  }, [calendarsError, notify]);
+  useHolidayCalendarErrorNotification({ calendarsError, notify });
 
   const holidaySet = useMemo(
     () => new Set(holidayCalendars.map((h) => h.holidayDate)),
@@ -133,104 +299,20 @@ export default function ShiftManagementBoard() {
     shiftPlanPlans,
   });
 
-  // 変更を追跡するためのRef
-  const pendingChangesRef = React.useRef<Map<string, Map<string, ShiftState>>>(
-    new Map(),
-  );
-  const [autoSaveCounter, setAutoSaveCounter] = React.useState(0);
-
-  // シフトの変更を記録（自動保存用）
-  const recordShiftChange = React.useCallback(
-    (staffId: string, dayKey: string, state: ShiftState) => {
-      if (scenario !== "actual") return;
-
-      if (!pendingChangesRef.current.has(staffId)) {
-        pendingChangesRef.current.set(staffId, new Map());
-      }
-      pendingChangesRef.current.get(staffId)!.set(dayKey, state);
-
-      // カウンターを更新して自動保存をトリガー
-      setAutoSaveCounter((prev) => prev + 1);
-    },
-    [scenario],
-  );
-
-  const applyShiftState = async (
-    staffIds: string[],
-    dayKeys: string[],
-    nextState: ShiftState,
-  ) => {
-    if (!staffIds.length || !dayKeys.length) return;
-
-    if (scenario === "actual") {
-      // 変更を記録（自動保存でバッチ処理される）
-      staffIds.forEach((staffId) => {
-        dayKeys.forEach((dayKey) => {
-          recordShiftChange(staffId, dayKey, nextState);
-        });
-      });
-      return;
-    }
-
-    setMockShifts((prev) => {
-      const next = new Map(prev);
-      staffIds.forEach((staffId) => {
-        const per = { ...(next.get(staffId) || {}) };
-        dayKeys.forEach((key) => {
-          per[key] = nextState;
-        });
-        next.set(staffId, per);
-      });
-      return next;
-    });
-  };
-
-  // 自動保存機能: 変更を監視して自動的に保存する
+  const pendingChangesRef = React.useRef<Map<string, Map<string, ShiftState>>>(new Map());
   const {
     isSaving: isAutoSaving,
     isPending: isAutoSavePending,
     lastSavedAt,
     lastChangedAt,
-  } = useAutoSave({
-    saveFn: async () => {
-      if (scenario !== "actual") return;
-
-      const changes = pendingChangesRef.current;
-      if (changes.size === 0) return;
-
-      const changesToSave = new Map(changes);
-      pendingChangesRef.current = new Map();
-
-      const promises: Promise<void>[] = [];
-      changesToSave.forEach((dayChanges, staffId) => {
-        dayChanges.forEach((state, dayKey) => {
-          promises.push(persistShiftRequestChanges(staffId, [dayKey], state));
-        });
-      });
-
-      if (promises.length > 0) {
-        await Promise.all(promises);
-      }
-    },
-    data: autoSaveCounter,
-    enabled: scenario === "actual" && isAuthenticated,
-    delay: 2000,
-    onSaveSuccess: () => {
-      notify({
-        title: "シフトを自動保存しました",
-        tone: "success",
-        dedupeKey: "shift-autosave-success",
-      });
-    },
-    onSaveError: (error) => {
-      console.error("Auto-save error:", error);
-      notify({
-        title: "エラー",
-        description: "シフトの自動保存に失敗しました",
-        tone: "error",
-        dedupeKey: "shift-autosave-error",
-      });
-    },
+    applyShiftState,
+  } = useShiftAutoSaveState({
+    scenario,
+    isAuthenticated,
+    pendingChangesRef,
+    persistShiftRequestChanges,
+    notify,
+    setMockShifts,
   });
 
   const {
@@ -251,18 +333,8 @@ export default function ShiftManagementBoard() {
     applyBulkEdit,
   } = useShiftManagementDialogs(applyShiftState);
 
-  const prevMonth = () => setCurrentMonth((m) => m.subtract(1, "month"));
-  const nextMonth = () => setCurrentMonth((m) => m.add(1, "month"));
-  const handleOpenBulkEditDialog = () => {
-    if (!hasBulkSelection) return;
-    openBulkEditDialog();
-  };
-  const handleApplyBulkEdit = () => {
-    if (!hasBulkSelection) return;
-    const staffIds = Array.from(selectedStaffIds);
-    const selectedDayKeyList = Array.from(selectedDayKeys);
-    void applyBulkEdit(staffIds, selectedDayKeyList);
-  };
+  const { prevMonth, nextMonth } = useMonthNavigation(setCurrentMonth);
+  const { handleOpenBulkEditDialog, handleApplyBulkEdit } = useShiftBulkEditActions({ hasBulkSelection, openBulkEditDialog, applyBulkEdit, selectedStaffIds, selectedDayKeys });
 
   if (!isAuthenticated) {
     return (
@@ -310,7 +382,13 @@ export default function ShiftManagementBoard() {
       {!loading && !shiftRequestsLoading && (
         <ShiftManagementTable
           days={days}
-          groupedShiftStaffs={groupedShiftStaffs}
+          groupedShiftStaffs={groupedShiftStaffs.map((group) => ({
+            groupName: group.groupName,
+            staffs: group.members.map((staff) => ({
+              id: staff.id,
+              name: `${staff.familyName}${staff.givenName}`,
+            })),
+          }))}
           holidaySet={holidaySet}
           companyHolidaySet={companyHolidaySet}
           holidayNameMap={holidayNameMap}

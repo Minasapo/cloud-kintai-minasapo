@@ -1,4 +1,6 @@
 import { useAppDispatchV2 } from "@app/hooks";
+import { AuthContext } from "@app/providers/auth/AuthContext";
+import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
 import {
   getDefaultWorkflowCategoryOrder,
   type WorkflowCategoryOrderItem,
@@ -11,8 +13,7 @@ import {
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-import { AppConfigContext } from "@/context/AppConfigContext";
-import { AuthContext } from "@/context/AuthContext";
+import { useWorkflowTemplateForm } from "./useWorkflowTemplateForm";
 
 const WORKFLOW_TEMPLATE_ORGANIZATION_ID = "default";
 const CATEGORY_AUTO_SAVE_DELAY = 600;
@@ -66,16 +67,13 @@ export function useAdminWorkflowSettings() {
   const [items, setItems] = useState<WorkflowCategoryOrderItem[]>([]);
   const [saving, setSaving] = useState(false);
   const [categorySaveToken, setCategorySaveToken] = useState(0);
-  const [templateName, setTemplateName] = useState("");
-  const [templateTitle, setTemplateTitle] = useState("");
-  const [templateContent, setTemplateContent] = useState("");
-  const [editingTemplateId, setEditingTemplateId] = useState<string | null>(
-    null,
-  );
-  const [templateSaving, setTemplateSaving] = useState(false);
-  const [initialTemplateName, setInitialTemplateName] = useState("");
-  const [initialTemplateTitle, setInitialTemplateTitle] = useState("");
-  const [initialTemplateContent, setInitialTemplateContent] = useState("");
+
+  const templateForm = useWorkflowTemplateForm({
+    templates,
+    createTemplate,
+    updateTemplate,
+    removeTemplate,
+  });
 
   useEffect(() => {
     setItems(getWorkflowCategoryOrder());
@@ -89,11 +87,6 @@ export function useAdminWorkflowSettings() {
     );
     return current !== original;
   }, [getWorkflowCategoryOrder, items]);
-
-  const hasTemplateChanges =
-    templateName !== initialTemplateName ||
-    templateTitle !== initialTemplateTitle ||
-    templateContent !== initialTemplateContent;
 
   const persistWorkflowCategoryOrder = useCallback(
     async (nextItems: WorkflowCategoryOrderItem[]) => {
@@ -169,129 +162,6 @@ export function useAdminWorkflowSettings() {
     setCategorySaveToken((prev) => prev + 1);
   };
 
-  const resetTemplateForm = () => {
-    setTemplateName("");
-    setTemplateTitle("");
-    setTemplateContent("");
-    setEditingTemplateId(null);
-    setInitialTemplateName("");
-    setInitialTemplateTitle("");
-    setInitialTemplateContent("");
-  };
-
-  const handleTemplateSubmit = async () => {
-    const normalizedName = templateName.trim();
-    const normalizedTitle = templateTitle.trim();
-    const normalizedContent = templateContent.trim();
-
-    if (!normalizedName || !normalizedTitle || !normalizedContent) {
-      dispatch(
-        pushNotification({
-          tone: "error",
-          message:
-            "テンプレート名・タイトルテンプレート・詳細内容テンプレートを入力してください。",
-        }),
-      );
-      return;
-    }
-
-    if (templateSaving) {
-      return;
-    }
-
-    setTemplateSaving(true);
-    try {
-      if (editingTemplateId) {
-        await updateTemplate({
-          id: editingTemplateId,
-          name: normalizedName,
-          title: normalizedTitle,
-          content: normalizedContent,
-        });
-        dispatch(
-          pushNotification({
-            tone: "success",
-            message: "テンプレートを更新しました。",
-          }),
-        );
-      } else {
-        await createTemplate({
-          name: normalizedName,
-          title: normalizedTitle,
-          content: normalizedContent,
-        });
-        dispatch(
-          pushNotification({
-            tone: "success",
-            message: "テンプレートを作成しました。",
-          }),
-        );
-      }
-
-      resetTemplateForm();
-    } catch (error) {
-      console.error(error);
-      dispatch(
-        pushNotification({
-          tone: "error",
-          message: "テンプレートの保存に失敗しました。",
-        }),
-      );
-    } finally {
-      setTemplateSaving(false);
-    }
-  };
-
-  const handleTemplateEdit = (templateId: string) => {
-    const target = templates.find((template) => template.id === templateId);
-    if (!target) {
-      return;
-    }
-
-    setEditingTemplateId(target.id);
-    setTemplateName(target.name);
-    setTemplateTitle(target.title);
-    setTemplateContent(target.content);
-    setInitialTemplateName(target.name);
-    setInitialTemplateTitle(target.title);
-    setInitialTemplateContent(target.content);
-  };
-
-  const handleTemplateDelete = async (templateId: string) => {
-    const target = templates.find((template) => template.id === templateId);
-    if (!target) {
-      return;
-    }
-
-    const confirmed = window.confirm(
-      `テンプレート「${target.name}」を削除します。よろしいですか？`,
-    );
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      await removeTemplate(templateId);
-      if (editingTemplateId === templateId) {
-        resetTemplateForm();
-      }
-      dispatch(
-        pushNotification({
-          tone: "success",
-          message: "テンプレートを削除しました。",
-        }),
-      );
-    } catch (error) {
-      console.error(error);
-      dispatch(
-        pushNotification({
-          tone: "error",
-          message: "テンプレートの削除に失敗しました。",
-        }),
-      );
-    }
-  };
-
   return {
     items,
     saving,
@@ -299,23 +169,11 @@ export function useAdminWorkflowSettings() {
     templates,
     templateLoading,
     templateError,
-    templateName,
-    setTemplateName,
-    templateTitle,
-    setTemplateTitle,
-    templateContent,
-    setTemplateContent,
-    editingTemplateId,
-    templateSaving,
-    hasTemplateChanges,
-    isDirty: hasChanges || hasTemplateChanges,
-    isBusy: saving || templateSaving,
+    ...templateForm,
+    isDirty: hasChanges || templateForm.hasTemplateChanges,
+    isBusy: saving || templateForm.templateSaving,
     handleToggleEnabled,
     handleMoveItem,
     handleReset,
-    resetTemplateForm,
-    handleTemplateSubmit,
-    handleTemplateEdit,
-    handleTemplateDelete,
   };
 }
