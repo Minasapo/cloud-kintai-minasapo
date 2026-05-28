@@ -16,17 +16,25 @@ export function useOfficeQr() {
   const [timeLeft, setTimeLeft] = useState(TOTAL_DURATION);
   const [isRegisterMode, setIsRegisterMode] = useState(true);
   const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const tooltipTimeoutRef = useRef<number | undefined>(undefined);
 
   const updateQrValue = useCallback(async () => {
-    const timestamp = getUnixTimestamp();
-    const token = await generateOfficeQrToken(timestamp);
-    const basePath = import.meta.env.VITE_BASE_PATH || "";
-    const newQrValue = `${basePath}/office/qr/register?timestamp=${timestamp}&token=${token}`;
+    try {
+      const timestamp = getUnixTimestamp();
+      const token = await generateOfficeQrToken(timestamp);
+      const basePath = import.meta.env.VITE_BASE_PATH || "";
+      const newQrValue = `${basePath}/office/qr/register?timestamp=${timestamp}&token=${token}`;
 
-    setBaseQrValue(newQrValue);
-    setProgress(100);
-    setTimeLeft(TOTAL_DURATION);
+      setBaseQrValue(newQrValue);
+      setProgress(100);
+      setTimeLeft(TOTAL_DURATION);
+      setErrorMessage("");
+    } catch {
+      setErrorMessage(
+        "QRコードの更新に失敗しました。時間をおいて再試行してください。",
+      );
+    }
   }, []);
 
   useEffect(() => {
@@ -106,6 +114,7 @@ export function useOfficeQr() {
     qrUrl,
     timeLeft,
     progress,
+    errorMessage,
     isRegisterMode,
     tooltipOpen,
     handleModeChange,

@@ -1,6 +1,6 @@
+import { EditCalendarItem } from "@features/admin/holidayCalendar/ui/components/EditCalendarItem";
 import { HolidayCalendar } from "@shared/api/graphql/types";
 import { HolidayCalendarMessage } from "@shared/lib/message/HolidayCalendarMessage";
-import { EditCalendarItem } from "@features/admin/holidayCalendar/ui/components/EditCalendarItem";
 
 export default function HolidayCalendarEdit({
   holidayCalendar,

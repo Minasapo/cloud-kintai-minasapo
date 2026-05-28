@@ -1,9 +1,9 @@
+import { CopyCalendarItem } from "@features/admin/holidayCalendar/ui/components/CopyCalendarItem";
 import {
   CreateHolidayCalendarInput,
   HolidayCalendar,
 } from "@shared/api/graphql/types";
 import { HolidayCalendarMessage } from "@shared/lib/message/HolidayCalendarMessage";
-import { CopyCalendarItem } from "@features/admin/holidayCalendar/ui/components/CopyCalendarItem";
 
 export default function HolidayCalendarCopy({
   holidayCalendar,

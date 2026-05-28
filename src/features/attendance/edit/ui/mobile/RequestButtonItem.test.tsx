@@ -41,6 +41,5 @@ describe("RequestButtonItem", () => {
 
     const button = screen.getByRole("button", { name: "申請" });
     expect(button).toBeDisabled();
-    expect(button.querySelector(".app-button__spinner")).toBeInTheDocument();
   });
 });

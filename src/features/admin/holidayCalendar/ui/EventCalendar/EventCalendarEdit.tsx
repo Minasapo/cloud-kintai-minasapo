@@ -1,7 +1,7 @@
+import { EditCalendarItem } from "@features/admin/holidayCalendar/ui/components/EditCalendarItem";
 import { TextField } from "@mui/material";
 import { EventCalendar } from "@shared/api/graphql/types";
 import { EventCalendarMessage } from "@shared/lib/message/EventCalendarMessage";
-import { EditCalendarItem } from "@features/admin/holidayCalendar/ui/components/EditCalendarItem";
 
 export default function EventCalendarEdit({
   eventCalendar,

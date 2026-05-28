@@ -1,9 +1,10 @@
-import "./buttonStyles.scss";
-
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import type { SxProps, Theme } from "@mui/material/styles";
 import type {
   ButtonHTMLAttributes,
-  CSSProperties,
   LabelHTMLAttributes,
+  MouseEvent,
   ReactNode,
 } from "react";
 
@@ -19,6 +20,7 @@ type CommonProps = {
   endIcon?: ReactNode;
   disabled?: boolean;
   className?: string;
+  sx?: SxProps<Theme>;
   children: ReactNode;
 };
 
@@ -34,42 +36,31 @@ type LabelElementProps = CommonProps &
 
 export type AppButtonProps = ButtonElementProps | LabelElementProps;
 
-const joinClassNames = (...values: Array<string | undefined | false>) =>
-  values.filter(Boolean).join(" ");
-
-const contentClassName = "app-button__content";
-
-const sharedStyle: CSSProperties = {
-  fontFamily: "var(--ds-typography-font-family)",
+const variantMap: Record<ButtonVariant, "contained" | "outlined" | "text"> = {
+  solid: "contained",
+  outline: "outlined",
+  ghost: "text",
 };
 
-function ButtonInner({
-  loading,
-  startIcon,
-  endIcon,
-  children,
-}: Pick<
-  CommonProps,
-  "loading" | "startIcon" | "endIcon" | "children"
->) {
-  return (
-    <>
-      {loading ? (
-        <span className="app-button__spinner" aria-hidden="true" />
-      ) : startIcon ? (
-        <span className="app-button__icon" aria-hidden="true">
-          {startIcon}
-        </span>
-      ) : null}
-      <span className={contentClassName}>{children}</span>
-      {endIcon ? (
-        <span className="app-button__icon" aria-hidden="true">
-          {endIcon}
-        </span>
-      ) : null}
-    </>
-  );
-}
+const toneMap: Record<
+  ButtonTone,
+  "primary" | "secondary" | "error" | "neutral"
+> = {
+  primary: "primary",
+  secondary: "secondary",
+  danger: "error",
+  neutral: "neutral",
+};
+
+const sizeMap: Record<ButtonSize, "small" | "medium" | "large"> = {
+  sm: "small",
+  md: "medium",
+  lg: "large",
+};
+
+const LoadingIcon = () => (
+  <CircularProgress size={14} color="inherit" thickness={5} />
+);
 
 export default function AppButton(props: AppButtonProps) {
   const {
@@ -83,66 +74,67 @@ export default function AppButton(props: AppButtonProps) {
     endIcon,
     disabled = false,
     className,
+    sx,
     children,
     ...rest
   } = props;
 
   const resolvedDisabled = disabled || loading;
+  const muiVariant = variantMap[variant];
+  const muiColor = toneMap[tone];
+  const muiSize = sizeMap[size];
+  const resolvedStartIcon = loading ? <LoadingIcon /> : startIcon;
 
   if (as === "label") {
-    const labelProps = rest as Omit<
+    const { onClick, ...labelRest } = rest as Omit<
       LabelElementProps,
       keyof CommonProps | "as"
     >;
 
     return (
-      <label
-        {...labelProps}
-        role="button"
-        tabIndex={resolvedDisabled ? -1 : 0}
-        aria-disabled={resolvedDisabled}
-        className={joinClassNames("app-button", className)}
-        data-app-button-variant={variant}
-        data-app-button-tone={tone}
-        data-app-button-size={size}
-        data-app-button-full-width={String(fullWidth)}
+      <Button
+        {...(labelRest as object)}
+        component="label"
+        variant={muiVariant}
+        color={muiColor}
+        size={muiSize}
+        fullWidth={fullWidth}
+        disabled={resolvedDisabled}
+        startIcon={resolvedStartIcon}
+        endIcon={endIcon}
+        className={className}
+        sx={sx}
         onClick={(event) => {
           if (resolvedDisabled) {
             event.preventDefault();
             event.stopPropagation();
             return;
           }
-          labelProps.onClick?.(event);
+          onClick?.(event as unknown as MouseEvent<HTMLLabelElement>);
         }}
-        style={sharedStyle}
       >
-        <ButtonInner loading={loading} startIcon={startIcon} endIcon={endIcon}>
-          {children}
-        </ButtonInner>
-      </label>
+        {children}
+      </Button>
     );
   }
 
-  const buttonProps = rest as Omit<
-    ButtonElementProps,
-    keyof CommonProps | "as"
-  >;
+  const buttonRest = rest as Omit<ButtonElementProps, keyof CommonProps | "as">;
 
   return (
-    <button
-      {...buttonProps}
-      type={buttonProps.type ?? "button"}
+    <Button
+      {...(buttonRest as object)}
+      type={buttonRest.type ?? "button"}
+      variant={muiVariant}
+      color={muiColor}
+      size={muiSize}
+      fullWidth={fullWidth}
       disabled={resolvedDisabled}
-      className={joinClassNames("app-button", className)}
-      data-app-button-variant={variant}
-      data-app-button-tone={tone}
-      data-app-button-size={size}
-      data-app-button-full-width={String(fullWidth)}
-      style={sharedStyle}
+      startIcon={resolvedStartIcon}
+      endIcon={endIcon}
+      className={className}
+      sx={sx}
     >
-      <ButtonInner loading={loading} startIcon={startIcon} endIcon={endIcon}>
-        {children}
-      </ButtonInner>
-    </button>
+      {children}
+    </Button>
   );
 }

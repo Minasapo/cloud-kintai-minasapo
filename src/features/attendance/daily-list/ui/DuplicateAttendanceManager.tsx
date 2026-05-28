@@ -34,6 +34,11 @@ import { useDispatch } from "react-redux";
 
 import * as MESSAGE_CODE from "@/errors";
 
+import {
+  DuplicateSelectionMode,
+  useDuplicateSelectionModel,
+} from "../model/useDuplicateSelectionModel";
+
 const diffWrapperSx = { whiteSpace: "pre-wrap" } as const;
 const diffHighlightSx = {
   backgroundColor: "rgba(255, 87, 34, 0.22)",
@@ -75,6 +80,22 @@ type ConfirmFieldRow = {
   render: (record: Attendance) => string;
 };
 
+type DuplicateComparisonTableProps = {
+  confirmRecords: Attendance[];
+  confirmFieldRows: ConfirmFieldRow[];
+  selectionMode: DuplicateSelectionMode;
+  selectedRecordIndex: number | null;
+  fieldSelections: Record<string, number>;
+  onSelectRecord: (index: number) => void;
+  onSelectField: (
+    label: string,
+    index: number,
+    rowIndex: number,
+    isShift: boolean,
+  ) => void;
+  renderInlineDiff: (base: string, target: string) => React.ReactNode;
+};
+
 type DuplicateAttendanceManagerProps = {
   duplicates: DuplicateAttendanceDaily[];
   staffNameMap: Record<string, string>;
@@ -84,6 +105,121 @@ type DuplicateAttendanceBadgeProps = {
   row: AttendanceDaily;
   duplicateInfoByStaff: Record<string, DuplicateAttendanceDaily[]>;
 };
+
+function buildConfirmFieldRows(): ConfirmFieldRow[] {
+  const formatTime = (value?: string | null) =>
+    value ? dayjs(value).format("HH:mm") : "-";
+  const formatDate = (value?: string | null) =>
+    value ? dayjs(value).format("YYYY/MM/DD") : "-";
+  const formatBool = (value?: boolean | null) => (value ? "○" : "-");
+  const formatRests = (rests?: Attendance["rests"]) => {
+    const items = (rests ?? []).filter(Boolean).map((rest) => {
+      const start = rest?.startTime ? dayjs(rest.startTime).format("HH:mm") : "-";
+      const end = rest?.endTime ? dayjs(rest.endTime).format("HH:mm") : "-";
+      return `${start}-${end}`;
+    });
+    return items.length ? items.join(" / ") : "-";
+  };
+  const formatHourlyTimes = (
+    hourlyTimes?: Attendance["hourlyPaidHolidayTimes"],
+  ) => {
+    const items = (hourlyTimes ?? []).filter(Boolean).map((time) => {
+      const start = time?.startTime ? dayjs(time.startTime).format("HH:mm") : "-";
+      const end = time?.endTime ? dayjs(time.endTime).format("HH:mm") : "-";
+      return `${start}-${end}`;
+    });
+    return items.length ? items.join(" / ") : "-";
+  };
+  const formatChangeRequests = (
+    changeRequests?: Attendance["changeRequests"],
+  ) => {
+    const items = (changeRequests ?? []).filter(Boolean).map((request, idx) => {
+      const start = request?.startTime
+        ? dayjs(request.startTime).format("HH:mm")
+        : "-";
+      const end = request?.endTime ? dayjs(request.endTime).format("HH:mm") : "-";
+      const completed = request?.completed ? "済" : "未";
+      return `#${idx + 1}: ${start}-${end} / ${completed}`;
+    });
+    return items.length ? items.join(" | ") : "-";
+  };
+  const row = (label: string, value: (record: Attendance) => string) => ({
+    label,
+    value,
+    render: value,
+  });
+
+  return [
+    row("対象日", (record) => (record.workDate ? formatDate(record.workDate) : "-")),
+    row("スタッフID", (record) => record.staffId || "-"),
+    row("出勤", (record) => formatTime(record.startTime)),
+    row("退勤", (record) => formatTime(record.endTime)),
+    row("直行", (record) => formatBool(record.goDirectlyFlag)),
+    row("直帰", (record) => formatBool(record.returnDirectlyFlag)),
+    row("欠勤", (record) => formatBool(record.absentFlag)),
+    row("休憩", (record) => formatRests(record.rests)),
+    row("時間有休", (record) => formatHourlyTimes(record.hourlyPaidHolidayTimes)),
+    row("備考", (record) => record.remarks || "-"),
+    row("有給", (record) => formatBool(record.paidHolidayFlag)),
+    row("特別休暇", (record) => formatBool(record.specialHolidayFlag)),
+    row("指定休日", (record) => formatBool(record.isDeemedHoliday)),
+    row("時間有休(時間)", (record) =>
+      typeof record.hourlyPaidHolidayHours === "number"
+        ? `${record.hourlyPaidHolidayHours}h`
+        : "-",
+    ),
+    row("振替日", (record) => formatDate(record.substituteHolidayDate)),
+    row("変更申請", (record) => formatChangeRequests(record.changeRequests)),
+    row("改訂番号", (record) =>
+      typeof record.revision === "number" ? `${record.revision}` : "-",
+    ),
+    row("作成日時", (record) =>
+      record.createdAt ? dayjs(record.createdAt).format("YYYY/MM/DD HH:mm") : "-",
+    ),
+    row("更新日時", (record) =>
+      record.updatedAt ? dayjs(record.updatedAt).format("YYYY/MM/DD HH:mm") : "-",
+    ),
+    row("ID", (record) => record.id || "-"),
+  ];
+}
+
+function renderInlineDiff(base: string, target: string): React.ReactNode {
+  if (base === target) {
+    return target || "-";
+  }
+
+  const a = base ?? "";
+  const b = target ?? "";
+  let prefix = 0;
+  while (prefix < a.length && prefix < b.length && a[prefix] === b[prefix]) {
+    prefix += 1;
+  }
+
+  let suffix = 0;
+  while (
+    suffix < a.length - prefix &&
+    suffix < b.length - prefix &&
+    a[a.length - 1 - suffix] === b[b.length - 1 - suffix]
+  ) {
+    suffix += 1;
+  }
+
+  const sameStart = b.slice(0, prefix);
+  const diffMid = b.slice(prefix, b.length - suffix);
+  const sameEnd = b.slice(b.length - suffix);
+
+  return (
+    <Box component="span" sx={diffWrapperSx}>
+      {sameStart}
+      {diffMid ? (
+        <Box component="span" sx={diffHighlightSx}>
+          {diffMid || " "}
+        </Box>
+      ) : null}
+      {sameEnd}
+    </Box>
+  );
+}
 
 export function DuplicateAttendanceBadge({
   row,
@@ -107,14 +243,157 @@ export function DuplicateAttendanceBadge({
   );
 }
 
-export function DuplicateAttendanceManager({
+function DuplicateComparisonTable({
+  confirmRecords,
+  confirmFieldRows,
+  selectionMode,
+  selectedRecordIndex,
+  fieldSelections,
+  onSelectRecord,
+  onSelectField,
+  renderInlineDiff,
+}: DuplicateComparisonTableProps) {
+  const handleRecordHeaderClick = useCallback(
+    (event: React.MouseEvent<HTMLTableCellElement>) => {
+      if (selectionMode !== "record") {
+        return;
+      }
+      const idx = Number(event.currentTarget.dataset.recordIndex);
+      onSelectRecord(idx);
+    },
+    [onSelectRecord, selectionMode],
+  );
+
+  const handleBodyCellClick = useCallback(
+    (event: React.MouseEvent<HTMLTableCellElement>) => {
+      const idx = Number(event.currentTarget.dataset.recordIndex);
+      const rowIndex = Number(event.currentTarget.dataset.rowIndex);
+      const fieldLabel = event.currentTarget.dataset.fieldLabel ?? "";
+
+      if (selectionMode === "record") {
+        onSelectRecord(idx);
+      } else if (selectionMode === "field") {
+        onSelectField(fieldLabel, idx, rowIndex, event.shiftKey);
+      }
+    },
+    [onSelectField, onSelectRecord, selectionMode],
+  );
+
+  return (
+    <TableContainer sx={tableContainerSx}>
+      <Table size="small">
+        <TableHead>
+          <TableRow>
+            <TableCell sx={colItemLabelSx}>項目</TableCell>
+            {confirmRecords.map((record, idx) => {
+              const isSelected =
+                selectionMode === "record" && selectedRecordIndex === idx;
+              const selectable = selectionMode === "record";
+              return (
+                <TableCell
+                  key={record.id}
+                  sx={{
+                    minWidth: 140,
+                    cursor: selectable ? "pointer" : "default",
+                    fontWeight: isSelected ? 700 : 400,
+                    border: isSelected ? "2px solid rgba(25,118,210,0.6)" : undefined,
+                    backgroundColor: isSelected
+                      ? "rgba(25,118,210,0.08)"
+                      : undefined,
+                  }}
+                  data-record-index={idx}
+                  onClick={handleRecordHeaderClick}
+                >
+                  #{idx + 1} ({record.id})
+                </TableCell>
+              );
+            })}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {confirmFieldRows.map((row, rowIndex) => {
+            const values = confirmRecords.map((record) => row.value(record));
+            const unique = new Set(values);
+            const hasDiff = unique.size > 1;
+            const diffSx = hasDiff
+              ? {
+                  backgroundColor: "rgba(255,205,210,0.35)",
+                  fontWeight: 700,
+                }
+              : undefined;
+            const base = values[0] ?? "";
+
+            return (
+              <TableRow key={row.label}>
+                <TableCell sx={{ fontWeight: hasDiff ? 700 : 600, ...diffSx }}>
+                  {row.label}
+                </TableCell>
+                {confirmRecords.map((record, idx) => {
+                  const current = values[idx] ?? "";
+                  const content = hasDiff
+                    ? renderInlineDiff(base, current)
+                    : row.render(record);
+                  const recordSelected =
+                    selectionMode === "record" && selectedRecordIndex === idx;
+                  const isFieldSelected =
+                    selectionMode === "field" && fieldSelections[row.label] === idx;
+                  const selectable =
+                    selectionMode === "field" || selectionMode === "record";
+
+                  return (
+                    <TableCell
+                      key={`${row.label}-${record.id}`}
+                      sx={{
+                        ...diffSx,
+                        cursor: selectable ? "pointer" : "default",
+                        border:
+                          isFieldSelected || recordSelected
+                            ? "2px solid rgba(25,118,210,0.6)"
+                            : undefined,
+                        backgroundColor:
+                          isFieldSelected || recordSelected
+                            ? "rgba(25,118,210,0.08)"
+                            : undefined,
+                      }}
+                      data-record-index={idx}
+                      data-row-index={rowIndex}
+                      data-field-label={row.label}
+                      onClick={handleBodyCellClick}
+                    >
+                      {content}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
+
+type UseDuplicateConfirmStateParams = {
+  dispatch: ReturnType<typeof useDispatch>;
+  duplicates: DuplicateAttendanceDaily[];
+  staffNameMap: Record<string, string>;
+  triggerGetAttendanceById: ReturnType<typeof useLazyGetAttendanceByIdQuery>[0];
+  deleteAttendance: ReturnType<typeof useDeleteAttendanceMutation>[0];
+  resetToRecordMode: () => void;
+  resetSelection: () => void;
+  selectedRecordIndex: number | null;
+};
+
+function useDuplicateConfirmState({
+  dispatch,
   duplicates,
   staffNameMap,
-}: DuplicateAttendanceManagerProps) {
-  const dispatch = useDispatch();
-  const [triggerGetAttendanceById] = useLazyGetAttendanceByIdQuery();
-  const [deleteAttendance] = useDeleteAttendanceMutation();
-
+  triggerGetAttendanceById,
+  deleteAttendance,
+  resetToRecordMode,
+  resetSelection,
+  selectedRecordIndex,
+}: UseDuplicateConfirmStateParams) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmTargetStaffId, setConfirmTargetStaffId] = useState<string | null>(
     null,
@@ -122,148 +401,14 @@ export function DuplicateAttendanceManager({
   const [confirmTargetName, setConfirmTargetName] = useState("");
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [confirmRecords, setConfirmRecords] = useState<Attendance[]>([]);
-  const [selectionMode, setSelectionMode] = useState<"record" | "field">(
-    "record",
-  );
-  const [selectedRecordIndex, setSelectedRecordIndex] = useState<number | null>(
-    null,
-  );
-  const [fieldSelections, setFieldSelections] = useState<Record<string, number>>(
-    {},
-  );
-  const [lastFieldRowIndex, setLastFieldRowIndex] = useState<number | null>(null);
-  const [lastFieldRecordIndex, setLastFieldRecordIndex] = useState<number | null>(
-    null,
-  );
-
-  const confirmFieldRows = useMemo<ConfirmFieldRow[]>(() => {
-    const formatTime = (value?: string | null) =>
-      value ? dayjs(value).format("HH:mm") : "-";
-    const formatDate = (value?: string | null) =>
-      value ? dayjs(value).format("YYYY/MM/DD") : "-";
-    const formatBool = (value?: boolean | null) => (value ? "○" : "-");
-    const formatRests = (rests?: Attendance["rests"]) => {
-      const items = (rests ?? []).filter(Boolean).map((rest) => {
-        const start = rest?.startTime ? dayjs(rest.startTime).format("HH:mm") : "-";
-        const end = rest?.endTime ? dayjs(rest.endTime).format("HH:mm") : "-";
-        return `${start}-${end}`;
-      });
-      return items.length ? items.join(" / ") : "-";
-    };
-    const formatHourlyTimes = (
-      hourlyTimes?: Attendance["hourlyPaidHolidayTimes"],
-    ) => {
-      const items = (hourlyTimes ?? []).filter(Boolean).map((time) => {
-        const start = time?.startTime ? dayjs(time.startTime).format("HH:mm") : "-";
-        const end = time?.endTime ? dayjs(time.endTime).format("HH:mm") : "-";
-        return `${start}-${end}`;
-      });
-      return items.length ? items.join(" / ") : "-";
-    };
-    const formatChangeRequests = (
-      changeRequests?: Attendance["changeRequests"],
-    ) => {
-      const items = (changeRequests ?? []).filter(Boolean).map((request, idx) => {
-        const start = request?.startTime
-          ? dayjs(request.startTime).format("HH:mm")
-          : "-";
-        const end = request?.endTime ? dayjs(request.endTime).format("HH:mm") : "-";
-        const completed = request?.completed ? "済" : "未";
-        return `#${idx + 1}: ${start}-${end} / ${completed}`;
-      });
-      return items.length ? items.join(" | ") : "-";
-    };
-    const row = (label: string, value: (record: Attendance) => string) => ({
-      label,
-      value,
-      render: value,
-    });
-
-    return [
-      row("対象日", (record) =>
-        record.workDate ? formatDate(record.workDate) : "-",
-      ),
-      row("スタッフID", (record) => record.staffId || "-"),
-      row("出勤", (record) => formatTime(record.startTime)),
-      row("退勤", (record) => formatTime(record.endTime)),
-      row("直行", (record) => formatBool(record.goDirectlyFlag)),
-      row("直帰", (record) => formatBool(record.returnDirectlyFlag)),
-      row("欠勤", (record) => formatBool(record.absentFlag)),
-      row("休憩", (record) => formatRests(record.rests)),
-      row("時間有休", (record) => formatHourlyTimes(record.hourlyPaidHolidayTimes)),
-      row("備考", (record) => record.remarks || "-"),
-      row("有給", (record) => formatBool(record.paidHolidayFlag)),
-      row("特別休暇", (record) => formatBool(record.specialHolidayFlag)),
-      row("指定休日", (record) => formatBool(record.isDeemedHoliday)),
-      row("時間有休(時間)", (record) =>
-        typeof record.hourlyPaidHolidayHours === "number"
-          ? `${record.hourlyPaidHolidayHours}h`
-          : "-",
-      ),
-      row("振替日", (record) => formatDate(record.substituteHolidayDate)),
-      row("変更申請", (record) => formatChangeRequests(record.changeRequests)),
-      row("改訂番号", (record) =>
-        typeof record.revision === "number" ? `${record.revision}` : "-",
-      ),
-      row("作成日時", (record) =>
-        record.createdAt ? dayjs(record.createdAt).format("YYYY/MM/DD HH:mm") : "-",
-      ),
-      row("更新日時", (record) =>
-        record.updatedAt ? dayjs(record.updatedAt).format("YYYY/MM/DD HH:mm") : "-",
-      ),
-      row("ID", (record) => record.id || "-"),
-    ];
-  }, []);
-
-  const renderInlineDiff = useCallback((base: string, target: string) => {
-    if (base === target) {
-      return target || "-";
-    }
-
-    const a = base ?? "";
-    const b = target ?? "";
-    let prefix = 0;
-    while (prefix < a.length && prefix < b.length && a[prefix] === b[prefix]) {
-      prefix += 1;
-    }
-
-    let suffix = 0;
-    while (
-      suffix < a.length - prefix &&
-      suffix < b.length - prefix &&
-      a[a.length - 1 - suffix] === b[b.length - 1 - suffix]
-    ) {
-      suffix += 1;
-    }
-
-    const sameStart = b.slice(0, prefix);
-    const diffMid = b.slice(prefix, b.length - suffix);
-    const sameEnd = b.slice(b.length - suffix);
-
-    return (
-      <Box component="span" sx={diffWrapperSx}>
-        {sameStart}
-        {diffMid ? (
-          <Box component="span" sx={diffHighlightSx}>
-            {diffMid || " "}
-          </Box>
-        ) : null}
-        {sameEnd}
-      </Box>
-    );
-  }, []);
 
   const handleOpenConfirm = useCallback(
     async (staffId: string) => {
-      setSelectionMode("record");
-      setSelectedRecordIndex(null);
-      setFieldSelections({});
+      resetToRecordMode();
       setConfirmTargetStaffId(staffId);
       setConfirmTargetName(staffNameMap[staffId] ?? staffId);
       setConfirmOpen(true);
       setConfirmLoading(true);
-      setLastFieldRowIndex(null);
-      setLastFieldRecordIndex(null);
 
       const targetIds = duplicates
         .filter((duplicate) => duplicate.staffId === staffId)
@@ -286,12 +431,8 @@ export function DuplicateAttendanceManager({
         const validRecords = records
           .filter((record): record is Attendance => Boolean(record))
           .toSorted((a, b) => {
-            const aTime = dayjs(
-              `${a.workDate} ${a.startTime || "00:00"}`,
-            ).valueOf();
-            const bTime = dayjs(
-              `${b.workDate} ${b.startTime || "00:00"}`,
-            ).valueOf();
+            const aTime = dayjs(`${a.workDate} ${a.startTime || "00:00"}`).valueOf();
+            const bTime = dayjs(`${b.workDate} ${b.startTime || "00:00"}`).valueOf();
             return aTime - bTime;
           });
         setConfirmRecords(validRecords);
@@ -307,7 +448,7 @@ export function DuplicateAttendanceManager({
         setConfirmLoading(false);
       }
     },
-    [dispatch, duplicates, staffNameMap, triggerGetAttendanceById],
+    [dispatch, duplicates, resetToRecordMode, staffNameMap, triggerGetAttendanceById],
   );
 
   const handleOpenConfirmClick = useCallback(
@@ -323,102 +464,8 @@ export function DuplicateAttendanceManager({
   const handleCloseConfirm = useCallback(() => {
     setConfirmOpen(false);
     setConfirmRecords([]);
-    setSelectedRecordIndex(null);
-    setFieldSelections({});
-    setLastFieldRowIndex(null);
-    setLastFieldRecordIndex(null);
-  }, []);
-
-  const handleChangeSelectionMode = useCallback(
-    (_: unknown, next: "record" | "field" | null) => {
-      if (!next) {
-        return;
-      }
-      setSelectionMode(next);
-      setSelectedRecordIndex(null);
-      setFieldSelections({});
-      setLastFieldRowIndex(null);
-      setLastFieldRecordIndex(null);
-    },
-    [],
-  );
-
-  const handleSelectRecord = useCallback(
-    (index: number) => {
-      if (selectionMode !== "record") {
-        return;
-      }
-      setSelectedRecordIndex((previous) => (previous === index ? null : index));
-    },
-    [selectionMode],
-  );
-
-  const handleRecordHeaderClick = useCallback(
-    (event: React.MouseEvent<HTMLTableCellElement>) => {
-      if (selectionMode !== "record") {
-        return;
-      }
-      const idx = Number(event.currentTarget.dataset.recordIndex);
-      handleSelectRecord(idx);
-    },
-    [handleSelectRecord, selectionMode],
-  );
-
-  const handleSelectField = useCallback(
-    (label: string, index: number, rowIndex: number, isShift: boolean) => {
-      if (selectionMode !== "field") {
-        return;
-      }
-
-      setFieldSelections((previous) => {
-        if (
-          isShift &&
-          lastFieldRowIndex !== null &&
-          lastFieldRecordIndex === index
-        ) {
-          const next = { ...previous };
-          const start = Math.min(lastFieldRowIndex, rowIndex);
-          const end = Math.max(lastFieldRowIndex, rowIndex);
-          confirmFieldRows.slice(start, end + 1).forEach((row) => {
-            next[row.label] = index;
-          });
-          return next;
-        }
-
-        const current = previous[label];
-        if (current === index) {
-          const { [label]: _removed, ...rest } = previous;
-          return rest;
-        }
-
-        return { ...previous, [label]: index };
-      });
-
-      setLastFieldRowIndex(rowIndex);
-      setLastFieldRecordIndex(index);
-    },
-    [
-      confirmFieldRows,
-      lastFieldRecordIndex,
-      lastFieldRowIndex,
-      selectionMode,
-    ],
-  );
-
-  const handleBodyCellClick = useCallback(
-    (event: React.MouseEvent<HTMLTableCellElement>) => {
-      const idx = Number(event.currentTarget.dataset.recordIndex);
-      const rowIndex = Number(event.currentTarget.dataset.rowIndex);
-      const fieldLabel = event.currentTarget.dataset.fieldLabel ?? "";
-
-      if (selectionMode === "record") {
-        handleSelectRecord(idx);
-      } else if (selectionMode === "field") {
-        handleSelectField(fieldLabel, idx, rowIndex, event.shiftKey);
-      }
-    },
-    [handleSelectField, handleSelectRecord, selectionMode],
-  );
+    resetSelection();
+  }, [resetSelection]);
 
   const handleDeleteDuplicates = useCallback(async () => {
     if (selectedRecordIndex === null) {
@@ -436,7 +483,9 @@ export function DuplicateAttendanceManager({
     }
 
     const ok = window.confirm(
-      `選択したデータのみを残し、他の重複レコードを削除します。対象件数: ${toDelete.length}\n削除対象ID: ${toDelete.join(", ")}\nこの操作は取り消せません。実行しますか？`,
+      `選択したデータのみを残し、他の重複レコードを削除します。対象件数: ${toDelete.length}
+削除対象ID: ${toDelete.join(", ")}
+この操作は取り消せません。実行しますか？`,
     );
     if (!ok) {
       return;
@@ -469,6 +518,62 @@ export function DuplicateAttendanceManager({
       setConfirmLoading(false);
     }
   }, [confirmRecords, deleteAttendance, dispatch, selectedRecordIndex]);
+
+  return {
+    confirmOpen,
+    confirmTargetStaffId,
+    confirmTargetName,
+    confirmLoading,
+    confirmRecords,
+    handleOpenConfirm,
+    handleOpenConfirmClick,
+    handleCloseConfirm,
+    handleDeleteDuplicates,
+  };
+}
+
+export function DuplicateAttendanceManager({
+  duplicates,
+  staffNameMap,
+}: DuplicateAttendanceManagerProps) {
+  const dispatch = useDispatch();
+  const [triggerGetAttendanceById] = useLazyGetAttendanceByIdQuery();
+  const [deleteAttendance] = useDeleteAttendanceMutation();
+
+  const confirmFieldRows = useMemo(() => buildConfirmFieldRows(), []);
+
+  const {
+    selectionMode,
+    selectedRecordIndex,
+    fieldSelections,
+    resetSelection,
+    resetToRecordMode,
+    handleChangeSelectionMode,
+    handleSelectRecord,
+    handleSelectField,
+  } = useDuplicateSelectionModel({
+    fieldLabels: confirmFieldRows.map((row) => row.label),
+  });
+
+  const {
+    confirmOpen,
+    confirmTargetStaffId,
+    confirmTargetName,
+    confirmLoading,
+    confirmRecords,
+    handleOpenConfirmClick,
+    handleCloseConfirm,
+    handleDeleteDuplicates,
+  } = useDuplicateConfirmState({
+    dispatch,
+    duplicates,
+    staffNameMap,
+    triggerGetAttendanceById,
+    deleteAttendance,
+    resetToRecordMode,
+    resetSelection,
+    selectedRecordIndex,
+  });
 
   if (duplicates.length === 0) {
     return null;
@@ -557,100 +662,16 @@ export function DuplicateAttendanceManager({
                 </ToggleButtonGroup>
               </Box>
 
-              <TableContainer sx={tableContainerSx}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={colItemLabelSx}>項目</TableCell>
-                      {confirmRecords.map((record, idx) => {
-                        const isSelected =
-                          selectionMode === "record" && selectedRecordIndex === idx;
-                        const selectable = selectionMode === "record";
-                        return (
-                          <TableCell
-                            key={record.id}
-                            sx={{
-                              minWidth: 140,
-                              cursor: selectable ? "pointer" : "default",
-                              fontWeight: isSelected ? 700 : 400,
-                              border: isSelected
-                                ? "2px solid rgba(25,118,210,0.6)"
-                                : undefined,
-                              backgroundColor: isSelected
-                                ? "rgba(25,118,210,0.08)"
-                                : undefined,
-                            }}
-                            data-record-index={idx}
-                            onClick={handleRecordHeaderClick}
-                          >
-                            #{idx + 1} ({record.id})
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {confirmFieldRows.map((row, rowIndex) => {
-                      const values = confirmRecords.map((record) => row.value(record));
-                      const unique = new Set(values);
-                      const hasDiff = unique.size > 1;
-                      const diffSx = hasDiff
-                        ? {
-                            backgroundColor: "rgba(255,205,210,0.35)",
-                            fontWeight: 700,
-                          }
-                        : undefined;
-                      const base = values[0] ?? "";
-
-                      return (
-                        <TableRow key={row.label}>
-                          <TableCell sx={{ fontWeight: hasDiff ? 700 : 600, ...diffSx }}>
-                            {row.label}
-                          </TableCell>
-                          {confirmRecords.map((record, idx) => {
-                            const current = values[idx] ?? "";
-                            const content = hasDiff
-                              ? renderInlineDiff(base, current)
-                              : row.render(record);
-                            const recordSelected =
-                              selectionMode === "record" && selectedRecordIndex === idx;
-                            const isFieldSelected =
-                              selectionMode === "field" &&
-                              fieldSelections[row.label] === idx;
-                            const isFieldMode = selectionMode === "field";
-                            const isRecordMode = selectionMode === "record";
-                            const selectable = isFieldMode || isRecordMode;
-
-                            return (
-                              <TableCell
-                                key={`${row.label}-${record.id}`}
-                                sx={{
-                                  ...diffSx,
-                                  cursor: selectable ? "pointer" : "default",
-                                  border:
-                                    isFieldSelected || recordSelected
-                                      ? "2px solid rgba(25,118,210,0.6)"
-                                      : undefined,
-                                  backgroundColor:
-                                    isFieldSelected || recordSelected
-                                      ? "rgba(25,118,210,0.08)"
-                                      : undefined,
-                                }}
-                                data-record-index={idx}
-                                data-row-index={rowIndex}
-                                data-field-label={row.label}
-                                onClick={handleBodyCellClick}
-                              >
-                                {content}
-                              </TableCell>
-                            );
-                          })}
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <DuplicateComparisonTable
+                confirmRecords={confirmRecords}
+                confirmFieldRows={confirmFieldRows}
+                selectionMode={selectionMode}
+                selectedRecordIndex={selectedRecordIndex}
+                fieldSelections={fieldSelections}
+                onSelectRecord={handleSelectRecord}
+                onSelectField={handleSelectField}
+                renderInlineDiff={renderInlineDiff}
+              />
             </>
           )}
         </DialogContent>

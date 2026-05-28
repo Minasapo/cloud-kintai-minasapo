@@ -1,4 +1,4 @@
-import { AppTabs, type AppTabAppearance } from "@shared/ui/tabs";
+import { type AppTabAppearance,AppTabs } from "@shared/ui/tabs";
 import { type ReactNode } from "react";
 
 type VacationTabsProps = {

@@ -1,6 +1,6 @@
 import { AppButton, AppIconButton } from "@shared/ui/button";
 import { SectionTitle } from "@shared/ui/typography";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 import {
   useWorkflowListActions,
@@ -35,6 +35,8 @@ export default function WorkflowFiltersArea() {
   const { filterRowRef } = useWorkflowListUi();
   const [dialogOpen, setDialogOpen] = useState(false);
   const titleId = useId();
+  const triggerElementRef = useRef<HTMLElement | null>(null);
+  const dialogPanelRef = useRef<HTMLDivElement | null>(null);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -63,10 +65,40 @@ export default function WorkflowFiltersArea() {
     setDialogOpen(false);
   };
 
+  const focusFirstElementInDialog = () => {
+    const panel = dialogPanelRef.current;
+    if (!panel) {
+      return;
+    }
+
+    const focusableElements = panel.querySelectorAll<HTMLElement>(
+      [
+        "button:not([disabled])",
+        "[href]",
+        "input:not([disabled])",
+        "select:not([disabled])",
+        "textarea:not([disabled])",
+        "[tabindex]:not([tabindex='-1'])",
+      ].join(","),
+    );
+
+    focusableElements[0]?.focus();
+  };
+
+  const handleOpenDialog = (event: React.MouseEvent<HTMLElement>) => {
+    triggerElementRef.current = event.currentTarget;
+    setDialogOpen(true);
+  };
+
   useEffect(() => {
     if (!dialogOpen) {
       return;
     }
+
+    const previouslyFocusedElement =
+      document.activeElement as HTMLElement | null;
+
+    focusFirstElementInDialog();
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -80,8 +112,52 @@ export default function WorkflowFiltersArea() {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
+      (triggerElementRef.current ?? previouslyFocusedElement)?.focus();
     };
   }, [dialogOpen]);
+
+  const handlePanelKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== "Tab") {
+      return;
+    }
+
+    const panel = dialogPanelRef.current;
+    if (!panel) {
+      return;
+    }
+
+    const focusableElements = Array.from(
+      panel.querySelectorAll<HTMLElement>(
+        [
+          "button:not([disabled])",
+          "[href]",
+          "input:not([disabled])",
+          "select:not([disabled])",
+          "textarea:not([disabled])",
+          "[tabindex]:not([tabindex='-1'])",
+        ].join(","),
+      ),
+    );
+
+    if (focusableElements.length === 0) {
+      return;
+    }
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+    const activeElement = document.activeElement as HTMLElement | null;
+
+    if (event.shiftKey && activeElement === firstElement) {
+      event.preventDefault();
+      lastElement?.focus();
+      return;
+    }
+
+    if (!event.shiftKey && activeElement === lastElement) {
+      event.preventDefault();
+      firstElement?.focus();
+    }
+  };
 
   return (
     <>
@@ -89,7 +165,7 @@ export default function WorkflowFiltersArea() {
         <div className="workflow-filter-toolbar__actions">
           <AppButton
             size="sm"
-            onClick={() => setDialogOpen(true)}
+            onClick={handleOpenDialog}
             className="workflow-filter-trigger-button"
             aria-haspopup="dialog"
             aria-expanded={dialogOpen}
@@ -117,6 +193,8 @@ export default function WorkflowFiltersArea() {
           <div
             className="workflow-filter-dialog__panel"
             onClick={(event) => event.stopPropagation()}
+            ref={dialogPanelRef}
+            onKeyDown={handlePanelKeyDown}
           >
             <div className="workflow-filter-dialog__header">
               <div>

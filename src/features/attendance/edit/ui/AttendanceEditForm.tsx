@@ -4,6 +4,7 @@ import { resolveConfigTimeOnDate } from "@entities/attendance/lib/resolveConfigT
 import { collectAttendanceErrorMessages } from "@entities/attendance/validation/collectErrorMessages";
 import { getWorkTypeLabel } from "@entities/staff/lib/workTypeOptions";
 import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
+import { type AttendanceEditInputs } from "@features/attendance/edit/model/common";
 import { AttendanceEditPageHeader } from "@features/attendance/edit/ui/components/AttendanceEditPageHeader";
 import { AttendanceErrorSummary } from "@features/attendance/edit/ui/components/AttendanceErrorSummary";
 import { VacationTabs } from "@features/attendance/edit/ui/components/VacationTabs";
@@ -22,7 +23,7 @@ import { FormErrorMessage } from "@shared/ui/form";
 import GroupContainer from "@shared/ui/group-container/GroupContainer";
 import GroupContainerMobile from "@shared/ui/group-container/GroupContainerMobile";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Controller, useFormState } from "react-hook-form";
+import { Controller, useFormState, type UseFormWatch } from "react-hook-form";
 
 import ChangeRequestingAlert from "./ChangeRequestingMessage";
 import PaidHolidayFlagInputDesktop from "./desktop/PaidHolidayFlagInput";
@@ -42,56 +43,12 @@ import { WorkDateItem as WorkDateItemMobile } from "./mobile/WorkDateItem";
 import { WorkTimeInput as WorkTimeInputMobile } from "./mobile/WorkTimeInput";
 import NoDataAlert from "./NoDataAlert";
 
-export function AttendanceEditForm() {
-  const ctx = useContext(AttendanceEditContext);
-  const {
-    attendance,
-    staff,
-    onSubmit,
-    register,
-    control,
-    setValue,
-    getValues,
-    watch,
-    handleSubmit,
-    isDirty,
-    isValid,
-    isSubmitting,
-    changeRequests,
-    hourlyPaidHolidayEnabled,
-    hourlyPaidHolidayTimeFields,
-    hourlyPaidHolidayTimeAppend,
-    hourlyPaidHolidayTimeReplace,
-    restFields,
-    restAppend,
-    restRemove,
-    restUpdate,
-    restReplace,
-    workDate,
-    readOnly,
-    errorMessages: contextErrorMessages,
-    submitErrorMessage,
-  } = ctx;
-  const { errors } = useFormState({ control });
-  const { getStartTime } = useAppConfig();
-  const { getSpecialHolidayEnabled } = useContext(AppConfigContext);
-  const [vacationTab, setVacationTab] = useState<number>(0);
+function useAttendanceFormTimeSummary(
+  watch: UseFormWatch<AttendanceEditInputs> | undefined,
+) {
   const [totalProductionTime, setTotalProductionTime] = useState<number>(0);
   const [totalHourlyPaidHolidayTime, setTotalHourlyPaidHolidayTime] =
     useState<number>(0);
-  const [highlightStartTime, setHighlightStartTime] = useState(false);
-  const [highlightEndTime, setHighlightEndTime] = useState(false);
-
-  const errorMessages = useMemo(() => {
-    if (contextErrorMessages && contextErrorMessages.length > 0) {
-      return contextErrorMessages;
-    }
-    return collectAttendanceErrorMessages(errors || {});
-  }, [contextErrorMessages, errors]);
-
-  const workTypeValue = (staff as unknown as Record<string, unknown>)
-    ?.workType as string | null | undefined;
-  const workTypeLabel = getWorkTypeLabel(workTypeValue);
 
   useEffect(() => {
     if (!watch) return;
@@ -113,14 +70,301 @@ export function AttendanceEditForm() {
         data.hourlyPaidHolidayTimes?.reduce((acc, time) => {
           if (!time) return acc;
           if (!time.endTime) return acc;
-          return (
-            acc + calcTotalHourlyPaidHolidayTime(time.startTime, time.endTime)
-          );
+          return acc + calcTotalHourlyPaidHolidayTime(time.startTime, time.endTime);
         }, 0) ?? 0;
       setTotalHourlyPaidHolidayTime(totalHourly);
     });
     return typeof unsubscribe === "function" ? unsubscribe : undefined;
   }, [watch]);
+
+  return { totalProductionTime, totalHourlyPaidHolidayTime };
+}
+
+function AttendanceEditFormMobileSection() {
+  const ctx = useContext(AttendanceEditContext);
+  const { getSpecialHolidayEnabled } = useContext(AppConfigContext);
+  const { control, setValue, getValues, workDate } = ctx;
+  const {
+    changeRequests,
+    hourlyPaidHolidayEnabled,
+    hourlyPaidHolidayTimeFields,
+    hourlyPaidHolidayTimeAppend,
+    hourlyPaidHolidayTimeReplace,
+    restFields,
+    restAppend,
+    restRemove,
+    restReplace,
+    restUpdate,
+    register,
+    isDirty,
+    isValid,
+    isSubmitting,
+    onSubmit,
+    submitErrorMessage,
+    errorMessages,
+  } = ctx;
+
+  if (!control || !setValue || !getValues || !register) {
+    return null;
+  }
+
+  return (
+    <div className="md:hidden" data-testid="attendance-mobile-editor">
+      {changeRequests.length > 0 ? (
+        <div className="flex flex-col gap-2 p-2">
+          <AttendanceEditPageHeader variant="mobile" />
+          <AttendanceErrorSummary messages={errorMessages ?? []} variant="mobile" />
+          <FormErrorMessage message={submitErrorMessage} />
+          <ChangeRequestingAlert changeRequests={changeRequests} />
+        </div>
+      ) : !restAppend || !restRemove || !restUpdate ? null : (
+        <div className="flex flex-col gap-2 p-2 pb-10">
+          <AttendanceEditPageHeader
+            description="勤務時間や休憩、休暇、備考を確認しながら、そのまま修正申請できます。"
+            variant="mobile"
+          />
+          <AttendanceErrorSummary messages={errorMessages ?? []} variant="mobile" />
+          <FormErrorMessage message={submitErrorMessage} />
+          <div className="flex flex-col gap-2">
+            <NoDataAlert />
+            {setValue && restReplace && hourlyPaidHolidayTimeReplace && (
+              <QuickInputButtonsMobile
+                setValue={setValue}
+                restReplace={restReplace}
+                hourlyPaidHolidayTimeReplace={hourlyPaidHolidayTimeReplace}
+                workDate={workDate ?? null}
+                visibleMode="staff"
+              />
+            )}
+            <GroupContainerMobile hideAccent hideBorder>
+              <WorkDateItemMobile />
+            </GroupContainerMobile>
+            <GroupContainerMobile hideAccent hideBorder>
+              <div className="overflow-hidden rounded-lg border border-slate-200/80">
+                <div className="grid grid-cols-[7.5rem_1fr] border-b border-slate-200/80">
+                  <div className="bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700">
+                    スタッフ
+                  </div>
+                  <div className="px-3 py-2 text-base text-slate-900">
+                    {ctx.staff ? `${ctx.staff.familyName} ${ctx.staff.givenName}` : ""}
+                  </div>
+                </div>
+                {ctx.staff ? (
+                  <div className="grid grid-cols-[7.5rem_1fr]">
+                    <div className="bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700">
+                      勤務形態
+                    </div>
+                    <div className="px-3 py-2 text-base text-slate-900">
+                      {getWorkTypeLabel((ctx.staff as unknown as Record<string, unknown>)?.workType as string | null | undefined)}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </GroupContainerMobile>
+            <GroupContainerMobile hideAccent hideBorder>
+              <div className="flex flex-col gap-2">
+                <WorkTimeInputMobile />
+                <RestTimeInputMobile
+                  restFields={restFields}
+                  restAppend={restAppend}
+                  restRemove={restRemove}
+                />
+              </div>
+            </GroupContainerMobile>
+            <GroupContainerMobile hideAccent hideBorder>
+              <MobilePaidHolidaySection
+                control={control}
+                setValue={setValue}
+                workDate={workDate}
+                restReplace={restReplace}
+                getValues={getValues}
+                getSpecialHolidayEnabled={getSpecialHolidayEnabled}
+                changeRequestsLength={changeRequests.length}
+                hourlyPaidHolidayEnabled={hourlyPaidHolidayEnabled}
+                hourlyPaidHolidayTimeFields={hourlyPaidHolidayTimeFields}
+                hourlyPaidHolidayTimeAppend={hourlyPaidHolidayTimeAppend}
+              />
+            </GroupContainerMobile>
+            <GroupContainerMobile title="備考" hideAccent hideBorder>
+              <RemarksInputMobile />
+            </GroupContainerMobile>
+            <GroupContainerMobile title="修正理由" hideAccent hideBorder>
+              <StaffCommentInputMobile />
+            </GroupContainerMobile>
+            <RequestButtonItem
+              handleSubmit={ctx.handleSubmit!}
+              onSubmit={onSubmit}
+              isDirty={isDirty}
+              isValid={isValid}
+              isSubmitting={isSubmitting}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DesktopVacationTabsSection({
+  vacationTab,
+  onVacationTabChange,
+}: {
+  vacationTab: number;
+  onVacationTabChange: (tab: number) => void;
+}) {
+  const { getSpecialHolidayEnabled } = useContext(AppConfigContext);
+  const {
+    control,
+    changeRequests,
+    hourlyPaidHolidayEnabled,
+    hourlyPaidHolidayTimeFields,
+    hourlyPaidHolidayTimeAppend,
+  } = useContext(AttendanceEditContext);
+
+  const items: { label: string; content: JSX.Element }[] = [];
+  items.push({
+    label: "振替休日",
+    content: <SubstituteHolidayDateInput />,
+  });
+  items.push({
+    label: "有給(1日)",
+    content: <PaidHolidayFlagInputDesktop />,
+  });
+  if (getSpecialHolidayEnabled && getSpecialHolidayEnabled()) {
+    items.push({
+      label: "特別休暇",
+      content: (
+        <div className="flex flex-col gap-3 md:flex-row md:items-start">
+          <div className="w-full text-sm font-bold text-slate-900 md:w-[150px]">
+            特別休暇
+          </div>
+          <div className="flex flex-1 flex-col gap-3">
+            <div className="text-sm leading-6 text-slate-500">
+              有給休暇ではない特別な休暇(忌引きなど)として扱われます。
+              <br />
+              使用する際は、事前に勤怠管理者へご相談ください。
+            </div>
+            <Controller
+              name="specialHolidayFlag"
+              control={control}
+              render={({ field }) => (
+                <label className="inline-flex items-center gap-3">
+                  <input
+                    ref={field.ref}
+                    name={field.name}
+                    checked={!!field.value}
+                    onBlur={field.onBlur}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      field.onChange(e.target.checked)
+                    }
+                    disabled={changeRequests.length > 0}
+                    type="checkbox"
+                    className="h-4 w-4 accent-emerald-600"
+                  />
+                  <span className="text-sm text-slate-600">
+                    特別休暇として申請する
+                  </span>
+                </label>
+              )}
+            />
+          </div>
+        </div>
+      ),
+    });
+  }
+  if (hourlyPaidHolidayEnabled) {
+    items.push({
+      label: `時間単位(${hourlyPaidHolidayTimeFields.length})`,
+      content: (
+        <div className="flex flex-col gap-3 md:flex-row md:items-start">
+          <div className="w-full text-sm font-bold text-slate-900 md:w-[150px]">
+            時間単位休暇
+          </div>
+          <div className="flex flex-1 flex-col gap-3">
+            {hourlyPaidHolidayTimeFields.length === 0 && (
+              <div className="text-sm leading-6 text-slate-500">
+                時間単位休暇の時間帯を追加してください。
+              </div>
+            )}
+            {hourlyPaidHolidayTimeFields.map((hourlyPaidHolidayTime, index) => (
+              <HourlyPaidHolidayTimeItem
+                key={hourlyPaidHolidayTime.id}
+                time={hourlyPaidHolidayTime}
+                index={index}
+              />
+            ))}
+            <div>
+              <AppIconButton
+                aria-label="add-hourly-paid-holiday-time"
+                onClick={() =>
+                  hourlyPaidHolidayTimeAppend({
+                    startTime: null,
+                    endTime: null,
+                  })
+                }
+                disabled={changeRequests.length > 0}
+                tone="primary"
+              >
+                <span aria-hidden="true" className="text-2xl leading-none">
+                  +
+                </span>
+              </AppIconButton>
+            </div>
+          </div>
+        </div>
+      ),
+    });
+  }
+  return (
+    <VacationTabs
+      value={vacationTab}
+      onChange={onVacationTabChange}
+      items={items}
+      panelPadding={2}
+      tabsProps={{
+        "aria-label": "vacation-tabs-desktop",
+      }}
+    />
+  );
+}
+
+export function AttendanceEditForm() {
+  const ctx = useContext(AttendanceEditContext);
+  const {
+    attendance,
+    staff,
+    onSubmit,
+    register,
+    control,
+    setValue,
+    getValues,
+    watch,
+    handleSubmit,
+    isDirty,
+    isValid,
+    isSubmitting,
+    changeRequests,
+    hourlyPaidHolidayTimeReplace,
+    restReplace,
+    workDate,
+    readOnly,
+    errorMessages: contextErrorMessages,
+    submitErrorMessage,
+  } = ctx;
+  const { errors } = useFormState({ control });
+  const { getStartTime } = useAppConfig();
+  const [vacationTab, setVacationTab] = useState<number>(0);
+  const { totalProductionTime, totalHourlyPaidHolidayTime } =
+    useAttendanceFormTimeSummary(watch);
+  const [highlightStartTime, setHighlightStartTime] = useState(false);
+  const [highlightEndTime, setHighlightEndTime] = useState(false);
+
+  const errorMessages = useMemo(() => {
+    if (contextErrorMessages && contextErrorMessages.length > 0) {
+      return contextErrorMessages;
+    }
+    return collectAttendanceErrorMessages(errors || {});
+  }, [contextErrorMessages, errors]);
 
   if (!staff || !control || !setValue || !watch || !handleSubmit || !register) {
     return null;
@@ -129,99 +373,7 @@ export function AttendanceEditForm() {
   return (
     <>
       {/* Mobile */}
-      <div className="md:hidden" data-testid="attendance-mobile-editor">
-        {changeRequests.length > 0 ? (
-          <div className="flex flex-col gap-2 p-2">
-            <AttendanceEditPageHeader variant="mobile" />
-            <AttendanceErrorSummary messages={errorMessages} variant="mobile" />
-            <FormErrorMessage message={submitErrorMessage} />
-            <ChangeRequestingAlert changeRequests={changeRequests} />
-          </div>
-        ) : !restAppend || !restRemove || !restUpdate ? null : (
-          <div className="flex flex-col gap-2 p-2 pb-10">
-            <AttendanceEditPageHeader
-              description="勤務時間や休憩、休暇、備考を確認しながら、そのまま修正申請できます。"
-              variant="mobile"
-            />
-            <AttendanceErrorSummary messages={errorMessages} variant="mobile" />
-            <FormErrorMessage message={submitErrorMessage} />
-            <div className="flex flex-col gap-2">
-              <NoDataAlert />
-              {setValue && restReplace && hourlyPaidHolidayTimeReplace && (
-                <QuickInputButtonsMobile
-                  setValue={setValue}
-                  restReplace={restReplace}
-                  hourlyPaidHolidayTimeReplace={hourlyPaidHolidayTimeReplace}
-                  workDate={workDate ?? null}
-                  visibleMode="staff"
-                />
-              )}
-              <GroupContainerMobile hideAccent hideBorder>
-                <WorkDateItemMobile />
-              </GroupContainerMobile>
-              <GroupContainerMobile hideAccent hideBorder>
-                <div className="overflow-hidden rounded-lg border border-slate-200/80">
-                  <div className="grid grid-cols-[7.5rem_1fr] border-b border-slate-200/80">
-                    <div className="bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700">
-                      スタッフ
-                    </div>
-                    <div className="px-3 py-2 text-base text-slate-900">
-                      {`${staff.familyName} ${staff.givenName}`}
-                    </div>
-                  </div>
-                  {workTypeLabel ? (
-                    <div className="grid grid-cols-[7.5rem_1fr]">
-                      <div className="bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700">
-                        勤務形態
-                      </div>
-                      <div className="px-3 py-2 text-base text-slate-900">
-                        {workTypeLabel}
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              </GroupContainerMobile>
-              <GroupContainerMobile hideAccent hideBorder>
-                <div className="flex flex-col gap-2">
-                  <WorkTimeInputMobile />
-                  <RestTimeInputMobile
-                    restFields={restFields}
-                    restAppend={restAppend}
-                    restRemove={restRemove}
-                  />
-                </div>
-              </GroupContainerMobile>
-              <GroupContainerMobile hideAccent hideBorder>
-                <MobilePaidHolidaySection
-                  control={control}
-                  setValue={setValue}
-                  workDate={workDate}
-                  restReplace={restReplace}
-                  getValues={getValues}
-                  getSpecialHolidayEnabled={getSpecialHolidayEnabled}
-                  changeRequestsLength={changeRequests.length}
-                  hourlyPaidHolidayEnabled={hourlyPaidHolidayEnabled}
-                  hourlyPaidHolidayTimeFields={hourlyPaidHolidayTimeFields}
-                  hourlyPaidHolidayTimeAppend={hourlyPaidHolidayTimeAppend}
-                />
-              </GroupContainerMobile>
-              <GroupContainerMobile title="備考" hideAccent hideBorder>
-                <RemarksInputMobile />
-              </GroupContainerMobile>
-              <GroupContainerMobile title="修正理由" hideAccent hideBorder>
-                <StaffCommentInputMobile />
-              </GroupContainerMobile>
-              <RequestButtonItem
-                handleSubmit={handleSubmit}
-                onSubmit={onSubmit}
-                isDirty={isDirty}
-                isValid={isValid}
-                isSubmitting={isSubmitting}
-              />
-            </div>
-          </div>
-        )}
-      </div>
+      <AttendanceEditFormMobileSection />
 
       {/* Desktop */}
       <div className="hidden md:block" data-testid="attendance-desktop-editor">
@@ -292,118 +444,10 @@ export function AttendanceEditForm() {
                 />
               </GroupContainer>
               <GroupContainer hideAccent hideBorder className="w-full">
-                {(() => {
-                  const items: { label: string; content: JSX.Element }[] = [];
-                  items.push({
-                    label: "振替休日",
-                    content: <SubstituteHolidayDateInput />,
-                  });
-                  items.push({
-                    label: "有給(1日)",
-                    content: <PaidHolidayFlagInputDesktop />,
-                  });
-                  if (getSpecialHolidayEnabled && getSpecialHolidayEnabled()) {
-                    items.push({
-                      label: "特別休暇",
-                      content: (
-                        <div className="flex flex-col gap-3 md:flex-row md:items-start">
-                          <div className="w-full text-sm font-bold text-slate-900 md:w-[150px]">
-                            特別休暇
-                          </div>
-                          <div className="flex flex-1 flex-col gap-3">
-                            <div className="text-sm leading-6 text-slate-500">
-                              有給休暇ではない特別な休暇(忌引きなど)として扱われます。
-                              <br />
-                              使用する際は、事前に勤怠管理者へご相談ください。
-                            </div>
-                            <Controller
-                              name="specialHolidayFlag"
-                              control={control}
-                              render={({ field }) => (
-                                <label className="inline-flex items-center gap-3">
-                                  <input
-                                    ref={field.ref}
-                                    name={field.name}
-                                    checked={!!field.value}
-                                    onBlur={field.onBlur}
-                                    onChange={(
-                                      e: React.ChangeEvent<HTMLInputElement>,
-                                    ) => field.onChange(e.target.checked)}
-                                    disabled={changeRequests.length > 0}
-                                    type="checkbox"
-                                    className="h-4 w-4 accent-emerald-600"
-                                  />
-                                  <span className="text-sm text-slate-600">
-                                    特別休暇として申請する
-                                  </span>
-                                </label>
-                              )}
-                            />
-                          </div>
-                        </div>
-                      ),
-                    });
-                  }
-                  if (hourlyPaidHolidayEnabled) {
-                    items.push({
-                      label: `時間単位(${hourlyPaidHolidayTimeFields.length})`,
-                      content: (
-                        <div className="flex flex-col gap-3 md:flex-row md:items-start">
-                          <div className="w-full text-sm font-bold text-slate-900 md:w-[150px]">
-                            時間単位休暇
-                          </div>
-                          <div className="flex flex-1 flex-col gap-3">
-                            {hourlyPaidHolidayTimeFields.length === 0 && (
-                              <div className="text-sm leading-6 text-slate-500">
-                                時間単位休暇の時間帯を追加してください。
-                              </div>
-                            )}
-                            {hourlyPaidHolidayTimeFields.map(
-                              (hourlyPaidHolidayTime, index) => (
-                                <HourlyPaidHolidayTimeItem
-                                  key={hourlyPaidHolidayTime.id}
-                                  time={hourlyPaidHolidayTime}
-                                  index={index}
-                                />
-                              ),
-                            )}
-                            <div>
-                              <AppIconButton
-                                aria-label="add-hourly-paid-holiday-time"
-                                onClick={() =>
-                                  hourlyPaidHolidayTimeAppend({
-                                    startTime: null,
-                                    endTime: null,
-                                  })
-                                }
-                                disabled={changeRequests.length > 0}
-                                tone="primary"
-                              >
-                                <span
-                                  aria-hidden="true"
-                                  className="text-2xl leading-none"
-                                >
-                                  +
-                                </span>
-                              </AppIconButton>
-                            </div>
-                          </div>
-                        </div>
-                      ),
-                    });
-                  }
-                  return (
-                    <VacationTabs
-                      value={vacationTab}
-                      onChange={setVacationTab}
-                      items={items}
-                      panelPadding={2}
-                      tabsProps={{
-                        "aria-label": "vacation-tabs-desktop",
-                      }}
-                    />
-                  );
-                })()}
+                <DesktopVacationTabsSection
+                  vacationTab={vacationTab}
+                  onVacationTabChange={setVacationTab}
+                />
               </GroupContainer>
               <GroupContainer title="備考" hideAccent hideBorder className="w-full">
                 <RemarksInputDesktop />

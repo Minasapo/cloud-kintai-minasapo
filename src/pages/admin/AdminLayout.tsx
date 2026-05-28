@@ -62,6 +62,39 @@ const SURFACE_SECTION_SX = {
   boxShadow: "0 28px 60px -42px rgba(15,23,42,0.35)",
 } as const;
 
+const PANEL_SEPARATOR_STYLE = {
+  width: "8px",
+  backgroundColor: "#e2e8f0",
+  cursor: "col-resize",
+} as const;
+
+const RAIL_ITEM_CONTAINER_SX = {
+  display: "flex",
+  alignItems: "center",
+  gap: 0.5,
+  "&:hover .rail-panel-menu-trigger, &:focus-within .rail-panel-menu-trigger": {
+    visibility: "visible",
+  },
+} as const;
+
+const RAIL_ITEM_BUTTON_SX = (isActive: boolean) =>
+  ({
+    flex: 1,
+    justifyContent: "space-between",
+    textTransform: "none",
+    borderRadius: "10px",
+    px: 1.25,
+    py: 1,
+    color: isActive ? "#065f46" : "#1e293b",
+    backgroundColor: isActive ? "rgba(16,185,129,0.14)" : "transparent",
+    fontWeight: isActive ? 700 : 500,
+    "&:hover": {
+      backgroundColor: isActive
+        ? "rgba(16,185,129,0.2)"
+        : "rgba(148,163,184,0.12)",
+    },
+  }) as const;
+
 const SETTINGS_HREF = "/admin/master";
 const SETTINGS_NAV_GROUPS = getAdminSettingsNavigationGroups();
 
@@ -92,6 +125,70 @@ const MemoizedOutlet = memo(function MemoizedOutlet() {
 
 const SinglePanelContent = memo(function SinglePanelContent() {
   return <MemoizedOutlet />;
+});
+
+const MainOutletPanelContent = memo(function MainOutletPanelContent() {
+  return (
+    <PanelContainer onClose={undefined}>
+      <MemoizedOutlet />
+    </PanelContainer>
+  );
+});
+
+const SplitContentPanel = memo(function SplitContentPanel({
+  title,
+  selectedScreen,
+  emptyLabel,
+  onClose,
+  onScreenChange,
+  PanelComponent,
+}: {
+  title?: string;
+  selectedScreen: string;
+  emptyLabel: string;
+  onClose: () => void;
+  onScreenChange: (screenValue: string) => void;
+  PanelComponent?: React.ComponentType<{ panelId: string }>;
+}) {
+  return (
+    <PanelContainer
+      title={title || "画面を選択"}
+      onClose={onClose}
+      screenOptions={ADMIN_SPLIT_PANEL_OPTIONS}
+      selectedScreen={selectedScreen}
+      onScreenChange={onScreenChange}
+      contentSx={selectedScreen === "daily-report" ? { pt: 0 } : undefined}
+    >
+      {PanelComponent ? (
+        <Suspense fallback={<SplitPanelSkeleton />}>
+          <PanelComponent panelId={selectedScreen} />
+        </Suspense>
+      ) : (
+        <EmptyPanelState label={emptyLabel} />
+      )}
+    </PanelContainer>
+  );
+});
+
+const RailItemButton = memo(function RailItemButton({
+  isActive,
+  primaryLabel,
+  secondaryLabel,
+  onClick,
+}: {
+  isActive: boolean;
+  primaryLabel: string;
+  secondaryLabel?: string;
+  onClick: () => void;
+}) {
+  return (
+    <Button variant="text" onClick={onClick} sx={RAIL_ITEM_BUTTON_SX(isActive)}>
+      <Box component="span">{primaryLabel}</Box>
+      <Box component="span" sx={{ fontSize: "0.72rem", opacity: 0.75 }}>
+        {secondaryLabel ?? ""}
+      </Box>
+    </Button>
+  );
 });
 
 const AdminContextRail = memo(function AdminContextRail({
@@ -158,45 +255,13 @@ const AdminContextRail = memo(function AdminContextRail({
           if (item.href === SETTINGS_HREF) {
             return (
               <React.Fragment key={item.href}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    "&:hover .rail-panel-menu-trigger, &:focus-within .rail-panel-menu-trigger":
-                      { visibility: "visible" },
-                  }}
-                >
-                  <Button
-                    variant="text"
+                <Box sx={RAIL_ITEM_CONTAINER_SX}>
+                  <RailItemButton
+                    isActive={isActive}
+                    primaryLabel={item.primaryLabel}
+                    secondaryLabel={item.secondaryLabel}
                     onClick={() => onSelect(item.href)}
-                    sx={{
-                      flex: 1,
-                      justifyContent: "space-between",
-                      textTransform: "none",
-                      borderRadius: "10px",
-                      px: 1.25,
-                      py: 1,
-                      color: isActive ? "#065f46" : "#1e293b",
-                      backgroundColor: isActive
-                        ? "rgba(16,185,129,0.14)"
-                        : "transparent",
-                      fontWeight: isActive ? 700 : 500,
-                      "&:hover": {
-                        backgroundColor: isActive
-                          ? "rgba(16,185,129,0.2)"
-                          : "rgba(148,163,184,0.12)",
-                      },
-                    }}
-                  >
-                    <Box component="span">{item.primaryLabel}</Box>
-                    <Box
-                      component="span"
-                      sx={{ fontSize: "0.72rem", opacity: 0.75 }}
-                    >
-                      {item.secondaryLabel ?? ""}
-                    </Box>
-                  </Button>
+                  />
                   <Box
                     component="button"
                     type="button"
@@ -303,48 +368,13 @@ const AdminContextRail = memo(function AdminContextRail({
           }
 
           return (
-            <Box
-              key={item.href}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 0.5,
-                "&:hover .rail-panel-menu-trigger, &:focus-within .rail-panel-menu-trigger":
-                  {
-                    visibility: "visible",
-                  },
-              }}
-            >
-              <Button
-                variant="text"
+            <Box key={item.href} sx={RAIL_ITEM_CONTAINER_SX}>
+              <RailItemButton
+                isActive={isActive}
+                primaryLabel={item.primaryLabel}
+                secondaryLabel={item.secondaryLabel}
                 onClick={() => onSelect(item.href)}
-                sx={{
-                  flex: 1,
-                  justifyContent: "space-between",
-                  textTransform: "none",
-                  borderRadius: "10px",
-                  px: 1.25,
-                  py: 1,
-                  color: isActive ? "#065f46" : "#1e293b",
-                  backgroundColor: isActive
-                    ? "rgba(16,185,129,0.14)"
-                    : "transparent",
-                  fontWeight: isActive ? 700 : 500,
-                  "&:hover": {
-                    backgroundColor: isActive
-                      ? "rgba(16,185,129,0.2)"
-                      : "rgba(148,163,184,0.12)",
-                  },
-                }}
-              >
-                <Box component="span">{item.primaryLabel}</Box>
-                <Box
-                  component="span"
-                  sx={{ fontSize: "0.72rem", opacity: 0.75 }}
-                >
-                  {item.secondaryLabel ?? ""}
-                </Box>
-              </Button>
+              />
               <NavItemPanelMenu
                 href={item.href}
                 label={item.primaryLabel}
@@ -374,49 +404,27 @@ const SplitLayoutPanels = memo(function SplitLayoutPanels({
   onScreenChange: (screenValue: string) => void;
   SplitPanelComponent?: React.ComponentType<{ panelId: string }>;
 }) {
-  const renderSplitPanelContent = () => (
-    <PanelContainer
-      title={splitPanelTitle || "画面を選択"}
-      onClose={onClosePanel}
-      screenOptions={ADMIN_SPLIT_PANEL_OPTIONS}
+  const splitPanelContent = (
+    <SplitContentPanel
+      title={splitPanelTitle}
       selectedScreen={selectedScreen}
+      emptyLabel="パネルが選択されていません"
+      onClose={onClosePanel}
       onScreenChange={onScreenChange}
-      contentSx={selectedScreen === "daily-report" ? { pt: 0 } : undefined}
-    >
-      {SplitPanelComponent ? (
-        <Suspense fallback={<SplitPanelSkeleton />}>
-          <SplitPanelComponent panelId={selectedScreen} />
-        </Suspense>
-      ) : (
-        <EmptyPanelState label="パネルが選択されていません" />
-      )}
-    </PanelContainer>
+      PanelComponent={SplitPanelComponent}
+    />
   );
 
-  const renderMainPanelContent = () => (
-    <PanelContainer onClose={undefined}>
-      <MemoizedOutlet />
-    </PanelContainer>
-  );
+  const mainPanelContent = <MainOutletPanelContent />;
 
   return (
     <Group orientation="horizontal">
       <Panel defaultSize={50} minSize={30}>
-        {splitPanelPosition === "left"
-          ? renderSplitPanelContent()
-          : renderMainPanelContent()}
+        {splitPanelPosition === "left" ? splitPanelContent : mainPanelContent}
       </Panel>
-      <Separator
-        style={{
-          width: "8px",
-          backgroundColor: "#e2e8f0",
-          cursor: "col-resize",
-        }}
-      />
+      <Separator style={PANEL_SEPARATOR_STYLE} />
       <Panel defaultSize={50} minSize={30}>
-        {splitPanelPosition === "left"
-          ? renderMainPanelContent()
-          : renderSplitPanelContent()}
+        {splitPanelPosition === "left" ? mainPanelContent : splitPanelContent}
       </Panel>
     </Group>
   );
@@ -448,63 +456,35 @@ const TripleLayoutPanels = memo(function TripleLayoutPanels({
   return (
     <Group orientation="horizontal">
       <Panel defaultSize={35} minSize={22}>
-        <PanelContainer onClose={undefined}>
-          <MemoizedOutlet />
-        </PanelContainer>
+        <MainOutletPanelContent />
       </Panel>
-      <Separator
-        style={{
-          width: "8px",
-          backgroundColor: "#e2e8f0",
-          cursor: "col-resize",
-        }}
-      />
+      <Separator style={PANEL_SEPARATOR_STYLE} />
       <Panel defaultSize={32} minSize={22}>
-        <PanelContainer
+        <SplitContentPanel
           title={middlePanelTitle || "中央パネル"}
-          onClose={onCloseMiddlePanel}
-          screenOptions={ADMIN_SPLIT_PANEL_OPTIONS}
           selectedScreen={middleSelectedScreen}
+          emptyLabel="中央パネルの画面を選択してください"
+          onClose={onCloseMiddlePanel}
           onScreenChange={onMiddleScreenChange}
-        >
-          {MiddlePanelComponent ? (
-            <Suspense fallback={<SplitPanelSkeleton />}>
-              <MiddlePanelComponent panelId={middleSelectedScreen} />
-            </Suspense>
-          ) : (
-            <EmptyPanelState label="中央パネルの画面を選択してください" />
-          )}
-        </PanelContainer>
+          PanelComponent={MiddlePanelComponent}
+        />
       </Panel>
-      <Separator
-        style={{
-          width: "8px",
-          backgroundColor: "#e2e8f0",
-          cursor: "col-resize",
-        }}
-      />
+      <Separator style={PANEL_SEPARATOR_STYLE} />
       <Panel defaultSize={33} minSize={22}>
-        <PanelContainer
+        <SplitContentPanel
           title={rightPanelTitle || "右パネル"}
-          onClose={onCloseRightPanel}
-          screenOptions={ADMIN_SPLIT_PANEL_OPTIONS}
           selectedScreen={rightSelectedScreen}
+          emptyLabel="右パネルの画面を選択してください"
+          onClose={onCloseRightPanel}
           onScreenChange={onRightScreenChange}
-        >
-          {RightPanelComponent ? (
-            <Suspense fallback={<SplitPanelSkeleton />}>
-              <RightPanelComponent panelId={rightSelectedScreen} />
-            </Suspense>
-          ) : (
-            <EmptyPanelState label="右パネルの画面を選択してください" />
-          )}
-        </PanelContainer>
+          PanelComponent={RightPanelComponent}
+        />
       </Panel>
     </Group>
   );
 });
 
-function AdminLayoutContent() {
+function useAdminLayoutContent() {
   const menuItems = useHeaderMenu();
   const navigate = useNavigate();
   const location = useLocation();
@@ -723,6 +703,62 @@ function AdminLayoutContent() {
     }
   }, [isMobile, state.mode, setMode, setLeftPanel]);
 
+  return {
+    menuItems,
+    activeMenuHref,
+    activeMenuItem,
+    currentPath: location.pathname,
+    isMobile,
+    isMobileRailOpen,
+    handleSelect,
+    handleToggleMobileRail,
+    handleToggleSplitMode,
+    handleCloseMiddlePanel,
+    handleCloseRightPanel,
+    handleMiddleScreenChange,
+    handleRightScreenChange,
+    selectedMiddleScreen,
+    selectedRightScreen,
+    isSplitMode,
+    isTripleMode,
+    splitPanelPosition,
+    splitPanelConfig,
+    MiddlePanelComponent,
+    RightPanelComponent,
+    splitMode: state.mode,
+    middlePanelTitle: state.leftPanel?.title,
+    rightPanelTitle: state.rightPanel?.title,
+  };
+}
+
+function AdminLayoutContent() {
+  const {
+    menuItems,
+    activeMenuHref,
+    activeMenuItem,
+    currentPath,
+    isMobile,
+    isMobileRailOpen,
+    handleSelect,
+    handleToggleMobileRail,
+    handleToggleSplitMode,
+    handleCloseMiddlePanel,
+    handleCloseRightPanel,
+    handleMiddleScreenChange,
+    handleRightScreenChange,
+    selectedMiddleScreen,
+    selectedRightScreen,
+    isSplitMode,
+    isTripleMode,
+    splitPanelPosition,
+    splitPanelConfig,
+    MiddlePanelComponent,
+    RightPanelComponent,
+    splitMode,
+    middlePanelTitle,
+    rightPanelTitle,
+  } = useAdminLayoutContent();
+
   return (
     <Stack component="section" sx={PAGE_CONTAINER_SX}>
       <PageSection
@@ -750,7 +786,7 @@ function AdminLayoutContent() {
               {isMobileRailOpen ? "ナビを閉じる" : "ナビを開く"}
             </Button>
           )}
-          <SplitModeToggle mode={state.mode} onToggle={handleToggleSplitMode} />
+          <SplitModeToggle mode={splitMode} onToggle={handleToggleSplitMode} />
         </Box>
 
         <Stack
@@ -762,7 +798,7 @@ function AdminLayoutContent() {
               menuItems={menuItems}
               activeMenuHref={activeMenuHref}
               activeMenuItem={activeMenuItem}
-              currentPath={location.pathname}
+              currentPath={currentPath}
               onSelect={handleSelect}
             />
           )}
@@ -775,7 +811,7 @@ function AdminLayoutContent() {
                   menuItems={menuItems}
                   activeMenuHref={activeMenuHref}
                   activeMenuItem={activeMenuItem}
-                  currentPath={location.pathname}
+                  currentPath={currentPath}
                   onSelect={handleSelect}
                 />
               </Box>
@@ -783,8 +819,8 @@ function AdminLayoutContent() {
 
             {isTripleMode ? (
               <TripleLayoutPanels
-                middlePanelTitle={state.leftPanel?.title}
-                rightPanelTitle={state.rightPanel?.title}
+                middlePanelTitle={middlePanelTitle}
+                rightPanelTitle={rightPanelTitle}
                 middleSelectedScreen={selectedMiddleScreen}
                 rightSelectedScreen={selectedRightScreen}
                 onCloseMiddlePanel={handleCloseMiddlePanel}

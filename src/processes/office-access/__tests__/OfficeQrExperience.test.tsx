@@ -31,6 +31,7 @@ const defaultOfficeQrHookValue = {
   qrUrl: "https://example.com/office/qr/register?token=test",
   timeLeft: 30,
   progress: 100,
+  errorMessage: "",
   isRegisterMode: true,
   tooltipOpen: false,
   handleModeChange: jest.fn(),

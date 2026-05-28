@@ -5,13 +5,19 @@ import { calendarApi } from "@entities/calendar/api/calendarApi";
 import { fetchAuthSession } from "aws-amplify/auth";
 
 async function resolveCognitoUserId(): Promise<string | null> {
-  try {
-    const session = await fetchAuthSession();
-    const sub = session.tokens?.idToken?.payload?.sub;
-    return typeof sub === "string" && sub.length > 0 ? sub : null;
-  } catch {
-    return null;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const session = await fetchAuthSession();
+      const sub = session.tokens?.idToken?.payload?.sub;
+      return typeof sub === "string" && sub.length > 0 ? sub : null;
+    } catch {
+      if (attempt === 1) {
+        return null;
+      }
+    }
   }
+
+  return null;
 }
 
 export async function attendanceListLoader(): Promise<null> {

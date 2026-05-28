@@ -1,4 +1,3 @@
-import AppIconButton from "@shared/ui/button/AppIconButton";
 import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
 import {
   SettingsButton,
@@ -7,6 +6,7 @@ import {
   SettingsTextField,
 } from "@features/admin/layout/ui/SettingsPrimitives";
 import { predefinedIcons } from "@shared/config/icons";
+import AppIconButton from "@shared/ui/button/AppIconButton";
 import { SubsectionTitle } from "@shared/ui/typography";
 
 interface Link {

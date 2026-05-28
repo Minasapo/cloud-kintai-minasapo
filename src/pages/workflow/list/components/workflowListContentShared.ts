@@ -10,6 +10,10 @@ export const WORKFLOW_LIST_COLUMNS = [
   "作成日",
 ] as const;
 
+export const WORKFLOW_LIST_COLUMN_HEADER_IDS = WORKFLOW_LIST_COLUMNS.map(
+  (_, index) => `workflow-list-column-${index}`,
+) as readonly string[];
+
 export const formatWorkflowDateValue = (value?: string) => value ?? EMPTY_VALUE;
 
 export const cx = (...classNames: Array<string | false | null | undefined>) =>

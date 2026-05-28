@@ -1,22 +1,14 @@
 import { AuthContext } from "@app/providers/auth/AuthContext";
 import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
-import {
-  useGetAttendanceByStaffAndDateQuery,
-  useListAttendancesByDateRangeWithPlaceholdersQuery,
-} from "@entities/attendance/api/attendanceApi";
 import { getWorkStatus } from "@entities/attendance/lib/actions/workStatus";
-import {
-  getEffectiveDateRange,
-  getEffectivePastDateRangeEnd,
-} from "@entities/attendance/lib/aggregationDateRange";
 import { resolveCurrentBusinessWorkDate } from "@entities/attendance/lib/businessDate";
-import useCloseDates from "@entities/attendance/model/useCloseDates";
-import { useCalendars } from "@entities/calendar/model/useCalendars";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { onUpdateAttendance } from "@shared/api/graphql/documents/subscriptions";
 import {
   Attendance,
+  CompanyHolidayCalendar,
+  HolidayCalendar,
   OnUpdateAttendanceSubscription,
   Staff,
 } from "@shared/api/graphql/types";
@@ -49,6 +41,109 @@ import {
 } from "./timeRecorderUtils";
 import { TimeRecorderLoadingView, TimeRecorderView } from "./TimeRecorderView";
 import { useAttendanceActions } from "./useAttendanceActions";
+import { useTimeRecorderQueries } from "./useTimeRecorderQueries";
+
+function useWorkDateInterval(): string {
+  const [currentWorkDate, setCurrentWorkDate] = useState(() =>
+    resolveCurrentBusinessWorkDate(),
+  );
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      const nextWorkDate = resolveCurrentBusinessWorkDate();
+      setCurrentWorkDate((prev) =>
+        prev === nextWorkDate ? prev : nextWorkDate,
+      );
+    }, 30 * 1000);
+    return () => { window.clearInterval(intervalId); };
+  }, []);
+  return currentWorkDate;
+}
+
+type UseStaffRefreshParams = { cognitoId: string | undefined; dispatch: ReturnType<typeof useDispatch> };
+function useStaffRefresh({ cognitoId, dispatch }: UseStaffRefreshParams) {
+  const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
+  const refreshStaff = useCallback(async () => {
+    if (!cognitoId) return;
+    try {
+      const latestStaff = await fetchStaff(cognitoId);
+      setStaff(latestStaff);
+    } catch {
+      dispatch(pushNotification({ tone: "error", message: MESSAGE_CODE.E00001 }));
+    }
+  }, [cognitoId, dispatch]);
+  return { staff, refreshStaff };
+}
+
+type UseAttendanceErrorStatsParams = {
+  staff: Staff | null | undefined;
+  attendances: Attendance[];
+  holidayCalendars: HolidayCalendar[];
+  companyHolidayCalendars: CompanyHolidayCalendar[];
+  attendanceLoading: boolean;
+  attendancesLoading: boolean;
+  calendarLoading: boolean;
+  attendanceErrorToday: dayjs.Dayjs;
+};
+function useAttendanceErrorStats({ staff, attendances, holidayCalendars, companyHolidayCalendars, attendanceLoading, attendancesLoading, calendarLoading, attendanceErrorToday }: UseAttendanceErrorStatsParams) {
+  const { errorCount, hasTimeElapsedError } = useMemo(() => {
+    if (!staff || attendanceLoading || attendancesLoading || calendarLoading) {
+      return { errorCount: 0, hasTimeElapsedError: false };
+    }
+    return summarizeAttendanceErrors({ staff, attendances, holidayCalendars, companyHolidayCalendars, today: attendanceErrorToday });
+  }, [staff, attendances, holidayCalendars, companyHolidayCalendars, attendanceLoading, attendancesLoading, calendarLoading, attendanceErrorToday]);
+  return { attendanceErrorCount: errorCount, isAttendanceError: errorCount > 0, isTimeElapsedError: hasTimeElapsedError };
+}
+
+type UseTimeRecorderErrorsParams = {
+  attendanceError: unknown;
+  attendancesError: unknown;
+  calendarsError: unknown;
+  shouldFetchAttendance: boolean;
+  dispatch: ReturnType<typeof useDispatch>;
+  logger: Logger;
+};
+function useTimeRecorderErrors({ attendanceError, attendancesError, calendarsError, shouldFetchAttendance, dispatch, logger }: UseTimeRecorderErrorsParams) {
+  useEffect(() => {
+    if (!calendarsError) return;
+    logger.debug(calendarsError);
+    dispatch(pushNotification({ tone: "error", message: MESSAGE_CODE.E00001 }));
+  }, [calendarsError, dispatch, logger]);
+  useEffect(() => {
+    if (!shouldFetchAttendance || !attendanceError) return;
+    dispatch(pushNotification({ tone: "error", message: MESSAGE_CODE.E01001 }));
+  }, [attendanceError, dispatch, shouldFetchAttendance]);
+  useEffect(() => {
+    if (!shouldFetchAttendance || !attendancesError) return;
+    dispatch(pushNotification({ tone: "error", message: MESSAGE_CODE.E02001 }));
+  }, [attendancesError, dispatch, shouldFetchAttendance]);
+}
+
+type UseTimeRecorderSubscriptionParams = {
+  cognitoId: string | undefined;
+  currentWorkDate: string;
+  localAttendanceUpdateIgnoreUntilRef: React.MutableRefObject<number>;
+  refreshTimeRecorderData: () => Promise<void>;
+  logger: Logger;
+};
+function useTimeRecorderSubscription({ cognitoId, currentWorkDate, localAttendanceUpdateIgnoreUntilRef, refreshTimeRecorderData, logger }: UseTimeRecorderSubscriptionParams) {
+  useEffect(() => {
+    if (!cognitoId) return;
+    const subscription = graphqlClient.graphql({
+      query: onUpdateAttendance,
+      variables: { filter: { staffId: { eq: cognitoId }, workDate: { eq: currentWorkDate } } },
+      authMode: "userPool",
+    }).subscribe({
+      next: (event) => {
+        const updatedAttendance = (event.data as OnUpdateAttendanceSubscription)?.onUpdateAttendance;
+        if (!updatedAttendance) return;
+        if (Date.now() < localAttendanceUpdateIgnoreUntilRef.current) return;
+        void refreshTimeRecorderData();
+      },
+      error: (error: unknown) => { logger.error("Subscription error:", error); },
+    });
+    return () => { subscription.unsubscribe(); };
+  }, [cognitoId, currentWorkDate, logger, refreshTimeRecorderData]);
+}
 
 type TimeRecorderProps = {
   onAttendanceErrorCountChange?: (attendanceErrorCount: number) => void;
@@ -66,100 +161,27 @@ export default function TimeRecorder({
     getLunchRestStartTime,
     getLunchRestEndTime,
   } = useContext(AppConfigContext);
-  const [currentWorkDate, setCurrentWorkDate] = useState(() =>
-    resolveCurrentBusinessWorkDate(),
-  );
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      const nextWorkDate = resolveCurrentBusinessWorkDate();
-      setCurrentWorkDate((prev) =>
-        prev === nextWorkDate ? prev : nextWorkDate,
-      );
-    }, 30 * 1000);
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, []);
-  const shouldFetchAttendance = Boolean(cognitoUser?.id);
+  const currentWorkDate = useWorkDateInterval();
   const {
+    shouldFetchAttendance,
+    shouldFetchAttendanceErrors,
+    attendance,
+    attendances,
+    attendanceLoading,
+    attendancesLoading,
+    attendanceError,
+    attendancesError,
+    refetchAttendance,
+    refetchAttendances,
     holidayCalendars,
     companyHolidayCalendars,
-    isLoading: calendarLoading,
-    error: calendarsError,
-  } = useCalendars();
-  const { closeDates, loading: closeDatesLoading } = useCloseDates();
-  const attendanceErrorToday = useMemo(
-    () => dayjs().startOf("day"),
-    [currentWorkDate],
-  );
-  const attendanceErrorCurrentMonth = useMemo(
-    () => attendanceErrorToday.startOf("month"),
-    [attendanceErrorToday],
-  );
-  const attendanceErrorEffectiveDateRange = useMemo(
-    () => getEffectiveDateRange(attendanceErrorCurrentMonth, closeDates),
-    [attendanceErrorCurrentMonth, closeDates],
-  );
-  const attendanceErrorQueryEnd = useMemo(
-    () =>
-      getEffectivePastDateRangeEnd(
-        attendanceErrorEffectiveDateRange,
-        attendanceErrorToday,
-      ),
-    [attendanceErrorEffectiveDateRange, attendanceErrorToday],
-  );
-  const shouldFetchAttendanceErrors =
-    shouldFetchAttendance &&
-    !attendanceErrorEffectiveDateRange.start.isAfter(
-      attendanceErrorQueryEnd,
-      "day",
-    );
-  const {
-    data: attendanceData,
-    isLoading: isAttendanceInitialLoading,
-    isFetching: isAttendanceFetching,
-    isUninitialized: isAttendanceUninitialized,
-    error: attendanceError,
-    refetch: refetchAttendance,
-  } = useGetAttendanceByStaffAndDateQuery(
-    { staffId: cognitoUser?.id ?? "", workDate: currentWorkDate },
-    { skip: !shouldFetchAttendance },
-  );
-  const {
-    data: attendancesData,
-    isLoading: isAttendancesInitialLoading,
-    isFetching: isAttendancesFetching,
-    isUninitialized: isAttendancesUninitialized,
-    error: attendancesError,
-    refetch: refetchAttendances,
-  } = useListAttendancesByDateRangeWithPlaceholdersQuery(
-    {
-      staffId: cognitoUser?.id ?? "",
-      startDate: attendanceErrorEffectiveDateRange.start.format("YYYY-MM-DD"),
-      endDate: attendanceErrorQueryEnd.format("YYYY-MM-DD"),
-    },
-    { skip: !shouldFetchAttendanceErrors },
-  );
-  const attendance = attendanceData ?? undefined;
-  const attendances: Attendance[] = attendancesData?.attendances ?? [];
-  const attendanceLoading =
-    !shouldFetchAttendance ||
-    isAttendanceInitialLoading ||
-    isAttendanceFetching ||
-    isAttendanceUninitialized;
-  const attendancesLoading =
-    closeDatesLoading ||
-    (shouldFetchAttendanceErrors &&
-      (isAttendancesInitialLoading ||
-        isAttendancesFetching ||
-        isAttendancesUninitialized));
+    calendarLoading,
+    calendarsError,
+    attendanceErrorToday,
+  } = useTimeRecorderQueries({ cognitoId: cognitoUser?.id, currentWorkDate });
   const [workStatus, setWorkStatus] = useState<WorkStatus | null | undefined>(
     undefined,
   );
-  const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
-  const [attendanceErrorCount, setAttendanceErrorCount] = useState(0);
-  const [isAttendanceError, setIsAttendanceError] = useState(false);
-  const [isTimeElapsedError, setIsTimeElapsedError] = useState(false);
   const [directMode, setDirectMode] = useState(false);
   const [elapsedWorkTick, setElapsedWorkTick] = useState(() => Date.now());
   const lastActiveTimeRef = useRef(dayjs());
@@ -176,6 +198,7 @@ export default function TimeRecorder({
     [attendance],
   );
   const logger = new Logger("TimeRecorder", "DEBUG");
+  const { staff, refreshStaff } = useStaffRefresh({ cognitoId: cognitoUser?.id, dispatch });
   const {
     localAttendanceUpdateIgnoreUntilRef,
     refreshAttendanceData,
@@ -194,36 +217,13 @@ export default function TimeRecorder({
     refetchAttendance,
     refetchAttendances,
   });
-  const refreshStaff = useCallback(async () => {
-    if (!cognitoUser?.id) {
-      return;
-    }
-    try {
-      const latestStaff = await fetchStaff(cognitoUser.id);
-      setStaff(latestStaff);
-    } catch {
-      dispatch(
-        pushNotification({
-          tone: "error",
-          message: MESSAGE_CODE.E00001,
-        }),
-      );
-    }
-  }, [cognitoUser?.id, dispatch]);
   const refreshTimeRecorderData = useCallback(async () => {
     await Promise.allSettled([refreshStaff(), refreshAttendanceData()]);
   }, [refreshAttendanceData, refreshStaff]);
-  useEffect(() => {
-    if (calendarsError) {
-      logger.debug(calendarsError);
-      dispatch(
-        pushNotification({
-          tone: "error",
-          message: MESSAGE_CODE.E00001,
-        }),
-      );
-    }
-  }, [calendarsError, dispatch, logger]);
+  useTimeRecorderErrors({ attendanceError, attendancesError, calendarsError, shouldFetchAttendance, dispatch, logger });
+  const { attendanceErrorCount, isAttendanceError, isTimeElapsedError } = useAttendanceErrorStats({
+    staff, attendances, holidayCalendars, companyHolidayCalendars, attendanceLoading, attendancesLoading, calendarLoading, attendanceErrorToday,
+  });
   const clockInDisplayText = useMemo(
     () => formatClockDisplayText(attendance?.startTime, "出勤"),
     [attendance?.startTime],
@@ -255,52 +255,6 @@ export default function TimeRecorder({
     void refreshStaff();
   }, [refreshStaff]);
   useEffect(() => {
-    if (!shouldFetchAttendance || !attendanceError) {
-      return;
-    }
-    dispatch(
-      pushNotification({
-        tone: "error",
-        message: MESSAGE_CODE.E01001,
-      }),
-    );
-  }, [attendanceError, dispatch, shouldFetchAttendance]);
-  useEffect(() => {
-    if (!shouldFetchAttendance || !attendancesError) {
-      return;
-    }
-    dispatch(
-      pushNotification({
-        tone: "error",
-        message: MESSAGE_CODE.E02001,
-      }),
-    );
-  }, [attendancesError, dispatch, shouldFetchAttendance]);
-  useEffect(() => {
-    if (!staff || attendanceLoading || attendancesLoading || calendarLoading) {
-      return;
-    }
-    const { errorCount, hasTimeElapsedError } = summarizeAttendanceErrors({
-      staff,
-      attendances,
-      holidayCalendars,
-      companyHolidayCalendars,
-      today: attendanceErrorToday,
-    });
-    setAttendanceErrorCount(errorCount);
-    setIsAttendanceError(errorCount > 0);
-    setIsTimeElapsedError(hasTimeElapsedError);
-  }, [
-    attendanceLoading,
-    attendancesLoading,
-    staff,
-    holidayCalendars,
-    companyHolidayCalendars,
-    attendances,
-    calendarLoading,
-    attendanceErrorToday,
-  ]);
-  useEffect(() => {
     setWorkStatus(getWorkStatus(attendance));
   }, [attendance]);
   const elapsedWorkInfo = useMemo<TimeRecorderElapsedWorkInfo>(() => {
@@ -325,45 +279,7 @@ export default function TimeRecorder({
   useEffect(() => {
     onElapsedWorkTimeChange?.(elapsedWorkInfo);
   }, [elapsedWorkInfo, onElapsedWorkTimeChange]);
-  // 勤怠データ更新のサブスクリプション
-  useEffect(() => {
-    if (!cognitoUser?.id) {
-      return;
-    }
-    const subscription = graphqlClient
-      .graphql({
-        query: onUpdateAttendance,
-        variables: {
-          filter: {
-            staffId: { eq: cognitoUser.id },
-            workDate: { eq: currentWorkDate },
-          },
-        },
-        authMode: "userPool",
-      })
-      .subscribe({
-        next: (event) => {
-          const updatedAttendance = (
-            event.data as OnUpdateAttendanceSubscription
-          )?.onUpdateAttendance;
-          if (!updatedAttendance) {
-            return;
-          }
-          const shouldIgnoreLocalUpdate =
-            Date.now() < localAttendanceUpdateIgnoreUntilRef.current;
-          if (shouldIgnoreLocalUpdate) {
-            return;
-          }
-          void refreshTimeRecorderData();
-        },
-        error: (error: unknown) => {
-          logger.error("Subscription error:", error);
-        },
-      });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [cognitoUser?.id, currentWorkDate, logger, refreshTimeRecorderData]);
+  useTimeRecorderSubscription({ cognitoId: cognitoUser?.id, currentWorkDate, localAttendanceUpdateIgnoreUntilRef, refreshTimeRecorderData, logger });
   const contextValue = useMemo<TimeRecorderContextValue | null>(() => {
     if (workStatus === undefined || workStatus === null) {
       return null;

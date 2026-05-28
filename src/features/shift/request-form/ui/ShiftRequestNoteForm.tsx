@@ -58,16 +58,16 @@ export function ShiftRequestNoteForm({
               onClick={() => onSave(summary)}
               disabled={!hasSelection || interactionDisabled}
               fullWidth={isMobile}
-              style={
-                {
-                  "--app-button-bg": "#19b985",
-                  "--app-button-hover-bg": "#17ab7b",
-                  "--app-button-border": "rgba(6,95,70,0.35)",
-                  "--app-button-hover-border": "rgba(6,95,70,0.35)",
-                  "--app-button-shadow":
+              sx={{
+                backgroundColor: "#19b985 !important",
+                borderColor: "rgba(6,95,70,0.35) !important",
+                "&:hover": {
+                  backgroundColor: "#17ab7b !important",
+                  borderColor: "rgba(6,95,70,0.35) !important",
+                  boxShadow:
                     "inset 0 -2px 0 rgba(0,0,0,0.12), 0 12px 24px -18px rgba(5,150,105,0.55)",
-                } as React.CSSProperties
-              }
+                },
+              }}
             >
               保存
             </AppButton>

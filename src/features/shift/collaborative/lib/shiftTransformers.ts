@@ -386,3 +386,26 @@ export function deriveHistoryCellChanges(
 
   return records;
 }
+
+/**
+ * スタッフのシフトセルマップから GraphQL 入力用エントリ配列を構築する純粋関数
+ */
+export function buildShiftRequestEntries(
+  staffData: Map<string, ShiftCellData>,
+  targetMonth: string,
+): ShiftRequestDayPreferenceInput[] {
+  return Array.from(staffData.entries())
+    .map(([dayKey, cell]): ShiftRequestDayPreferenceInput | null => {
+      const status = shiftStateWithEmptyToShiftRequestStatus(cell.state);
+      if (!status) return null;
+      return {
+        date: dayjs(`${targetMonth}-${dayKey}`).format("YYYY-MM-DD"),
+        status,
+        isLocked: cell.isLocked || undefined,
+      };
+    })
+    .filter(
+      (entry): entry is ShiftRequestDayPreferenceInput => entry !== null,
+    )
+    .toSorted((a, b) => a.date.localeCompare(b.date));
+}

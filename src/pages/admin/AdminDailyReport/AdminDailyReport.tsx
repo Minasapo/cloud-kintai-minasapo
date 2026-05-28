@@ -81,7 +81,7 @@ const SELECT_CLASS =
 const INPUT_DATE_CLASS =
   "rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-200";
 
-export default function AdminDailyReport() {
+function useAdminDailyReportList() {
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
   const navigate = useNavigate();
@@ -100,9 +100,7 @@ export default function AdminDailyReport() {
   const [reports, setReports] = useState<AdminDailyReport[]>([]);
   const [isLoadingReports, setIsLoadingReports] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [selectedReport, setSelectedReport] = useState<AdminDailyReport | null>(
-    null,
-  );
+  const [selectedReport, setSelectedReport] = useState<AdminDailyReport | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const buildStaffName = useCallback(
@@ -123,34 +121,25 @@ export default function AdminDailyReport() {
     try {
       const aggregated: AdminDailyReport[] = [];
       let nextToken: string | null | undefined = undefined;
-
       do {
         const response = (await graphqlClient.graphql({
           query: listDailyReports,
           variables: { limit: 100, nextToken },
           authMode: "userPool",
         })) as GraphQLResult<ListDailyReportsQuery>;
-
         if (response.errors?.length) {
           throw new Error(response.errors.map((err) => err.message).join("\n"));
         }
-
         const items = response.data?.listDailyReports?.items ?? [];
         items.forEach((record) => {
           if (!record) return;
-          aggregated.push(
-            mapDailyReport(record, buildStaffName(record.staffId)),
-          );
+          aggregated.push(mapDailyReport(record, buildStaffName(record.staffId)));
         });
-
         nextToken = response.data?.listDailyReports?.nextToken;
       } while (nextToken);
-
       setReports(aggregated.toSorted(compareReportByDateDesc));
     } catch (error) {
-      setLoadError(
-        error instanceof Error ? error.message : "日報の取得に失敗しました。",
-      );
+      setLoadError(error instanceof Error ? error.message : "日報の取得に失敗しました。");
     } finally {
       setIsLoadingReports(false);
     }
@@ -161,17 +150,12 @@ export default function AdminDailyReport() {
   }, [fetchReports]);
 
   const visibleReports = useMemo(
-    () =>
-      reports.filter((report) =>
-        DISPLAY_STATUSES.includes(report.status as DisplayStatus),
-      ),
+    () => reports.filter((report) => DISPLAY_STATUSES.includes(report.status as DisplayStatus)),
     [reports],
   );
 
   const staffOptions = useMemo(() => {
-    const unique = Array.from(
-      new Set(visibleReports.map((report) => report.author)),
-    );
+    const unique = Array.from(new Set(visibleReports.map((report) => report.author)));
     return unique.toSorted((a, b) => a.localeCompare(b, "ja"));
   }, [visibleReports]);
 
@@ -192,9 +176,7 @@ export default function AdminDailyReport() {
 
   const statusSummary = useMemo(() => {
     return DISPLAY_STATUSES.map((key) => {
-      const count = visibleReports.filter(
-        (report) => report.status === key,
-      ).length;
+      const count = visibleReports.filter((report) => report.status === key).length;
       return { ...STATUS_META[key], count, key };
     });
   }, [visibleReports]);
@@ -245,6 +227,313 @@ export default function AdminDailyReport() {
   const rangeStart = filteredReports.length > 0 ? page * rowsPerPage + 1 : 0;
   const rangeEnd = Math.min((page + 1) * rowsPerPage, filteredReports.length);
 
+  return {
+    isStaffLoading,
+    staffError,
+    statusFilter,
+    setStatusFilter,
+    staffFilter,
+    setStaffFilter,
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    page,
+    setPage,
+    rowsPerPage,
+    setRowsPerPage,
+    isLoadingReports,
+    loadError,
+    selectedReport,
+    isDialogOpen,
+    staffOptions,
+    filteredReports,
+    paginatedReports,
+    statusSummary,
+    visibleReports,
+    totalPages,
+    rangeStart,
+    rangeEnd,
+    handleCloseDialog,
+    handleNavigateDetail,
+    handleOpenInRightPanel,
+    handleOpenCarousel,
+    handleExportCsv,
+  };
+}
+
+type DailyReportFilterBarProps = {
+  statusFilter: DisplayStatus | "";
+  staffFilter: string;
+  startDate: string;
+  endDate: string;
+  staffOptions: string[];
+  onStatusChange: (value: DisplayStatus | "") => void;
+  onStaffChange: (value: string) => void;
+  onStartDateChange: (value: string) => void;
+  onEndDateChange: (value: string) => void;
+};
+
+function DailyReportFilterBar({
+  statusFilter,
+  staffFilter,
+  startDate,
+  endDate,
+  staffOptions,
+  onStatusChange,
+  onStaffChange,
+  onStartDateChange,
+  onEndDateChange,
+}: DailyReportFilterBarProps) {
+  return (
+    <section className="rounded-2xl border border-emerald-100 bg-white/95 px-4 py-3">
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-500">ステータス</label>
+          <select
+            value={statusFilter}
+            onChange={(e) => onStatusChange(e.target.value as DisplayStatus | "")}
+            className={SELECT_CLASS}
+          >
+            <option value="">すべて</option>
+            {DISPLAY_STATUSES.map((key) => (
+              <option key={key} value={key}>
+                {STATUS_META[key].label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-500">スタッフ</label>
+          <select
+            value={staffFilter}
+            onChange={(e) => onStaffChange(e.target.value)}
+            className={SELECT_CLASS}
+          >
+            <option value="">すべて</option>
+            {staffOptions.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-500">開始日</label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => onStartDateChange(e.target.value)}
+            className={INPUT_DATE_CLASS}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-500">終了日</label>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => onEndDateChange(e.target.value)}
+            className={INPUT_DATE_CLASS}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+type DailyReportTableSectionProps = {
+  isLoadingReports: boolean;
+  isStaffLoading: boolean;
+  paginatedReports: AdminDailyReport[];
+  filteredReports: AdminDailyReport[];
+  page: number;
+  rowsPerPage: number;
+  totalPages: number;
+  rangeStart: number;
+  rangeEnd: number;
+  onRowsPerPageChange: (value: number) => void;
+  onPageChange: (updater: (p: number) => number) => void;
+  onNavigateDetail: (report: AdminDailyReport) => void;
+  onOpenInRightPanel: (report: AdminDailyReport) => void;
+};
+
+function DailyReportTableSection({
+  isLoadingReports,
+  isStaffLoading,
+  paginatedReports,
+  filteredReports,
+  page,
+  rowsPerPage,
+  totalPages,
+  rangeStart,
+  rangeEnd,
+  onRowsPerPageChange,
+  onPageChange,
+  onNavigateDetail,
+  onOpenInRightPanel,
+}: DailyReportTableSectionProps) {
+  return (
+    <section className="overflow-hidden rounded-2xl border border-emerald-100 bg-white/95">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[700px] text-sm">
+          <thead>
+            <tr className="border-b border-slate-200 bg-slate-50">
+              <th className="w-[44px] px-2 py-3" />
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500">日付</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500">スタッフ</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500">タイトル</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500">ステータス</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500">最終更新</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {isLoadingReports || isStaffLoading ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-8 text-center text-sm text-slate-400">
+                  読み込み中...
+                </td>
+              </tr>
+            ) : paginatedReports.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-8 text-center text-sm text-slate-400">
+                  条件に一致する日報がありません。
+                </td>
+              </tr>
+            ) : (
+              paginatedReports.map((report) => (
+                <tr key={report.id} className="group transition hover:bg-emerald-50/40">
+                  <td className="px-2 py-2">
+                    <AppIconButton
+                      title="右側で開く"
+                      aria-label="右側で開く"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenInRightPanel(report);
+                      }}
+                      tone="neutral"
+                      size="sm"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                      </svg>
+                    </AppIconButton>
+                  </td>
+                  <td className="cursor-pointer px-4 py-3 text-slate-700" onClick={() => onNavigateDetail(report)}>{report.date}</td>
+                  <td className="cursor-pointer px-4 py-3 text-slate-700" onClick={() => onNavigateDetail(report)}>{report.author}</td>
+                  <td className="cursor-pointer px-4 py-3 text-slate-700" onClick={() => onNavigateDetail(report)}>{report.title}</td>
+                  <td className="px-4 py-3">
+                    <span className={STATUS_BADGE_CLASS[STATUS_META[report.status].color]}>
+                      {STATUS_META[report.status].label}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-slate-500">
+                    {report.updatedAt ? formatDateTimeReadable(report.updatedAt) : "-"}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex items-center justify-between border-t border-slate-100 px-4 py-2">
+        <div className="flex items-center gap-2 text-xs text-slate-500">
+          <span>表示件数:</span>
+          <select
+            value={rowsPerPage}
+            onChange={(e) => onRowsPerPageChange(parseInt(e.target.value, 10))}
+            className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700"
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-3 text-xs text-slate-500">
+          <span>
+            {filteredReports.length > 0
+              ? `${rangeStart}–${rangeEnd} / ${filteredReports.length}件`
+              : "0件"}
+          </span>
+          <div className="flex items-center gap-1">
+            <AppIconButton
+              onClick={() => onPageChange((p) => p - 1)}
+              disabled={page <= 0}
+              aria-label="前のページ"
+              tone="neutral"
+              size="sm"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </AppIconButton>
+            <AppIconButton
+              onClick={() => onPageChange((p) => p + 1)}
+              disabled={page >= totalPages - 1}
+              aria-label="次のページ"
+              tone="neutral"
+              size="sm"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </AppIconButton>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function AdminDailyReport() {
+  const {
+    isStaffLoading,
+    staffError,
+    statusFilter,
+    setStatusFilter,
+    staffFilter,
+    setStaffFilter,
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    page,
+    setPage,
+    rowsPerPage,
+    setRowsPerPage,
+    isLoadingReports,
+    loadError,
+    selectedReport,
+    isDialogOpen,
+    staffOptions,
+    filteredReports,
+    paginatedReports,
+    statusSummary,
+    visibleReports,
+    totalPages,
+    rangeStart,
+    rangeEnd,
+    handleCloseDialog,
+    handleNavigateDetail,
+    handleOpenInRightPanel,
+    handleOpenCarousel,
+    handleExportCsv,
+  } = useAdminDailyReportList();
+
   return (
     <div className="w-full px-2 pb-6 pt-4 sm:px-4 md:px-6">
       <div className="space-y-3">
@@ -252,10 +541,7 @@ export default function AdminDailyReport() {
           <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
             <div className="flex flex-wrap gap-2">
               {statusSummary.map((status) => (
-                <span
-                  key={status.key}
-                  className={STATUS_BADGE_CLASS[status.color]}
-                >
+                <span key={status.key} className={STATUS_BADGE_CLASS[status.color]}>
                   {status.label} {status.count}
                 </span>
               ))}
@@ -272,81 +558,17 @@ export default function AdminDailyReport() {
           </div>
         )}
 
-        <section className="rounded-2xl border border-emerald-100 bg-white/95 px-4 py-3">
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-slate-500">
-                ステータス
-              </label>
-              <select
-                value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value as DisplayStatus | "");
-                  setPage(0);
-                }}
-                className={SELECT_CLASS}
-              >
-                <option value="">すべて</option>
-                {DISPLAY_STATUSES.map((key) => (
-                  <option key={key} value={key}>
-                    {STATUS_META[key].label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-slate-500">
-                スタッフ
-              </label>
-              <select
-                value={staffFilter}
-                onChange={(e) => {
-                  setStaffFilter(e.target.value);
-                  setPage(0);
-                }}
-                className={SELECT_CLASS}
-              >
-                <option value="">すべて</option>
-                {staffOptions.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-slate-500">
-                開始日
-              </label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => {
-                  setStartDate(e.target.value);
-                  setPage(0);
-                }}
-                className={INPUT_DATE_CLASS}
-              />
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-slate-500">
-                終了日
-              </label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => {
-                  setEndDate(e.target.value);
-                  setPage(0);
-                }}
-                className={INPUT_DATE_CLASS}
-              />
-            </div>
-          </div>
-        </section>
+        <DailyReportFilterBar
+          statusFilter={statusFilter}
+          staffFilter={staffFilter}
+          startDate={startDate}
+          endDate={endDate}
+          staffOptions={staffOptions}
+          onStatusChange={(v) => { setStatusFilter(v); setPage(0); }}
+          onStaffChange={(v) => { setStaffFilter(v); setPage(0); }}
+          onStartDateChange={(v) => { setStartDate(v); setPage(0); }}
+          onEndDateChange={(v) => { setEndDate(v); setPage(0); }}
+        />
 
         <div className="flex flex-col items-stretch justify-between gap-2 sm:flex-row sm:items-center">
           <AppButton
@@ -374,187 +596,21 @@ export default function AdminDailyReport() {
           </AppButton>
         </div>
 
-        <section className="overflow-hidden rounded-2xl border border-emerald-100 bg-white/95">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px] text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
-                  <th className="w-[44px] px-2 py-3" />
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500">
-                    日付
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500">
-                    スタッフ
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500">
-                    タイトル
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500">
-                    ステータス
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500">
-                    最終更新
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {isLoadingReports || isStaffLoading ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-8 text-center text-sm text-slate-400"
-                    >
-                      読み込み中...
-                    </td>
-                  </tr>
-                ) : paginatedReports.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-8 text-center text-sm text-slate-400"
-                    >
-                      条件に一致する日報がありません。
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedReports.map((report) => (
-                    <tr
-                      key={report.id}
-                      className="group transition hover:bg-emerald-50/40"
-                    >
-                      <td className="px-2 py-2">
-                        <AppIconButton
-                          title="右側で開く"
-                          aria-label="右側で開く"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenInRightPanel(report);
-                          }}
-                          tone="neutral"
-                          size="sm"
-                        >
-                          <svg
-                            className="h-4 w-4"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden="true"
-                          >
-                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                            <polyline points="15 3 21 3 21 9" />
-                            <line x1="10" y1="14" x2="21" y2="3" />
-                          </svg>
-                        </AppIconButton>
-                      </td>
-                      <td
-                        className="cursor-pointer px-4 py-3 text-slate-700"
-                        onClick={() => handleNavigateDetail(report)}
-                      >
-                        {report.date}
-                      </td>
-                      <td
-                        className="cursor-pointer px-4 py-3 text-slate-700"
-                        onClick={() => handleNavigateDetail(report)}
-                      >
-                        {report.author}
-                      </td>
-                      <td
-                        className="cursor-pointer px-4 py-3 text-slate-700"
-                        onClick={() => handleNavigateDetail(report)}
-                      >
-                        {report.title}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={
-                            STATUS_BADGE_CLASS[STATUS_META[report.status].color]
-                          }
-                        >
-                          {STATUS_META[report.status].label}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-slate-500">
-                        {report.updatedAt
-                          ? formatDateTimeReadable(report.updatedAt)
-                          : "-"}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="flex items-center justify-between border-t border-slate-100 px-4 py-2">
-            <div className="flex items-center gap-2 text-xs text-slate-500">
-              <span>表示件数:</span>
-              <select
-                value={rowsPerPage}
-                onChange={(e) => {
-                  setRowsPerPage(parseInt(e.target.value, 10));
-                  setPage(0);
-                }}
-                className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700"
-              >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
-            <div className="flex items-center gap-3 text-xs text-slate-500">
-              <span>
-                {filteredReports.length > 0
-                  ? `${rangeStart}–${rangeEnd} / ${filteredReports.length}件`
-                  : "0件"}
-              </span>
-              <div className="flex items-center gap-1">
-                <AppIconButton
-                  onClick={() => setPage((p) => p - 1)}
-                  disabled={page <= 0}
-                  aria-label="前のページ"
-                  tone="neutral"
-                  size="sm"
-                >
-                  <svg
-                    className="h-4 w-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <polyline points="15 18 9 12 15 6" />
-                  </svg>
-                </AppIconButton>
-                <AppIconButton
-                  onClick={() => setPage((p) => p + 1)}
-                  disabled={page >= totalPages - 1}
-                  aria-label="次のページ"
-                  tone="neutral"
-                  size="sm"
-                >
-                  <svg
-                    className="h-4 w-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                </AppIconButton>
-              </div>
-            </div>
-          </div>
-        </section>
+        <DailyReportTableSection
+          isLoadingReports={isLoadingReports}
+          isStaffLoading={isStaffLoading}
+          paginatedReports={paginatedReports}
+          filteredReports={filteredReports}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          totalPages={totalPages}
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          onRowsPerPageChange={(v) => { setRowsPerPage(v); setPage(0); }}
+          onPageChange={setPage}
+          onNavigateDetail={handleNavigateDetail}
+          onOpenInRightPanel={handleOpenInRightPanel}
+        />
       </div>
 
       {selectedReport && (

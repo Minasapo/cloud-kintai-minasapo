@@ -44,6 +44,136 @@ const SECTION_TITLE = designTokenVar("color.text.primary", "#1E2A25");
 const LOADING_TEXT = designTokenVar("color.text.muted", "#5E7268");
 const ERROR_TEXT = designTokenVar("color.feedback.danger.base", "#D7443E");
 const logger = createLogger("WorkflowDetailPanel");
+
+type WorkflowDetailHeroProps = {
+  statusLabel: string;
+  approvalStepsCount: number;
+  commentsCount: number;
+  showBackButton: boolean;
+  onBack?: () => void;
+  handleApprove: () => void;
+  isApproveDisabled: boolean;
+  handleReject: () => void;
+  isRejectDisabled: boolean;
+};
+
+function WorkflowDetailHero({
+  statusLabel,
+  approvalStepsCount,
+  commentsCount,
+  showBackButton,
+  onBack,
+  handleApprove,
+  isApproveDisabled,
+  handleReject,
+  isRejectDisabled,
+}: WorkflowDetailHeroProps) {
+  return (
+    <div
+      className="mb-6 flex flex-col gap-4 rounded-2xl p-4 sm:p-5"
+      style={{
+        border: `1px solid ${HERO_BORDER}`,
+        background: HERO_BACKGROUND,
+      }}
+    >
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <SectionTitle
+              className="m-0 text-2xl font-extrabold leading-tight"
+              style={{ color: HERO_TITLE }}
+            >
+              申請内容の確認
+            </SectionTitle>
+          </div>
+        </div>
+
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
+          {showBackButton && onBack && (
+            <AppButton
+              variant="outline"
+              tone="secondary"
+              size="sm"
+              onClick={onBack}
+              className="min-w-0"
+              style={{
+                backgroundColor: "rgba(255,255,255,0.72)",
+              }}
+              startIcon={<BackArrowIcon />}
+            >
+              ワークフロー一覧へ戻る
+            </AppButton>
+          )}
+
+          <AppButton
+            onClick={handleApprove}
+            disabled={isApproveDisabled}
+            className="min-w-24"
+          >
+            承認
+          </AppButton>
+
+          <AppButton
+            tone="danger"
+            onClick={handleReject}
+            disabled={isRejectDisabled}
+            className="min-w-24"
+          >
+            却下
+          </AppButton>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div
+          className="rounded-xl p-4"
+          style={{ backgroundColor: "rgba(255,255,255,0.72)" }}
+        >
+          <p className="m-0 text-xs" style={{ color: HERO_LABEL }}>
+            現在ステータス
+          </p>
+          <p
+            className="m-0 mt-1 text-sm font-bold"
+            style={{ color: HERO_TITLE }}
+          >
+            {statusLabel}
+          </p>
+        </div>
+
+        <div
+          className="rounded-xl p-4"
+          style={{ backgroundColor: "rgba(255,255,255,0.72)" }}
+        >
+          <p className="m-0 text-xs" style={{ color: HERO_LABEL }}>
+            承認ステップ
+          </p>
+          <p
+            className="m-0 mt-1 text-sm font-bold"
+            style={{ color: HERO_TITLE }}
+          >
+            {approvalStepsCount} 件
+          </p>
+        </div>
+
+        <div
+          className="rounded-xl p-4"
+          style={{ backgroundColor: "rgba(255,255,255,0.72)" }}
+        >
+          <p className="m-0 text-xs" style={{ color: HERO_LABEL }}>
+            コメント件数
+          </p>
+          <p
+            className="m-0 mt-1 text-sm font-bold"
+            style={{ color: HERO_TITLE }}
+          >
+            {commentsCount} 件
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface WorkflowDetailPanelProps {
   workflowId?: string;
   onBack?: () => void;
@@ -172,108 +302,17 @@ export default function WorkflowDetailPanel({
         boxShadow: "0 18px 40px rgba(15, 23, 42, 0.08)",
       }}
     >
-      <div
-        className="mb-6 flex flex-col gap-4 rounded-2xl p-4 sm:p-5"
-        style={{
-          border: `1px solid ${HERO_BORDER}`,
-          background: HERO_BACKGROUND,
-        }}
-      >
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0 space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <SectionTitle
-                className="m-0 text-2xl font-extrabold leading-tight"
-                style={{ color: HERO_TITLE }}
-              >
-                申請内容の確認
-              </SectionTitle>
-            </div>
-          </div>
-
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
-            {showBackButton && onBack && (
-              <AppButton
-                variant="outline"
-                tone="secondary"
-                size="sm"
-                onClick={onBack}
-                className="min-w-0"
-                style={{
-                  backgroundColor: "rgba(255,255,255,0.72)",
-                }}
-                startIcon={<BackArrowIcon />}
-              >
-                ワークフロー一覧へ戻る
-              </AppButton>
-            )}
-
-            <AppButton
-              onClick={handleApprove}
-              disabled={isApproveDisabled}
-              className="min-w-24"
-            >
-              承認
-            </AppButton>
-
-            <AppButton
-              tone="danger"
-              onClick={handleReject}
-              disabled={isRejectDisabled}
-              className="min-w-24"
-            >
-              却下
-            </AppButton>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div
-            className="rounded-xl p-4"
-            style={{ backgroundColor: "rgba(255,255,255,0.72)" }}
-          >
-            <p className="m-0 text-xs" style={{ color: HERO_LABEL }}>
-              現在ステータス
-            </p>
-            <p
-              className="m-0 mt-1 text-sm font-bold"
-              style={{ color: HERO_TITLE }}
-            >
-              {statusLabel}
-            </p>
-          </div>
-
-          <div
-            className="rounded-xl p-4"
-            style={{ backgroundColor: "rgba(255,255,255,0.72)" }}
-          >
-            <p className="m-0 text-xs" style={{ color: HERO_LABEL }}>
-              承認ステップ
-            </p>
-            <p
-              className="m-0 mt-1 text-sm font-bold"
-              style={{ color: HERO_TITLE }}
-            >
-              {approvalSteps.length} 件
-            </p>
-          </div>
-
-          <div
-            className="rounded-xl p-4"
-            style={{ backgroundColor: "rgba(255,255,255,0.72)" }}
-          >
-            <p className="m-0 text-xs" style={{ color: HERO_LABEL }}>
-              コメント件数
-            </p>
-            <p
-              className="m-0 mt-1 text-sm font-bold"
-              style={{ color: HERO_TITLE }}
-            >
-              {workflow?.comments?.filter(Boolean).length ?? 0} 件
-            </p>
-          </div>
-        </div>
-      </div>
+      <WorkflowDetailHero
+        statusLabel={statusLabel}
+        approvalStepsCount={approvalSteps.length}
+        commentsCount={workflow?.comments?.filter(Boolean).length ?? 0}
+        showBackButton={showBackButton}
+        onBack={onBack}
+        handleApprove={handleApprove}
+        isApproveDisabled={isApproveDisabled}
+        handleReject={handleReject}
+        isRejectDisabled={isRejectDisabled}
+      />
 
       {loading && (
         <p className="m-0 text-sm" style={{ color: LOADING_TEXT }}>

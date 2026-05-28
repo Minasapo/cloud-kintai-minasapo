@@ -1,5 +1,6 @@
-import { CalendarDateTableCell } from "./CalendarTableCells";
 import { HolidayCalendar } from "@shared/api/graphql/types";
+
+import { CalendarDateTableCell } from "./CalendarTableCells";
 
 export default function HolidayDateTableCell({
   holidayCalendar,

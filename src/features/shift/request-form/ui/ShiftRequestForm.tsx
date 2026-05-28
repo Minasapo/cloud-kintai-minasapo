@@ -1,11 +1,14 @@
 import useCognitoUser from "@entities/staff/model/useCognitoUser";
 import { Box, Container, useMediaQuery, useTheme } from "@mui/material";
+import type { Theme } from "@mui/material/styles";
+import type { Staff } from "@shared/api/graphql/types";
 import { useAppNotification } from "@shared/lib/useAppNotification";
 import { useAutoSave } from "@shared/lib/useAutoSave";
 import dayjs, { Dayjs } from "dayjs";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { createShiftRequestSummary } from "../model/shiftRequestSummary";
+import type { SelectedDateMap } from "../model/statusMapping";
 import { useShiftCalendarSelection } from "../model/useShiftCalendarSelection";
 import { useShiftPatterns } from "../model/useShiftPatterns";
 import { useShiftRequestData } from "../model/useShiftRequestData";
@@ -22,6 +25,147 @@ import { ShiftRequestHeader } from "./ShiftRequestHeader";
 import { ShiftRequestNoteForm } from "./ShiftRequestNoteForm";
 import { ShiftRequestToolbar } from "./ShiftRequestToolbar";
 
+function buildCalendarDays(monthStart: Dayjs): Dayjs[] {
+  const start = monthStart.startOf("week");
+  const end = monthStart.endOf("month").endOf("week");
+  const items: Dayjs[] = [];
+  let cursor = start;
+  while (cursor.isBefore(end) || cursor.isSame(end, "day")) {
+    items.push(cursor);
+    cursor = cursor.add(1, "day");
+  }
+  return items;
+}
+
+function useShiftStatusBackgroundMap(theme: Theme) {
+  return useMemo(() => createStatusBackgroundMap(theme), [theme]);
+}
+
+function useShiftRequestMonthNavigation(
+  setCurrentMonth: React.Dispatch<React.SetStateAction<Dayjs>>,
+) {
+  const prevMonth = useCallback(
+    () => setCurrentMonth((month) => month.subtract(1, "month")),
+    [setCurrentMonth],
+  );
+  const nextMonth = useCallback(
+    () => setCurrentMonth((month) => month.add(1, "month")),
+    [setCurrentMonth],
+  );
+
+  return { prevMonth, nextMonth };
+}
+
+function useShiftRequestUiState({
+  staff,
+  isLoadingStaff,
+  isLoadingShiftRequest,
+  isSaving,
+  isAutoSaving,
+  selectedDates,
+}: {
+  staff: Staff | null;
+  isLoadingStaff: boolean;
+  isLoadingShiftRequest: boolean;
+  isSaving: boolean;
+  isAutoSaving: boolean;
+  selectedDates: SelectedDateMap;
+}) {
+  const summary = useMemo(
+    () => createShiftRequestSummary(selectedDates),
+    [selectedDates],
+  );
+  const interactionDisabled =
+    !staff ||
+    isLoadingStaff ||
+    isLoadingShiftRequest ||
+    isSaving ||
+    isAutoSaving;
+  const hasSelection = Object.keys(selectedDates).length > 0;
+
+  return { summary, interactionDisabled, hasSelection };
+}
+
+function useShiftRequestInitialLoad({
+  isLoadingStaff,
+  isLoadingShiftRequest,
+  staff,
+}: {
+  isLoadingStaff: boolean;
+  isLoadingShiftRequest: boolean;
+  staff: Staff | null;
+}) {
+  const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
+
+  useEffect(() => {
+    if (isLoadingStaff || isLoadingShiftRequest || !staff) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setIsInitialLoadComplete(true);
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+      setIsInitialLoadComplete(false);
+    };
+  }, [isLoadingStaff, isLoadingShiftRequest, staff]);
+
+  return isInitialLoadComplete;
+}
+
+function useShiftRequestAutoSave({
+  staff,
+  isLoadingStaff,
+  isLoadingShiftRequest,
+  isInitialLoadComplete,
+  selectedDates,
+  saveShiftRequest,
+  notify,
+}: {
+  staff: Staff | null;
+  isLoadingStaff: boolean;
+  isLoadingShiftRequest: boolean;
+  isInitialLoadComplete: boolean;
+  selectedDates: SelectedDateMap;
+  saveShiftRequest: (
+    summary: ReturnType<typeof createShiftRequestSummary>,
+  ) => Promise<void>;
+  notify: ReturnType<typeof useAppNotification>["notify"];
+}) {
+  return useAutoSave({
+    saveFn: async () => {
+      if (!staff || isLoadingStaff || isLoadingShiftRequest) return;
+      await saveShiftRequest(createShiftRequestSummary(selectedDates));
+    },
+    data: selectedDates,
+    enabled:
+      isInitialLoadComplete &&
+      !!staff &&
+      !isLoadingStaff &&
+      !isLoadingShiftRequest,
+    delay: 2000,
+    onSaveSuccess: () => {
+      notify({
+        title: "自動保存完了",
+        description: "シフトを自動保存しました",
+        tone: "success",
+        dedupeKey: "shift-auto-save-success",
+      });
+    },
+    onSaveError: (error) => {
+      console.error("Auto-save error:", error);
+      notify({
+        title: "自動保存エラー",
+        description: "シフトの自動保存に失敗しました",
+        tone: "error",
+        dedupeKey: "shift-auto-save-error",
+      });
+    },
+  });
+}
+
 export default function ShiftRequestForm() {
   const { notify } = useAppNotification();
   const { cognitoUser, loading: cognitoUserLoading } = useCognitoUser();
@@ -30,10 +174,7 @@ export default function ShiftRequestForm() {
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
   const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
 
-  const statusBackgroundMap = useMemo(
-    () => createStatusBackgroundMap(theme),
-    [theme],
-  );
+  const statusBackgroundMap = useShiftStatusBackgroundMap(theme);
 
   const monthStart = useMemo(
     () => currentMonth.startOf("month"),
@@ -49,17 +190,7 @@ export default function ShiftRequestForm() {
     [monthStart, daysInMonth],
   );
 
-  const calendarDays = useMemo(() => {
-    const start = monthStart.startOf("week");
-    const end = monthStart.endOf("month").endOf("week");
-    const items: Dayjs[] = [];
-    let cursor = start;
-    while (cursor.isBefore(end) || cursor.isSame(end, "day")) {
-      items.push(cursor);
-      cursor = cursor.add(1, "day");
-    }
-    return items;
-  }, [monthStart]);
+  const calendarDays = useMemo(() => buildCalendarDays(monthStart), [monthStart]);
 
   const dayKeyList = useMemo(
     () => days.map((day) => day.format("YYYY-MM-DD")),
@@ -142,74 +273,13 @@ export default function ShiftRequestForm() {
     defaultMapping: DEFAULT_NEW_PATTERN_MAPPING,
   });
 
-  const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
+  const isInitialLoadComplete = useShiftRequestInitialLoad({ isLoadingStaff, isLoadingShiftRequest, staff });
 
-  useEffect(() => {
-    if (isLoadingStaff || isLoadingShiftRequest || !staff) {
-      return;
-    }
+  const { isSaving: isAutoSaving, isPending: isAutoSavePending, lastSavedAt, lastChangedAt } = useShiftRequestAutoSave({ staff, isLoadingStaff, isLoadingShiftRequest, isInitialLoadComplete, selectedDates, saveShiftRequest, notify });
 
-    const timer = setTimeout(() => {
-      setIsInitialLoadComplete(true);
-    }, 500);
+  const { summary, interactionDisabled, hasSelection } = useShiftRequestUiState({ staff, isLoadingStaff, isLoadingShiftRequest, isSaving, isAutoSaving, selectedDates });
 
-    return () => {
-      clearTimeout(timer);
-      setIsInitialLoadComplete(false);
-    };
-  }, [isLoadingStaff, isLoadingShiftRequest, staff]);
-
-  const summary = useMemo(
-    () => createShiftRequestSummary(selectedDates),
-    [selectedDates],
-  );
-
-  const {
-    isSaving: isAutoSaving,
-    isPending: isAutoSavePending,
-    lastSavedAt,
-    lastChangedAt,
-  } = useAutoSave({
-    saveFn: async () => {
-      if (!staff || isLoadingStaff || isLoadingShiftRequest) return;
-      await saveShiftRequest(createShiftRequestSummary(selectedDates));
-    },
-    data: selectedDates,
-    enabled:
-      isInitialLoadComplete &&
-      !!staff &&
-      !isLoadingStaff &&
-      !isLoadingShiftRequest,
-    delay: 2000,
-    onSaveSuccess: () => {
-      notify({
-        title: "自動保存完了",
-        description: "シフトを自動保存しました",
-        tone: "success",
-        dedupeKey: "shift-auto-save-success",
-      });
-    },
-    onSaveError: (error) => {
-      console.error("Auto-save error:", error);
-      notify({
-        title: "自動保存エラー",
-        description: "シフトの自動保存に失敗しました",
-        tone: "error",
-        dedupeKey: "shift-auto-save-error",
-      });
-    },
-  });
-
-  const interactionDisabled =
-    !staff ||
-    isLoadingStaff ||
-    isLoadingShiftRequest ||
-    isSaving ||
-    isAutoSaving;
-  const hasSelection = Object.keys(selectedDates).length > 0;
-
-  const prevMonth = () => setCurrentMonth((month) => month.subtract(1, "month"));
-  const nextMonth = () => setCurrentMonth((month) => month.add(1, "month"));
+  const { prevMonth, nextMonth } = useShiftRequestMonthNavigation(setCurrentMonth);
 
   return (
     <Container
