@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { INPUT_PLACEHOLDER, sanitizeCapacityValue } from "../shiftPlanUtils";
 
@@ -20,14 +20,6 @@ const EditableCapacityCell: React.FC<EditableCapacityCellProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(value);
   const skipBlurCommitRef = useRef(false);
-
-  // Sync draft to value when not editing
-  useEffect(() => {
-    if (!isEditing) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setDraft(value);
-    }
-  }, [value, isEditing]);
 
   const handleCommit = useCallback(() => {
     const normalized = sanitizeCapacityValue(draft);
@@ -98,7 +90,10 @@ const EditableCapacityCell: React.FC<EditableCapacityCellProps> = ({
       ) : (
         <button
           type="button"
-          onClick={() => setIsEditing(true)}
+          onClick={() => {
+            setDraft(value);
+            setIsEditing(true);
+          }}
           style={{
             width: 52,
             borderRadius: 4,

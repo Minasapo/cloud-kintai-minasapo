@@ -34,6 +34,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -531,29 +532,57 @@ function QuickInputPanel() {
   const { getQuickInputStartTimes, getQuickInputEndTimes } =
     useContext(AppConfigContext);
   const { save } = useAppConfigSaveAction();
-  const [quickInputStartTimes, setQuickInputStartTimes] = useState<
-    QuickInputEntry[]
-  >([]);
-  const [quickInputEndTimes, setQuickInputEndTimes] = useState<QuickInputEntry[]>(
-    [],
+  const quickInputResetKey = useMemo(
+    () =>
+      JSON.stringify({
+        startTimes: getQuickInputStartTimes(),
+        endTimes: getQuickInputEndTimes(),
+      }),
+    [getQuickInputEndTimes, getQuickInputStartTimes],
   );
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setQuickInputStartTimes(
+  const initialQuickInputStartTimes = useMemo(
+    () =>
       getQuickInputStartTimes().map((entry) => ({
         time: dayjs(entry.time, TIME_FORMAT),
         enabled: entry.enabled,
       })),
-    );
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setQuickInputEndTimes(
+    [getQuickInputStartTimes, quickInputResetKey],
+  );
+  const initialQuickInputEndTimes = useMemo(
+    () =>
       getQuickInputEndTimes().map((entry) => ({
         time: dayjs(entry.time, TIME_FORMAT),
         enabled: entry.enabled,
       })),
-    );
-  }, [getQuickInputEndTimes, getQuickInputStartTimes]);
+    [getQuickInputEndTimes, quickInputResetKey],
+  );
+
+  return (
+    <QuickInputPanelBody
+      key={quickInputResetKey}
+      quickInputStartTimesSeed={initialQuickInputStartTimes}
+      quickInputEndTimesSeed={initialQuickInputEndTimes}
+      save={save}
+    />
+  );
+}
+
+function QuickInputPanelBody({
+  quickInputStartTimesSeed,
+  quickInputEndTimesSeed,
+  save,
+}: {
+  quickInputStartTimesSeed: QuickInputEntry[];
+  quickInputEndTimesSeed: QuickInputEntry[];
+  save: (payload: SavePayload) => Promise<void>;
+}) {
+  const [quickInputStartTimes, setQuickInputStartTimes] = useState(
+    quickInputStartTimesSeed,
+  );
+  const [quickInputEndTimes, setQuickInputEndTimes] = useState(
+    quickInputEndTimesSeed,
+  );
+
   const persist = useCallback(async () => {
     await save({
       quickInputStartTimes: quickInputStartTimes.map((entry) => ({

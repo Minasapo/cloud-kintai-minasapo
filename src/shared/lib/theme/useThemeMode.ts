@@ -4,7 +4,7 @@
  */
 
 import { useThemeContext } from "@app/providers/theme/ThemeContext";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 /**
  * テーマモード（light/auto）を管理するフック
@@ -17,7 +17,6 @@ import { useEffect, useState } from "react";
  */
 export function useThemeMode() {
   const { mode, setMode } = useThemeContext();
-  const [isHydrated, setIsHydrated] = useState(false);
 
   // LocalStorage からの復元（SSR 対応）
   useEffect(() => {
@@ -32,9 +31,7 @@ export function useThemeMode() {
     } catch {
       // LocalStorage が利用不可の場合
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsHydrated(true);
   }, [mode, setMode]);
 
-  return { mode, setMode, isHydrated };
+  return { mode, setMode, isHydrated: true };
 }
