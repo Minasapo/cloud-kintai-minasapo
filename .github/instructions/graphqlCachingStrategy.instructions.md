@@ -1,3 +1,7 @@
+---
+applyTo: "src/entities/**/api/**,src/features/**/hooks/**,src/shared/api/graphql/*.ts"
+---
+
 # GraphQL キャッシング戦略ガイド
 
 Real-time updates と cache coherence のバランスを取り、効率的で予測可能なデータ管理を実現するためのガイドラインです。

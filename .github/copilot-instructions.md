@@ -61,9 +61,12 @@ AWS Amplify (AppSync / GraphQL + Cognito). Real-time updates use GraphQL Subscri
 
 ### Auto-generated files — DO NOT manually edit
 
-- `src/shared/api/graphql/**` — regenerate with `amplify codegen`
+- `src/shared/api/graphql/documents/mutations.ts`, `queries.ts`, `subscriptions.ts` — regenerate with `amplify codegen`
+- `src/shared/api/graphql/types.ts` — regenerate with `amplify codegen`
 - `src/ui-components/**` — regenerate with `amplify pull`
 - `src/aws-exports.js`
+
+> Note: Other files in `src/shared/api/graphql/` (e.g., `graphqlBaseQuery.ts`, `tagBuilder.ts`, `concurrency.ts`, `paginatedQuery.ts`) are **manually maintained** utilities and can be edited.
 
 To change GraphQL schema, edit `amplify/backend/api/garakufrontend/schema.graphql`, then run `amplify codegen`.
 
@@ -126,6 +129,7 @@ See `.github/instructions/shiftCollaborative.instructions.md` for guardrails.
 | `.github/instructions/dailyReport.instructions.md` | 日報 |
 | `.github/instructions/testing-guide.md` | テスト規約 |
 | `.github/instructions/amplifyGraphqlGenerated.instructions.md` | 自動生成ファイル |
+| `.github/instructions/graphqlCachingStrategy.instructions.md` | GraphQL キャッシング戦略 |
 
 ## Commit and issue conventions
 
