@@ -18,7 +18,9 @@ export function ExternalLinks() {
     return resolvedLinks;
   }, [getLinks]);
 
-  const personalLinks = usePersonalExternalLinks(cognitoUser?.id);
+  const { personalLinks, hasFetchError } = usePersonalExternalLinks(
+    cognitoUser?.id,
+  );
 
   const { familyName = "", givenName = "" } = cognitoUser ?? {};
 
@@ -42,7 +44,13 @@ export function ExternalLinks() {
     return null;
   }
 
-  return <ExternalLinksView links={mergedLinks} staffName={staffName} />;
+  return (
+    <ExternalLinksView
+      links={mergedLinks}
+      staffName={staffName}
+      personalLinksFetchError={hasFetchError}
+    />
+  );
 }
 
 const filterEnabledLinks = (links: ExternalLinkItem[]) =>
