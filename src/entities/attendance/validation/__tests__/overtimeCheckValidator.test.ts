@@ -1,6 +1,8 @@
-import type { OvertimeCheckContext } from "../overtimeCheckValidator";
+import { validationMessages } from "@shared/config/validationMessages";
+
 import {
   extractTimeFromISO,
+  type OvertimeCheckContext,
   validateOvertimeCheck,
 } from "../overtimeCheckValidator";
 
@@ -132,9 +134,20 @@ describe("overtimeCheckValidator", () => {
       );
     });
 
-    it("時刻パース失敗時は有効として扱う", () => {
+    it("HH:mm 以外の文字列は無効になる", () => {
       const result = validateOvertimeCheck("invalid-time", baseContext);
-      expect(result.isValid).toBe(true);
+      expect(result.isValid).toBe(false);
+      expect(result.errorMessage).toBe(
+        validationMessages.common.invalidDateTime,
+      );
+    });
+
+    it("存在しない時刻の HH:mm も無効になる", () => {
+      const result = validateOvertimeCheck("25:61", baseContext);
+      expect(result.isValid).toBe(false);
+      expect(result.errorMessage).toBe(
+        validationMessages.common.invalidDateTime,
+      );
     });
   });
 });
