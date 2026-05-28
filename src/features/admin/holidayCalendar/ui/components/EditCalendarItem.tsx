@@ -1,18 +1,15 @@
 import { useAppDispatchV2 } from "@app/hooks";
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
-import { Stack, TextField } from "@mui/material";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
+import { Stack } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import type { MessageGenerator } from "@shared/lib/message/Message";
 import { MessageStatus } from "@shared/lib/message/Message";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { AppButton } from "@shared/ui/button";
 import { AppEditIconButton } from "@shared/ui/button/AppActionIconButton";
+import AppDialog from "@shared/ui/feedback/AppDialog";
 import { useDialogCloseGuard } from "@shared/ui/feedback/useDialogCloseGuard";
+import { AppTextField } from "@shared/ui/form";
 import dayjs from "dayjs";
 import { type ReactNode, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -90,38 +87,52 @@ export function EditCalendarItem<TItem extends { id: string }>({
 
   const onSubmit = async (data: BaseInputs) => {
     if (!data.id || !data.date) return;
-    await updateItem(buildUpdatePayload(item, data))
-      .then(() => {
-        dispatch(
-          pushNotification({
-            tone: "success",
-            message: messageFactory.update(MessageStatus.SUCCESS),
-          }),
-        );
-        closeWithoutGuard();
-      })
-      .catch(() => {
-        dispatch(
-          pushNotification({
-            tone: "error",
-            message: messageFactory.update(MessageStatus.ERROR),
-          }),
-        );
-      });
+    try {
+      await updateItem(buildUpdatePayload(item, data));
+      dispatch(
+        pushNotification({
+          tone: "success",
+          message: messageFactory.update(MessageStatus.SUCCESS),
+        }),
+      );
+      closeWithoutGuard();
+    } catch {
+      dispatch(
+        pushNotification({
+          tone: "error",
+          message: messageFactory.update(MessageStatus.ERROR),
+        }),
+      );
+    }
   };
 
   return (
     <>
       <AppEditIconButton onClick={() => setEditRow(item)} />
       {dialog}
-      <Dialog open={Boolean(editRow)} onClose={requestClose}>
-        <DialogTitle>{dialogTitle}</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2}>
-            <DialogContentText>{dialogDescription}</DialogContentText>
-            <Controller
-              name="date"
-              control={control}
+      <AppDialog
+        open={Boolean(editRow)}
+        onClose={requestClose}
+        title={dialogTitle}
+        description={dialogDescription}
+        actions={
+          <>
+            <AppButton variant="outline" tone="neutral" onClick={requestClose}>
+              キャンセル
+            </AppButton>
+            <AppButton
+              disabled={!isValid || !isDirty || isSubmitting}
+              onClick={handleSubmit(onSubmit)}
+            >
+              更新
+            </AppButton>
+          </>
+        }
+      >
+        <Stack spacing={2} sx={{ mt: 1 }}>
+          <Controller
+            name="date"
+            control={control}
               rules={{ required: true }}
               render={({ field }) => (
                 <DatePicker
@@ -133,26 +144,14 @@ export function EditCalendarItem<TItem extends { id: string }>({
                 />
               )}
             />
-            <TextField
+            <AppTextField
               label={nameLabel}
               required
               {...register("name", { required: true })}
             />
             {renderExtraFields?.(register)}
           </Stack>
-        </DialogContent>
-        <DialogActions>
-          <AppButton variant="outline" tone="neutral" onClick={requestClose}>
-            キャンセル
-          </AppButton>
-          <AppButton
-            disabled={!isValid || !isDirty || isSubmitting}
-            onClick={handleSubmit(onSubmit)}
-          >
-            更新
-          </AppButton>
-        </DialogActions>
-      </Dialog>
+        </AppDialog>
     </>
   );
 }

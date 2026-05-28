@@ -1,11 +1,10 @@
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
-import { TableCell } from "@mui/material";
-import dayjs from "dayjs";
+import { DateDisplayCell, TextDisplayCell } from "@shared/ui/table";
 
 export function CalendarDateTableCell({ date }: { date: string }) {
-  return <TableCell>{dayjs(date).format(AttendanceDate.DisplayFormat)}</TableCell>;
+  return <DateDisplayCell date={date} format={AttendanceDate.DisplayFormat} />;
 }
 
 export function CalendarNameTableCell({ name }: { name: string }) {
-  return <TableCell>{name}</TableCell>;
+  return <TextDisplayCell value={name} />;
 }

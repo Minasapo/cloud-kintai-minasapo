@@ -4,10 +4,10 @@ import {
   HolidayDateRangeError,
   MAX_HOLIDAY_RANGE_DAYS,
 } from "@features/admin/holidayCalendar/lib/buildHolidayDateRange";
-import { TextField } from "@mui/material";
 import type { MessageGenerator } from "@shared/lib/message/Message";
 import { MessageStatus } from "@shared/lib/message/Message";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
+import { AppTextField } from "@shared/ui/form";
 import type { ReactNode } from "react";
 import type { UseFormRegister } from "react-hook-form";
 
@@ -119,7 +119,7 @@ export function AddCalendarItem<TInput>({
       onSubmit={onSubmit}
       renderFields={({ register }) => (
         <>
-          <TextField
+          <AppTextField
             label={nameLabel}
             required
             {...register("name", { required: true })}
