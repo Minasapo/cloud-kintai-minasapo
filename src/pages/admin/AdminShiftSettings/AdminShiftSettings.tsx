@@ -1,17 +1,14 @@
 import { useAppDispatchV2 } from "@app/hooks";
-import type { ShiftDisplayMode } from "@entities/app-config/model/useAppConfig";
 import AdminSettingsLayout from "@features/admin/layout/ui/AdminSettingsLayout";
-import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
-import { SettingsAlert, SettingsButton } from "@features/admin/layout/ui/SettingsPrimitives";
 import { useAdminShiftSettings } from "@features/admin-config-shift/useAdminShiftSettings";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
-import { SubsectionTitle } from "@shared/ui/typography";
 import { useCallback, useRef, useState } from "react";
 
 import { S14001, S14002 } from "@/errors";
 
-import { SHIFT_GROUP_UI_TEXTS, ShiftGroupRow } from "./";
+import ShiftDisplaySettingsPanel from "./ShiftDisplaySettingsPanel";
+import ShiftGroupSettingsPanel from "./ShiftGroupSettingsPanel";
 
 type ShiftSettingsTab = "shift-group" | "shift-display";
 
@@ -24,7 +21,8 @@ const SHIFT_SETTINGS_TABS: ReadonlyArray<{
 ];
 
 const getTabId = (tab: ShiftSettingsTab) => `admin-shift-settings-tab-${tab}`;
-const getPanelId = (tab: ShiftSettingsTab) => `admin-shift-settings-panel-${tab}`;
+const getPanelId = (tab: ShiftSettingsTab) =>
+  `admin-shift-settings-panel-${tab}`;
 
 export default function AdminShiftSettings() {
   const dispatch = useAppDispatchV2();
@@ -72,10 +70,6 @@ export default function AdminShiftSettings() {
     isBusy,
   });
 
-  const handleSwitchShiftDefaultMode = (mode: ShiftDisplayMode) => {
-    setShiftDefaultMode(mode);
-  };
-
   const handleTabKeyDown = (
     event: React.KeyboardEvent<HTMLButtonElement>,
     currentTab: ShiftSettingsTab,
@@ -106,7 +100,8 @@ export default function AdminShiftSettings() {
     if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
       event.preventDefault();
       moveFocusTo(
-        (currentIndex - 1 + SHIFT_SETTINGS_TABS.length) % SHIFT_SETTINGS_TABS.length,
+        (currentIndex - 1 + SHIFT_SETTINGS_TABS.length) %
+          SHIFT_SETTINGS_TABS.length,
       );
       return;
     }
@@ -128,7 +123,11 @@ export default function AdminShiftSettings() {
       {dialog}
       <div className="flex flex-col gap-6">
         <div className="rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
-          <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="シフト設定タブ">
+          <div
+            className="grid grid-cols-2 gap-2"
+            role="tablist"
+            aria-label="シフト設定タブ"
+          >
             {SHIFT_SETTINGS_TABS.map((tab) => (
               <button
                 key={tab.value}
@@ -163,72 +162,16 @@ export default function AdminShiftSettings() {
           aria-labelledby={getTabId("shift-group")}
         >
           {activeTab === "shift-group" && (
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-semibold text-slate-800">
-                  {SHIFT_GROUP_UI_TEXTS.introTitle}
-                </span>
-                <ul className="m-0 list-disc pl-6 text-sm text-slate-600">
-                  {SHIFT_GROUP_UI_TEXTS.introBullets.map((text) => (
-                    <li key={text}>{text}</li>
-                  ))}
-                </ul>
-              </div>
-              <SettingsAlert>{SHIFT_GROUP_UI_TEXTS.saveInfo}</SettingsAlert>
-
-              <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-                <div className="flex flex-col gap-6">
-                  <SubsectionTitle className="border-b border-slate-100 pb-2 text-lg font-semibold text-slate-800">
-                    シフトグループ
-                  </SubsectionTitle>
-                  <div className="flex flex-col gap-4">
-                    {fields.length === 0 ? (
-                      <SettingsAlert>{SHIFT_GROUP_UI_TEXTS.emptyGroups}</SettingsAlert>
-                    ) : (
-                      fields.map((group, index) => (
-                        <ShiftGroupRow
-                          key={group.id}
-                          control={control}
-                          index={index}
-                          onDelete={() => handleRemoveGroup(index)}
-                        />
-                      ))
-                    )}
-                  </div>
-                  <button
-                    className="flex flex-row items-center gap-2 self-start rounded-lg border border-slate-300 px-4 py-2 text-slate-700 transition hover:bg-slate-50"
-                    onClick={handleAddGroup}
-                    type="button"
-                  >
-                    <SettingsIcon name="plus" className="text-slate-500" />
-                    <span>グループを追加</span>
-                  </button>
-                  {hasValidationError && (
-                    <SettingsAlert variant="warning">
-                      <div className="flex flex-col gap-2">
-                        <span className="text-sm">
-                          {SHIFT_GROUP_UI_TEXTS.validationWarning}
-                        </span>
-                        <ul className="m-0 list-disc pl-6 text-sm">
-                          {validationDetails.map((detail) => (
-                            <li key={detail}>{detail}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </SettingsAlert>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex flex-row justify-end pb-8">
-                <SettingsButton
-                  onClick={handleSaveShiftGroup}
-                  disabled={hasValidationError || savingShiftGroup}
-                >
-                  {savingShiftGroup ? "保存中..." : "保存"}
-                </SettingsButton>
-              </div>
-            </div>
+            <ShiftGroupSettingsPanel
+              control={control}
+              fields={fields}
+              validationDetails={validationDetails}
+              hasValidationError={hasValidationError}
+              savingShiftGroup={savingShiftGroup}
+              onAddGroup={handleAddGroup}
+              onRemoveGroup={handleRemoveGroup}
+              onSaveShiftGroup={handleSaveShiftGroup}
+            />
           )}
         </div>
 
@@ -239,59 +182,12 @@ export default function AdminShiftSettings() {
           aria-labelledby={getTabId("shift-display")}
         >
           {activeTab === "shift-display" && (
-            <div className="flex flex-col gap-6">
-              <SettingsAlert>シフト管理画面の表示モードを設定します。</SettingsAlert>
-              <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-                <div className="flex flex-col gap-6">
-                  <SubsectionTitle className="border-b border-slate-100 pb-2 text-lg font-semibold text-slate-800">
-                    シフト表示
-                  </SubsectionTitle>
-                  <div className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-2">
-                      <span className="text-sm font-medium text-slate-700">表示モード</span>
-                      <div className="flex flex-wrap gap-3">
-                        <button
-                          type="button"
-                          onClick={() => handleSwitchShiftDefaultMode("normal")}
-                          className={[
-                            "rounded-xl border px-4 py-2 text-sm font-medium transition",
-                            shiftDefaultMode === "normal"
-                              ? "border-emerald-600 bg-emerald-50 text-emerald-700"
-                              : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
-                          ].join(" ")}
-                        >
-                          通常モード
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleSwitchShiftDefaultMode("collaborative")}
-                          className={[
-                            "rounded-xl border px-4 py-2 text-sm font-medium transition",
-                            shiftDefaultMode === "collaborative"
-                              ? "border-emerald-600 bg-emerald-50 text-emerald-700"
-                              : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
-                          ].join(" ")}
-                        >
-                          共同編集モード
-                        </button>
-                      </div>
-                    </div>
-                    <span className="text-sm text-slate-500">
-                      スタッフ側への設定反映には数分程度かかる場合があります。
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-row justify-end pb-8">
-                <SettingsButton
-                  onClick={handleSaveShiftDisplay}
-                  disabled={savingShiftDisplay}
-                >
-                  {savingShiftDisplay ? "保存中..." : "保存"}
-                </SettingsButton>
-              </div>
-            </div>
+            <ShiftDisplaySettingsPanel
+              shiftDefaultMode={shiftDefaultMode}
+              savingShiftDisplay={savingShiftDisplay}
+              onSwitchShiftDefaultMode={setShiftDefaultMode}
+              onSaveShiftDisplay={handleSaveShiftDisplay}
+            />
           )}
         </div>
       </div>

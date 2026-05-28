@@ -1,36 +1,33 @@
 import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
 import { appendItem, removeItemAt, toggleEnabledAt, updateItem, } from "@features/admin/configManagement/lib/arrayHelpers";
-import { TIME_FORMAT } from "@features/admin/configManagement/lib/constants";
 import AdminSettingsLayout from "@features/admin/layout/ui/AdminSettingsLayout";
 import AdminSettingsSection from "@features/admin/layout/ui/AdminSettingsSection";
 import { SettingsButton } from "@features/admin/layout/ui/SettingsPrimitives";
 import dayjs, { Dayjs } from "dayjs";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 
+import { createQuickInputState, getQuickInputStateKey, type QuickInputEntry,type QuickInputState } from "../lib/formState";
 import { useSaveAppConfigSection } from "../lib/useSaveAppConfigSection";
 import QuickInputSection from "./QuickInputSection";
 
-type Entry = {
-    time: Dayjs;
-    enabled: boolean;
-};
 export default function QuickInput() {
     const { getQuickInputStartTimes, getQuickInputEndTimes } = useContext(AppConfigContext);
-    const [quickInputStartTimes, setQuickInputStartTimes] = useState<Entry[]>([]);
-    const [quickInputEndTimes, setQuickInputEndTimes] = useState<Entry[]>([]);
+    const initialState = createQuickInputState({ getQuickInputStartTimes, getQuickInputEndTimes });
+    const stateKey = getQuickInputStateKey(initialState);
+    return <QuickInputContent key={stateKey} initialState={initialState} />;
+}
+
+function mapEntries(entries: QuickInputEntry[]) {
+    return entries.map((entry) => ({
+        time: entry.time,
+        enabled: entry.enabled,
+    }));
+}
+
+function QuickInputContent({ initialState }: { initialState: QuickInputState }) {
+    const [quickInputStartTimes, setQuickInputStartTimes] = useState<QuickInputEntry[]>(() => mapEntries(initialState.quickInputStartTimes));
+    const [quickInputEndTimes, setQuickInputEndTimes] = useState<QuickInputEntry[]>(() => mapEntries(initialState.quickInputEndTimes));
     const saveAppConfigSection = useSaveAppConfigSection();
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setQuickInputStartTimes(getQuickInputStartTimes().map((entry) => ({
-            time: dayjs(entry.time, TIME_FORMAT),
-            enabled: entry.enabled,
-        })));
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setQuickInputEndTimes(getQuickInputEndTimes().map((entry) => ({
-            time: dayjs(entry.time, TIME_FORMAT),
-            enabled: entry.enabled,
-        })));
-    }, [getQuickInputStartTimes, getQuickInputEndTimes]);
     const handleAddQuickInputStartTime = () => setQuickInputStartTimes(appendItem(quickInputStartTimes, { time: dayjs(), enabled: true }));
     const handleQuickInputStartTimeChange = (index: number, newValue: Dayjs | null) => {
         if (!newValue)

@@ -46,6 +46,24 @@ export async function waitForOptionalLayoutLoading(page: Page) {
   }
 }
 
+export async function waitForOptionalLoadingByTestId(
+  page: Page,
+  testId: string,
+  timeout = 10000,
+) {
+  try {
+    const loading = page.getByTestId(testId);
+    await loading.waitFor({ state: "hidden", timeout });
+  } catch {
+    // ignore when loading indicator is not rendered
+  }
+}
+
+export async function waitForShiftCollaborativeLoading(page: Page) {
+  await waitForOptionalLoadingByTestId(page, "shift-mode-loading");
+  await waitForOptionalLayoutLoading(page);
+}
+
 export async function closeTimeElapsedErrorDialogIfVisible(page: Page) {
   try {
     const dialog = page.getByTestId("time-elapsed-error-dialog");

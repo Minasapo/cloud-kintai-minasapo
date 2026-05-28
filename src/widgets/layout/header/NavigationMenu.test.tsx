@@ -206,6 +206,8 @@ describe("NavigationMenu", () => {
       attendanceStatisticsEnabled: false,
     });
 
-    expect(screen.getByTestId("desktop-menu")).not.toHaveTextContent("稼働統計");
+    expect(screen.getByTestId("desktop-menu")).not.toHaveTextContent(
+      "稼働統計",
+    );
   });
 });

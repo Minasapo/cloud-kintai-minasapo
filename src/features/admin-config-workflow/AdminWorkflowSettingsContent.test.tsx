@@ -87,6 +87,10 @@ function TestHarness() {
     handleTemplateSubmit: jest.fn(),
     handleTemplateEdit: jest.fn(),
     handleTemplateDelete: jest.fn(),
+    templateDeleteConfirmOpen: false,
+    templateDeleteConfirmMessage: "",
+    handleConfirmTemplateDelete: jest.fn(),
+    handleCancelTemplateDelete: jest.fn(),
   } satisfies ReturnType<typeof useAdminWorkflowSettings>;
 
   return <AdminWorkflowSettingsContent state={state} />;

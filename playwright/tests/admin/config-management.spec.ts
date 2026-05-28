@@ -1,4 +1,8 @@
 import { expect, Page, test } from "@playwright/test";
+import {
+  collectPageErrors as collectErrors,
+  waitForOptionalLayoutLoading as waitForLoading,
+} from "../helpers/pageTestHelpers";
 
 /**
  * E2E テスト: 管理者設定変更フロー（AppConfig）
@@ -19,47 +23,6 @@ import { expect, Page, test } from "@playwright/test";
 // ---------------------------------------------------------------------------
 // ヘルパー
 // ---------------------------------------------------------------------------
-
-function collectErrors(page: Page) {
-  const errors = {
-    console: [] as string[],
-    network: [] as string[],
-    pageErrors: [] as Error[],
-  };
-
-  page.on("console", (msg) => {
-    if (msg.type() === "error") {
-      const text = msg.text();
-      if (
-        !text.includes("status of 400") &&
-        !text.includes("status of 404")
-      ) {
-        errors.console.push(text);
-      }
-    }
-  });
-
-  page.on("response", (response) => {
-    if (response.status() >= 500) {
-      errors.network.push(`[${response.status()}] ${response.url()}`);
-    }
-  });
-
-  page.on("pageerror", (error: Error) => {
-    errors.pageErrors.push(error);
-  });
-
-  return errors;
-}
-
-async function waitForLoading(page: Page) {
-  try {
-    const loading = page.getByTestId("layout-linear-progress");
-    await expect(loading).toBeHidden({ timeout: 10000 });
-  } catch {
-    // ローディング要素がないページでは無視する
-  }
-}
 
 async function waitForNotification(page: Page, message: string) {
   const notification = page.locator('[role="alert"]').filter({
@@ -145,7 +108,8 @@ test.describe("管理者設定変更フロー @smoke-test", () => {
     await waitForLoading(page);
 
     const dialogAfterReload = await openAttendanceSettingsDialog(page);
-    const timeInputsAfterReload = dialogAfterReload.locator('input[type="time"]');
+    const timeInputsAfterReload =
+      dialogAfterReload.locator('input[type="time"]');
     await expect(timeInputsAfterReload.nth(0)).toHaveValue(newStart);
     await expect(timeInputsAfterReload.nth(1)).toHaveValue(newEnd);
   });
@@ -207,9 +171,7 @@ test.describe("管理者設定 追加シナリオ", () => {
     expect(errors.network).toHaveLength(0);
   });
 
-  test("テーマカラー変更（AdminTheme）の確認", async ({
-    page,
-  }, testInfo) => {
+  test("テーマカラー変更（AdminTheme）の確認", async ({ page }, testInfo) => {
     if (testInfo.project.name !== "chromium-admin") {
       testInfo.skip();
     }
@@ -233,9 +195,11 @@ test.describe("管理者設定 追加シナリオ", () => {
     // テーマページのカラー入力要素を確認
     // ページが正常にロードされて要素が存在すればOK
     const pageTitle = page.locator("h1, h2").filter({ hasText: /テーマ/ });
-    await expect(pageTitle).toBeVisible({ timeout: 10000 }).catch(() => {
-      // タイトルがない場合でもOK（ページがロードされていれば）
-    });
+    await expect(pageTitle)
+      .toBeVisible({ timeout: 10000 })
+      .catch(() => {
+        // タイトルがない場合でもOK（ページがロードされていれば）
+      });
 
     // 2番目のスウォッチを選択して変更
     const secondSwatch = colorSwatches.nth(1);
@@ -283,11 +247,12 @@ test.describe("管理者設定 追加シナリオ", () => {
     await expect(page.locator("body")).toBeVisible();
 
     // シフト設定を開くボタンを探す
-    const settingsButton = page
-      .getByRole("button")
-      .filter({ hasText: /設定/ });
+    const settingsButton = page.getByRole("button").filter({ hasText: /設定/ });
 
-    const settingsButtonVisible = await settingsButton.first().isVisible().catch(() => false);
+    const settingsButtonVisible = await settingsButton
+      .first()
+      .isVisible()
+      .catch(() => false);
 
     if (settingsButtonVisible) {
       await settingsButton.first().click();

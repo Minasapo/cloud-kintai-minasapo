@@ -197,7 +197,10 @@ export default function TimeRecorder({
     () => hasPendingChangeRequests(attendance),
     [attendance],
   );
-  const logger = new Logger("TimeRecorder", "DEBUG");
+  const logger = useMemo(
+    () => new Logger("TimeRecorder", import.meta.env.DEV ? "DEBUG" : "ERROR"),
+    [],
+  );
   const { staff, refreshStaff } = useStaffRefresh({ cognitoId: cognitoUser?.id, dispatch });
   const {
     localAttendanceUpdateIgnoreUntilRef,

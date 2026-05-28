@@ -1,7 +1,14 @@
-import { AppContext,CalendarContext } from "../CalendarContext";
+import type { Context } from "react";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ctx = (CalendarContext as any)._currentValue;
+import { AppContext, CalendarContext, type CalendarContextProps } from "../CalendarContext";
+
+type ContextWithDefaultValue<T> = Context<T> & {
+  _currentValue: T;
+};
+
+const ctx = (
+  CalendarContext as ContextWithDefaultValue<CalendarContextProps>
+)._currentValue;
 
 describe("CalendarContext", () => {
   describe("デフォルト値", () => {
@@ -23,8 +30,7 @@ describe("CalendarContext", () => {
       const result = await ctx.createHolidayCalendar({
         id: "test",
         holidayDate: "2024-01-01",
-        calendarName: "元日",
-        calendarType: "NATIONAL",
+        name: "元日",
       });
       expect(result).toBeUndefined();
     });

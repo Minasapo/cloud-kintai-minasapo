@@ -1,4 +1,16 @@
-import { expect, test } from "@playwright/test";
+import {
+  type ConsoleMessage,
+  expect,
+  type Page,
+  type Response,
+  test,
+} from "@playwright/test";
+
+interface CollectedPageErrors {
+  readonly console: string[];
+  readonly network: string[];
+  readonly pageErrors: Error[];
+}
 
 /**
  * スモークテスト: 全ページエラー検出
@@ -41,15 +53,15 @@ const ADMIN_PAGES = [
 
 test.describe("スモークテスト - ページエラー検出", () => {
   // ページごとにエラーを収集
-  const collectErrorsForPage = (page: any) => {
-    const errors = {
-      console: [] as string[],
-      network: [] as string[],
-      pageErrors: [] as Error[],
+  const collectErrorsForPage = (page: Page): CollectedPageErrors => {
+    const errors: CollectedPageErrors = {
+      console: [],
+      network: [],
+      pageErrors: [],
     };
 
     // コンソールエラーをキャッチ（リソースロードエラーは除外）
-    page.on("console", (msg: any) => {
+    page.on("console", (msg: ConsoleMessage) => {
       if (msg.type() === "error") {
         const text = msg.text();
         // リソースロードエラー（400系）は除外
@@ -63,7 +75,7 @@ test.describe("スモークテスト - ページエラー検出", () => {
     });
 
     // ネットワークエラー（5xx）をキャッチ
-    page.on("response", (response: any) => {
+    page.on("response", (response: Response) => {
       const status = response.status();
       if (status >= 500) {
         errors.network.push(`[${status}] ${response.url()}`);

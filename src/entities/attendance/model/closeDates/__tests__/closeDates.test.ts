@@ -1,4 +1,9 @@
 import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import {
+  type CreateCloseDateInput,
+  type ModelCloseDateConditionInput,
+  type UpdateCloseDateInput,
+} from "@shared/api/graphql/types";
 
 import createCloseDateData from "../createCloseDateData";
 import deleteCloseDateData from "../deleteCloseDateData";
@@ -6,6 +11,22 @@ import fetchCloseDates from "../fetchCloseDates";
 import updateCloseDateData from "../updateCloseDateData";
 
 const mockedGraphql = graphqlClient.graphql as jest.Mock;
+
+const makeCreateCloseDateInput = (
+  overrides: Partial<CreateCloseDateInput> = {},
+): CreateCloseDateInput => ({
+  closeDate: "2024-01-31",
+  startDate: "2024-01-01",
+  endDate: "2024-01-31",
+  ...overrides,
+});
+
+const makeUpdateCloseDateInput = (
+  overrides: Partial<UpdateCloseDateInput> = {},
+): UpdateCloseDateInput => ({
+  id: "1",
+  ...overrides,
+});
 
 // ---------------------------------------------------------------------------
 // fetchCloseDates
@@ -118,8 +139,7 @@ describe("createCloseDateData", () => {
       data: { createCloseDate: mockCloseDate },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await createCloseDateData({} as any);
+    const result = await createCloseDateData(makeCreateCloseDateInput());
 
     expect(result).toEqual(mockCloseDate);
     expect(mockedGraphql).toHaveBeenCalledWith(
@@ -137,8 +157,7 @@ describe("createCloseDateData", () => {
       data: { createCloseDate: { id: "1", ...input } },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await createCloseDateData(input as any);
+    await createCloseDateData(input);
 
     expect(mockedGraphql).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -152,8 +171,9 @@ describe("createCloseDateData", () => {
       errors: [{ message: "Create error" }],
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await expect(createCloseDateData({} as any)).rejects.toThrow("Create error");
+    await expect(createCloseDateData(makeCreateCloseDateInput())).rejects.toThrow(
+      "Create error",
+    );
   });
 
   it("data がない場合は例外をスローする", async () => {
@@ -161,8 +181,7 @@ describe("createCloseDateData", () => {
       data: { createCloseDate: null },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await expect(createCloseDateData({} as any)).rejects.toThrow(
+    await expect(createCloseDateData(makeCreateCloseDateInput())).rejects.toThrow(
       "No data returned",
     );
   });
@@ -188,8 +207,9 @@ describe("updateCloseDateData", () => {
       data: { updateCloseDate: mockCloseDate },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await updateCloseDateData({ input: { id: "1" } as any });
+    const result = await updateCloseDateData({
+      input: makeUpdateCloseDateInput(),
+    });
 
     expect(result).toEqual(mockCloseDate);
     expect(mockedGraphql).toHaveBeenCalledWith(
@@ -202,13 +222,11 @@ describe("updateCloseDateData", () => {
     mockedGraphql.mockResolvedValueOnce({
       data: { updateCloseDate: mockCloseDate },
     });
-    const condition = { version: { eq: 1 } };
+    const condition: ModelCloseDateConditionInput = { version: { eq: 1 } };
 
     await updateCloseDateData({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      input: { id: "1", closeDate: "2024-01-28" } as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      condition: condition as any,
+      input: makeUpdateCloseDateInput({ closeDate: "2024-01-28" }),
+      condition,
     });
 
     expect(mockedGraphql).toHaveBeenCalledWith(
@@ -224,8 +242,9 @@ describe("updateCloseDateData", () => {
       data: { updateCloseDate: mockCloseDate },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await updateCloseDateData({ input: { id: "1", closeDate: "2024-01-28" } as any });
+    await updateCloseDateData({
+      input: makeUpdateCloseDateInput({ closeDate: "2024-01-28" }),
+    });
 
     expect(mockedGraphql).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -240,8 +259,7 @@ describe("updateCloseDateData", () => {
     });
 
     await expect(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      updateCloseDateData({ input: { id: "1" } as any }),
+      updateCloseDateData({ input: makeUpdateCloseDateInput() }),
     ).rejects.toThrow("Update error");
   });
 
@@ -251,8 +269,7 @@ describe("updateCloseDateData", () => {
     });
 
     await expect(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      updateCloseDateData({ input: { id: "1" } as any }),
+      updateCloseDateData({ input: makeUpdateCloseDateInput() }),
     ).rejects.toThrow("No data returned");
   });
 });

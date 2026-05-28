@@ -14,6 +14,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
 import dayjs, { Dayjs } from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
@@ -178,7 +179,10 @@ const PrintShiftDialogComponent = ({
   const handlePrint = useCallback(() => {
     const printWindow = window.open("", "_blank");
     if (!printWindow) {
-      alert("ポップアップが許可されていません");
+      pushNotification({
+        tone: "warning",
+        message: "ポップアップが許可されていません。ブラウザ設定を確認してください。",
+      });
       return;
     }
 
