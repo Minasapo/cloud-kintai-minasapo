@@ -15,16 +15,20 @@ type TimeElapsedErrorDialogProps = {
 export default function TimeElapsedErrorDialog({
   isTimeElapsedError,
 }: TimeElapsedErrorDialogProps): JSX.Element | null {
-  const [open, setOpen] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const laterButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
-    setOpen(isTimeElapsedError);
+    if (!isTimeElapsedError) {
+      setDismissed(false);
+    }
   }, [isTimeElapsedError]);
 
+  const open = isTimeElapsedError && !dismissed;
+
   const handleClose = () => {
-    setOpen(false);
+    setDismissed(true);
   };
 
   useDialogFocusManagement({

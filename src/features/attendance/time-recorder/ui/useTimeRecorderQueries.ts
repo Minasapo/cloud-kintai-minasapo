@@ -58,7 +58,6 @@ export function useTimeRecorderQueries({
   const {
     data: attendanceData,
     isLoading: isAttendanceInitialLoading,
-    isFetching: isAttendanceFetching,
     isUninitialized: isAttendanceUninitialized,
     error: attendanceError,
     refetch: refetchAttendance,
@@ -69,7 +68,6 @@ export function useTimeRecorderQueries({
   const {
     data: attendancesData,
     isLoading: isAttendancesInitialLoading,
-    isFetching: isAttendancesFetching,
     isUninitialized: isAttendancesUninitialized,
     error: attendancesError,
     refetch: refetchAttendances,
@@ -86,13 +84,11 @@ export function useTimeRecorderQueries({
   const attendanceLoading =
     !shouldFetchAttendance ||
     isAttendanceInitialLoading ||
-    isAttendanceFetching ||
     isAttendanceUninitialized;
   const attendancesLoading =
     closeDatesLoading ||
     (shouldFetchAttendanceErrors &&
       (isAttendancesInitialLoading ||
-        isAttendancesFetching ||
         isAttendancesUninitialized));
   return {
     shouldFetchAttendance,

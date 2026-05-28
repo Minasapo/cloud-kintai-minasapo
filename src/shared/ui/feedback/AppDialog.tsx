@@ -32,8 +32,18 @@ export default function AppDialog({
   fullWidth = true,
   loading = false,
 }: AppDialogProps) {
+  if (!open) {
+    return null;
+  }
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth={maxWidth} fullWidth={fullWidth}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth={maxWidth}
+      fullWidth={fullWidth}
+      keepMounted={false}
+    >
       {title && <DialogTitle>{title}</DialogTitle>}
       {loading && <ProgressBar />}
       <DialogContent>
