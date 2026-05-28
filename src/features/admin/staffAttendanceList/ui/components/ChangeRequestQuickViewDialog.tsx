@@ -27,13 +27,13 @@ export default function ChangeRequestQuickViewDialog({
   changeRequest,
   onClose,
 }: ChangeRequestQuickViewDialogProps) {
+  const workDate = attendance?.workDate ?? null;
   const workDateLabel = useMemo(() => {
-    if (!attendance?.workDate) return "";
-    const date = dayjs(attendance.workDate);
+    if (!workDate) return "";
+    const date = dayjs(workDate);
     if (!date.isValid()) return "";
     return date.format(AttendanceDate.DisplayFormat);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attendance?.workDate]);
+  }, [workDate]);
 
   if (!attendance || !changeRequest) {
     return (

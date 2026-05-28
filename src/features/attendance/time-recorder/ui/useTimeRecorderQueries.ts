@@ -30,8 +30,7 @@ export function useTimeRecorderQueries({
   } = useCalendars();
   const { closeDates, loading: closeDatesLoading } = useCloseDates();
   const attendanceErrorToday = useMemo(
-    () => dayjs().startOf("day"),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    () => dayjs(currentWorkDate).startOf("day"),
     [currentWorkDate],
   );
   const attendanceErrorCurrentMonth = useMemo(

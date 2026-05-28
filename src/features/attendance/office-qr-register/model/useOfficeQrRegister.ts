@@ -21,7 +21,7 @@ export function useOfficeQrRegister() {
     const { getOfficeMode } = useContext(AppConfigContext);
     const { cognitoUser } = useContext(AuthContext);
     const [searchParams] = useSearchParams();
-    const [isOfficeModeEnabled, setIsOfficeModeEnabled] = useState(false);
+    const isOfficeModeEnabled = getOfficeMode();
     const [isValidToken, setIsValidToken] = useState(false);
     const [attendance, setAttendance] = useState<Attendance | null>(null);
     const [triggerGetAttendance, { error: fetchAttendanceError }] = useLazyGetAttendanceByStaffAndDateQuery();
@@ -83,10 +83,6 @@ export function useOfficeQrRegister() {
         return () => {
             window.clearInterval(intervalId);
         };
-    }, []);
-    useEffect(() => {
-        setIsOfficeModeEnabled(getOfficeMode());
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     useEffect(() => {
         let isMounted = true;
