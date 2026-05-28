@@ -3,8 +3,17 @@
  * @description テーマモードを管理するカスタムフック
  */
 
-import { useThemeContext } from "@app/providers/theme/ThemeContext";
+import {
+  type ThemeMode,
+  useThemeContext,
+} from "@app/providers/theme/ThemeContext";
 import { useEffect } from "react";
+
+const THEME_MODE_STORAGE_KEY = "app-theme-mode";
+
+function isThemeMode(value: string): value is ThemeMode {
+  return value === "light" || value === "auto";
+}
 
 /**
  * テーマモード（light/auto）を管理するフック
@@ -21,11 +30,17 @@ export function useThemeMode() {
   // LocalStorage からの復元（SSR 対応）
   useEffect(() => {
     try {
-      const savedMode = localStorage.getItem("app-theme-mode") as
-        | "light"
-        | "auto"
-        | null;
-      if (savedMode && savedMode !== mode) {
+      const savedMode = localStorage.getItem(THEME_MODE_STORAGE_KEY);
+      if (!savedMode) {
+        return;
+      }
+
+      if (!isThemeMode(savedMode)) {
+        localStorage.removeItem(THEME_MODE_STORAGE_KEY);
+        return;
+      }
+
+      if (savedMode !== mode) {
         setMode(savedMode);
       }
     } catch {
