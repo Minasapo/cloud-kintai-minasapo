@@ -9,7 +9,14 @@
  * - 登録フロー（成功・失敗・キャンセル）
  * - エッジケース（BOM, CRLF, 無効日付, 空データ等）
  */
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import {
@@ -62,8 +69,7 @@ class MockFileReader {
   onload: MockReaderInstance["onload"] = null;
   onerror: MockReaderInstance["onerror"] = null;
   constructor() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    capturedReaders.push(this as any);
+    capturedReaders.push(this);
   }
 }
 
@@ -104,13 +110,17 @@ function getLastReader(): MockReaderInstance {
 }
 
 /** FileReader.onload を指定した result で発火する */
-function triggerLoad(result: string | null) {
-  getLastReader().onload?.({ target: { result } });
+async function triggerLoad(result: string | null) {
+  await act(async () => {
+    getLastReader().onload?.({ target: { result } });
+  });
 }
 
 /** FileReader.onerror を発火する */
-function triggerError() {
-  getLastReader().onerror?.();
+async function triggerError() {
+  await act(async () => {
+    getLastReader().onerror?.();
+  });
 }
 
 /** コンポーネントをレンダリングし、bulkCreate モックと共に返す */
@@ -132,7 +142,6 @@ describe("ExcelFilePicker", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedReaders.length = 0;
-    jest.spyOn(window, "confirm").mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -199,19 +208,19 @@ describe("ExcelFilePicker", () => {
     await openDialog();
 
     const mockClick = jest.fn();
-    const mockAnchor = { href: "", download: "", click: mockClick };
+    const mockAnchor = document.createElement("a");
+    jest.spyOn(mockAnchor, "click").mockImplementation(mockClick);
 
     // renderComponent の後にスパイを設定し、"a" タグだけをインターセプト
     const realCreateElement = document.createElement.bind(document);
     jest.spyOn(document, "createElement").mockImplementation((tagName: string) => {
-      if (tagName === "a") return mockAnchor as unknown as HTMLElement;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return realCreateElement(tagName as any);
+      if (tagName === "a") return mockAnchor;
+      return realCreateElement(tagName);
     });
 
     await userEvent.click(screen.getByRole("button", { name: /テンプレート/ }));
 
-    expect(mockAnchor.href).toBe("mock-csv-url");
+    expect(mockAnchor.href).toBe("http://localhost/mock-csv-url");
     expect(mockAnchor.download).toBe("company_holiday.csv");
     expect(mockClick).toHaveBeenCalledTimes(1);
   });
@@ -223,7 +232,7 @@ describe("ExcelFilePicker", () => {
     await openDialog();
 
     selectFile(createFile("holidays.csv", VALID_CSV));
-    triggerLoad(VALID_CSV);
+    await triggerLoad(VALID_CSV);
 
     await waitFor(() => {
       expect(screen.getByText("holidays.csv")).toBeInTheDocument();
@@ -235,9 +244,15 @@ describe("ExcelFilePicker", () => {
     await openDialog();
 
     selectFile(createFile("holidays.csv", VALID_CSV));
-    triggerLoad(VALID_CSV);
+    await triggerLoad(VALID_CSV);
 
     await userEvent.click(screen.getByRole("button", { name: "登録" }));
+    const confirmDialog = await screen.findByRole("dialog", {
+      name: "一括登録の確認",
+    });
+    await userEvent.click(
+      within(confirmDialog).getByRole("button", { name: "登録" }),
+    );
 
     await waitFor(() => {
       expect(bulkCreate).toHaveBeenCalledTimes(1);
@@ -263,9 +278,15 @@ describe("ExcelFilePicker", () => {
     await openDialog();
 
     selectFile(createFile("holidays.csv", VALID_CSV));
-    triggerLoad(VALID_CSV);
+    await triggerLoad(VALID_CSV);
 
     await userEvent.click(screen.getByRole("button", { name: "登録" }));
+    const confirmDialog = await screen.findByRole("dialog", {
+      name: "一括登録の確認",
+    });
+    await userEvent.click(
+      within(confirmDialog).getByRole("button", { name: "登録" }),
+    );
 
     await waitFor(() => {
       const successCall = pushNotificationMock.mock.calls.find(
@@ -286,9 +307,15 @@ describe("ExcelFilePicker", () => {
     await openDialog();
 
     selectFile(createFile("holidays.csv", VALID_CSV));
-    triggerLoad(VALID_CSV);
+    await triggerLoad(VALID_CSV);
 
     await userEvent.click(screen.getByRole("button", { name: "登録" }));
+    const confirmDialog = await screen.findByRole("dialog", {
+      name: "一括登録の確認",
+    });
+    await userEvent.click(
+      within(confirmDialog).getByRole("button", { name: "登録" }),
+    );
 
     await waitFor(() => {
       const errorCall = pushNotificationMock.mock.calls.find(
@@ -303,9 +330,15 @@ describe("ExcelFilePicker", () => {
     await openDialog();
 
     selectFile(createFile("crlf.csv", CRLF_CSV));
-    triggerLoad(CRLF_CSV);
+    await triggerLoad(CRLF_CSV);
 
     await userEvent.click(screen.getByRole("button", { name: "登録" }));
+    const confirmDialog = await screen.findByRole("dialog", {
+      name: "一括登録の確認",
+    });
+    await userEvent.click(
+      within(confirmDialog).getByRole("button", { name: "登録" }),
+    );
 
     await waitFor(() => {
       expect(bulkCreate).toHaveBeenCalledWith(
@@ -325,9 +358,15 @@ describe("ExcelFilePicker", () => {
     await openDialog();
 
     selectFile(createFile("bom.csv", BOM_CSV));
-    triggerLoad(BOM_CSV);
+    await triggerLoad(BOM_CSV);
 
     await userEvent.click(screen.getByRole("button", { name: "登録" }));
+    const confirmDialog = await screen.findByRole("dialog", {
+      name: "一括登録の確認",
+    });
+    await userEvent.click(
+      within(confirmDialog).getByRole("button", { name: "登録" }),
+    );
 
     await waitFor(() => {
       expect(bulkCreate).toHaveBeenCalledWith([
@@ -341,9 +380,15 @@ describe("ExcelFilePicker", () => {
     await openDialog();
 
     selectFile(createFile("partial.csv", INVALID_DATE_CSV));
-    triggerLoad(INVALID_DATE_CSV);
+    await triggerLoad(INVALID_DATE_CSV);
 
     await userEvent.click(screen.getByRole("button", { name: "登録" }));
+    const confirmDialog = await screen.findByRole("dialog", {
+      name: "一括登録の確認",
+    });
+    await userEvent.click(
+      within(confirmDialog).getByRole("button", { name: "登録" }),
+    );
 
     await waitFor(() => {
       expect(bulkCreate).toHaveBeenCalledWith([
@@ -353,21 +398,38 @@ describe("ExcelFilePicker", () => {
   });
 
   it("登録ボタンクリック時の confirm メッセージにデータ件数が含まれる", async () => {
-    const confirmSpy = jest
-      .spyOn(window, "confirm")
-      .mockReturnValue(false);
     renderComponent();
     await openDialog();
 
     selectFile(createFile("holidays.csv", VALID_CSV));
-    triggerLoad(VALID_CSV);
+    await triggerLoad(VALID_CSV);
 
     await userEvent.click(screen.getByRole("button", { name: "登録" }));
+    const confirmDialog = await screen.findByRole("dialog", {
+      name: "一括登録の確認",
+    });
 
-    // VALID_CSV には 2 件のデータがある
-    expect(confirmSpy).toHaveBeenCalledWith(
-      expect.stringContaining("2件"),
+    expect(
+      within(confirmDialog).getByText("以下の2件のデータを登録しますか？"),
+    ).toBeInTheDocument();
+  });
+
+  it("confirm でキャンセルすると bulkCreate は呼ばれない", async () => {
+    const { bulkCreate } = renderComponent();
+    await openDialog();
+
+    selectFile(createFile("holidays.csv", VALID_CSV));
+    await triggerLoad(VALID_CSV);
+
+    await userEvent.click(screen.getByRole("button", { name: "登録" }));
+    const confirmDialog = await screen.findByRole("dialog", {
+      name: "一括登録の確認",
+    });
+    await userEvent.click(
+      within(confirmDialog).getByRole("button", { name: "キャンセル" }),
     );
+
+    expect(bulkCreate).not.toHaveBeenCalled();
   });
 
   // ── 登録フロー（キャンセル・空データ）──────────────────────────────────────
@@ -379,19 +441,6 @@ describe("ExcelFilePicker", () => {
     await userEvent.click(screen.getByRole("button", { name: "登録" }));
 
     expect(bulkCreate).not.toHaveBeenCalled();
-    expect(window.confirm).not.toHaveBeenCalled();
-  });
-
-  it("confirm でキャンセルすると bulkCreate は呼ばれない", async () => {
-    jest.spyOn(window, "confirm").mockReturnValue(false);
-    const { bulkCreate } = renderComponent();
-    await openDialog();
-
-    selectFile(createFile("holidays.csv", VALID_CSV));
-    triggerLoad(VALID_CSV);
-
-    await userEvent.click(screen.getByRole("button", { name: "登録" }));
-    expect(bulkCreate).not.toHaveBeenCalled();
   });
 
   // ── ファイル選択（異常系）────────────────────────────────────────────────
@@ -401,7 +450,7 @@ describe("ExcelFilePicker", () => {
     await openDialog();
 
     selectFile(createFile("empty.csv", EMPTY_DATA_CSV));
-    triggerLoad(EMPTY_DATA_CSV);
+    await triggerLoad(EMPTY_DATA_CSV);
 
     await waitFor(() => {
       const errorCall = pushNotificationMock.mock.calls.find(
@@ -416,7 +465,7 @@ describe("ExcelFilePicker", () => {
     await openDialog();
 
     selectFile(createFile("bad_header.csv", MISSING_HEADER_CSV));
-    triggerLoad(MISSING_HEADER_CSV);
+    await triggerLoad(MISSING_HEADER_CSV);
 
     await waitFor(() => {
       const errorCall = pushNotificationMock.mock.calls.find(
@@ -431,7 +480,7 @@ describe("ExcelFilePicker", () => {
     await openDialog();
 
     selectFile(createFile("null.csv", ""));
-    triggerLoad(null);
+    await triggerLoad(null);
 
     await waitFor(() => {
       expect(pushNotificationMock).toHaveBeenCalledWith(
@@ -445,7 +494,7 @@ describe("ExcelFilePicker", () => {
     await openDialog();
 
     selectFile(createFile("empty_result.csv", ""));
-    triggerLoad("");
+    await triggerLoad("");
 
     await waitFor(() => {
       expect(pushNotificationMock).toHaveBeenCalledWith(
@@ -459,7 +508,7 @@ describe("ExcelFilePicker", () => {
     await openDialog();
 
     selectFile(createFile("error.csv", "content"));
-    triggerError();
+    await triggerError();
 
     await waitFor(() => {
       expect(pushNotificationMock).toHaveBeenCalledWith(
@@ -490,7 +539,7 @@ describe("ExcelFilePicker", () => {
     await openDialog();
 
     selectFile(createFile("missing_fields.csv", MISSING_FIELDS_CSV));
-    triggerLoad(MISSING_FIELDS_CSV);
+    await triggerLoad(MISSING_FIELDS_CSV);
 
     // データが 0 件になるので error 通知が dispatch される
     await waitFor(() => {
