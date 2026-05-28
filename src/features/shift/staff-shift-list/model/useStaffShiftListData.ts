@@ -11,11 +11,14 @@ import {
   type ShiftRequestHistoryInput,
   ShiftRequestStatus,
 } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { useAppNotification } from "@shared/lib/useAppNotification";
 import dayjs, { type Dayjs } from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import * as MESSAGE_CODE from "@/errors";
+
+const logger = createLogger("StaffShiftListData");
 
 export type ShiftState = "work" | "off" | undefined;
 
@@ -206,7 +209,7 @@ export const useStaffShiftListData = ({
 
   useEffect(() => {
     if (calendarsError) {
-      console.error(calendarsError);
+      logger.error(calendarsError);
       notify({
         title: "エラー",
         description: MESSAGE_CODE.E00001,
@@ -218,7 +221,7 @@ export const useStaffShiftListData = ({
 
   useEffect(() => {
     if (shiftRequestError) {
-      console.error(shiftRequestError);
+      logger.error(shiftRequestError);
       notify({
         title: "エラー",
         description: MESSAGE_CODE.E16002,
@@ -306,7 +309,7 @@ export const useStaffShiftListData = ({
           },
         }).unwrap();
       } catch (error) {
-        console.error("Failed to persist staff shift", error);
+        logger.error("Failed to persist staff shift", error);
         setShiftStates(prevShiftStates);
         notify({
           title: "エラー",

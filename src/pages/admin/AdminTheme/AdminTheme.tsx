@@ -10,12 +10,15 @@ import {
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
 import { resolveThemeColor } from "@shared/config/theme";
+import { createLogger } from "@shared/lib/logger";
 import { useAppNotification } from "@shared/lib/useAppNotification";
 import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
 import { SubsectionTitle } from "@shared/ui/typography";
 import { useContext, useEffect, useMemo, useState } from "react";
 
 import { E15001, S15001 } from "@/errors";
+
+const logger = createLogger("AdminTheme");
 
 const basePalette = [
   "#1976d2",
@@ -261,7 +264,7 @@ export default function AdminTheme() {
       setCurrentColor(payloadColor);
       notify({ title: S15001, tone: "success" });
     } catch (error) {
-      console.error(error);
+      logger.error("Failed to save theme color", error);
       notify({
         title: "エラー",
         description: E15001,

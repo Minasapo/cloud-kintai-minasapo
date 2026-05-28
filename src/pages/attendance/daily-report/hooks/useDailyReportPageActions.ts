@@ -2,6 +2,7 @@ import { logDailyReportMutation } from "@entities/operation-log/model/dailyRepor
 import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { sendDailyReportSubmissionNotification } from "@features/attendance/daily-report/lib/sendDailyReportSubmissionNotification";
 import { DailyReportStatus } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { useAppNotification } from "@shared/lib/useAppNotification";
 import {
   Dispatch,
@@ -26,6 +27,8 @@ import {
   updateDailyReportRecord,
 } from "../services/dailyReportMutations";
 import { useDailyReportAutoSave } from "./useDailyReportAutoSave";
+
+const logger = createLogger("DailyReportPageActions");
 
 const AUTO_SAVE_DELAY = 1000;
 
@@ -87,7 +90,7 @@ async function executeCreateSubmit({
         try {
           await sendDailyReportSubmissionNotification({ staffs, report: updated, fallbackAuthorName: resolvedAuthorName });
         } catch (mailError) {
-          console.error("Failed to send daily report submission notification:", mailError);
+          logger.error("Failed to send daily report submission notification:", mailError);
           notify({ title: "メール送信エラー", description: "管理者への通知メールの送信に失敗しました。", tone: "error", dedupeKey: "daily-report-mail-error" });
         }
       }
@@ -109,7 +112,7 @@ async function executeCreateSubmit({
         try {
           await sendDailyReportSubmissionNotification({ staffs, report: created, fallbackAuthorName: resolvedAuthorName });
         } catch (mailError) {
-          console.error("Failed to send daily report submission notification:", mailError);
+          logger.error("Failed to send daily report submission notification:", mailError);
           notify({ title: "メール送信エラー", description: "管理者への通知メールの送信に失敗しました。", tone: "error", dedupeKey: "daily-report-mail-error" });
         }
       }
@@ -172,7 +175,7 @@ async function executeEditSubmit({
       try {
         await sendDailyReportSubmissionNotification({ staffs, report: updated, fallbackAuthorName: resolvedAuthorName });
       } catch (mailError) {
-        console.error("Failed to send daily report submission notification:", mailError);
+        logger.error("Failed to send daily report submission notification:", mailError);
         notify({ title: "メール送信エラー", description: "管理者への通知メールの送信に失敗しました。", tone: "error", dedupeKey: "daily-report-mail-error" });
       }
     }

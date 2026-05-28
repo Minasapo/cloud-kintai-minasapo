@@ -14,6 +14,7 @@ import type {
   DailyReportReaction,
   GetDailyReportQuery,
 } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { formatDateSlash, formatDateTimeReadable } from "@shared/lib/time";
 import { SectionTitle, SubsectionTitle } from "@shared/ui/typography";
 import type { GraphQLResult } from "aws-amplify/api";
@@ -34,6 +35,8 @@ import {
   updateDailyReportReaction,
 } from "./services/dailyReportInteractionService";
 import { useCurrentStaff } from "./useCurrentStaff";
+
+const logger = createLogger("DailyReportCarousel");
 
 interface DailyReportCarouselDialogProps {
   open: boolean;
@@ -344,7 +347,7 @@ function useDailyReportInteractions({
           commentBody: body,
         });
       } catch (mailError) {
-        console.error("Failed to send daily report comment notification:", mailError);
+        logger.error("Failed to send daily report comment notification:", mailError);
       }
 
       await logDailyReportCommentAdd({

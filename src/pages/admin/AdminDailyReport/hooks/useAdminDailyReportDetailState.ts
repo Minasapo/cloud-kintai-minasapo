@@ -14,6 +14,7 @@ import type {
   DailyReportReaction,
   GetDailyReportQuery,
 } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import type { GraphQLResult } from "aws-amplify/api";
 import {
   type Dispatch,
@@ -37,6 +38,8 @@ import {
   updateDailyReportReaction,
 } from "../services/dailyReportInteractionService";
 import { useCurrentStaff } from "../useCurrentStaff";
+
+const logger = createLogger("AdminDailyReportDetail");
 
 type State = {
   report: AdminDailyReport | null;
@@ -266,10 +269,7 @@ function useReportInteractions({
           commentBody: body,
         });
       } catch (mailError) {
-        console.error(
-          "Failed to send daily report comment notification:",
-          mailError,
-        );
+        logger.error("Failed to send daily report comment notification:", mailError);
       }
 
       await logDailyReportCommentAdd({

@@ -280,7 +280,6 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     reset,
     restReplace,
     hourlyPaidHolidayTimeReplace,
-    logger,
   });
   const { overtimeRequestEndTime, hasOvertimeRequest } = useOvertimeRequest({
     staffId: staff?.id ?? targetStaffId ?? null,

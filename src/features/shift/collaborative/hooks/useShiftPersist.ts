@@ -2,6 +2,7 @@ import {
   useCreateShiftRequestMutation,
   useUpdateShiftCellMutation,
 } from "@entities/shift/api/shiftApi";
+import { createLogger } from "@shared/lib/logger";
 import {
   Dispatch,
   MutableRefObject,
@@ -23,6 +24,8 @@ import {
   ShiftRequestData,
 } from "../types/collaborative.types";
 import { useShiftBatchUpdate } from "./useShiftBatchUpdate";
+
+const logger = createLogger("ShiftPersist");
 
 interface UseShiftPersistProps {
   targetMonth: string | undefined;
@@ -166,7 +169,7 @@ export const useShiftPersist = ({
           onSaveCompletedRef.current?.();
         })
         .catch((err) => {
-          console.error("Failed to update shift:", err);
+          logger.error("Failed to update shift:", err);
           pendingChangesRef.current.delete(key);
           setShiftDataMap(prevMap);
           const { message, connection } = buildShiftErrorMessage(err);

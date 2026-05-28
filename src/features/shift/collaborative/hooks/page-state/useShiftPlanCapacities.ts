@@ -1,9 +1,12 @@
 import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { shiftPlanYearByTargetYear } from "@shared/api/graphql/documents/queries";
 import type { ShiftPlanYearByTargetYearQuery } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { type GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
+
+const logger = createLogger("ShiftPlanCapacities");
 
 export const useShiftPlanCapacities = (targetMonth: string) => {
   const currentMonth = useMemo(() => dayjs(targetMonth), [targetMonth]);
@@ -38,7 +41,7 @@ export const useShiftPlanCapacities = (targetMonth: string) => {
         }
         setShiftPlanCapacities([]);
       } catch (error) {
-        console.error("Failed to fetch shift plan:", error);
+        logger.error("Failed to fetch shift plan:", error);
         setShiftPlanCapacities([]);
       }
     };

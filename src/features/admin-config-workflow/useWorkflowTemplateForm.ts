@@ -1,6 +1,9 @@
 import { useAppDispatchV2 } from "@app/hooks";
+import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useMemo, useState } from "react";
+
+const logger = createLogger("WorkflowTemplateForm");
 
 type Template = { id: string; name: string; title: string; content: string };
 
@@ -109,7 +112,7 @@ export function useWorkflowTemplateForm({
 
       resetTemplateForm();
     } catch (error) {
-      console.error(error);
+      logger.error("Failed to save template", error);
       dispatch(
         pushNotification({
           tone: "error",
@@ -180,7 +183,7 @@ export function useWorkflowTemplateForm({
         }),
       );
     } catch (error) {
-      console.error(error);
+      logger.error("Failed to delete template", error);
       dispatch(
         pushNotification({
           tone: "error",

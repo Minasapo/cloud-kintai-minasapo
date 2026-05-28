@@ -8,6 +8,7 @@ import {
   CompanyHolidayCalendar,
   CreateCompanyHolidayCalendarInput,
 } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { CompanyHolidayCalendarMessage } from "@shared/lib/message/CompanyHolidayCalendarMessage";
 import { MessageStatus } from "@shared/lib/message/Message";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
@@ -16,6 +17,8 @@ import dayjs from "dayjs";
 import { type Dispatch, type SetStateAction, useState } from "react";
 
 import company_holiday from "@/templates/company_holiday.csv";
+
+const logger = createLogger("ExcelFilePicker");
 
 const CSV_DOWNLOAD_FILENAME = "company_holiday.csv";
 const CSV_PARSE_ERROR_MESSAGE =
@@ -183,7 +186,7 @@ function FileInput({
         setUploadedData(parsed);
       }}
       onParseError={(error) => {
-        console.error(error);
+        logger.error(error);
         handleParseFailure(CSV_PARSE_ERROR_MESSAGE);
       }}
       onReadError={() => {

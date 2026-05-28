@@ -7,6 +7,7 @@ import {
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
 import { useAutoSave } from "@shared/hooks";
+import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -19,6 +20,8 @@ import {
 import { toShiftGroupFormValue } from "@/pages/admin/AdminShiftSettings/shiftGroupFactory";
 import type { ShiftGroupFormState } from "@/pages/admin/AdminShiftSettings/shiftGroupSchema";
 import { shiftGroupFormSchema } from "@/pages/admin/AdminShiftSettings/shiftGroupSchema";
+
+const logger = createLogger("AdminShiftSettings");
 
 const SHIFT_GROUP_ERROR_FIELDS = [
   { key: "label", label: "ラベル名" },
@@ -206,7 +209,7 @@ export function useAdminShiftSettings(options: UseAdminShiftSettingsOptions = {}
       options.onShiftGroupSaveSuccess?.(isUpdate);
       reset(values);
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       dispatch(pushNotification({ tone: "error", message: E14001 }));
     } finally {
       setSavingShiftGroup(false);
@@ -223,7 +226,7 @@ export function useAdminShiftSettings(options: UseAdminShiftSettingsOptions = {}
       options.onShiftDisplaySaveSuccess?.(isUpdate);
       setSavedShiftDefaultMode(shiftDefaultMode);
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       dispatch(pushNotification({ tone: "error", message: E14001 }));
     } finally {
       setSavingShiftDisplay(false);

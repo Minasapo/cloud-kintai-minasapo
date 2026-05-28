@@ -1,3 +1,4 @@
+import { createLogger } from "@shared/lib/logger";
 import React, {
   useCallback,
   useEffect,
@@ -7,6 +8,8 @@ import React, {
 } from "react";
 
 import { CollaborativeUser } from "../types/collaborative.types";
+
+const logger = createLogger("ShiftPresence");
 
 /**
  * アクティブユーザーのプレゼンス管理フック
@@ -167,7 +170,7 @@ const usePresenceHeartbeat = ({
       try {
         window.localStorage.removeItem(storageKey);
       } catch (error) {
-        console.error("Failed to remove presence from storage:", error);
+        logger.error("Failed to remove presence from storage:", error);
       }
     };
 
@@ -505,7 +508,7 @@ export const useShiftPresence = ({
         }
       }
     } catch (error) {
-      console.error("Failed to load active users from storage:", error);
+      logger.error("Failed to load active users from storage:", error);
     }
 
     applyPresenceSnapshot(records);
@@ -522,7 +525,7 @@ export const useShiftPresence = ({
         JSON.stringify(buildPresenceData()),
       );
     } catch (error) {
-      console.error("Failed to save presence to storage:", error);
+      logger.error("Failed to save presence to storage:", error);
     }
   }, [buildPresenceData, storageKey]);
 
@@ -536,7 +539,7 @@ export const useShiftPresence = ({
         JSON.stringify(buildPresenceData()),
       );
     } catch (error) {
-      console.error("Failed to save presence to storage:", error);
+      logger.error("Failed to save presence to storage:", error);
     }
   }, [buildPresenceData, storageKey]);
 

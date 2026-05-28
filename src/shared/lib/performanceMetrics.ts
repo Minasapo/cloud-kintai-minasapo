@@ -4,6 +4,10 @@
  * バンドルサイズとランタイムパフォーマンスの両方をカバー。
  */
 
+import { createLogger } from "./logger";
+
+const logger = createLogger("PerformanceMetrics");
+
 /**
  * パフォーマンスメトリクス
  */
@@ -140,7 +144,7 @@ class PerformanceMetricsCollector {
       try {
         callback(this.metrics);
       } catch (error) {
-        console.error("Error in performance metric callback:", error);
+        logger.error("Error in performance metric callback:", error);
       }
     });
   }

@@ -1,7 +1,10 @@
+import { createLogger } from "@shared/lib/logger";
 import { useCallback } from "react";
 
 import type { ShiftState } from "../../types/collaborative.types";
 import { buildEditLockConflictMessage } from "../useShiftEditLocks";
+
+const logger = createLogger("CellStateActions");
 
 type CellPosition = {
   staffId: string;
@@ -148,7 +151,7 @@ export const useCellStateActions = ({
             await changeCellState(focusedCell.staffId, focusedCell.date, newState);
           }
         } catch (error) {
-          console.error("Failed to change shift state:", error);
+          logger.error("Failed to change shift state:", error);
         }
       };
 

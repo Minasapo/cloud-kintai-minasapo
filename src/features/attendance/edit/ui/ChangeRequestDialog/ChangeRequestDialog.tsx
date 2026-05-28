@@ -3,6 +3,7 @@ import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { Stack, TextField, Typography } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { GenericMailSender } from "@shared/lib/mail/GenericMailSender";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { AppButton } from "@shared/ui/button";
@@ -17,6 +18,8 @@ import * as MESSAGE_CODE from "@/errors";
 import { ChangeRequestDiffTable } from "./ChangeRequestDiffTable";
 import handleApproveChangeRequest from "./handleApproveChangeRequest";
 import handleRejectChangeRequest from "./handleRejectChangeRequest";
+
+const logger = createLogger("ChangeRequestDialog");
 
 type ChangeRequestDialogProps = {
   attendance: Attendance | null;
@@ -110,7 +113,7 @@ export default function ChangeRequestDialog({
             updatedAttendance,
           ).rejectChangeRequest(comment);
         } catch (mailError) {
-          console.error(
+          logger.error(
             "Failed to send rejection notification mail:",
             mailError,
           );
@@ -149,7 +152,7 @@ export default function ChangeRequestDialog({
             updatedAttendance,
           ).approveChangeRequest(comment);
         } catch (mailError) {
-          console.error(
+          logger.error(
             "Failed to send approval notification mail:",
             mailError,
           );

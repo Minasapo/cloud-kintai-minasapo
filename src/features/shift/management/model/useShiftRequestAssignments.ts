@@ -12,6 +12,7 @@ import {
   ShiftRequestHistoryInput,
   UpdateShiftRequestMutation,
 } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { GraphQLResult } from "aws-amplify/api";
 import dayjs, { Dayjs } from "dayjs";
 import { useCallback, useEffect, useState } from "react";
@@ -29,6 +30,8 @@ import {
   shiftRequestStatusToShiftState,
   shiftStateToShiftRequestStatus,
 } from "../lib/shiftStateMapping";
+
+const logger = createLogger("ShiftRequestAssignments");
 
 type UseShiftRequestAssignmentsParams = {
   shiftStaffs: StaffType[];
@@ -306,7 +309,7 @@ export default function useShiftRequestAssignments({
         setShiftRequestHistoryMeta(nextHistoryMeta);
         setShiftRequestRecords(nextRecords);
       } catch (err) {
-        console.error(err);
+        logger.error("Failed to fetch shift requests", err);
         if (isMounted) {
           setShiftRequestsError("希望シフトの取得に失敗しました。");
         }

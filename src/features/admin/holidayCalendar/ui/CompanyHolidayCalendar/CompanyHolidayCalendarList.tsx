@@ -17,6 +17,7 @@ import {
   getNextVersion,
 } from "@shared/api/graphql/concurrency";
 import { CompanyHolidayCalendar } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { CompanyHolidayCalendarMessage } from "@shared/lib/message/CompanyHolidayCalendarMessage";
 import { MessageStatus } from "@shared/lib/message/Message";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
@@ -32,6 +33,8 @@ import { ExcelFilePicker } from "../HolidayCalendar/ExcelFilePicker";
 import AddCompanyHolidayCalendar from "./AddCompanyHolidayCalendar";
 import CompanyHolidayCalendarCopy from "./CompanyHolidayCalendarCopy";
 import CompanyHolidayCalendarEdit from "./CompanyHolidayCalendarEdit";
+
+const logger = createLogger("CompanyHolidayCalendarList");
 
 const YEAR_RANGE = 5;
 const YEAR_OFFSET = 4;
@@ -93,7 +96,7 @@ export default function CompanyHolidayCalendarList() {
 
   useEffect(() => {
     if (companyHolidayCalendarsError) {
-      console.error(companyHolidayCalendarsError);
+      logger.error(companyHolidayCalendarsError);
       dispatch(
         pushNotification({
           tone: "error",

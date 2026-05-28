@@ -10,10 +10,13 @@ import {
   CreateAppConfigInput,
   UpdateAppConfigInput,
 } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { useWorkflowTemplateForm } from "./useWorkflowTemplateForm";
+
+const logger = createLogger("AdminWorkflowSettings");
 
 const WORKFLOW_TEMPLATE_ORGANIZATION_ID = "default";
 const CATEGORY_AUTO_SAVE_DELAY = 600;
@@ -117,7 +120,7 @@ export function useAdminWorkflowSettings() {
         await fetchConfig();
         setConfigId(getConfigId());
       } catch (error) {
-        console.error(error);
+        logger.error("Failed to save workflow category order", error);
         dispatch(
           pushNotification({
             tone: "error",

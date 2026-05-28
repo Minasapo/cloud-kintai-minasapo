@@ -18,6 +18,7 @@ import {
   getNextVersion,
 } from "@shared/api/graphql/concurrency";
 import { HolidayCalendar } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { ProgressBar } from "@shared/ui/feedback";
 import { useCallback, useEffect } from "react";
@@ -28,6 +29,8 @@ import { AddHolidayCalendar } from "./AddHolidayCalendar";
 import { CSVFilePicker } from "./CSVFilePicker";
 import HolidayCalendarCopy from "./HolidayCalendarCopy";
 import HolidayCalendarEdit from "./HolidayCalendarEdit";
+
+const logger = createLogger("HolidayCalendarList");
 
 export default function HolidayCalendarList() {
   const dispatch = useAppDispatchV2();
@@ -80,7 +83,7 @@ export default function HolidayCalendarList() {
 
   useEffect(() => {
     if (holidayCalendarsError) {
-      console.error(holidayCalendarsError);
+      logger.error(holidayCalendarsError);
       dispatch(
         pushNotification({
           tone: "error",

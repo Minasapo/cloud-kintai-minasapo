@@ -3,11 +3,14 @@ import "./styles.scss";
 
 import { useSession } from "@app/providers/session/useSession";
 import { Authenticator } from "@aws-amplify/ui-react";
+import { createLogger } from "@shared/lib/logger";
 import { signIn } from "aws-amplify/auth";
 import { useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import logo from "./logo_large.png";
+
+const logger = createLogger("Login");
 
 const readSignInCredentials = (input: unknown) => {
   if (!input || typeof input !== "object") {
@@ -85,7 +88,7 @@ export default function Login() {
         } catch (error) {
           if (import.meta.env.DEV) {
             const parsedError = parseAuthError(error);
-            console.error("[Auth] Sign in failed", {
+            logger.error("Sign in failed", {
               ...parsedError,
               username: credentials.username,
             });

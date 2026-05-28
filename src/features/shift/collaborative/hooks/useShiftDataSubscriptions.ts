@@ -3,6 +3,7 @@ import {
   onCreateShiftRequest,
   onUpdateShiftRequest,
 } from "@shared/api/graphql/documents/subscriptions";
+import { createLogger } from "@shared/lib/logger";
 import { MutableRefObject, useEffect } from "react";
 
 import { normalizeShiftRequest } from "../lib/shiftTransformers";
@@ -10,6 +11,8 @@ import {
   ShiftRequestCommentData,
   ShiftRequestData,
 } from "../types/collaborative.types";
+
+const logger = createLogger("ShiftDataSubscriptions");
 
 interface UseShiftDataSubscriptionsProps {
   staffIds: string[];
@@ -89,8 +92,8 @@ export const useShiftDataSubscriptions = ({
             handleRealtimeEvent(createdRequest, staffId);
           },
           error: (error) => {
-            console.error(
-              `[Subscription Error] Failed to subscribe create for staff ${staffId}:`,
+            logger.error(
+              `Failed to subscribe create for staff ${staffId}:`,
               error,
             );
           },
@@ -111,8 +114,8 @@ export const useShiftDataSubscriptions = ({
             handleRealtimeEvent(updatedRequest, staffId);
           },
           error: (error) => {
-            console.error(
-              `[Subscription Error] Failed to subscribe update for staff ${staffId}:`,
+            logger.error(
+              `Failed to subscribe update for staff ${staffId}:`,
               error,
             );
           },
