@@ -14,6 +14,7 @@ import { useDispatch } from "react-redux";
 import * as MESSAGE_CODE from "@/errors";
 
 const logger = createLogger("AttendanceRecord");
+const ATTENDANCE_RECORD_ERROR_MESSAGE = MESSAGE_CODE.E02001;
 
 type ReplaceFn<T> = (value: T[]) => void;
 type UseAttendanceRecordParams = {
@@ -60,39 +61,35 @@ function applyHistoryToForm(
     restReplace: ReplaceFn<RestInputs>,
     hourlyPaidHolidayTimeReplace: ReplaceFn<HourlyPaidHolidayTimeInputs>,
 ) {
-    if (!sortedHistories || !sortedHistories[index]) return;
+    if (!sortedHistories || !sortedHistories[index]) return false;
     const h = sortedHistories[index];
-    try {
-        setValue("startTime", h.startTime ?? "");
-        setValue("endTime", h.endTime ?? "");
-        setValue("goDirectlyFlag", h.goDirectlyFlag ?? false);
-        setValue("returnDirectlyFlag", h.returnDirectlyFlag ?? false);
-        setValue("paidHolidayFlag", h.paidHolidayFlag ?? false);
-        setValue("specialHolidayFlag", h.specialHolidayFlag ?? false);
-        setValue("remarks", h.remarks ?? "");
-        setValue("substituteHolidayDate", h.substituteHolidayDate ?? undefined);
-        const rests: RestInputs[] = h.rests
-            ? h.rests
-                .filter((r): r is NonNullable<typeof r> => r !== null)
-                .map((r) => ({
-                startTime: r.startTime ?? null,
-                endTime: r.endTime ?? null,
-            }))
-            : [];
-        restReplace(rests);
-        const hourly: HourlyPaidHolidayTimeInputs[] = h.hourlyPaidHolidayTimes
-            ? h.hourlyPaidHolidayTimes
-                .filter((r): r is NonNullable<typeof r> => r !== null)
-                .map((r) => ({
-                startTime: r.startTime ?? null,
-                endTime: r.endTime ?? null,
-            }))
-            : [];
-        hourlyPaidHolidayTimeReplace(hourly);
-    }
-    catch (e) {
-        logger.error("Failed to apply history to form:", e);
-    }
+    setValue("startTime", h.startTime ?? "");
+    setValue("endTime", h.endTime ?? "");
+    setValue("goDirectlyFlag", h.goDirectlyFlag ?? false);
+    setValue("returnDirectlyFlag", h.returnDirectlyFlag ?? false);
+    setValue("paidHolidayFlag", h.paidHolidayFlag ?? false);
+    setValue("specialHolidayFlag", h.specialHolidayFlag ?? false);
+    setValue("remarks", h.remarks ?? "");
+    setValue("substituteHolidayDate", h.substituteHolidayDate ?? undefined);
+    const rests: RestInputs[] = h.rests
+        ? h.rests
+            .filter((r): r is NonNullable<typeof r> => r !== null)
+            .map((r) => ({
+            startTime: r.startTime ?? null,
+            endTime: r.endTime ?? null,
+        }))
+        : [];
+    restReplace(rests);
+    const hourly: HourlyPaidHolidayTimeInputs[] = h.hourlyPaidHolidayTimes
+        ? h.hourlyPaidHolidayTimes
+            .filter((r): r is NonNullable<typeof r> => r !== null)
+            .map((r) => ({
+            startTime: r.startTime ?? null,
+            endTime: r.endTime ?? null,
+        }))
+        : [];
+    hourlyPaidHolidayTimeReplace(hourly);
+    return true;
 }
 
 function initFormFromAttendance(
@@ -159,50 +156,48 @@ export const useAttendanceRecord = ({ targetStaffId, targetWorkDate, readOnly, s
             .filter((item): item is NonNullable<typeof item> => item !== null)
             .toSorted((a, b) => dayjs(b.createdAt).isBefore(dayjs(a.createdAt)) ? -1 : 1) as AttendanceHistory[];
     }, [attendance?.histories]);
+    const notifyRecordError = useCallback((context: string, error: unknown) => {
+        logger.error(context, error);
+        dispatch(pushNotification({
+            tone: "error",
+            message: ATTENDANCE_RECORD_ERROR_MESSAGE,
+        }));
+    }, [dispatch]);
     const applyHistory = useCallback((index: number) => {
-        applyHistoryToForm(sortedHistories, index, setValue, restReplace, hourlyPaidHolidayTimeReplace);
-    }, [sortedHistories, setValue, restReplace, hourlyPaidHolidayTimeReplace]);
-    useEffect(() => {
-        if (!sortedHistories || sortedHistories.length === 0)
-            return;
-        setHistoryIndex(0);
-    }, [sortedHistories.length]);
-    useEffect(() => {
-        if (!sortedHistories || sortedHistories.length === 0)
-            return;
-        applyHistory(historyIndex);
-    }, [historyIndex, sortedHistories, applyHistory]);
-    useEffect(() => {
-        if (!readOnly)
-            return;
-        if (!sortedHistories || sortedHistories.length === 0)
-            return;
         try {
-            applyHistory(0);
-            setHistoryIndex(0);
+            return applyHistoryToForm(
+                sortedHistories,
+                index,
+                setValue,
+                restReplace,
+                hourlyPaidHolidayTimeReplace,
+            );
         }
-        catch {
-            // noop
+        catch (error) {
+            notifyRecordError("Failed to apply history to form", error);
+            return false;
         }
-    }, [readOnly, sortedHistories.length, applyHistory]);
+    }, [sortedHistories, setValue, restReplace, hourlyPaidHolidayTimeReplace, notifyRecordError]);
+    const resolveHistoryIndex = useCallback((index: number) => {
+        if (sortedHistories.length === 0) {
+            return null;
+        }
+        if (readOnly) {
+            return 0;
+        }
+        return Math.min(Math.max(index, 0), sortedHistories.length - 1);
+    }, [readOnly, sortedHistories.length]);
     useEffect(() => {
-        if (!readOnly)
+        const resolvedHistoryIndex = resolveHistoryIndex(historyIndex);
+        if (resolvedHistoryIndex === null) {
             return;
-        if (!attendance)
+        }
+        if (resolvedHistoryIndex !== historyIndex) {
+            setHistoryIndex(resolvedHistoryIndex);
             return;
-        if (!sortedHistories || sortedHistories.length === 0)
-            return;
-        const id = window.setTimeout(() => {
-            try {
-                applyHistory(0);
-                setHistoryIndex(0);
-            }
-            catch {
-                // noop
-            }
-        }, 0);
-        return () => window.clearTimeout(id);
-    }, [attendance, readOnly, sortedHistories.length, applyHistory]);
+        }
+        applyHistory(resolvedHistoryIndex);
+    }, [historyIndex, resolveHistoryIndex, applyHistory]);
     useEffect(() => {
         if (!targetStaffId) {
             setStaff(null);
@@ -229,8 +224,8 @@ export const useAttendanceRecord = ({ targetStaffId, targetWorkDate, readOnly, s
             }
             setStaff(nextStaff);
         })
-            .catch((e) => {
-            logger.error(`Failed to fetch staff with ID ${targetStaffId}: ${e.message}`);
+            .catch((error) => {
+            logger.error(`Failed to fetch staff with ID ${targetStaffId}`, error);
             if (staffRequestIdRef.current !== requestId) {
                 return;
             }
@@ -238,7 +233,7 @@ export const useAttendanceRecord = ({ targetStaffId, targetWorkDate, readOnly, s
             setStaff(null);
             dispatch(pushNotification({
                 tone: "error",
-                message: MESSAGE_CODE.E02001
+                message: ATTENDANCE_RECORD_ERROR_MESSAGE
             }));
         });
     }, [dispatch, targetStaffId]);
@@ -272,14 +267,11 @@ export const useAttendanceRecord = ({ targetStaffId, targetWorkDate, readOnly, s
                 });
             }
         })
-            .catch(() => {
+            .catch((error) => {
             if (attendanceRequestIdRef.current !== requestId) {
                 return;
             }
-            dispatch(pushNotification({
-                tone: "error",
-                message: MESSAGE_CODE.E02001
-            }));
+            notifyRecordError("Failed to fetch attendance", error);
         })
             .finally(() => {
             if (attendanceRequestIdRef.current === requestId) {
@@ -291,7 +283,7 @@ export const useAttendanceRecord = ({ targetStaffId, targetWorkDate, readOnly, s
         targetStaffId,
         targetWorkDate,
         triggerGetAttendance,
-        dispatch,
+        notifyRecordError,
         reset,
     ]);
     useEffect(() => {
@@ -313,12 +305,12 @@ export const useAttendanceRecord = ({ targetStaffId, targetWorkDate, readOnly, s
             }).unwrap();
         }
         catch (error) {
-            logger.debug(`Failed to refetch attendance after update: ${error instanceof Error ? error.message : String(error)}`);
+            notifyRecordError("Failed to refetch attendance after update", error);
         }
         finally {
             setHistoriesLoading(false);
         }
-    }, [staff, targetWorkDate, triggerGetAttendance]);
+    }, [staff, targetWorkDate, triggerGetAttendance, notifyRecordError]);
     return {
         attendance,
         staff,
