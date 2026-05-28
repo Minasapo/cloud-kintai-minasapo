@@ -1,43 +1,32 @@
 import { useAppDispatchV2 } from "@app/hooks";
 import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
-import { DEFAULT_AM_HOLIDAY_END, DEFAULT_AM_HOLIDAY_START, DEFAULT_PM_HOLIDAY_END, DEFAULT_PM_HOLIDAY_START, TIME_FORMAT, } from "@features/admin/configManagement/lib/constants";
 import AdminSettingsLayout from "@features/admin/layout/ui/AdminSettingsLayout";
 import AdminSettingsSection from "@features/admin/layout/ui/AdminSettingsSection";
 import { SettingsButton, SettingsSwitch, SettingsTimeField, } from "@features/admin/layout/ui/SettingsPrimitives";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
-import dayjs, { Dayjs } from "dayjs";
-import { useContext, useEffect, useState } from "react";
+import type { Dayjs } from "dayjs";
+import { useContext, useState } from "react";
 
 import { E14002 } from "@/errors";
 
+import { type AmPmHolidayState,createAmPmHolidayState, getAmPmHolidayStateKey } from "../lib/formState";
 import { useSaveAppConfigSection } from "../lib/useSaveAppConfigSection";
 
 export default function AmPmHoliday() {
     const { getAmHolidayStartTime, getAmHolidayEndTime, getPmHolidayStartTime, getPmHolidayEndTime, getAmPmHolidayEnabled, } = useContext(AppConfigContext);
-    const [amHolidayStartTime, setAmHolidayStartTime] = useState<Dayjs | null>(dayjs(DEFAULT_AM_HOLIDAY_START, TIME_FORMAT));
-    const [amHolidayEndTime, setAmHolidayEndTime] = useState<Dayjs | null>(dayjs(DEFAULT_AM_HOLIDAY_END, TIME_FORMAT));
-    const [pmHolidayStartTime, setPmHolidayStartTime] = useState<Dayjs | null>(dayjs(DEFAULT_PM_HOLIDAY_START, TIME_FORMAT));
-    const [pmHolidayEndTime, setPmHolidayEndTime] = useState<Dayjs | null>(dayjs(DEFAULT_PM_HOLIDAY_END, TIME_FORMAT));
-    const [amPmHolidayEnabled, setAmPmHolidayEnabled] = useState<boolean>(true);
+    const initialState = createAmPmHolidayState({ getAmHolidayStartTime, getAmHolidayEndTime, getPmHolidayStartTime, getPmHolidayEndTime, getAmPmHolidayEnabled });
+    const stateKey = getAmPmHolidayStateKey(initialState);
+    return <AmPmHolidayContent key={stateKey} initialState={initialState} />;
+}
+
+function AmPmHolidayContent({ initialState }: { initialState: AmPmHolidayState }) {
+    const [amHolidayStartTime, setAmHolidayStartTime] = useState<Dayjs | null>(() => initialState.amHolidayStartTime);
+    const [amHolidayEndTime, setAmHolidayEndTime] = useState<Dayjs | null>(() => initialState.amHolidayEndTime);
+    const [pmHolidayStartTime, setPmHolidayStartTime] = useState<Dayjs | null>(() => initialState.pmHolidayStartTime);
+    const [pmHolidayEndTime, setPmHolidayEndTime] = useState<Dayjs | null>(() => initialState.pmHolidayEndTime);
+    const [amPmHolidayEnabled, setAmPmHolidayEnabled] = useState<boolean>(() => initialState.amPmHolidayEnabled);
     const saveAppConfigSection = useSaveAppConfigSection();
     const dispatch = useAppDispatchV2();
-    useEffect(() => {
-        if (typeof getAmHolidayStartTime === "function" && getAmHolidayStartTime())
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setAmHolidayStartTime(getAmHolidayStartTime());
-        if (typeof getAmHolidayEndTime === "function" && getAmHolidayEndTime())
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setAmHolidayEndTime(getAmHolidayEndTime());
-        if (typeof getPmHolidayStartTime === "function" && getPmHolidayStartTime())
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setPmHolidayStartTime(getPmHolidayStartTime());
-        if (typeof getPmHolidayEndTime === "function" && getPmHolidayEndTime())
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setPmHolidayEndTime(getPmHolidayEndTime());
-        if (typeof getAmPmHolidayEnabled === "function")
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setAmPmHolidayEnabled(getAmPmHolidayEnabled());
-    }, [getAmHolidayStartTime, getAmHolidayEndTime, getPmHolidayStartTime, getPmHolidayEndTime, getAmPmHolidayEnabled]);
     const handleSave = async () => {
         await saveAppConfigSection(
             {

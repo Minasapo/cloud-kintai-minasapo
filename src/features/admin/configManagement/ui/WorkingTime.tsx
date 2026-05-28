@@ -2,29 +2,26 @@ import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
 import AdminSettingsLayout from "@features/admin/layout/ui/AdminSettingsLayout";
 import AdminSettingsSection from "@features/admin/layout/ui/AdminSettingsSection";
 import { SettingsButton } from "@features/admin/layout/ui/SettingsPrimitives";
-import { Dayjs } from "dayjs";
-import { useContext, useEffect, useState } from "react";
+import type { Dayjs } from "dayjs";
+import { useContext, useState } from "react";
 
+import { createWorkingTimeState, getWorkingTimeStateKey, type WorkingTimeState } from "../lib/formState";
 import { useSaveAppConfigSection } from "../lib/useSaveAppConfigSection";
 import WorkingTimeSection from "./WorkingTimeSection";
 
 export default function WorkingTime() {
     const { getStartTime, getEndTime, getLunchRestStartTime, getLunchRestEndTime } = useContext(AppConfigContext);
-    const [startTime, setStartTime] = useState<Dayjs | null>(null);
-    const [endTime, setEndTime] = useState<Dayjs | null>(null);
-    const [lunchRestStartTime, setLunchRestStartTime] = useState<Dayjs | null>(null);
-    const [lunchRestEndTime, setLunchRestEndTime] = useState<Dayjs | null>(null);
+    const initialState = createWorkingTimeState({ getStartTime, getEndTime, getLunchRestStartTime, getLunchRestEndTime });
+    const stateKey = getWorkingTimeStateKey(initialState);
+    return <WorkingTimeContent key={stateKey} initialState={initialState} />;
+}
+
+function WorkingTimeContent({ initialState }: { initialState: WorkingTimeState }) {
+    const [startTime, setStartTime] = useState<Dayjs | null>(() => initialState.startTime);
+    const [endTime, setEndTime] = useState<Dayjs | null>(() => initialState.endTime);
+    const [lunchRestStartTime, setLunchRestStartTime] = useState<Dayjs | null>(() => initialState.lunchRestStartTime);
+    const [lunchRestEndTime, setLunchRestEndTime] = useState<Dayjs | null>(() => initialState.lunchRestEndTime);
     const saveAppConfigSection = useSaveAppConfigSection();
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setStartTime(getStartTime());
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setEndTime(getEndTime());
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setLunchRestStartTime(getLunchRestStartTime());
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setLunchRestEndTime(getLunchRestEndTime());
-    }, [getEndTime, getLunchRestEndTime, getLunchRestStartTime, getStartTime]);
     const handleSave = async () => {
         if (startTime && endTime && lunchRestStartTime && lunchRestEndTime) {
             await saveAppConfigSection({

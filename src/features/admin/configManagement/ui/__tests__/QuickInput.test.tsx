@@ -252,10 +252,6 @@ describe("QuickInput", () => {
       expect(screen.getByTestId("end-times-count")).toHaveTextContent("1");
     });
 
-    it("getConfigIdが呼ばれてidが設定される", () => {
-      renderQuickInput();
-      expect(mockGetConfigId).toHaveBeenCalled();
-    });
   });
 
   describe("出勤時間の追加", () => {

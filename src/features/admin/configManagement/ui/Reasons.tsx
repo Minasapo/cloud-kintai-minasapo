@@ -3,22 +3,15 @@ import { appendItem, removeItemAt, updateItem } from "@features/admin/configMana
 import AdminSettingsLayout from "@features/admin/layout/ui/AdminSettingsLayout";
 import AdminSettingsSection from "@features/admin/layout/ui/AdminSettingsSection";
 import { SettingsButton } from "@features/admin/layout/ui/SettingsPrimitives";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 
 import { useSaveAppConfigSection } from "../lib/useSaveAppConfigSection";
 import ReasonListSection from "./ReasonListSection";
 
 export default function Reasons() {
     const { getReasons } = useContext(AppConfigContext);
-    const [reasons, setReasons] = useState<{
-        reason: string;
-        enabled: boolean;
-    }[]>([]);
+    const [reasons, setReasons] = useState(() => getReasons());
     const saveAppConfigSection = useSaveAppConfigSection();
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setReasons(getReasons());
-    }, [getReasons]);
     const handleAddReason = () => setReasons(appendItem(reasons, { reason: "", enabled: true }));
     const handleReasonChange = (index: number, field: "reason" | "enabled", value: string | boolean) => {
         setReasons(updateItem(reasons, index, (r) => ({ ...r, [field]: value } as typeof r)));
