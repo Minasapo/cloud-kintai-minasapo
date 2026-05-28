@@ -4,14 +4,16 @@ import { useShiftPresence } from "../useShiftPresence";
 
 describe("useShiftPresence", () => {
   const otherUserStorageKey = "shift_presence_global_user2_test-session";
+  let consoleWarnSpy!: jest.SpyInstance;
 
   beforeEach(() => {
     jest.useFakeTimers();
-    // テスト前にローカルストレージをクリア
     localStorage.clear();
+    consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
   });
 
   afterEach(() => {
+    consoleWarnSpy.mockRestore();
     jest.restoreAllMocks();
     jest.useRealTimers();
     localStorage.clear();
@@ -148,6 +150,60 @@ describe("useShiftPresence", () => {
         (u) => u.userId === "user2",
       );
       expect(inactiveUser).toBeUndefined();
+    });
+  });
+
+  describe("不正なプレゼンスデータの除外", () => {
+    it("破損JSONを読み込んだ場合にレコードを削除し、警告を出さない", () => {
+      const malformedStorageKey = "shift_presence_global_user2_broken-session";
+      localStorage.setItem(malformedStorageKey, "{broken json");
+
+      const { result } = renderHook(() => useShiftPresence(defaultProps));
+
+      act(() => {
+        jest.advanceTimersByTime(10);
+      });
+
+      expect(result.current.activeUsers.some((u) => u.userId === "user1")).toBe(
+        true,
+      );
+      expect(localStorage.getItem(malformedStorageKey)).toBeNull();
+      expect(consoleWarnSpy).not.toHaveBeenCalled();
+    });
+
+    it("想定外のshapeを読み込んだ場合にレコードを削除し、警告を出さない", () => {
+      const invalidShapeStorageKey =
+        "shift_presence_global_user2_invalid-shape";
+      localStorage.setItem(
+        invalidShapeStorageKey,
+        JSON.stringify({
+          sessionId: "test-session",
+          userId: "user2",
+          userName: "Invalid User",
+          color: "#4caf50",
+          lastActivity: Date.now(),
+          timestamp: Date.now(),
+          editingCells: [
+            {
+              cellKey: "staff2_2024-01-16",
+              userId: "user2",
+              userName: "Invalid User",
+            },
+          ],
+        }),
+      );
+
+      const { result } = renderHook(() => useShiftPresence(defaultProps));
+
+      act(() => {
+        jest.advanceTimersByTime(10);
+      });
+
+      expect(result.current.activeUsers.some((u) => u.userId === "user1")).toBe(
+        true,
+      );
+      expect(localStorage.getItem(invalidShapeStorageKey)).toBeNull();
+      expect(consoleWarnSpy).not.toHaveBeenCalled();
     });
   });
 

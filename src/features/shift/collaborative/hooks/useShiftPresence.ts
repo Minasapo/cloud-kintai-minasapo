@@ -42,6 +42,8 @@ type EditingCellEntry = {
   startTime: number;
 };
 
+type PresenceEditingCell = PresenceData["editingCells"][number];
+
 type EditingCellsMap = Map<string, EditingCellEntry>;
 type EditingCellsStateUpdater =
   | EditingCellsMap
@@ -73,6 +75,49 @@ const generateUserColor = (userId: string): string => {
     return acc + char.charCodeAt(0);
   }, 0);
   return colors[hash % colors.length];
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const isString = (value: unknown): value is string => typeof value === "string";
+
+const isFiniteNumber = (value: unknown): value is number =>
+  typeof value === "number" && Number.isFinite(value);
+
+const isPresenceEditingCell = (value: unknown): value is PresenceEditingCell => {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    isString(value.cellKey) &&
+    isString(value.userId) &&
+    isString(value.userName) &&
+    isFiniteNumber(value.startTime)
+  );
+};
+
+const isPresenceData = (value: unknown): value is PresenceData => {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    isString(value.sessionId) &&
+    isString(value.userId) &&
+    isString(value.userName) &&
+    isString(value.color) &&
+    isFiniteNumber(value.lastActivity) &&
+    isFiniteNumber(value.timestamp) &&
+    Array.isArray(value.editingCells) &&
+    value.editingCells.every(isPresenceEditingCell)
+  );
+};
+
+const parsePresenceData = (raw: string): PresenceData | null => {
+  const parsed: unknown = JSON.parse(raw);
+  return isPresenceData(parsed) ? parsed : null;
 };
 
 const buildPresenceSnapshot = (
@@ -488,6 +533,7 @@ export const useShiftPresence = ({
 
   const loadPresenceFromStorage = useCallback(() => {
     const records: PresenceData[] = [];
+    const invalidKeys: string[] = [];
 
     try {
       for (let i = 0; i < window.localStorage.length; i++) {
@@ -497,16 +543,30 @@ export const useShiftPresence = ({
         }
 
         const data = window.localStorage.getItem(key);
-        if (!data) {
+        if (data === null) {
           continue;
         }
 
         try {
-          records.push(JSON.parse(data) as PresenceData);
-        } catch (error) {
-          console.warn("Failed to parse presence data:", key, error);
+          const parsed = parsePresenceData(data);
+          if (parsed) {
+            records.push(parsed);
+            continue;
+          }
+
+          invalidKeys.push(key);
+        } catch {
+          invalidKeys.push(key);
         }
       }
+
+      invalidKeys.forEach((key) => {
+        try {
+          window.localStorage.removeItem(key);
+        } catch (error) {
+          logger.error("Failed to remove invalid presence from storage:", key, error);
+        }
+      });
     } catch (error) {
       logger.error("Failed to load active users from storage:", error);
     }
