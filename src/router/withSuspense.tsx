@@ -1,24 +1,19 @@
 import PageLoader from "@shared/ui/feedback/PageLoader";
 import {
-  type ComponentProps,
   type ComponentType,
+  createElement,
   type LazyExoticComponent,
   type ReactNode,
   Suspense,
 } from "react";
 
-/**
- * Note: `any` is used here for ComponentType generics to allow wrapping
- * any component type with Suspense, regardless of its props.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function withSuspense<T extends ComponentType<any>>(
-  Component: LazyExoticComponent<T>,
-  props?: ComponentProps<T>
+export function withSuspense<TProps extends object>(
+  Component: LazyExoticComponent<ComponentType<TProps>>,
+  props?: TProps
 ): ReactNode {
   return (
     <Suspense fallback={<PageLoader />}>
-      <Component {...(props ?? ({} as ComponentProps<T>))} />
+      {createElement(Component, props)}
     </Suspense>
   );
 }
