@@ -388,6 +388,11 @@ type UseDuplicateConfirmStateParams = {
   selectedRecordIndex: number | null;
 };
 
+type UseDuplicateAttendanceManagerStateParams = {
+  duplicates: DuplicateAttendanceDaily[];
+  staffNameMap: Record<string, string>;
+};
+
 function useDuplicateConfirmState({
   dispatch,
   duplicates,
@@ -558,16 +563,14 @@ function useDuplicateConfirmState({
   };
 }
 
-export function DuplicateAttendanceManager({
+function useDuplicateAttendanceManagerState({
   duplicates,
   staffNameMap,
-}: DuplicateAttendanceManagerProps) {
+}: UseDuplicateAttendanceManagerStateParams) {
   const dispatch = useDispatch();
   const [triggerGetAttendanceById] = useLazyGetAttendanceByIdQuery();
   const [deleteAttendance] = useDeleteAttendanceMutation();
-
   const confirmFieldRows = useMemo(() => buildConfirmFieldRows(), []);
-
   const {
     selectionMode,
     selectedRecordIndex,
@@ -580,7 +583,6 @@ export function DuplicateAttendanceManager({
   } = useDuplicateSelectionModel({
     fieldLabels: confirmFieldRows.map((row) => row.label),
   });
-
   const {
     confirmOpen,
     confirmTargetStaffId,
@@ -603,6 +605,58 @@ export function DuplicateAttendanceManager({
     resetToRecordMode,
     resetSelection,
     selectedRecordIndex,
+  });
+
+  return {
+    confirmFieldRows,
+    selectionMode,
+    selectedRecordIndex,
+    fieldSelections,
+    handleChangeSelectionMode,
+    handleSelectRecord,
+    handleSelectField,
+    confirmOpen,
+    confirmTargetStaffId,
+    confirmTargetName,
+    confirmLoading,
+    confirmRecords,
+    handleOpenConfirmClick,
+    handleCloseConfirm,
+    handleRequestDeleteDuplicates,
+    handleCancelDeleteDuplicates,
+    handleDeleteDuplicates,
+    deleteConfirmOpen,
+    deleteConfirmMessage,
+  };
+}
+
+export function DuplicateAttendanceManager({
+  duplicates,
+  staffNameMap,
+}: DuplicateAttendanceManagerProps) {
+  const {
+    confirmFieldRows,
+    selectionMode,
+    selectedRecordIndex,
+    fieldSelections,
+    handleChangeSelectionMode,
+    handleSelectRecord,
+    handleSelectField,
+    confirmOpen,
+    confirmTargetStaffId,
+    confirmTargetName,
+    confirmLoading,
+    confirmRecords,
+    handleOpenConfirmClick,
+    handleCloseConfirm,
+    handleRequestDeleteDuplicates,
+    handleCancelDeleteDuplicates,
+    handleDeleteDuplicates,
+    deleteConfirmOpen,
+    deleteConfirmMessage,
+  } = useDuplicateAttendanceManagerState({
+    duplicates,
+    staffNameMap,
   });
 
   if (duplicates.length === 0) {
