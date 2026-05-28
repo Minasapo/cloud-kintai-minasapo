@@ -16,9 +16,10 @@ import type {
 } from "@shared/api/graphql/types";
 import { createLogger } from "@shared/lib/logger";
 import { formatDateSlash, formatDateTimeReadable } from "@shared/lib/time";
+import { useDialogFocusManagement } from "@shared/ui/feedback/useDialogFocusManagement";
 import { SectionTitle, SubsectionTitle } from "@shared/ui/typography";
 import type { GraphQLResult } from "aws-amplify/api";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   type AdminDailyReport,
@@ -437,6 +438,8 @@ export default function DailyReportCarouselDialog({
 
   const reactions = useMemo(() => report?.reactions ?? [], [report]);
   const comments = useMemo(() => report?.comments ?? [], [report]);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const selectedReactions = useMemo(() => {
     if (!reactionEntries || !currentStaffId) return [];
     return reactionEntries
@@ -453,6 +456,25 @@ export default function DailyReportCarouselDialog({
       setCurrentIndex(currentIndex + 1);
   };
 
+  useDialogFocusManagement({
+    open,
+    onClose,
+    dialogRef,
+    initialFocusRef: closeButtonRef,
+    onKeyDown: (event) => {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        handlePrevious();
+        return;
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        handleNext();
+      }
+    },
+  });
+
   if (!open) return null;
 
   return (
@@ -460,14 +482,21 @@ export default function DailyReportCarouselDialog({
       className="fixed inset-0 z-[1400] flex items-center justify-center bg-slate-900/40 p-4"
       onClick={onClose}
       data-testid="daily-report-carousel-dialog"
+      role="presentation"
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="日報を確認"
+        tabIndex={-1}
         className="flex h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-3">
           <SectionTitle className="text-base font-bold text-slate-800">日報を確認</SectionTitle>
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
             className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
