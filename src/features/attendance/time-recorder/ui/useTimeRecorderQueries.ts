@@ -88,8 +88,7 @@ export function useTimeRecorderQueries({
   const attendancesLoading =
     closeDatesLoading ||
     (shouldFetchAttendanceErrors &&
-      (isAttendancesInitialLoading ||
-        isAttendancesUninitialized));
+      (isAttendancesInitialLoading || isAttendancesUninitialized));
   return {
     shouldFetchAttendance,
     shouldFetchAttendanceErrors,
