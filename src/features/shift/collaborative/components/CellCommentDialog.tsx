@@ -1,4 +1,5 @@
-import { Button, Dialog, DialogActions, DialogTitle } from "@mui/material";
+import { Dialog, DialogActions, DialogTitle } from "@mui/material";
+import { AppButton } from "@shared/ui/button";
 import React from "react";
 
 import { useCellCommentDialogState } from "../hooks/useCellCommentDialogState";
@@ -113,16 +114,16 @@ export const CellCommentDialog: React.FC<CellCommentDialogProps> = ({
       />
 
       <DialogActions sx={{ p: 2 }}>
-        <Button variant="outlined" onClick={onClose}>
+        <AppButton variant="outline" tone="neutral" onClick={onClose}>
           キャンセル
-        </Button>
-        <Button
-          variant="contained"
+        </AppButton>
+        <AppButton
+          variant="solid"
           onClick={handleAddComment}
           disabled={!newCommentContent.trim()}
         >
           コメント追加
-        </Button>
+        </AppButton>
       </DialogActions>
     </Dialog>
   );

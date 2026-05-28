@@ -3,7 +3,6 @@ import {
   Autocomplete,
   Avatar,
   Box,
-  Button,
   Chip,
   DialogContent,
   Divider,
@@ -16,6 +15,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { AppButton } from "@shared/ui/button";
 import {
   AppDeleteIconButton,
   AppEditIconButton,
@@ -95,12 +95,12 @@ const CommentEditForm: React.FC<CommentEditFormProps> = ({
       variant="outlined"
     />
     <Box sx={{ mt: 1, display: "flex", gap: 1 }}>
-      <Button size="small" variant="contained" onClick={onSave}>
+      <AppButton size="sm" variant="solid" onClick={onSave}>
         保存
-      </Button>
-      <Button size="small" variant="outlined" onClick={onCancel}>
+      </AppButton>
+      <AppButton size="sm" variant="outline" tone="neutral" onClick={onCancel}>
         キャンセル
-      </Button>
+      </AppButton>
     </Box>
   </Box>
 );
@@ -205,12 +205,12 @@ const ReplyInputForm: React.FC<ReplyInputFormProps> = ({
       onChange={onMentionsChange}
     />
     <Box sx={{ mt: 1, display: "flex", gap: 1 }}>
-      <Button size="small" variant="contained" onClick={onSave}>
+      <AppButton size="sm" variant="solid" onClick={onSave}>
         返信
-      </Button>
-      <Button size="small" variant="outlined" onClick={onCancel}>
+      </AppButton>
+      <AppButton size="sm" variant="outline" tone="neutral" onClick={onCancel}>
         キャンセル
-      </Button>
+      </AppButton>
     </Box>
   </Paper>
 );
@@ -351,14 +351,14 @@ const CommentItem: React.FC<CommentItemProps> = ({
 
       {!isReplying && (
         <Box sx={{ ml: 4, mt: 0.5, mb: 1 }}>
-          <Button
-            size="small"
+          <AppButton
+            size="sm"
             startIcon={<ReplyIcon />}
             onClick={() => onStartReply(comment.id)}
             sx={{ textTransform: "none", fontSize: "0.8125rem" }}
           >
             返信
-          </Button>
+          </AppButton>
         </Box>
       )}
 

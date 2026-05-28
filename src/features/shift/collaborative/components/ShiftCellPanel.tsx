@@ -2,7 +2,8 @@ import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
-import { Box, Button, Divider, Paper, Stack, Typography } from "@mui/material";
+import { Box, Divider, Paper, Stack, Typography } from "@mui/material";
+import { AppButton } from "@shared/ui/button";
 import { memo } from "react";
 
 import { useShiftCellPanelState } from "../hooks/useShiftCellPanelState";
@@ -106,15 +107,16 @@ const ShiftCellPanelBase = ({
               {selectionCount}セル選択中
             </Typography>
           </Stack>
-          <Button
-            size="small"
+          <AppButton
+            variant="ghost"
+            tone="neutral"
+            size="sm"
             onClick={onClear}
             startIcon={<DeleteIcon />}
-            color="inherit"
             disabled={isUpdating}
           >
             選択解除
-          </Button>
+          </AppButton>
         </Box>
 
         <Divider />
@@ -142,28 +144,27 @@ const ShiftCellPanelBase = ({
 
         <Stack direction="row" spacing={1}>
           {showLock && (
-            <Button
-              variant="contained"
+            <AppButton
+              variant="solid"
               startIcon={<LockIcon />}
               onClick={onLock}
-              size="small"
-              color="primary"
+              size="sm"
               disabled={isUpdating}
             >
               確定（ロック）
-            </Button>
+            </AppButton>
           )}
           {showUnlock && (
-            <Button
-              variant="outlined"
+            <AppButton
+              variant="outline"
               startIcon={<LockOpenIcon />}
               onClick={onUnlock}
-              size="small"
-              color="inherit"
+              tone="neutral"
+              size="sm"
               disabled={!canUnlock || isUpdating}
             >
               確定解除
-            </Button>
+            </AppButton>
           )}
         </Stack>
 

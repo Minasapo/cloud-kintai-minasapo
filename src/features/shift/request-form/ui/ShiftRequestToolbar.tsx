@@ -3,12 +3,11 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import {
   Box,
-  Button,
   CircularProgress,
   Paper,
   Typography,
 } from "@mui/material";
-import { AppIconButton } from "@shared/ui/button";
+import { AppButton, AppIconButton } from "@shared/ui/button";
 import dayjs from "dayjs";
 
 type ShiftRequestToolbarProps = {
@@ -105,7 +104,8 @@ export function ShiftRequestToolbar({
         </Box>
 
         <Box sx={{ width: { xs: "100%", sm: "auto" } }}>
-          <Button
+          <AppButton
+            variant="solid"
             startIcon={<AddIcon />}
             onClick={onOpenPatterns}
             fullWidth={isMobile}
@@ -121,10 +121,9 @@ export function ShiftRequestToolbar({
             }}
           >
             マイパターン
-          </Button>
+          </AppButton>
         </Box>
       </Box>
     </Paper>
   );
 }
-

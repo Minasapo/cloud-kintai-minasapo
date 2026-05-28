@@ -4,7 +4,6 @@ import MessageIcon from "@mui/icons-material/Message";
 import {
   Avatar,
   Box,
-  Button,
   Chip,
   CircularProgress,
   Collapse,
@@ -16,6 +15,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { AppButton } from "@shared/ui/button";
 import dayjs from "dayjs";
 
 import {
@@ -80,37 +80,35 @@ export const CellEditLockSection = ({
   <Box>
     <Stack direction="row" spacing={1}>
       {!hasEditLockForSelected && !isOthersEditingSelected && (
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
+        <AppButton
+          variant="solid"
+          size="sm"
           onClick={onAcquireEditLock}
           disabled={isUpdating}
         >
           編集開始（ロック取得）
-        </Button>
+        </AppButton>
       )}
       {hasEditLockForSelected && (
-        <Button
-          variant="outlined"
-          color="primary"
-          size="small"
+        <AppButton
+          variant="outline"
+          size="sm"
           onClick={onReleaseEditLock}
           disabled={isUpdating}
         >
           編集終了（ロック解除）
-        </Button>
+        </AppButton>
       )}
       {(hasEditLockForSelected || isOthersEditingSelected) && canUnlock && (
-        <Button
-          variant="contained"
-          color="error"
-          size="small"
+        <AppButton
+          variant="solid"
+          tone="danger"
+          size="sm"
           onClick={onForceReleaseLock}
           disabled={isUpdating}
         >
           編集ロックを強制剥奪
-        </Button>
+        </AppButton>
       )}
       {isOthersEditingSelected && !canUnlock && (
         <Typography variant="body2" color="error" sx={{ alignSelf: "center" }}>
@@ -241,16 +239,16 @@ export const CellCommentsSection = ({
             maxRows={2}
             sx={{ flexGrow: 1 }}
           />
-          <Button
-            variant="contained"
+          <AppButton
+            variant="solid"
             startIcon={isAddingComment ? <CircularProgress size={16} /> : <MessageIcon />}
             onClick={onAddComment}
             disabled={!commentText.trim() || isAddingComment || isUpdating}
-            size="small"
+            size="sm"
             sx={{ whiteSpace: "nowrap" }}
           >
             追加
-          </Button>
+          </AppButton>
         </Stack>
       </Box>
 
@@ -334,17 +332,17 @@ export const CellHistorySection = ({
   return (
     <>
       <Box>
-        <Button
-          size="small"
-          variant="text"
-          color="inherit"
+        <AppButton
+          size="sm"
+          variant="ghost"
+          tone="neutral"
           endIcon={historyExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           onClick={onToggleExpand}
           sx={{ px: 0, fontWeight: 600 }}
         >
           変更履歴
           {cellHistory.length > 0 ? `（${cellHistory.length}件）` : ""}
-        </Button>
+        </AppButton>
         <Collapse in={historyExpanded}>
           {cellHistory.length === 0 ? (
             <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>

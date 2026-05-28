@@ -1,7 +1,6 @@
 import PrintIcon from "@mui/icons-material/Print";
 import {
   Box,
-  Button,
   Checkbox,
   Dialog,
   DialogActions,
@@ -15,6 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
+import { AppButton } from "@shared/ui/button";
 import dayjs, { Dayjs } from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
@@ -301,17 +301,17 @@ const PrintShiftDialogComponent = ({
         </Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} variant="outlined">
+        <AppButton variant="outline" tone="neutral" onClick={onClose}>
           キャンセル
-        </Button>
-        <Button
+        </AppButton>
+        <AppButton
           onClick={handlePrint}
-          variant="contained"
+          variant="solid"
           startIcon={<PrintIcon />}
           disabled={filteredDays.length === 0 || filteredStaffs.length === 0}
         >
           印刷プレビューを表示
-        </Button>
+        </AppButton>
       </DialogActions>
     </Dialog>
   );

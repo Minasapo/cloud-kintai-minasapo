@@ -8,7 +8,6 @@ import WarningIcon from "@mui/icons-material/Warning";
 import {
   Alert,
   Box,
-  Button,
   Card,
   CardContent,
   Chip,
@@ -23,7 +22,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { AppIconButton } from "@shared/ui/button";
+import { AppButton, AppIconButton } from "@shared/ui/button";
 import { memo, type UIEvent, useEffect, useRef, useState } from "react";
 
 import { RuleViolation, SuggestedAction } from "../rules/shiftRules";
@@ -132,15 +131,15 @@ const ViolationListItem = ({
                       <Typography variant="caption" color="text.secondary">
                         {action.impact}
                       </Typography>
-                      <Button
-                        size="small"
-                        variant="outlined"
+                      <AppButton
+                        size="sm"
+                        variant="outline"
                         startIcon={<CheckCircleIcon />}
                         onClick={() => onApplyAction(action)}
                         fullWidth
                       >
                         適用する
-                      </Button>
+                      </AppButton>
                     </Stack>
                   </CardContent>
                 </Card>

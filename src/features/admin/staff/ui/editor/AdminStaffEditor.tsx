@@ -19,7 +19,6 @@ import {
 import { ApproverSettingTableRows } from "@features/admin/staff/ui/shared/ApproverSettingTableRows";
 import {
   Autocomplete,
-  Button,
   Checkbox,
   CircularProgress,
   FormControlLabel,
@@ -30,6 +29,7 @@ import {
 import { DatePicker } from "@mui/x-date-pickers";
 import { ApproverSettingMode } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
+import { AppButton } from "@shared/ui/button";
 import { ProgressBar } from "@shared/ui/feedback";
 import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
 import { AppTabs } from "@shared/ui/tabs";
@@ -536,16 +536,15 @@ export default function AdminStaffEditor() {
         </section>
 
         <div className="flex justify-end pb-8 pt-2">
-          <Button
+          <AppButton
             data-testid="save-button"
-            variant="contained"
-            size="medium"
+            variant="solid"
             disabled={!isValid || !isDirty || saving || isSubmitting}
             startIcon={saving ? <CircularProgress size={15} /> : undefined}
             onClick={handleSubmit(onSubmit)}
           >
             保存
-          </Button>
+          </AppButton>
         </div>
       </div>
     </div>

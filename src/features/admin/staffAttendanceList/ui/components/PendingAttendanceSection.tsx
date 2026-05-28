@@ -6,7 +6,6 @@ import { AttendanceRecordActionCell } from "@features/attendance/list/ui/Attenda
 import {
   Alert,
   AlertTitle,
-  Button,
   Checkbox,
   Stack,
   Table,
@@ -24,6 +23,7 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 import { designTokenVar } from "@shared/designSystem";
+import { AppButton } from "@shared/ui/button";
 
 import { ChangeRequestQuickViewButton } from "./ChangeRequestQuickViewButton";
 
@@ -102,9 +102,8 @@ export function PendingAttendanceSection({
           <Typography variant="body2" color="text.secondary">
             選択中: {selectedAttendanceIds.length} 件
           </Typography>
-          <Button
-            variant="contained"
-            color="primary"
+          <AppButton
+            variant="solid"
             disabled={
               bulkApproving ||
               selectedAttendanceIds.length === 0 ||
@@ -114,7 +113,7 @@ export function PendingAttendanceSection({
             data-testid="bulk-approve-button"
           >
             {bulkApproving ? "承認処理中..." : "選択を一括承認"}
-          </Button>
+          </AppButton>
         </Stack>
       </Stack>
       <Alert severity="warning">

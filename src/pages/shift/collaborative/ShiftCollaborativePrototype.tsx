@@ -5,7 +5,6 @@ import {
   Avatar,
   AvatarGroup,
   Box,
-  Button,
   Chip,
   Paper,
   Stack,
@@ -19,6 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import { AppButton } from "@shared/ui/button";
 import { ProgressBar } from "@shared/ui/feedback";
 import { PageContent } from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
@@ -254,16 +254,16 @@ function PrototypeToolbarPanel({
     <Paper sx={{ p: 2 }}>
       <Stack spacing={2}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Button onClick={onPrevMonth} variant="outlined" size="small">
+          <AppButton variant="outline" size="sm" onClick={onPrevMonth}>
             前月
-          </Button>
+          </AppButton>
           <Chip
             label={monthStart.format("YYYY年 M月")}
             sx={{ minWidth: 120 }}
           />
-          <Button onClick={onNextMonth} variant="outlined" size="small">
+          <AppButton variant="outline" size="sm" onClick={onNextMonth}>
             翌月
-          </Button>
+          </AppButton>
         </Box>
 
         <Box>
@@ -514,12 +514,12 @@ function PrototypeFooter() {
             最終保存: {dayjs().format("YYYY/MM/DD HH:mm:ss")}
           </Typography>
           <Box sx={{ display: "flex", gap: 1 }}>
-            <Button variant="outlined" size="small" disabled>
+            <AppButton variant="outline" size="sm" disabled>
               キャンセル
-            </Button>
-            <Button variant="contained" size="small" disabled>
+            </AppButton>
+            <AppButton variant="solid" size="sm" disabled>
               確定してロック
-            </Button>
+            </AppButton>
           </Box>
         </Box>
       </Paper>

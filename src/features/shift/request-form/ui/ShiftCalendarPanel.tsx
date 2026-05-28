@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Checkbox,
   CircularProgress,
   FormControlLabel,
@@ -10,6 +9,7 @@ import {
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import { PANEL_HEIGHTS } from "@shared/config/uiDimensions";
+import { AppButton } from "@shared/ui/button";
 import { Dayjs } from "dayjs";
 import { MouseEvent, ReactNode } from "react";
 
@@ -111,20 +111,24 @@ export function ShiftCalendarPanel({
                   flexWrap="wrap"
                   justifyContent={isMobile ? "flex-start" : "flex-end"}
                 >
-                  <Button
-                    size="small"
+                  <AppButton
+                    variant="ghost"
+                    tone="neutral"
+                    size="sm"
                     disabled={interactionDisabled || !isSelectionMode}
                     onClick={onToggleAllRowsSelection}
                   >
                     すべて選択
-                  </Button>
-                  <Button
-                    size="small"
+                  </AppButton>
+                  <AppButton
+                    variant="ghost"
+                    tone="neutral"
+                    size="sm"
                     disabled={interactionDisabled || !isSelectionMode}
                     onClick={onClearRowSelection}
                   >
                     選択解除
-                  </Button>
+                  </AppButton>
                 </Stack>
               </Stack>
             </Stack>

@@ -1,7 +1,6 @@
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import { ChangeRequestDiffTable } from "@features/attendance/edit/ui/ChangeRequestDialog/ChangeRequestDiffTable";
 import {
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
@@ -11,6 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Attendance, AttendanceChangeRequest } from "@shared/api/graphql/types";
+import { AppButton } from "@shared/ui/button";
 import dayjs from "dayjs";
 import { useMemo } from "react";
 
@@ -45,7 +45,9 @@ export default function ChangeRequestQuickViewDialog({
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose}>閉じる</Button>
+          <AppButton variant="ghost" tone="neutral" onClick={onClose}>
+            閉じる
+          </AppButton>
         </DialogActions>
       </Dialog>
     );
@@ -76,7 +78,9 @@ export default function ChangeRequestQuickViewDialog({
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>閉じる</Button>
+        <AppButton variant="ghost" tone="neutral" onClick={onClose}>
+          閉じる
+        </AppButton>
       </DialogActions>
     </Dialog>
   );

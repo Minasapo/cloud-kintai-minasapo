@@ -5,8 +5,9 @@ import {
 import { useAdminLayoutContent } from "@features/admin/layout/model/useAdminLayoutContent";
 import { AdminContent } from "@features/admin/layout/ui/AdminContent";
 import { SplitModeToggle, SplitViewProvider } from "@features/splitView";
-import { Box, Button, Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import { designTokenVar } from "@shared/designSystem";
+import { AppButton } from "@shared/ui/button";
 import { PageSection } from "@shared/ui/layout";
 
 const PAGE_SECTION_GAP = designTokenVar("spacing.xl", "24px");
@@ -72,14 +73,14 @@ function AdminLayoutContent() {
           }}
         >
           {isMobile && (
-            <Button
-              variant="outlined"
-              size="small"
+            <AppButton
+              variant="outline"
+              size="sm"
               onClick={handleToggleMobileRail}
               sx={{ textTransform: "none", borderRadius: "999px" }}
             >
               {isMobileRailOpen ? "ナビを閉じる" : "ナビを開く"}
-            </Button>
+            </AppButton>
           )}
           <SplitModeToggle mode={splitMode} onToggle={handleToggleSplitMode} />
         </Box>

@@ -7,12 +7,12 @@ import type {
 } from "@entities/attendance-statistics/model/types";
 import {
   Alert,
-  Button,
   ButtonGroup,
   Paper,
   Stack,
   Typography,
 } from "@mui/material";
+import { AppButton } from "@shared/ui/button";
 import { ProgressBar } from "@shared/ui/feedback";
 import { PageTitle } from "@shared/ui/typography";
 import dayjs from "dayjs";
@@ -346,27 +346,33 @@ export default function AttendanceStatistics() {
           spacing={1}
           alignItems={{ xs: "stretch", sm: "center" }}
         >
-          <Button
-            variant="contained"
+          <AppButton
+            variant="solid"
             onClick={() => void handleRebuild()}
             disabled={isRebuilding}
           >
             {isRebuilding ? "再集計中..." : "この年の統計を再集計"}
-          </Button>
+          </AppButton>
           <ButtonGroup variant="outlined" size="small">
-            <Button
+            <AppButton
               onClick={() => setYear((prev) => prev - 1)}
               disabled={isRebuilding}
+              variant="outline"
+              size="sm"
             >
               前年
-            </Button>
-            <Button disabled>{year}年</Button>
-            <Button
+            </AppButton>
+            <AppButton disabled variant="outline" size="sm">
+              {year}年
+            </AppButton>
+            <AppButton
               onClick={() => setYear((prev) => prev + 1)}
               disabled={isRebuilding}
+              variant="outline"
+              size="sm"
             >
               翌年
-            </Button>
+            </AppButton>
           </ButtonGroup>
         </Stack>
       </Stack>

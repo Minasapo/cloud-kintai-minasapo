@@ -3,7 +3,6 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 import {
   alpha,
   Box,
-  Button,
   Paper,
   Table,
   TableBody,
@@ -13,6 +12,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { AppButton } from "@shared/ui/button";
 import dayjs from "dayjs";
 import React, { useMemo } from "react";
 
@@ -129,10 +129,10 @@ const StaffTableRow = ({
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           {staffName}
           {isAdmin && (
-            <Button
-              size="small"
-              variant="outlined"
-              color={allLocked ? "warning" : "primary"}
+            <AppButton
+              size="sm"
+              variant="outline"
+              tone="neutral"
               startIcon={
                 allLocked ? <LockOpenIcon fontSize="inherit" /> : <LockIcon fontSize="inherit" />
               }
@@ -143,10 +143,16 @@ const StaffTableRow = ({
                     : { kind: "lockStaff", staffId, staffName },
                 )
               }
-              sx={{ fontSize: "0.7rem", py: 0.25, px: 1 }}
+              sx={{
+                fontSize: "0.7rem",
+                py: 0.25,
+                px: 1,
+                color: allLocked ? "warning.main" : "primary.main",
+                borderColor: allLocked ? "warning.main" : "primary.main",
+              }}
             >
               {allLocked ? "解除" : "確定"}
-            </Button>
+            </AppButton>
           )}
         </Box>
       </TableCell>
@@ -235,10 +241,10 @@ const ShiftTableHeader = ({
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           スタッフ名
           {isAdmin && (
-            <Button
-              size="small"
-              variant="outlined"
-              color={isAllMonthLocked ? "warning" : "primary"}
+            <AppButton
+              size="sm"
+              variant="outline"
+              tone="neutral"
               startIcon={
                 isAllMonthLocked ? (
                   <LockOpenIcon fontSize="inherit" />
@@ -251,10 +257,16 @@ const ShiftTableHeader = ({
                   isAllMonthLocked ? { kind: "unlockMonth" } : { kind: "lockMonth" },
                 )
               }
-              sx={{ fontSize: "0.7rem", py: 0.25, px: 1 }}
+              sx={{
+                fontSize: "0.7rem",
+                py: 0.25,
+                px: 1,
+                color: isAllMonthLocked ? "warning.main" : "primary.main",
+                borderColor: isAllMonthLocked ? "warning.main" : "primary.main",
+              }}
             >
               {isAllMonthLocked ? "全員解除" : "全員確定"}
-            </Button>
+            </AppButton>
           )}
         </Box>
       </TableCell>
