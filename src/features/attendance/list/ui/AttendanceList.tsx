@@ -272,7 +272,7 @@ export default function AttendanceTable() {
     () => new Logger("AttendanceList", import.meta.env.DEV ? "DEBUG" : "ERROR"),
     [],
   );
-  const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
+  const [staff, setStaff] = useState<Staff | undefined>(undefined);
   useEffect(() => {
     if (!cognitoUser) return;
     fetchStaff(cognitoUser.id)

@@ -61,7 +61,7 @@ function useWorkDateInterval(): string {
 
 type UseStaffRefreshParams = { cognitoId: string | undefined; dispatch: ReturnType<typeof useDispatch> };
 function useStaffRefresh({ cognitoId, dispatch }: UseStaffRefreshParams) {
-  const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
+  const [staff, setStaff] = useState<Staff | undefined>(undefined);
   const refreshStaff = useCallback(async () => {
     if (!cognitoId) return;
     try {
@@ -75,7 +75,7 @@ function useStaffRefresh({ cognitoId, dispatch }: UseStaffRefreshParams) {
 }
 
 type UseAttendanceErrorStatsParams = {
-  staff: Staff | null | undefined;
+  staff: Staff | undefined;
   attendances: Attendance[];
   holidayCalendars: HolidayCalendar[];
   companyHolidayCalendars: CompanyHolidayCalendar[];
@@ -179,7 +179,7 @@ export default function TimeRecorder({
     calendarsError,
     attendanceErrorToday,
   } = useTimeRecorderQueries({ cognitoId: cognitoUser?.id, currentWorkDate });
-  const [workStatus, setWorkStatus] = useState<WorkStatus | null | undefined>(
+  const [workStatus, setWorkStatus] = useState<WorkStatus | undefined>(
     undefined,
   );
   const [directMode, setDirectMode] = useState(false);
@@ -284,7 +284,7 @@ export default function TimeRecorder({
   }, [elapsedWorkInfo, onElapsedWorkTimeChange]);
   useTimeRecorderSubscription({ cognitoId: cognitoUser?.id, currentWorkDate, localAttendanceUpdateIgnoreUntilRef, refreshTimeRecorderData, logger });
   const contextValue = useMemo<TimeRecorderContextValue | null>(() => {
-    if (workStatus === undefined || workStatus === null) {
+    if (workStatus === undefined) {
       return null;
     }
     return {
@@ -324,15 +324,6 @@ export default function TimeRecorder({
   ]);
   if (attendanceLoading || calendarLoading || workStatus === undefined) {
     return <TimeRecorderLoadingView />;
-  }
-  if (workStatus === null) {
-    dispatch(
-      pushNotification({
-        tone: "error",
-        message: MESSAGE_CODE.E00001,
-      }),
-    );
-    return <></>;
   }
   return (
     <TimeRecorderProvider value={contextValue!}>
