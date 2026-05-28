@@ -179,7 +179,17 @@ export default [
   }),
   {
     files: ["src/**/*.{ts,tsx,js,jsx}"],
+    ignores: ["src/shared/lib/logger.ts"],
     rules: {
+      "no-restricted-properties": [
+        "error",
+        {
+          object: "console",
+          property: "error",
+          message:
+            "Use logger.error from @shared/lib/logger instead of console.error in production code.",
+        },
+      ],
       "no-restricted-imports": [
         "error",
         {
@@ -235,6 +245,7 @@ export default [
     ],
     rules: {
       "max-lines-per-function": "off",
+      "no-restricted-properties": "off",
     },
   },
 ];

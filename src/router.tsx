@@ -2,7 +2,6 @@ import { lazy, type ReactNode,Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 
 import Layout from "./Layout";
-import NotFound from "./pages/NotFound";
 import { adminChildRoutes } from "./router/adminChildRoutes";
 import { createLazyRoute } from "./router/lazyRoute";
 import RouteErrorBoundary from "./router/RouteErrorBoundary";
@@ -90,6 +89,7 @@ const OfficeQrRegisterRoute = createLazyRoute(
 const DesignTokenPreviewRoute = createLazyRoute(
   () => import("./pages/preview/DesignTokenPreviewPage"),
 );
+const NotFoundRoute = createLazyRoute(() => import("./pages/NotFound"));
 const ProfileRoute = createLazyRoute(() => import("./pages/Profile"));
 const WorkflowNotificationsRoute = createLazyRoute(
   () => import("./pages/notifications/WorkflowNotificationsPage"),
@@ -103,15 +103,9 @@ const ShiftCollaborativeRoute = createLazyRoute(
 );
 const WorkflowDetailRoute = createLazyRoute(
   () => import("./pages/workflow/detail/WorkflowDetail"),
-  {
-    loader: loadWorkflowDetailLoader,
-  },
 );
 const WorkflowEditRoute = createLazyRoute(
   () => import("./pages/workflow/edit/WorkflowEdit"),
-  {
-    loader: loadWorkflowEditLoader,
-  },
 );
 const WorkflowListRoute = createLazyRoute(
   () => import("./pages/workflow/list/Workflow"),
@@ -168,7 +162,7 @@ const router = createBrowserRouter([
           },
           {
             path: "*",
-            element: <NotFound />,
+            lazy: NotFoundRoute,
           },
         ],
       },
@@ -183,10 +177,12 @@ const router = createBrowserRouter([
           {
             path: ":id",
             lazy: WorkflowDetailRoute,
+            loader: loadWorkflowDetailLoader,
           },
           {
             path: ":id/edit",
             lazy: WorkflowEditRoute,
+            loader: loadWorkflowEditLoader,
           },
           {
             path: "new",
@@ -194,7 +190,7 @@ const router = createBrowserRouter([
           },
           {
             path: "*",
-            element: <NotFound />,
+            lazy: NotFoundRoute,
           },
         ],
       },
@@ -211,7 +207,7 @@ const router = createBrowserRouter([
           },
           {
             path: "*",
-            element: <NotFound />,
+            lazy: NotFoundRoute,
           },
         ],
       },
@@ -259,13 +255,13 @@ const router = createBrowserRouter([
           },
           {
             path: "*",
-            element: <NotFound />,
+            lazy: NotFoundRoute,
           },
         ],
       },
       {
         path: "*",
-        element: <NotFound />,
+        lazy: NotFoundRoute,
       },
     ],
   },

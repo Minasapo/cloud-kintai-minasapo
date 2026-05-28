@@ -1,4 +1,5 @@
 import { useGetShiftRequestsQuery } from "@entities/shift/api/shiftApi";
+import { createLogger } from "@shared/lib/logger";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { buildShiftErrorMessage } from "../lib/shiftErrorMessages";
@@ -15,6 +16,8 @@ import {
 } from "../types/collaborative.types";
 import { useShiftDataSubscriptions } from "./useShiftDataSubscriptions";
 import { useShiftPersist } from "./useShiftPersist";
+
+const logger = createLogger("CollaborativeShiftData");
 
 /**
  * 共同編集シフトデータの取得・更新フック
@@ -183,7 +186,7 @@ export const useCollaborativeShiftData = ({
 
       setLastFetchedAt(Date.now());
     } catch (err) {
-      console.error("Failed to fetch shifts:", err);
+      logger.error("Failed to fetch shifts:", err);
       const { message, connection } = buildShiftErrorMessage(err);
       setConnectionState(connection);
       setError(message);

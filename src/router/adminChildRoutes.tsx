@@ -1,7 +1,6 @@
 import { Navigate, RouteObject } from "react-router-dom";
 
 import AdminShiftGuard from "../pages/admin/AdminShiftGuard";
-import NotFound from "../pages/NotFound";
 import { ProgressBar, Spinner } from "../shared/ui/feedback/LoadingPrimitives";
 import { createLazyRoute } from "./lazyRoute";
 
@@ -106,6 +105,7 @@ const StaffShiftListRoute = createLazyRoute(
     wrap: (node) => <AdminShiftGuard>{node}</AdminShiftGuard>,
   },
 );
+const NotFoundRoute = createLazyRoute(() => import("../pages/NotFound"));
 
 export const adminChildRoutes: RouteObject[] = [
   {
@@ -132,13 +132,13 @@ export const adminChildRoutes: RouteObject[] = [
           },
           {
             path: "*",
-            element: <NotFound />,
+            lazy: NotFoundRoute,
           },
         ],
       },
       {
         path: "*",
-        element: <NotFound />,
+        lazy: NotFoundRoute,
       },
     ],
   },
@@ -167,7 +167,7 @@ export const adminChildRoutes: RouteObject[] = [
       },
       {
         path: "*",
-        element: <NotFound />,
+        lazy: NotFoundRoute,
       },
     ],
   },
@@ -192,8 +192,8 @@ export const adminChildRoutes: RouteObject[] = [
     lazy: AdminMasterLayoutRoute,
     children: [
       {
-            index: true,
-            element: <Navigate to="/admin/master/job_term" replace />,
+        index: true,
+        element: <Navigate to="/admin/master/job_term" replace />,
       },
       {
         path: "job_term",
@@ -209,11 +209,11 @@ export const adminChildRoutes: RouteObject[] = [
       },
       {
         path: "shift",
-        element: <NotFound />,
+        lazy: NotFoundRoute,
       },
       {
         path: "workflow",
-        element: <NotFound />,
+        lazy: NotFoundRoute,
       },
       {
         path: "feature_management/attendance_statistics",
@@ -241,7 +241,7 @@ export const adminChildRoutes: RouteObject[] = [
       },
       {
         path: "*",
-        element: <NotFound />,
+        lazy: NotFoundRoute,
       },
     ],
   },
@@ -258,7 +258,7 @@ export const adminChildRoutes: RouteObject[] = [
       },
       {
         path: "*",
-        element: <NotFound />,
+        lazy: NotFoundRoute,
       },
     ],
   },
@@ -279,12 +279,12 @@ export const adminChildRoutes: RouteObject[] = [
       },
       {
         path: "*",
-        element: <NotFound />,
+        lazy: NotFoundRoute,
       },
     ],
   },
   {
     path: "*",
-    element: <NotFound />,
+    lazy: NotFoundRoute,
   },
 ];

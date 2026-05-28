@@ -26,6 +26,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { AppButton } from "@shared/ui/button";
 import ConfirmDialog from "@shared/ui/feedback/ConfirmDialog";
@@ -39,6 +40,8 @@ import {
   DuplicateSelectionMode,
   useDuplicateSelectionModel,
 } from "../model/useDuplicateSelectionModel";
+
+const logger = createLogger("DuplicateAttendanceManager");
 
 const diffWrapperSx = { whiteSpace: "pre-wrap" } as const;
 const diffHighlightSx = {
@@ -385,6 +388,11 @@ type UseDuplicateConfirmStateParams = {
   selectedRecordIndex: number | null;
 };
 
+type UseDuplicateAttendanceManagerStateParams = {
+  duplicates: DuplicateAttendanceDaily[];
+  staffNameMap: Record<string, string>;
+};
+
 function useDuplicateConfirmState({
   dispatch,
   duplicates,
@@ -425,7 +433,7 @@ function useDuplicateConfirmState({
               const response = await triggerGetAttendanceById({ id }).unwrap();
               return response ?? null;
             } catch (error) {
-              console.error(error);
+              logger.error("Failed to fetch attendance", error);
               return null;
             }
           }),
@@ -440,13 +448,13 @@ function useDuplicateConfirmState({
           });
         setConfirmRecords(validRecords);
       } catch (error) {
+        logger.error("Failed to handle duplicate attendance", error);
         dispatch(
           pushNotification({
             tone: "error",
             message: MESSAGE_CODE.E00001,
           }),
         );
-        console.error(error);
       } finally {
         setConfirmLoading(false);
       }
@@ -508,7 +516,7 @@ function useDuplicateConfirmState({
         try {
           await deleteAttendance({ id }).unwrap();
         } catch (error) {
-          console.error("Failed to delete attendance:", id, error);
+          logger.error("Failed to delete attendance:", id, error);
           dispatch(
             pushNotification({
               tone: "error",
@@ -555,16 +563,14 @@ function useDuplicateConfirmState({
   };
 }
 
-export function DuplicateAttendanceManager({
+function useDuplicateAttendanceManagerState({
   duplicates,
   staffNameMap,
-}: DuplicateAttendanceManagerProps) {
+}: UseDuplicateAttendanceManagerStateParams) {
   const dispatch = useDispatch();
   const [triggerGetAttendanceById] = useLazyGetAttendanceByIdQuery();
   const [deleteAttendance] = useDeleteAttendanceMutation();
-
   const confirmFieldRows = useMemo(() => buildConfirmFieldRows(), []);
-
   const {
     selectionMode,
     selectedRecordIndex,
@@ -577,7 +583,6 @@ export function DuplicateAttendanceManager({
   } = useDuplicateSelectionModel({
     fieldLabels: confirmFieldRows.map((row) => row.label),
   });
-
   const {
     confirmOpen,
     confirmTargetStaffId,
@@ -600,6 +605,58 @@ export function DuplicateAttendanceManager({
     resetToRecordMode,
     resetSelection,
     selectedRecordIndex,
+  });
+
+  return {
+    confirmFieldRows,
+    selectionMode,
+    selectedRecordIndex,
+    fieldSelections,
+    handleChangeSelectionMode,
+    handleSelectRecord,
+    handleSelectField,
+    confirmOpen,
+    confirmTargetStaffId,
+    confirmTargetName,
+    confirmLoading,
+    confirmRecords,
+    handleOpenConfirmClick,
+    handleCloseConfirm,
+    handleRequestDeleteDuplicates,
+    handleCancelDeleteDuplicates,
+    handleDeleteDuplicates,
+    deleteConfirmOpen,
+    deleteConfirmMessage,
+  };
+}
+
+export function DuplicateAttendanceManager({
+  duplicates,
+  staffNameMap,
+}: DuplicateAttendanceManagerProps) {
+  const {
+    confirmFieldRows,
+    selectionMode,
+    selectedRecordIndex,
+    fieldSelections,
+    handleChangeSelectionMode,
+    handleSelectRecord,
+    handleSelectField,
+    confirmOpen,
+    confirmTargetStaffId,
+    confirmTargetName,
+    confirmLoading,
+    confirmRecords,
+    handleOpenConfirmClick,
+    handleCloseConfirm,
+    handleRequestDeleteDuplicates,
+    handleCancelDeleteDuplicates,
+    handleDeleteDuplicates,
+    deleteConfirmOpen,
+    deleteConfirmMessage,
+  } = useDuplicateAttendanceManagerState({
+    duplicates,
+    staffNameMap,
   });
 
   if (duplicates.length === 0) {

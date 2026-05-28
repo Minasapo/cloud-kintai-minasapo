@@ -118,4 +118,18 @@ describe("ExternalLinks", () => {
     fireEvent.click(screen.getByLabelText("external links"));
     expect(screen.getByText("テストリンク")).toBeInTheDocument();
   });
+
+  it("個人リンク取得エラー時にエラーメッセージを表示する", () => {
+    render(
+      <ExternalLinks
+        links={[makeLink({ isPersonal: false })]}
+        staffName="山田太郎"
+        personalLinksFetchError
+      />,
+    );
+    fireEvent.click(screen.getByLabelText("external links"));
+    expect(
+      screen.getByText("プライベートリンクの取得に失敗しました"),
+    ).toBeInTheDocument();
+  });
 });

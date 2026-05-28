@@ -1,5 +1,7 @@
+import { createLogger } from "@shared/lib/logger";
 import dayjs from "dayjs";
 
+const logger = createLogger("OfficeQrToken");
 const TOKEN_TTL_SECONDS = 30;
 
 export async function validateOfficeQrToken(
@@ -13,7 +15,7 @@ export async function validateOfficeQrToken(
   try {
     const secret = import.meta.env.VITE_TOKEN_SECRET;
     if (!secret) {
-      console.error("VITE_TOKEN_SECRET is not set.");
+      logger.error("VITE_TOKEN_SECRET is not set.");
       throw new Error("VITE_TOKEN_SECRET is not defined or invalid.");
     }
 

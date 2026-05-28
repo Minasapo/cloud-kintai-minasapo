@@ -4,7 +4,7 @@ import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { AttendanceEditInputs, defaultValues, HourlyPaidHolidayTimeInputs, RestInputs, } from "@features/attendance/edit/model/common";
 import { Attendance,AttendanceHistory } from "@shared/api/graphql/types";
-import { Logger } from "@shared/lib/logger";
+import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -12,6 +12,8 @@ import { UseFormReset, UseFormSetValue, } from "react-hook-form";
 import { useDispatch } from "react-redux";
 
 import * as MESSAGE_CODE from "@/errors";
+
+const logger = createLogger("AttendanceRecord");
 
 type ReplaceFn<T> = (value: T[]) => void;
 type UseAttendanceRecordParams = {
@@ -22,7 +24,6 @@ type UseAttendanceRecordParams = {
     reset: UseFormReset<AttendanceEditInputs>;
     restReplace: ReplaceFn<RestInputs>;
     hourlyPaidHolidayTimeReplace: ReplaceFn<HourlyPaidHolidayTimeInputs>;
-    logger: Logger;
 };
 type FetchStaffResult = Awaited<ReturnType<typeof fetchStaff>>;
 const mapFetchedStaffToStaffType = (staff: FetchStaffResult): StaffType => ({
@@ -90,8 +91,7 @@ function applyHistoryToForm(
         hourlyPaidHolidayTimeReplace(hourly);
     }
     catch (e) {
-        // eslint-disable-next-line no-console
-        console.error("Failed to apply history to form:", e);
+        logger.error("Failed to apply history to form:", e);
     }
 }
 
@@ -140,7 +140,7 @@ function initFormFromAttendance(
     });
 }
 
-export const useAttendanceRecord = ({ targetStaffId, targetWorkDate, readOnly, setValue, reset, restReplace, hourlyPaidHolidayTimeReplace, logger, }: UseAttendanceRecordParams) => {
+export const useAttendanceRecord = ({ targetStaffId, targetWorkDate, readOnly, setValue, reset, restReplace, hourlyPaidHolidayTimeReplace }: UseAttendanceRecordParams) => {
     const dispatch = useDispatch();
     const [triggerGetAttendance, { data: attendanceData }] = useLazyGetAttendanceByStaffAndDateQuery();
     const attendance = attendanceData ?? null;
@@ -241,7 +241,7 @@ export const useAttendanceRecord = ({ targetStaffId, targetWorkDate, readOnly, s
                 message: MESSAGE_CODE.E02001
             }));
         });
-    }, [dispatch, logger, targetStaffId]);
+    }, [dispatch, targetStaffId]);
     useEffect(() => {
         if (!staff || !targetStaffId || !targetWorkDate)
             return;
@@ -318,7 +318,7 @@ export const useAttendanceRecord = ({ targetStaffId, targetWorkDate, readOnly, s
         finally {
             setHistoriesLoading(false);
         }
-    }, [staff, targetWorkDate, triggerGetAttendance, logger]);
+    }, [staff, targetWorkDate, triggerGetAttendance]);
     return {
         attendance,
         staff,

@@ -2,6 +2,7 @@ import { shiftRequestStatusToShiftStateWithEmpty } from "@entities/shift/lib/sta
 import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { updateShiftRequest } from "@shared/api/graphql/documents/mutations";
 import type { ShiftRequestCommentInput } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import React, {
   useCallback,
   useEffect,
@@ -34,6 +35,8 @@ import {
   ShiftRequestData,
   ShiftState,
 } from "../types/collaborative.types";
+
+const logger = createLogger("CollaborativeShiftProvider");
 
 const applyRemoteChangesToHistory = (
   staffId: string,
@@ -303,7 +306,7 @@ const useCommentHandlers = ({
           authMode: "userPool",
         });
       } catch (err) {
-        console.error("Failed to persist comments:", err);
+        logger.error("Failed to persist comments:", err);
       }
     },
     [getShiftRequest, getCommentsInputForStaff, currentUserId],

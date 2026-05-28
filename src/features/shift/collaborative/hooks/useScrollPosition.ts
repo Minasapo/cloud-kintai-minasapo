@@ -1,4 +1,7 @@
+import { createLogger } from "@shared/lib/logger";
 import { useCallback, useEffect, useRef } from "react";
+
+const logger = createLogger("ScrollPosition");
 
 interface ScrollPosition {
   horizontal: number;
@@ -37,7 +40,7 @@ export const useScrollPosition = ({
         JSON.stringify(position),
       );
     } catch (error) {
-      console.error("Failed to save scroll position:", error);
+      logger.error("Failed to save scroll position:", error);
     }
   }, [key, enabled]);
 
@@ -61,7 +64,7 @@ export const useScrollPosition = ({
         });
       }
     } catch (error) {
-      console.error("Failed to restore scroll position:", error);
+      logger.error("Failed to restore scroll position:", error);
     }
   }, [key, enabled]);
 
@@ -72,7 +75,7 @@ export const useScrollPosition = ({
     try {
       sessionStorage.removeItem(`scroll-position-${key}`);
     } catch (error) {
-      console.error("Failed to clear scroll position:", error);
+      logger.error("Failed to clear scroll position:", error);
     }
   }, [key]);
 

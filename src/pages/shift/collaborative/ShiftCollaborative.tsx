@@ -1,5 +1,6 @@
 import { AuthContext } from "@app/providers/auth/AuthContext";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import { createLogger } from "@shared/lib/logger";
 import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
 import { PageContent } from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
@@ -40,6 +41,8 @@ import type {
   DataSyncStatus,
   Mention,
 } from "../../../features/shift/collaborative/types/collaborative.types";
+
+const logger = createLogger("ShiftCollaborative");
 
 const isWeekend = (day: dayjs.Dayjs): boolean =>
   day.day() === 0 || day.day() === 6;
@@ -154,7 +157,7 @@ const addCommentsToSelectedCells = async ({
           await addComment(cellKey, content, []);
           addedCount++;
         } catch (error) {
-          console.error("Failed to add comment:", error);
+          logger.error("Failed to add comment:", error);
         }
       }
     }

@@ -9,6 +9,7 @@ import {
   onUpdateShiftEditLock,
   updateShiftEditLock,
 } from "@shared/api/graphql/documents/shiftEditLock";
+import { createLogger } from "@shared/lib/logger";
 import { GraphQLResult } from "aws-amplify/api";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
@@ -17,6 +18,8 @@ import type {
   EditLockAcquireResult,
   ShiftEditLockData,
 } from "../types/collaborative.types";
+
+const logger = createLogger("ShiftEditLocks");
 
 const EDIT_LOCK_TTL_MS = 90_000;
 const EDIT_LOCK_REFRESH_INTERVAL_MS = 30_000;
@@ -338,7 +341,7 @@ const useEditLockSubscriptions = ({
           }
         },
         error: (error: unknown) => {
-          console.error("Failed to subscribe create shift edit lock:", error);
+          logger.error("Failed to subscribe create shift edit lock:", error);
         },
       });
 
@@ -361,7 +364,7 @@ const useEditLockSubscriptions = ({
           }
         },
         error: (error: unknown) => {
-          console.error("Failed to subscribe update shift edit lock:", error);
+          logger.error("Failed to subscribe update shift edit lock:", error);
         },
       });
 
@@ -384,7 +387,7 @@ const useEditLockSubscriptions = ({
           }
         },
         error: (error: unknown) => {
-          console.error("Failed to subscribe delete shift edit lock:", error);
+          logger.error("Failed to subscribe delete shift edit lock:", error);
         },
       });
 
@@ -424,7 +427,7 @@ const useEditLockRenewal = ({
             expiresAt: new Date(lock.expiresAt).toISOString(),
             version: lock.version,
           }).catch((error) => {
-            console.error("Failed to renew shift edit lock:", error);
+            logger.error("Failed to renew shift edit lock:", error);
           });
         });
     }, EDIT_LOCK_REFRESH_INTERVAL_MS);
@@ -538,7 +541,7 @@ export const useShiftEditLocks = ({
         }
       })
       .catch((error) => {
-        console.error("Failed to refresh shift edit locks:", error);
+        logger.error("Failed to refresh shift edit locks:", error);
       });
 
     return () => {

@@ -2,6 +2,7 @@ import { AuthContext } from "@app/providers/auth/AuthContext";
 import { useCalendars } from "@entities/calendar/model/useCalendars";
 import useCognitoUser from "@entities/staff/model/useCognitoUser";
 import useShiftPlanYear from "@features/shift/management/model/useShiftPlanYear";
+import { createLogger } from "@shared/lib/logger";
 import { useAppNotification } from "@shared/lib/useAppNotification";
 import { useAutoSave } from "@shared/lib/useAutoSave";
 import dayjs, { Dayjs } from "dayjs";
@@ -21,6 +22,8 @@ import ShiftEditDialog from "./components/ShiftEditDialog";
 import { ShiftManagementHeader } from "./components/ShiftManagementHeader";
 import ShiftManagementLegend from "./components/ShiftManagementLegend";
 import { ShiftManagementTable } from "./components/ShiftManagementTable";
+
+const logger = createLogger("ShiftManagementBoard");
 
 function useShiftAutoSaveState({
   scenario,
@@ -118,7 +121,7 @@ function useShiftAutoSaveState({
       });
     },
     onSaveError: (error) => {
-      console.error("Auto-save error:", error);
+      logger.error("Auto-save error:", error);
       notify({
         title: "エラー",
         description: "シフトの自動保存に失敗しました",
@@ -146,7 +149,7 @@ function useHolidayCalendarErrorNotification({
 }) {
   React.useEffect(() => {
     if (calendarsError) {
-      console.error(calendarsError);
+      logger.error(calendarsError);
       notify({
         title: "エラー",
         description: MESSAGE_CODE.E00001,

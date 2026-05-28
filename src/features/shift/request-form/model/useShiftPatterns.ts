@@ -1,4 +1,5 @@
 import { type CognitoUser } from "@entities/staff/model/useCognitoUser";
+import { createLogger } from "@shared/lib/logger";
 import {
   loadShiftPatterns,
   saveShiftPatterns,
@@ -11,6 +12,8 @@ import * as MESSAGE_CODE from "@/errors";
 
 import { ShiftRequestPattern } from "./shiftRequestPattern";
 import { normalizeStatus, SelectedDateMap, ShiftRequestDayStatus } from "./statusMapping";
+
+const logger = createLogger("ShiftPatterns");
 
 type UseShiftPatternsParams = {
   cognitoUser: CognitoUser | null | undefined;
@@ -73,7 +76,7 @@ export function useShiftPatterns({
       } catch (error) {
         if (!isMounted) return;
 
-        console.error("Failed to load shift patterns", error);
+        logger.error("Failed to load shift patterns", error);
         setPatterns([]);
         notify({
           title: "エラー",
@@ -120,7 +123,7 @@ export function useShiftPatterns({
       try {
         await saveShiftPatterns(serializePatterns(nextPatterns));
       } catch (error) {
-        console.error("Failed to save shift patterns", error);
+        logger.error("Failed to save shift patterns", error);
         notify({
           title: "エラー",
           description: MESSAGE_CODE.E00001,

@@ -308,6 +308,20 @@ describe("DailyReportCarouselDialog > open/close", () => {
     await user.click(closeBtn);
     expect(onClose).toHaveBeenCalled();
   });
+
+  it("calls onClose when Escape key is pressed", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const report = makeReport();
+    mockFetchOnly(report);
+    renderDialog({
+      onClose,
+      selectedReport: report,
+      filteredReports: [report],
+    });
+    await user.keyboard("{Escape}");
+    expect(onClose).toHaveBeenCalled();
+  });
 });
 
 describe("DailyReportCarouselDialog > loading state", () => {
@@ -459,6 +473,20 @@ describe("DailyReportCarouselDialog > carousel navigation", () => {
     renderDialog({ selectedReport: reports[1], filteredReports: reports });
     expect(screen.getByText("2 / 2")).toBeInTheDocument();
     await user.click(getNavButton("prev"));
+    expect(screen.getByText("1 / 2")).toBeInTheDocument();
+  });
+
+  it("ArrowRight / ArrowLeft で前後の日報へ移動できる", async () => {
+    const user = userEvent.setup();
+    const reports = [makeReport({ id: "r1" }), makeReport({ id: "r2" })];
+    mockFetchOnly(reports[0]);
+    renderDialog({ selectedReport: reports[0], filteredReports: reports });
+    expect(screen.getByText("1 / 2")).toBeInTheDocument();
+
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByText("2 / 2")).toBeInTheDocument();
+
+    await user.keyboard("{ArrowLeft}");
     expect(screen.getByText("1 / 2")).toBeInTheDocument();
   });
 

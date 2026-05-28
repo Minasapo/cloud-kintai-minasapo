@@ -17,6 +17,7 @@ export type ExternalLinkItem = {
 export interface ExternalLinksProps {
   links: ExternalLinkItem[];
   staffName: string;
+  personalLinksFetchError?: boolean;
 }
 
 const ACTION_ICON_COLOR = designTokenVar(
@@ -101,6 +102,10 @@ const GRID_ITEM_BORDER = designTokenVar(
 const EMPTY_STATE_COLOR = designTokenVar(
   "component.headerActions.emptyStateColor",
   "#7D9288",
+);
+const PERSONAL_LINK_ERROR_COLOR = designTokenVar(
+  "component.headerActions.personalLinkErrorColor",
+  "#B42318",
 );
 const SECTION_TITLE_FONT_WEIGHT = designTokenVar(
   "component.headerActions.sectionTitle.fontWeight",
@@ -273,7 +278,11 @@ function LinkGridItem({
   );
 }
 
-const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
+const ExternalLinks = ({
+  links,
+  staffName,
+  personalLinksFetchError = false,
+}: ExternalLinksProps) => {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const buttonVars = {
@@ -400,6 +409,14 @@ const ExternalLinks = ({ links, staffName }: ExternalLinksProps) => {
                     staffName={staffName}
                     useGenericIcon
                   />
+                ) : null}
+                {personalLinksFetchError ? (
+                  <p
+                    className="m-0 text-sm"
+                    style={{ color: PERSONAL_LINK_ERROR_COLOR }}
+                  >
+                    プライベートリンクの取得に失敗しました
+                  </p>
                 ) : null}
                 {companyLinks.length === 0 && personalLinks.length === 0 ? (
                   <p

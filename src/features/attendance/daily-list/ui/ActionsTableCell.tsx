@@ -65,7 +65,7 @@ export function ActionsTableCell({ row, attendances, attendanceLoading, attendan
 }) {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
+    const [staff, setStaff] = useState<Staff | undefined>(undefined);
     const [staffLoading, setStaffLoading] = useState(true);
     useEffect(() => {
         // still fetch staff info here

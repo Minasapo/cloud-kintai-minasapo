@@ -142,7 +142,7 @@ export function useSubmitAttendanceEdit({
               data.staffComment,
             );
           } catch (mailError) {
-            console.error("Failed to send change request mail:", mailError);
+            logger.error("Failed to send change request mail:", mailError);
             notify({
               title: "メール送信エラー",
               description: MESSAGE_CODE.E00002,

@@ -8,7 +8,9 @@
 
 ## 実装時の重要制約
 
-- `src/shared/api/graphql/` と `src/ui-components/` は Amplify 自動生成のため手動編集禁止
+- `src/shared/api/graphql/documents/` 配下の生成ファイル（`mutations.ts`, `queries.ts`, `subscriptions.ts`）および `src/shared/api/graphql/types.ts` は Amplify 自動生成のため手動編集禁止
+- `src/ui-components/` は Amplify 自動生成のため手動編集禁止
+- キャッシュ戦略ユーティリティ（`graphqlBaseQuery.ts`、`tagBuilder.ts`、`concurrency.ts`、`paginatedQuery.ts` など）は手動管理ファイルのため編集可能
 - MUI コンポーネントの新規直接 import は禁止（`src/shared/ui/` の共通 UI を使う）
 - スタイリングは MUI `sx` を主軸、Tailwind は補助、新規 SCSS は作らない
 - デザイントークンは `designTokenVar()` 経由で参照する
@@ -55,9 +57,11 @@
 | `shiftCollaborative.instructions.md`      | シフト共同編集のガードレール                 |
 | `dailyReport.instructions.md`             | 日報                                         |
 | `amplifyGraphqlGenerated.instructions.md` | 自動生成ファイルの扱い                       |
+| `graphqlCachingStrategy.instructions.md`  | GraphQL キャッシング戦略・RTK Query 規約     |
 
 ## 自動生成ファイル（編集禁止）
 
-- `src/shared/api/graphql/**`
+- `src/shared/api/graphql/documents/mutations.ts`, `queries.ts`, `subscriptions.ts`（`amplify codegen` で生成）
+- `src/shared/api/graphql/types.ts`（`amplify codegen` で生成）
 - `src/ui-components/**`
 - `src/aws-exports.js`（`amplify pull` で生成）。ソースツリー（git worktree）使用時はメインリポジトリのファイルをリンクして使用する

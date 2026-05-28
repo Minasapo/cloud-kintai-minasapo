@@ -47,59 +47,75 @@ export function useWorkflowEditLoaderState(
   workflow: WorkflowEntity,
   staffs: StaffType[],
 ): WorkflowEditLoaderState {
-  const [category, setCategory] = useState("");
-  const [applicationDate, setApplicationDate] = useState("");
-  const [draftMode, setDraftMode] = useState(true);
-  const [applicant, setApplicant] = useState<StaffType | null>(null);
-  const [existingComments, setExistingComments] = useState<
-    WorkflowCommentInput[]
-  >([]);
+  const workflowKey = workflow.id || "__unknown-workflow";
+
+  const [categoryOverrides, setCategoryOverrides] = useState<
+    Record<string, string>
+  >({});
+  const [draftModeOverrides, setDraftModeOverrides] = useState<
+    Record<string, boolean>
+  >({});
+  const [existingCommentOverrides, setExistingCommentOverrides] = useState<
+    Record<string, WorkflowCommentInput[]>
+  >({});
+
+  const categoryFromWorkflow = useMemo(
+    () => resolveCategoryLabel(workflow),
+    [workflow],
+  );
+  const category = categoryOverrides[workflowKey] ?? categoryFromWorkflow;
+  const setCategory = (value: string) => {
+    setCategoryOverrides((prev) => ({ ...prev, [workflowKey]: value }));
+  };
+
+  const applicationDate = useMemo(() => {
+    const appDate =
+      workflow.overTimeDetails?.date ||
+      isoDateFromTimestamp(workflow.createdAt);
+    return formatDateSlash(appDate);
+  }, [workflow]);
+
+  const applicant = useMemo(() => {
+    if (!workflow.staffId) return null;
+    const match = staffs.find((s) => s.id === workflow.staffId);
+    return (
+      match ||
+      ({
+        id: workflow.staffId,
+        familyName: "",
+        givenName: "",
+      } as StaffType)
+    );
+  }, [workflow.staffId, staffs]);
+
+  const draftModeFromWorkflow = workflow.status === WorkflowStatus.DRAFT;
+  const draftMode = draftModeOverrides[workflowKey] ?? draftModeFromWorkflow;
+  const setDraftMode = (value: boolean) => {
+    setDraftModeOverrides((prev) => ({ ...prev, [workflowKey]: value }));
+  };
+
+  const existingCommentsFromWorkflow = useMemo(
+    () => extractExistingWorkflowComments(workflow),
+    [workflow],
+  );
+  const existingComments =
+    existingCommentOverrides[workflowKey] ?? existingCommentsFromWorkflow;
+  const setExistingComments = (comments: WorkflowCommentInput[]) => {
+    setExistingCommentOverrides((prev) => ({ ...prev, [workflowKey]: comments }));
+  };
 
   // 初期フィールド値を workflow から解決
   const initialFields = useMemo(
-    () => initDynamicFieldsFromWorkflow(resolveCategoryLabel(workflow), workflow),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [workflow.id],
+    () => initDynamicFieldsFromWorkflow(categoryFromWorkflow, workflow),
+    [categoryFromWorkflow, workflow],
   );
 
   const { fields, setFieldValue, resetFields, isDirty } =
     useDynamicWorkflowForm({ initialFields });
 
   useEffect(() => {
-    const nextCategoryLabel = resolveCategoryLabel(workflow);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCategory(nextCategoryLabel);
-
-    const appDate =
-      workflow.overTimeDetails?.date ||
-      isoDateFromTimestamp(workflow.createdAt);
-    setApplicationDate(formatDateSlash(appDate));
-
-    resetFields(
-      initDynamicFieldsFromWorkflow(nextCategoryLabel, workflow),
-    );
-
-    setDraftMode(workflow.status === WorkflowStatus.DRAFT);
-    setExistingComments(extractExistingWorkflowComments(workflow));
-  }, [workflow, resetFields]);
-
-  useEffect(() => {
-    if (!workflow.staffId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setApplicant(null);
-      return;
-    }
-    const match = staffs.find((s) => s.id === workflow.staffId);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setApplicant(
-      match ||
-        ({
-          id: workflow.staffId,
-          familyName: "",
-          givenName: "",
-        } as StaffType),
-    );
-  }, [workflow.staffId, staffs]);
+    resetFields(initialFields);
+  }, [initialFields, resetFields]);
 
   return {
     category,

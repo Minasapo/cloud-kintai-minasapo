@@ -1,3 +1,4 @@
+import { FeatureErrorBoundary } from "@shared/ui/feedback";
 import { ComponentProps, ComponentType, ReactNode } from "react";
 import type {
   ActionFunction,
@@ -6,6 +7,8 @@ import type {
   RouteObject,
   ShouldRevalidateFunction,
 } from "react-router-dom";
+
+import RouteErrorBoundary from "./RouteErrorBoundary";
 
 /**
  * Note: `any` is used here for ComponentType generics as we need maximum flexibility
@@ -39,7 +42,8 @@ export function createLazyRoute<T extends ComponentType<any>>(
 
     const Wrapped = (props: ComponentProps<T>) => {
       const node = <Component {...props} />;
-      return options?.wrap ? <>{options.wrap(node)}</> : node;
+      const wrappedNode = options?.wrap ? <>{options.wrap(node)}</> : node;
+      return <FeatureErrorBoundary>{wrappedNode}</FeatureErrorBoundary>;
     };
 
     const result: Record<string, unknown> = {
@@ -64,6 +68,8 @@ export function createLazyRoute<T extends ComponentType<any>>(
       result.ErrorBoundary = function LazyRouteErrorBoundary() {
         return <>{options.errorElement}</>;
       };
+    } else {
+      result.ErrorBoundary = RouteErrorBoundary;
     }
 
     if (options?.hydrateFallback) {

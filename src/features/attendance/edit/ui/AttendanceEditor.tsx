@@ -201,8 +201,11 @@ function useAttendanceEditorHandlers({
   return { handleAbsentFlagChange, handleSpecialHolidayFlagChange, handleGoDirectlyChange, dialog, runWithoutGuard };
 }
 
+type UseAttendanceEditorStateParams = {
+  readOnly?: boolean;
+};
 
-export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
+function useAttendanceEditorState({ readOnly }: UseAttendanceEditorStateParams) {
   const {
     derived,
     loading: appConfigLoading,
@@ -280,7 +283,6 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     reset,
     restReplace,
     hourlyPaidHolidayTimeReplace,
-    logger,
   });
   const { overtimeRequestEndTime, hasOvertimeRequest } = useOvertimeRequest({
     staffId: staff?.id ?? targetStaffId ?? null,
@@ -300,6 +302,23 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     overtimeRequestEndTime,
     hasOvertimeRequest,
   });
+  const { handleAbsentFlagChange, handleSpecialHolidayFlagChange, handleGoDirectlyChange, dialog, runWithoutGuard } =
+    useAttendanceEditorHandlers({
+      getValues,
+      setValue,
+      getStartTime,
+      getEndTime,
+      getLunchRestStartTime,
+      getLunchRestEndTime,
+      targetWorkDate,
+      attendanceWorkDate: attendance?.workDate,
+      workDate,
+      restReplace,
+      hourlyPaidHolidayTimeReplace,
+      setHighlightStartTime,
+      isDirty,
+      isSubmitting,
+    });
   const { onSubmit } = useAttendanceSubmit({
     attendance,
     staff,
@@ -319,101 +338,150 @@ export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
     setSubmitError,
     clearSubmitError,
   });
-  const { handleAbsentFlagChange, handleSpecialHolidayFlagChange, handleGoDirectlyChange, dialog, runWithoutGuard } =
-    useAttendanceEditorHandlers({
-      getValues,
-      setValue,
-      getStartTime,
-      getEndTime,
-      getLunchRestStartTime,
-      getLunchRestEndTime,
-      targetWorkDate,
-      attendanceWorkDate: attendance?.workDate,
-      workDate,
-      restReplace,
-      hourlyPaidHolidayTimeReplace,
-      setHighlightStartTime,
-      isDirty,
-      isSubmitting,
-    });
-  if (appConfigLoading || staffsLoading || !hasAttendanceFetched) {
+  const changeRequests = attendance?.changeRequests
+    ? attendance.changeRequests
+        .filter((item): item is NonNullable<typeof item> => item !== null)
+        .filter((item) => !item.completed)
+    : [];
+
+  return {
+    appConfigLoading,
+    staffsLoading,
+    hasAttendanceFetched,
+    staffSError,
+    targetStaffId,
+    staff,
+    workDate,
+    attendance,
+    onSubmit,
+    getValues,
+    setValue,
+    watch,
+    isDirty,
+    isValid,
+    isSubmitting,
+    submitErrorMessage,
+    restFields,
+    changeRequests,
+    restAppend,
+    restRemove,
+    restUpdate,
+    restReplace,
+    register,
+    control,
+    hourlyPaidHolidayTimeFields,
+    hourlyPaidHolidayTimeAppend,
+    hourlyPaidHolidayTimeRemove,
+    hourlyPaidHolidayTimeUpdate,
+    hourlyPaidHolidayTimeReplace,
+    hourlyPaidHolidayEnabled: getHourlyPaidHolidayEnabled(),
+    errorMessages,
+    isOnBreak,
+    dialog,
+    attendanceListPath,
+    sortedHistories,
+    historyIndex,
+    historiesLoading,
+    setHistoryIndex,
+    applyHistory,
+    overtimeError,
+    totalProductionTime,
+    totalHourlyPaidHolidayTime,
+    highlightStartTime,
+    handleGoDirectlyChange,
+    getAbsentEnabled,
+    getSpecialHolidayEnabled,
+    getHourlyPaidHolidayEnabled,
+    handleAbsentFlagChange,
+    handleSpecialHolidayFlagChange,
+    handleSubmit,
+    handleUpdateAttendance,
+    enabledSendMail,
+    toggleSendMail: () => setEnabledSendMail((prev) => !prev),
+  };
+}
+
+
+export default function AttendanceEditor({ readOnly }: { readOnly?: boolean }) {
+  const state = useAttendanceEditorState({ readOnly });
+  if (
+    state.appConfigLoading ||
+    state.staffsLoading ||
+    !state.hasAttendanceFetched
+  ) {
     return <ProgressBar />;
   }
-  if (staffSError) {
+  if (state.staffSError) {
     return (
       <InlineAlert tone="error" title="エラー">
-        {staffSError.message}
+        {state.staffSError.message}
       </InlineAlert>
     );
   }
-  if (!targetStaffId) {
+  if (!state.targetStaffId) {
     return (
       <InlineAlert tone="error" title="エラー">
         スタッフが指定されていません。
       </InlineAlert>
     );
   }
-  const changeRequests = attendance?.changeRequests
-    ? attendance.changeRequests
-        .filter((item): item is NonNullable<typeof item> => item !== null)
-        .filter((item) => !item.completed)
-    : [];
+
   return (
     <AttendanceEditProvider
       value={{
-        staff,
-        workDate,
-        attendance,
-        onSubmit,
-        getValues,
-        setValue,
-        watch,
-        isDirty,
-        isValid,
-        isSubmitting,
-        submitErrorMessage,
-        restFields,
-        changeRequests,
-        restAppend,
-        restRemove,
-        restUpdate,
-        restReplace,
-        register,
-        control,
-        hourlyPaidHolidayTimeFields,
-        hourlyPaidHolidayTimeAppend,
-        hourlyPaidHolidayTimeRemove,
-        hourlyPaidHolidayTimeUpdate,
-        hourlyPaidHolidayTimeReplace,
-        hourlyPaidHolidayEnabled: getHourlyPaidHolidayEnabled(),
-        errorMessages,
+        staff: state.staff,
+        workDate: state.workDate,
+        attendance: state.attendance,
+        onSubmit: state.onSubmit,
+        getValues: state.getValues,
+        setValue: state.setValue,
+        watch: state.watch,
+        isDirty: state.isDirty,
+        isValid: state.isValid,
+        isSubmitting: state.isSubmitting,
+        submitErrorMessage: state.submitErrorMessage,
+        restFields: state.restFields,
+        changeRequests: state.changeRequests,
+        restAppend: state.restAppend,
+        restRemove: state.restRemove,
+        restUpdate: state.restUpdate,
+        restReplace: state.restReplace,
+        register: state.register,
+        control: state.control,
+        hourlyPaidHolidayTimeFields: state.hourlyPaidHolidayTimeFields,
+        hourlyPaidHolidayTimeAppend: state.hourlyPaidHolidayTimeAppend,
+        hourlyPaidHolidayTimeRemove: state.hourlyPaidHolidayTimeRemove,
+        hourlyPaidHolidayTimeUpdate: state.hourlyPaidHolidayTimeUpdate,
+        hourlyPaidHolidayTimeReplace: state.hourlyPaidHolidayTimeReplace,
+        hourlyPaidHolidayEnabled: state.hourlyPaidHolidayEnabled,
+        errorMessages: state.errorMessages,
         readOnly,
-        isOnBreak,
+        isOnBreak: state.isOnBreak,
       }}
     >
       <AttendanceEditorBody
-        dialog={dialog}
-        attendanceListPath={attendanceListPath}
-        sortedHistories={sortedHistories}
-        historyIndex={historyIndex}
-        historiesLoading={historiesLoading}
-        setHistoryIndex={setHistoryIndex}
-        applyHistory={applyHistory}
+        dialog={state.dialog}
+        attendanceListPath={state.attendanceListPath}
+        sortedHistories={state.sortedHistories}
+        historyIndex={state.historyIndex}
+        historiesLoading={state.historiesLoading}
+        setHistoryIndex={state.setHistoryIndex}
+        applyHistory={state.applyHistory}
         logger={logger}
-        overtimeError={overtimeError}
-        totalProductionTime={totalProductionTime}
-        totalHourlyPaidHolidayTime={totalHourlyPaidHolidayTime}
-        highlightStartTime={highlightStartTime}
-        handleGoDirectlyChange={handleGoDirectlyChange}
-        getAbsentEnabled={getAbsentEnabled}
-        getSpecialHolidayEnabled={getSpecialHolidayEnabled}
-        getHourlyPaidHolidayEnabled={getHourlyPaidHolidayEnabled}
-        handleAbsentFlagChange={handleAbsentFlagChange}
-        handleSpecialHolidayFlagChange={handleSpecialHolidayFlagChange}
-        handleSubmit={handleSubmit}
-        handleUpdateAttendance={handleUpdateAttendance}
-        enabledSendMail={enabledSendMail}
-        onToggleSendMail={() => setEnabledSendMail((prev) => !prev)}
+        overtimeError={state.overtimeError}
+        totalProductionTime={state.totalProductionTime}
+        totalHourlyPaidHolidayTime={state.totalHourlyPaidHolidayTime}
+        highlightStartTime={state.highlightStartTime}
+        handleGoDirectlyChange={state.handleGoDirectlyChange}
+        getAbsentEnabled={state.getAbsentEnabled}
+        getSpecialHolidayEnabled={state.getSpecialHolidayEnabled}
+        getHourlyPaidHolidayEnabled={state.getHourlyPaidHolidayEnabled}
+        handleAbsentFlagChange={state.handleAbsentFlagChange}
+        handleSpecialHolidayFlagChange={state.handleSpecialHolidayFlagChange}
+        handleSubmit={state.handleSubmit}
+        handleUpdateAttendance={state.handleUpdateAttendance}
+        enabledSendMail={state.enabledSendMail}
+        onToggleSendMail={state.toggleSendMail}
       />
     </AttendanceEditProvider>
   );

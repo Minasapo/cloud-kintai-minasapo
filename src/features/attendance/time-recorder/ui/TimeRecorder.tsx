@@ -61,7 +61,7 @@ function useWorkDateInterval(): string {
 
 type UseStaffRefreshParams = { cognitoId: string | undefined; dispatch: ReturnType<typeof useDispatch> };
 function useStaffRefresh({ cognitoId, dispatch }: UseStaffRefreshParams) {
-  const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
+  const [staff, setStaff] = useState<Staff | undefined>(undefined);
   const refreshStaff = useCallback(async () => {
     if (!cognitoId) return;
     try {
@@ -75,7 +75,7 @@ function useStaffRefresh({ cognitoId, dispatch }: UseStaffRefreshParams) {
 }
 
 type UseAttendanceErrorStatsParams = {
-  staff: Staff | null | undefined;
+  staff: Staff | undefined;
   attendances: Attendance[];
   holidayCalendars: HolidayCalendar[];
   companyHolidayCalendars: CompanyHolidayCalendar[];
@@ -150,10 +150,11 @@ type TimeRecorderProps = {
   onElapsedWorkTimeChange?: (payload: TimeRecorderElapsedWorkInfo) => void;
 };
 export type { TimeRecorderElapsedWorkInfo } from "./timeRecorderUtils";
-export default function TimeRecorder({
+
+function useTimeRecorderState({
   onAttendanceErrorCountChange,
   onElapsedWorkTimeChange,
-}: TimeRecorderProps): JSX.Element {
+}: TimeRecorderProps) {
   const VISIBILITY_REFRESH_THRESHOLD_MINUTES = 5;
   const { cognitoUser } = useContext(AuthContext);
   const dispatch = useDispatch();
@@ -179,7 +180,7 @@ export default function TimeRecorder({
     calendarsError,
     attendanceErrorToday,
   } = useTimeRecorderQueries({ cognitoId: cognitoUser?.id, currentWorkDate });
-  const [workStatus, setWorkStatus] = useState<WorkStatus | null | undefined>(
+  const [workStatus, setWorkStatus] = useState<WorkStatus | undefined>(
     undefined,
   );
   const [directMode, setDirectMode] = useState(false);
@@ -284,7 +285,7 @@ export default function TimeRecorder({
   }, [elapsedWorkInfo, onElapsedWorkTimeChange]);
   useTimeRecorderSubscription({ cognitoId: cognitoUser?.id, currentWorkDate, localAttendanceUpdateIgnoreUntilRef, refreshTimeRecorderData, logger });
   const contextValue = useMemo<TimeRecorderContextValue | null>(() => {
-    if (workStatus === undefined || workStatus === null) {
+    if (workStatus === undefined) {
       return null;
     }
     return {
@@ -322,20 +323,30 @@ export default function TimeRecorder({
     handleRestEnd,
     isTimeElapsedError,
   ]);
-  if (attendanceLoading || calendarLoading || workStatus === undefined) {
+  const isLoading =
+    attendanceLoading || calendarLoading || workStatus === undefined;
+
+  return {
+    isLoading,
+    contextValue,
+  };
+}
+
+export default function TimeRecorder({
+  onAttendanceErrorCountChange,
+  onElapsedWorkTimeChange,
+}: TimeRecorderProps): JSX.Element {
+  const { isLoading, contextValue } = useTimeRecorderState({
+    onAttendanceErrorCountChange,
+    onElapsedWorkTimeChange,
+  });
+
+  if (isLoading || !contextValue) {
     return <TimeRecorderLoadingView />;
   }
-  if (workStatus === null) {
-    dispatch(
-      pushNotification({
-        tone: "error",
-        message: MESSAGE_CODE.E00001,
-      }),
-    );
-    return <></>;
-  }
+
   return (
-    <TimeRecorderProvider value={contextValue!}>
+    <TimeRecorderProvider value={contextValue}>
       <TimeRecorderView />
     </TimeRecorderProvider>
   );

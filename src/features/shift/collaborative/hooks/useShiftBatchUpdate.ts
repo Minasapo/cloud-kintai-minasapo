@@ -2,6 +2,7 @@ import {
   useBatchUpdateShiftCellsMutation,
   useCreateShiftRequestMutation,
 } from "@entities/shift/api/shiftApi";
+import { createLogger } from "@shared/lib/logger";
 import {
   Dispatch,
   MutableRefObject,
@@ -24,6 +25,8 @@ import {
   ShiftDataMap,
   ShiftRequestData,
 } from "../types/collaborative.types";
+
+const logger = createLogger("ShiftBatchUpdate");
 
 interface UseShiftBatchUpdateProps {
   targetMonth: string | undefined;
@@ -218,7 +221,7 @@ export const useShiftBatchUpdate = ({
           onSaveCompletedRef.current?.();
         }
       } catch (err) {
-        console.error("Batch update failed:", err);
+        logger.error("Batch update failed:", err);
         setShiftDataMap(prevMap);
         updates.forEach((update) => {
           pendingChangesRef.current.delete(`${update.staffId}-${update.date}`);

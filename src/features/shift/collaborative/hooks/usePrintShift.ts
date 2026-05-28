@@ -1,4 +1,7 @@
+import { createLogger } from "@shared/lib/logger";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+const logger = createLogger("PrintShift");
 
 /**
  * 印刷用フック
@@ -45,7 +48,7 @@ export const usePrintShift = () => {
     (html: string, _title: string = "シフト調整表") => {
       const printWindow = window.open("", "_blank");
       if (!printWindow) {
-        console.error("Print window could not be opened");
+        logger.error("Print window could not be opened");
         return;
       }
 
@@ -88,17 +91,17 @@ export const usePrintShift = () => {
       shiftDataMap: Map<unknown, unknown>,
     ): boolean => {
       if (!Array.isArray(days) || days.length === 0) {
-        console.error("No days data available");
+        logger.error("No days data available");
         return false;
       }
 
       if (!Array.isArray(staffs) || staffs.length === 0) {
-        console.error("No staffs data available");
+        logger.error("No staffs data available");
         return false;
       }
 
       if (!shiftDataMap || !(shiftDataMap instanceof Map)) {
-        console.error("Invalid shift data map");
+        logger.error("Invalid shift data map");
         return false;
       }
 
