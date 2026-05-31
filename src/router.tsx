@@ -1,6 +1,12 @@
 import { lazy, type ReactNode,Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 
+import {
+  collectExtensionAdminRoutes,
+  collectExtensionRoutes,
+  extensionManifests,
+} from "@/extensions";
+
 import Layout from "./Layout";
 import { adminChildRoutes } from "./router/adminChildRoutes";
 import { createLazyRoute } from "./router/lazyRoute";
@@ -117,6 +123,9 @@ const NewWorkflowRoute = createLazyRoute(
   () => import("./pages/workflow/new/NewWorkflow"),
 );
 
+const extensionTopRoutes = collectExtensionRoutes(extensionManifests);
+const extensionAdminRoutes = collectExtensionAdminRoutes(extensionManifests);
+
 const router = createBrowserRouter([
   {
     path: "/login",
@@ -232,6 +241,7 @@ const router = createBrowserRouter([
                 index: true,
                 lazy: AdminDashboardRoute,
               },
+              ...extensionAdminRoutes,
               ...adminChildRoutes,
             ],
           },
@@ -259,6 +269,7 @@ const router = createBrowserRouter([
           },
         ],
       },
+      ...extensionTopRoutes,
       {
         path: "*",
         lazy: NotFoundRoute,

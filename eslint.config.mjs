@@ -86,6 +86,7 @@ export default [
         { type: "features", pattern: "src/features/**" },
         { type: "entities", pattern: "src/entities/**" },
         { type: "shared", pattern: "src/shared/**" },
+        { type: "extensions", pattern: "src/extensions/**" },
       ],
     },
     rules: {
@@ -262,6 +263,66 @@ export default [
     rules: {
       "max-lines-per-function": "off",
       "no-restricted-properties": "off",
+    },
+  },
+  {
+    // Forbid the core/shell layers from depending on extensions. Extensions
+    // register themselves via the manifest registry (src/extensions/index.ts).
+    // The few well-known integration points (router, store apis, root
+    // providers, navigation menu) opt out below.
+    files: [
+      "src/app/**/*.{ts,tsx}",
+      "src/processes/**/*.{ts,tsx}",
+      "src/pages/**/*.{ts,tsx}",
+      "src/features/**/*.{ts,tsx}",
+      "src/entities/**/*.{ts,tsx}",
+      "src/shared/**/*.{ts,tsx}",
+      "src/widgets/**/*.{ts,tsx}",
+      "src/router.tsx",
+      "src/router/**/*.{ts,tsx}",
+    ],
+    ignores: [
+      "src/router.tsx",
+      "src/app/apis/index.ts",
+      "src/app/providers/AppRootProviders.tsx",
+      "src/widgets/layout/header/NavigationMenu.tsx",
+      "src/**/*.test.{ts,tsx}",
+      "src/**/*.spec.{ts,tsx}",
+      "src/__tests__/**",
+      "src/**/__tests__/**",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@extensions/*", "src/extensions/*", "*/extensions/*"],
+              message:
+                "Core/shell layers must not depend on extensions. Add contributions to src/extensions/index.ts and let the registry wire them up.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // Forbid extensions from depending on other extensions. Shared utilities
+    // should be promoted to shared/ or entities/ instead.
+    files: ["src/extensions/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@extensions/*/**", "src/extensions/*/**"],
+              message:
+                "Extensions must not import from sibling extensions. Promote shared code to shared/ or entities/.",
+            },
+          ],
+        },
+      ],
     },
   },
 ];

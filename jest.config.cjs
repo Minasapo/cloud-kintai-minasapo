@@ -15,6 +15,7 @@ module.exports = {
     "^@features/(.*)$": "<rootDir>/src/features/$1",
     "^@entities/(.*)$": "<rootDir>/src/entities/$1",
     "^@shared/(.*)$": "<rootDir>/src/shared/$1",
+    "^@extensions/(.*)$": "<rootDir>/src/extensions/$1",
   },
   // Ignore directories used by e2e tests and build artifacts
   testPathIgnorePatterns: [

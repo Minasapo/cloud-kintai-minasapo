@@ -6,6 +6,10 @@ import { shiftApi } from "@entities/shift/api/shiftApi";
 import { staffApi } from "@entities/staff/api/staffApi";
 import { workflowApi } from "@entities/workflow/api/workflowApi";
 import { workflowTemplateApi } from "@entities/workflow-template/api/workflowTemplateApi";
+import {
+  collectExtensionRtkApis,
+  extensionManifests,
+} from "@extensions/index";
 import type { Middleware, Reducer } from "@reduxjs/toolkit";
 
 export type RegisteredRtkApi = {
@@ -17,7 +21,11 @@ export type RegisteredRtkApi = {
   };
 };
 
-export const rtkApis: RegisteredRtkApi[] = [
+/**
+ * Core RTK Query slices required by the application shell. Extension-owned
+ * slices are appended in {@link rtkApis} via the extension registry.
+ */
+const coreRtkApis: RegisteredRtkApi[] = [
   attendanceApi,
   attendanceStatisticsApi,
   calendarApi,
@@ -26,4 +34,9 @@ export const rtkApis: RegisteredRtkApi[] = [
   staffApi,
   workflowApi,
   workflowTemplateApi,
+];
+
+export const rtkApis: RegisteredRtkApi[] = [
+  ...coreRtkApis,
+  ...collectExtensionRtkApis(extensionManifests),
 ];
