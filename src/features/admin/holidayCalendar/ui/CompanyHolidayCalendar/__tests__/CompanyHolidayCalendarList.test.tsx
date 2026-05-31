@@ -171,12 +171,23 @@ describe("CompanyHolidayCalendarList", () => {
   beforeEach(() => {
     jest.resetAllMocks();
     setupDefaultMocks();
-    jest.spyOn(window, "confirm").mockReturnValue(true);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
   });
+
+  async function clickConfirmDelete(user: ReturnType<typeof userEvent.setup>) {
+    const dialog = await screen.findByRole("dialog");
+    const confirmButton = within(dialog).getByRole("button", { name: "削除" });
+    await user.click(confirmButton);
+  }
+
+  async function clickConfirmCancel(user: ReturnType<typeof userEvent.setup>) {
+    const dialog = await screen.findByRole("dialog");
+    const cancelButton = within(dialog).getByRole("button", { name: "キャンセル" });
+    await user.click(cancelButton);
+  }
 
   // ── ローディング状態 ──────────────────────────────────────────────────────
 
@@ -314,59 +325,57 @@ describe("CompanyHolidayCalendarList", () => {
 
   // ── 削除フロー ────────────────────────────────────────────────────────────
 
-  it("削除ボタンをクリックすると window.confirm が呼ばれる", async () => {
+  it("削除ボタンをクリックすると確認ダイアログが表示される", async () => {
     const user = userEvent.setup();
     renderComponent();
     const deleteButtons = screen.getAllByRole("button", { name: "削除" });
     await user.click(deleteButtons[0]);
-    expect(window.confirm).toHaveBeenCalledTimes(1);
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
   });
 
-  it("confirm メッセージに日付と名前が含まれる", async () => {
+  it("確認ダイアログに日付と名前が含まれる", async () => {
     const user = userEvent.setup();
     renderComponent();
     // useHolidayCalendarList は降順ソートするので最初の行は「春分の日 2024/03/20」
     const deleteButtons = screen.getAllByRole("button", { name: "削除" });
     await user.click(deleteButtons[0]);
-    // 先頭行のデータ（降順で春分の日が先頭）が含まれているか確認
-    expect(window.confirm).toHaveBeenCalledWith(
-      expect.stringMatching(/春分の日|建国記念日|元日/),
-    );
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText(/春分の日|建国記念日|元日/)).toBeInTheDocument();
   });
 
-  it("confirm で OK を選択すると deleteCompanyHolidayCalendar が呼ばれる", async () => {
+  it("確認ダイアログで削除を選択すると deleteCompanyHolidayCalendar が呼ばれる", async () => {
     const user = userEvent.setup();
-    jest.spyOn(window, "confirm").mockReturnValue(true);
     const unwrapMock = jest.fn().mockResolvedValue({});
     mockDeleteMutation.mockReturnValue({ unwrap: unwrapMock });
     renderComponent();
     const deleteButtons = screen.getAllByRole("button", { name: "削除" });
     await user.click(deleteButtons[0]);
+    await clickConfirmDelete(user);
     await waitFor(() => {
       expect(unwrapMock).toHaveBeenCalledTimes(1);
     });
   });
 
-  it("confirm でキャンセルを選択すると deleteCompanyHolidayCalendar が呼ばれない", async () => {
+  it("確認ダイアログでキャンセルを選択すると deleteCompanyHolidayCalendar が呼ばれない", async () => {
     const user = userEvent.setup();
-    jest.spyOn(window, "confirm").mockReturnValue(false);
     const unwrapMock = jest.fn();
     mockDeleteMutation.mockReturnValue({ unwrap: unwrapMock });
     renderComponent();
     const deleteButtons = screen.getAllByRole("button", { name: "削除" });
     await user.click(deleteButtons[0]);
+    await clickConfirmCancel(user);
     expect(unwrapMock).not.toHaveBeenCalled();
   });
 
   it("削除成功時に success 通知が dispatch される", async () => {
     const user = userEvent.setup();
-    jest.spyOn(window, "confirm").mockReturnValue(true);
     mockDeleteMutation.mockReturnValue({
       unwrap: jest.fn().mockResolvedValue({}),
     });
     renderComponent();
     const deleteButtons = screen.getAllByRole("button", { name: "削除" });
     await user.click(deleteButtons[0]);
+    await clickConfirmDelete(user);
     await waitFor(() => {
       expect(pushNotificationMock).toHaveBeenCalledWith(
         expect.objectContaining({ tone: "success" }),
@@ -376,13 +385,13 @@ describe("CompanyHolidayCalendarList", () => {
 
   it("削除失敗時に error 通知が dispatch される", async () => {
     const user = userEvent.setup();
-    jest.spyOn(window, "confirm").mockReturnValue(true);
     mockDeleteMutation.mockReturnValue({
       unwrap: jest.fn().mockRejectedValue(new Error("Delete failed")),
     });
     renderComponent();
     const deleteButtons = screen.getAllByRole("button", { name: "削除" });
     await user.click(deleteButtons[0]);
+    await clickConfirmDelete(user);
     await waitFor(() => {
       expect(pushNotificationMock).toHaveBeenCalledWith(
         expect.objectContaining({ tone: "error" }),

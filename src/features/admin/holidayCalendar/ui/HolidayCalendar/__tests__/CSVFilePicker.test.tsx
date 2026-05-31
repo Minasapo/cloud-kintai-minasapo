@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import {
@@ -58,12 +58,23 @@ function simulateFileUpload(
 describe("HolidayCalendar CSVFilePicker", () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(window, "confirm").mockReturnValue(true);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
   });
+
+  async function confirmRegister() {
+    const dialogs = await screen.findAllByRole("dialog");
+    const confirmDialog = dialogs[dialogs.length - 1];
+    await userEvent.click(within(confirmDialog).getByRole("button", { name: "登録" }));
+  }
+
+  async function cancelRegister() {
+    const dialogs = await screen.findAllByRole("dialog");
+    const confirmDialog = dialogs[dialogs.length - 1];
+    await userEvent.click(within(confirmDialog).getByRole("button", { name: "キャンセル" }));
+  }
 
   it("ダイアログを開いてファイル選択できる", async () => {
     renderComponent();
@@ -79,6 +90,7 @@ describe("HolidayCalendar CSVFilePicker", () => {
 
     simulateFileUpload("holiday_date,name\r\n2024-01-01,元日\r\n");
     await userEvent.click(screen.getByRole("button", { name: "登録" }));
+    await confirmRegister();
 
     await waitFor(() => {
       expect(bulkCreate).toHaveBeenCalledWith([
@@ -87,13 +99,13 @@ describe("HolidayCalendar CSVFilePicker", () => {
     });
   });
 
-  it("confirmでキャンセルすると bulkCreate は呼ばれない", async () => {
-    jest.spyOn(window, "confirm").mockReturnValue(false);
+  it("確認ダイアログでキャンセルすると bulkCreate は呼ばれない", async () => {
     const bulkCreate = renderComponent();
     await openDialog();
 
     simulateFileUpload("holiday_date,name\r\n2024-01-01,元日\r\n");
     await userEvent.click(screen.getByRole("button", { name: "登録" }));
+    await cancelRegister();
 
     expect(bulkCreate).not.toHaveBeenCalled();
   });
@@ -104,6 +116,7 @@ describe("HolidayCalendar CSVFilePicker", () => {
 
     simulateFileUpload("holiday_date,name\r\n2024-01-01,元日\r\n");
     await userEvent.click(screen.getByRole("button", { name: "登録" }));
+    await confirmRegister();
 
     await waitFor(() => {
       expect(pushNotificationMock).toHaveBeenCalledWith(
@@ -118,6 +131,7 @@ describe("HolidayCalendar CSVFilePicker", () => {
 
     simulateFileUpload("holiday_date,name\r\n2024-01-01,元日\r\n");
     await userEvent.click(screen.getByRole("button", { name: "登録" }));
+    await confirmRegister();
 
     await waitFor(() => {
       expect(pushNotificationMock).toHaveBeenCalledWith(
@@ -135,6 +149,5 @@ describe("HolidayCalendar CSVFilePicker", () => {
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
-    expect(window.confirm).not.toHaveBeenCalled();
   });
 });
