@@ -1,6 +1,6 @@
 # Extension Architecture
 
-> 状態: Phase 1（土台のみ） — 拡張モジュールの仕組みを利用可能。既存機能の移設は Phase 2 以降。
+> 状態: Phase 3 完了 — 5 つの主要機能を `src/extensions/` 配下に移設済み。新規拡張は `scripts/create-extension.mjs` で雛形生成可能。
 
 ## 目的
 
@@ -121,32 +121,35 @@ export const extensionManifests = [sampleManifest] as const;
 
 ---
 
-## 移設ガイド（Phase 2+）
+## 移設ガイド
 
 既存機能を `src/extensions/<name>/` に移設する場合の手順:
 
 1. **コアから機能特定**: pages / features / entities 配下の対象ディレクトリと、router/store/menu の登録箇所を洗い出す
-2. **manifest 作成**: routes / adminRoutes / menuItems / rtkApis を移行
-3. **ファイル移動**: import path を `@extensions/<name>/...` に書き換え
-4. **コア側削除**:
+2. **雛形生成**: `node scripts/create-extension.mjs <kebab-case-name>` で `src/extensions/<name>/manifest.ts` と `README.md` が作成され、`src/extensions/index.ts` にも自動登録される
+3. **manifest 編集**: routes / adminRoutes / menuItems / rtkApis を移行
+4. **ファイル移動**: `git mv` で対象 directory を `src/extensions/<name>/{pages,features,...}/` に移動し、import path を `@extensions/<name>/...` に書き換え
+5. **コア側削除**:
    - `src/router.tsx` から重複する route 定義を削除
+   - `src/router/adminChildRoutes.tsx` から admin route を削除（あれば）
+   - `src/router/routePreloaders.ts` の path を `@extensions/...` に更新
    - `src/app/apis/index.ts` の `coreRtkApis` から重複する RTK Query slice を削除
    - `src/widgets/layout/header/NavigationMenu.tsx` から重複するメニュー定義を削除
-5. **テスト**: `npm run typecheck && npm run lint && npm run test:unit -- <name>`
-6. **E2E**: 該当機能の Playwright スモーク
-7. **手動**: AppConfig フラグ off で該当ルート / メニューが消えることを確認
+6. **ESLint ignores 追加**: extension を import する core ファイルを `eslint.config.mjs` の `no-restricted-imports` rule の `ignores` 配列に追加
+7. **テスト**: `npm run typecheck && npm run lint && npm run test:unit`
+8. **手動**: AppConfig フラグ off で該当ルート / メニューが消えることを確認
 
 ---
 
-## 移設候補（Phase 2-3）
+## 移設済み拡張
 
-| 拡張名 | 移設元 | enabledKey |
-|---|---|---|
-| `attendance-statistics` | `src/pages/attendance/stats/`, `src/entities/attendance-statistics/` | `attendanceStatisticsEnabled` |
-| `workflow-notification` | `src/widgets/feedback/notification/` 内 ワークフロー通知部 | `workflowNotificationEnabled` |
-| `daily-report` | `src/pages/attendance/daily-report/`, `src/pages/admin/AdminDailyReportManagement/` | （AppConfig フラグなし → 常時有効、または新規追加） |
-| `shift-collaborative` | `src/pages/shift/collaborative/`, `src/features/shift/collaborative/` | `shiftCollaborativeEnabled` |
-| `office-qr` | `src/pages/office/qr*/`, `src/processes/office-access/` | `officeMode` |
+| 拡張名 | 移設元 | enabledKey | manifest |
+|---|---|---|---|
+| `attendance-statistics` | `src/pages/attendance/statistics/`, `src/features/attendance/statistics/` | `attendanceStatisticsEnabled` | ✅ |
+| `workflow-notification` | `src/pages/notifications/WorkflowNotificationsPage.tsx` | `workflowNotificationEnabled` | ✅（page のみ。Header ボタン・inbox hook 等は core 残置） |
+| `daily-report` | `src/pages/attendance/daily-report/`, `src/features/attendance/daily-report/`, `src/pages/admin/AdminDailyReport/` | （フラグなし、常時有効） | ✅ |
+| `shift-collaborative` | `src/pages/shift/collaborative/`, `src/features/shift/collaborative/` | `shiftCollaborativeEnabled` | ❌（route 登録は core 残置。ファイル配置のみ extension 化） |
+| `office-qr` | `src/pages/office/`, `src/features/attendance/office-{layout,qr,qr-register}/`, `src/processes/office-access/` | `officeMode` | ✅ |
 
 ---
 
@@ -162,5 +165,6 @@ npm run build           # chunk 分割を確認したい場合
 ## 既知の制限と将来検討
 
 - **GraphQL schema**: `amplify/backend/api/garakufrontend/schema.graphql` は単一ファイル。拡張ごとにスキーマを分離する仕組みは未対応。
-- **route override（オフィスQR の `/register` 置換など）**: 現状 `RouteDescriptor` に override フラグはなく、core route を後勝ちで上書きする手段は未提供。Phase 3（office-qr 移設）で `override?: boolean` を追加する想定。
+- **route override**: 現状 `RouteDescriptor` に override フラグはなく、core route を後勝ちで上書きする手段は未提供。必要になった時点で `override?: boolean` を追加する想定。
 - **動的ロード（Module Federation）**: 検討対象外。必要になった時点で別プラン化する。
+- **extension 間の依存禁止**: lint で機械的にチェックする仕組みは現状なし。共通コードは `@shared/*` または `@entities/*` に昇格させること（規約のみ）。

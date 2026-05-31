@@ -33,6 +33,7 @@ Dependency direction is strictly **downward only**: `pages` → `processes` → 
 | `entities` | `src/entities/` | Domain types, API clients, business logic (`attendance`, `shift`, `staff`, `workflow`, etc.) |
 | `shared` | `src/shared/` | Project-wide UI components, hooks, utilities — imported via `@shared/*` |
 | `widgets` | `src/widgets/` | Large UI blocks used across pages (header, footer, snackbar) |
+| `extensions` | `src/extensions/` | 拡張モジュール。AppConfig フラグで on/off 可能な機能群を `manifest.ts` で宣言。`docs/EXTENSION_ARCHITECTURE.md` 参照。新規拡張は `node scripts/create-extension.mjs <name>` で雛形生成 |
 
 ### Path aliases (tsconfig.json)
 
@@ -44,6 +45,7 @@ Dependency direction is strictly **downward only**: `pages` → `processes` → 
 @entities/* → src/entities/*
 @shared/*   → src/shared/*
 @processes/* → src/processes/*
+@extensions/* → src/extensions/*
 ```
 
 Always use aliases instead of relative `../` paths.
