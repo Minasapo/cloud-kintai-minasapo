@@ -1,5 +1,6 @@
-import { Box, CircularProgress, Paper, Stack, TextField } from "@mui/material";
+import { Box, CircularProgress, Paper, Stack } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
+import { AppTextField } from "@shared/ui/form";
 
 import { ShiftRequestSummary } from "../model/shiftRequestSummary";
 
@@ -36,7 +37,7 @@ export function ShiftRequestNoteForm({
     >
       <Box component="form" onSubmit={(event) => event.preventDefault()}>
         <Stack spacing={2} alignItems="stretch">
-          <TextField
+          <AppTextField
             label="備考"
             multiline
             rows={2}

@@ -9,12 +9,11 @@ import {
   FormControlLabel,
   FormGroup,
   Paper,
-  Stack,
-  TextField,
-  Typography,
+  Stack,  Typography,
 } from "@mui/material";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { AppButton } from "@shared/ui/button";
+import { AppTextField } from "@shared/ui/form";
 import dayjs, { Dayjs } from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
@@ -235,7 +234,7 @@ const PrintShiftDialogComponent = ({
           <Stack spacing={2}>
             {/* 日付範囲 */}
             <Box sx={{ display: "flex", gap: 2, alignItems: "flex-end" }}>
-              <TextField
+              <AppTextField
                 label="開始日"
                 type="date"
                 value={startDate}
@@ -243,7 +242,7 @@ const PrintShiftDialogComponent = ({
                 size="small"
                 InputLabelProps={{ shrink: true }}
               />
-              <TextField
+              <AppTextField
                 label="終了日"
                 type="date"
                 value={endDate}

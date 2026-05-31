@@ -6,15 +6,14 @@ import {
   CardHeader,
   Chip,
   List,
-  Paper,
-  TextField,
-  Tooltip,
+  Paper,  Tooltip,
   Typography,
 } from "@mui/material";
 import {
   AppDeleteIconButton,
   AppEditIconButton,
 } from "@shared/ui/button/AppActionIconButton";
+import { AppTextField } from "@shared/ui/form";
 import React, { useMemo } from "react";
 
 import { CellComment, CommentsMap } from "../types/collaborative.types";
@@ -249,7 +248,7 @@ export const CommentsList: React.FC<CommentsListProps> = ({
           gap: 1,
         }}
       >
-        <TextField
+        <AppTextField
           size="small"
           placeholder="コメント検索..."
           variant="outlined"

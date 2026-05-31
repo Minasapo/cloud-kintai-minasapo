@@ -11,11 +11,10 @@ import {
   List,
   ListItem,
   ListItemText,
-  Stack,
-  TextField,
-  Typography,
+  Stack,  Typography,
 } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
+import { AppTextField } from "@shared/ui/form";
 import dayjs from "dayjs";
 
 import {
@@ -228,7 +227,7 @@ export const CellCommentsSection = ({
           コメント追加:
         </Typography>
         <Stack direction="row" spacing={1} mt={1}>
-          <TextField
+          <AppTextField
             placeholder="選択セルにコメントを追加..."
             size="small"
             fullWidth

@@ -5,12 +5,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Stack,
-  TextField,
-  Typography,
+  Stack,  Typography,
 } from "@mui/material";
 import { Attendance, AttendanceChangeRequest } from "@shared/api/graphql/types";
 import { AppButton } from "@shared/ui/button";
+import { AppTextField } from "@shared/ui/form";
 import dayjs from "dayjs";
 import { useMemo } from "react";
 
@@ -67,7 +66,7 @@ export default function ChangeRequestQuickViewDialog({
           />
           <Stack direction="column" spacing={1}>
             <Typography variant="body1">【スタッフからのコメント】</Typography>
-            <TextField
+            <AppTextField
               fullWidth
               multiline
               disabled

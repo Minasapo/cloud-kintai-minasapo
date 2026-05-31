@@ -1,8 +1,7 @@
 import {
   Autocomplete,
-  Stack,
-  TextField,
-} from "@mui/material";
+  Stack,} from "@mui/material";
+import { AppTextField } from "@shared/ui/form";
 
 import { StaffOption } from "./adminLogsTypes";
 
@@ -45,7 +44,7 @@ export default function AdminLogsFilterBar({
       spacing={1.5}
       sx={{ mb: 2 }}
     >
-      <TextField
+      <AppTextField
         size="small"
         label="リソース"
         value={resourceFilter}
@@ -63,7 +62,7 @@ export default function AdminLogsFilterBar({
         getOptionLabel={(option) => option.label}
         sx={{ minWidth: 220 }}
         renderInput={(params) => (
-          <TextField {...params} label="操作者" placeholder="スタッフ名で検索" />
+          <AppTextField {...params} label="操作者" placeholder="スタッフ名で検索" />
         )}
       />
       <Autocomplete
@@ -78,16 +77,16 @@ export default function AdminLogsFilterBar({
         getOptionLabel={(option) => option.label}
         sx={{ minWidth: 220 }}
         renderInput={(params) => (
-          <TextField {...params} label="対象者" placeholder="スタッフ名で検索" />
+          <AppTextField {...params} label="対象者" placeholder="スタッフ名で検索" />
         )}
       />
-      <TextField
+      <AppTextField
         size="small"
         label="アクション"
         value={actionFilter}
         onChange={(event) => onActionFilterChange(event.target.value)}
       />
-      <TextField
+      <AppTextField
         size="small"
         type="date"
         label="開始日"
@@ -95,7 +94,7 @@ export default function AdminLogsFilterBar({
         onChange={(event) => onFromDateChange(event.target.value)}
         InputLabelProps={{ shrink: true }}
       />
-      <TextField
+      <AppTextField
         size="small"
         type="date"
         label="終了日"

@@ -16,13 +16,12 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
-  TextField,
-  Tooltip,
+  TableRow,  Tooltip,
   Typography,
 } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
 import { AppIconButton } from "@shared/ui/button";
+import { AppTextField } from "@shared/ui/form";
 import dayjs from "dayjs";
 import { type ReactNode,useCallback, useContext } from "react";
 
@@ -253,7 +252,7 @@ export default function AttendanceDailyList() {
             <SearchIcon fontSize="small" />
           </AppIconButton>
           {isSearchVisible && (
-            <TextField
+            <AppTextField
               label="スタッフ名で検索"
               variant="outlined"
               size="small"

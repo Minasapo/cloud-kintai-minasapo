@@ -23,15 +23,14 @@ import {
   CircularProgress,
   FormControlLabel,
   Radio,
-  RadioGroup,
-  TextField,
-} from "@mui/material";
+  RadioGroup,} from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { ApproverSettingMode } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { AppButton } from "@shared/ui/button";
 import { ProgressBar } from "@shared/ui/feedback";
 import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
+import { AppTextField } from "@shared/ui/form";
 import { AppTabs } from "@shared/ui/tabs";
 import { PageTitle } from "@shared/ui/typography";
 import dayjs from "dayjs";
@@ -83,7 +82,7 @@ function WorkTypeRow({
               options={WORK_TYPE_OPTIONS}
               getOptionLabel={(option) => option.label}
               renderInput={(params) => (
-                <TextField
+                <AppTextField
                   {...params}
                   size="small"
                   sx={{ width: { xs: "100%", sm: 400 } }}
@@ -137,7 +136,7 @@ function ShiftGroupRow({
                     option.value === value.value
                   }
                   renderInput={(params) => (
-                    <TextField
+                    <AppTextField
                       {...params}
                       size="small"
                       sx={{ width: { xs: "100%", sm: 400 } }}
@@ -182,7 +181,7 @@ function GeneralTabContent({
             <tr>
               <td className={LABEL_CELL_CLASS}>汎用コード</td>
               <td className={VALUE_CELL_CLASS}>
-                <TextField
+                <AppTextField
                   {...register("sortKey")}
                   size="small"
                   sx={{ width: { xs: "100%", sm: 400 } }}
@@ -558,7 +557,7 @@ function MailAddressTableCell({
 }) {
   return (
     <td className={VALUE_CELL_CLASS}>
-      <TextField
+      <AppTextField
         {...register("mailAddress", { required: true })}
         size="small"
         sx={{ width: { xs: "100%", sm: 400 } }}

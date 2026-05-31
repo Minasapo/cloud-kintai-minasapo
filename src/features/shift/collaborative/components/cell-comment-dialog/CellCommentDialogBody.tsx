@@ -10,9 +10,7 @@ import {
   ListItem,
   ListItemSecondaryAction,
   ListItemText,
-  Paper,
-  TextField,
-  Tooltip,
+  Paper,  Tooltip,
   Typography,
 } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
@@ -20,6 +18,7 @@ import {
   AppDeleteIconButton,
   AppEditIconButton,
 } from "@shared/ui/button/AppActionIconButton";
+import { AppTextField } from "@shared/ui/form";
 import React from "react";
 
 import { UserOption } from "../../hooks/useCellCommentDialogState";
@@ -50,7 +49,7 @@ const MentionAutocomplete: React.FC<MentionAutocompleteProps> = ({
       onChange(newMentions);
     }}
     renderInput={(params) => (
-      <TextField
+      <AppTextField
         {...params}
         label="メンション"
         placeholder="メンションを選択"
@@ -85,7 +84,7 @@ const CommentEditForm: React.FC<CommentEditFormProps> = ({
   onCancel,
 }) => (
   <Box sx={{ mt: 1 }}>
-    <TextField
+    <AppTextField
       fullWidth
       multiline
       rows={3}
@@ -188,7 +187,7 @@ const ReplyInputForm: React.FC<ReplyInputFormProps> = ({
   onCancel,
 }) => (
   <Paper sx={{ ml: 4, p: 1.5, bgcolor: "background.default", mb: 1.5 }}>
-    <TextField
+    <AppTextField
       fullWidth
       multiline
       rows={2}
@@ -401,7 +400,7 @@ const NewCommentForm: React.FC<NewCommentFormProps> = ({
     <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
       コメントを追加
     </Typography>
-    <TextField
+    <AppTextField
       fullWidth
       multiline
       rows={3}
