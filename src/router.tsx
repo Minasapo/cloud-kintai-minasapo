@@ -94,9 +94,6 @@ const DesignTokenPreviewRoute = createLazyRoute(
 );
 const NotFoundRoute = createLazyRoute(() => import("./pages/NotFound"));
 const ProfileRoute = createLazyRoute(() => import("./pages/Profile"));
-const WorkflowNotificationsRoute = createLazyRoute(
-  () => import("./pages/notifications/WorkflowNotificationsPage"),
-);
 const RegisterRoute = createLazyRoute(() => import("./pages/Register"));
 const ShiftRequestRoute = createLazyRoute(
   () => import("./pages/shift/request"),
@@ -216,10 +213,6 @@ const router = createBrowserRouter([
       {
         path: "profile",
         lazy: ProfileRoute,
-      },
-      {
-        path: "notifications",
-        lazy: WorkflowNotificationsRoute,
       },
       {
         path: "/admin",

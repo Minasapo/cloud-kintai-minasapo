@@ -1,5 +1,6 @@
 import type { ExtensionManifest } from "./_types";
 import { attendanceStatisticsManifest } from "./attendance-statistics/manifest";
+import { workflowNotificationManifest } from "./workflow-notification/manifest";
 
 /**
  * Central registry of installed extensions. Add an extension by importing its
@@ -8,6 +9,7 @@ import { attendanceStatisticsManifest } from "./attendance-statistics/manifest";
  */
 export const extensionManifests: ReadonlyArray<ExtensionManifest> = [
   attendanceStatisticsManifest,
+  workflowNotificationManifest,
 ];
 
 export type { ExtensionManifest } from "./_types";
