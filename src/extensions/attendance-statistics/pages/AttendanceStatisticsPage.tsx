@@ -1,5 +1,4 @@
 import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
-import AttendanceStatistics from "@features/attendance/statistics/ui/AttendanceStatistics";
 import { PANEL_HEIGHTS } from "@shared/config/uiDimensions";
 import {
   DashboardInnerSurface,
@@ -9,6 +8,8 @@ import {
 import Page from "@shared/ui/page/Page";
 import { useContext } from "react";
 import { Navigate } from "react-router-dom";
+
+import AttendanceStatistics from "../features/statistics/ui/AttendanceStatistics";
 
 export default function AttendanceStatisticsPage() {
   const { getAttendanceStatisticsEnabled } = useContext(AppConfigContext);

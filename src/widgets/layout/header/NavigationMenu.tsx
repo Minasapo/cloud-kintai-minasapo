@@ -45,8 +45,7 @@ export default function NavigationMenu() {
   const { isOpen, closeDrawer, openDrawer } = useMobileDrawer();
   const { isCognitoUserRole, cognitoUser, authStatus } =
     useContext(AuthContext);
-  const { getOfficeMode, getAttendanceStatisticsEnabled, derived } =
-    useContext(AppConfigContext);
+  const { getOfficeMode, derived } = useContext(AppConfigContext);
   const isAuthenticated = authStatus === "authenticated";
   const { staffs } = useStaffs({ isAuthenticated });
 
@@ -66,7 +65,6 @@ export default function NavigationMenu() {
     () => [
       { label: "勤怠打刻", href: "/register" },
       { label: "勤怠一覧", href: "/attendance/list" },
-      { label: "稼働統計", href: "/attendance/stats" },
       { label: "日報", href: "/attendance/report" },
       { label: "シフト", href: "/shift" },
       { label: "ワークフロー", href: "/workflow" },
@@ -80,7 +78,6 @@ export default function NavigationMenu() {
   );
 
   const officeMode = getOfficeMode();
-  const attendanceStatisticsEnabled = getAttendanceStatisticsEnabled();
   const operatorMenuList: DesktopMenuItem[] = officeMode
     ? [{ label: "QR表示", href: "/office/qr" }]
     : [];
@@ -96,9 +93,6 @@ export default function NavigationMenu() {
 
   const desktopMenuItems = useMemo(() => {
     const filteredMenuList = menuList.filter((menu) => {
-      if (menu.href === "/attendance/stats") {
-        return attendanceStatisticsEnabled;
-      }
       if (menu.href === "/shift") {
         return canAccessShiftMenu;
       }
@@ -144,7 +138,6 @@ export default function NavigationMenu() {
 
     return [];
   }, [
-    attendanceStatisticsEnabled,
     canAccessShiftMenu,
     derived,
     isAdminUser,

@@ -77,8 +77,6 @@ const moduleLoaders: Partial<Record<string, () => Promise<unknown>>> = {
   "/register": () => import("../pages/Register"),
   "/attendance/list": () =>
     import("../pages/attendance/list/AttendanceListPage"),
-  "/attendance/stats": () =>
-    import("../pages/attendance/statistics/AttendanceStatisticsPage"),
   "/attendance/report": () =>
     import("../pages/attendance/daily-report/DailyReport"),
   "/shift": () => import("../pages/shift/request"),

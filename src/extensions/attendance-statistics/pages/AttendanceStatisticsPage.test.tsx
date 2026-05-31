@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import AttendanceStatisticsPage from "./AttendanceStatisticsPage";
 
-jest.mock("@features/attendance/statistics/ui/AttendanceStatistics", () => ({
+jest.mock("../features/statistics/ui/AttendanceStatistics", () => ({
   __esModule: true,
   default: () => <div>attendance statistics body</div>,
 }));

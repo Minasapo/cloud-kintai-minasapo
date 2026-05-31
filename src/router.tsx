@@ -76,9 +76,6 @@ const AttendanceListRoute = createLazyRoute(
     wrap: wrapWithMuiXDateProvider,
   },
 );
-const AttendanceStatisticsRoute = createLazyRoute(
-  () => import("./pages/attendance/statistics/AttendanceStatisticsPage"),
-);
 const LoginRoute = createLazyRoute(() => import("./pages/Login/LoginShell"));
 const OfficeHomeRoute = createLazyRoute(
   () => import("./pages/office/home/OfficeHomePage"),
@@ -156,10 +153,6 @@ const router = createBrowserRouter([
             path: "list",
             lazy: AttendanceListRoute,
             loader: loadAttendanceListLoader,
-          },
-          {
-            path: "stats",
-            lazy: AttendanceStatisticsRoute,
           },
           {
             path: "report",
