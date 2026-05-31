@@ -196,9 +196,9 @@ export default [
           paths: [
             {
               name: "@mui/material",
-              importNames: ["Button", "IconButton"],
+              importNames: ["Button", "IconButton", "TextField"],
               message:
-                "Use AppButton/AppIconButton from @/shared/ui/button instead.",
+                "Use AppButton/AppIconButton from @/shared/ui/button or AppTextField from @/shared/ui/form instead.",
             },
             {
               name: "@mui/material/Button",
@@ -207,6 +207,10 @@ export default [
             {
               name: "@mui/material/IconButton",
               message: "Use AppIconButton from @/shared/ui/button instead.",
+            },
+            {
+              name: "@mui/material/TextField",
+              message: "Use AppTextField from @/shared/ui/form instead.",
             },
           ],
         },
@@ -217,6 +221,7 @@ export default [
     files: [
       "src/shared/ui/button/AppButton.tsx",
       "src/shared/ui/button/AppIconButton.tsx",
+      "src/shared/ui/form/AppTextField.tsx",
       "src/pages/preview/**/*.{ts,tsx,js,jsx}",
     ],
     rules: {
