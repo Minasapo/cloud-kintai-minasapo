@@ -10,6 +10,7 @@ export {
   extractDateFromISO,
   formatDateToString,
   formatISOToTime,
+  formatISOToTimeOr,
   formatISOToTimeOrEmpty,
   formatMinutesToHHmm,
   isCompleteTime,

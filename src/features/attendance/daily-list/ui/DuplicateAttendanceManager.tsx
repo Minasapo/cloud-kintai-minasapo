@@ -28,6 +28,7 @@ import {
 import { Attendance } from "@shared/api/graphql/types";
 import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
+import { formatISOToTimeOr } from "@shared/lib/time";
 import { AppButton } from "@shared/ui/button";
 import ConfirmDialog from "@shared/ui/feedback/ConfirmDialog";
 import dayjs from "dayjs";
@@ -111,15 +112,14 @@ type DuplicateAttendanceBadgeProps = {
 };
 
 function buildConfirmFieldRows(): ConfirmFieldRow[] {
-  const formatTime = (value?: string | null) =>
-    value ? dayjs(value).format("HH:mm") : "-";
+  const formatTime = (value?: string | null) => formatISOToTimeOr(value);
   const formatDate = (value?: string | null) =>
     value ? dayjs(value).format("YYYY/MM/DD") : "-";
   const formatBool = (value?: boolean | null) => (value ? "○" : "-");
   const formatRests = (rests?: Attendance["rests"]) => {
     const items = (rests ?? []).filter(Boolean).map((rest) => {
-      const start = rest?.startTime ? dayjs(rest.startTime).format("HH:mm") : "-";
-      const end = rest?.endTime ? dayjs(rest.endTime).format("HH:mm") : "-";
+      const start = formatISOToTimeOr(rest?.startTime);
+      const end = formatISOToTimeOr(rest?.endTime);
       return `${start}-${end}`;
     });
     return items.length ? items.join(" / ") : "-";
@@ -128,8 +128,8 @@ function buildConfirmFieldRows(): ConfirmFieldRow[] {
     hourlyTimes?: Attendance["hourlyPaidHolidayTimes"],
   ) => {
     const items = (hourlyTimes ?? []).filter(Boolean).map((time) => {
-      const start = time?.startTime ? dayjs(time.startTime).format("HH:mm") : "-";
-      const end = time?.endTime ? dayjs(time.endTime).format("HH:mm") : "-";
+      const start = formatISOToTimeOr(time?.startTime);
+      const end = formatISOToTimeOr(time?.endTime);
       return `${start}-${end}`;
     });
     return items.length ? items.join(" / ") : "-";
@@ -138,10 +138,8 @@ function buildConfirmFieldRows(): ConfirmFieldRow[] {
     changeRequests?: Attendance["changeRequests"],
   ) => {
     const items = (changeRequests ?? []).filter(Boolean).map((request, idx) => {
-      const start = request?.startTime
-        ? dayjs(request.startTime).format("HH:mm")
-        : "-";
-      const end = request?.endTime ? dayjs(request.endTime).format("HH:mm") : "-";
+      const start = formatISOToTimeOr(request?.startTime);
+      const end = formatISOToTimeOr(request?.endTime);
       const completed = request?.completed ? "済" : "未";
       return `#${idx + 1}: ${start}-${end} / ${completed}`;
     });

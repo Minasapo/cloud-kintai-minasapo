@@ -4,6 +4,7 @@ import {
   extractDateFromISO,
   formatDateToString,
   formatISOToTime,
+  formatISOToTimeOr,
   formatISOToTimeOrEmpty,
   formatMinutesToHHmm,
   isCompleteTime,
@@ -78,6 +79,21 @@ describe("formatISOToTimeOrEmpty", () => {
     expect(formatISOToTimeOrEmpty(undefined)).toBe("");
     expect(formatISOToTimeOrEmpty(null)).toBe("");
     expect(formatISOToTimeOrEmpty("invalid")).toBe("");
+  });
+});
+
+describe("formatISOToTimeOr", () => {
+  it("有効な ISO 文字列は HH:mm に変換する", () => {
+    expect(formatISOToTimeOr("2024-01-15T09:30:00+09:00")).toBe("09:30");
+  });
+  it("未入力・不正値はデフォルトフォールバック '-' を返す", () => {
+    expect(formatISOToTimeOr(undefined)).toBe("-");
+    expect(formatISOToTimeOr(null)).toBe("-");
+    expect(formatISOToTimeOr("invalid")).toBe("-");
+  });
+  it("カスタムフォールバックを返す", () => {
+    expect(formatISOToTimeOr(null, "—")).toBe("—");
+    expect(formatISOToTimeOr("invalid", "N/A")).toBe("N/A");
   });
 });
 
