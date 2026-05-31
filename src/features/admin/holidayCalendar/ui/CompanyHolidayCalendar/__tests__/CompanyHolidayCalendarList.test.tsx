@@ -151,9 +151,15 @@ function setupDefaultMocks() {
     isFetching: false,
     error: undefined,
   });
-  mockCreateMutation.mockReturnValue({ unwrap: jest.fn().mockResolvedValue({}) });
-  mockUpdateMutation.mockReturnValue({ unwrap: jest.fn().mockResolvedValue({}) });
-  mockDeleteMutation.mockReturnValue({ unwrap: jest.fn().mockResolvedValue({}) });
+  mockCreateMutation.mockReturnValue({
+    unwrap: jest.fn().mockResolvedValue({}),
+  });
+  mockUpdateMutation.mockReturnValue({
+    unwrap: jest.fn().mockResolvedValue({}),
+  });
+  mockDeleteMutation.mockReturnValue({
+    unwrap: jest.fn().mockResolvedValue({}),
+  });
   mockBulkCreateMutation.mockReturnValue({
     unwrap: jest.fn().mockResolvedValue([]),
   });
@@ -185,7 +191,9 @@ describe("CompanyHolidayCalendarList", () => {
 
   async function clickConfirmCancel(user: ReturnType<typeof userEvent.setup>) {
     const dialog = await screen.findByRole("dialog");
-    const cancelButton = within(dialog).getByRole("button", { name: "キャンセル" });
+    const cancelButton = within(dialog).getByRole("button", {
+      name: "キャンセル",
+    });
     await user.click(cancelButton);
   }
 
@@ -234,9 +242,15 @@ describe("CompanyHolidayCalendarList", () => {
 
   it("テーブルに「日付」「名前」「作成日」ヘッダーが表示される", () => {
     renderComponent();
-    expect(screen.getByRole("columnheader", { name: "日付" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "名前" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "作成日" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "日付" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "名前" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "作成日" }),
+    ).toBeInTheDocument();
   });
 
   it("各休日の名前がテーブルに表示される", () => {
@@ -340,7 +354,9 @@ describe("CompanyHolidayCalendarList", () => {
     const deleteButtons = screen.getAllByRole("button", { name: "削除" });
     await user.click(deleteButtons[0]);
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByText(/春分の日|建国記念日|元日/)).toBeInTheDocument();
+    expect(
+      within(dialog).getByText(/春分の日|建国記念日|元日/),
+    ).toBeInTheDocument();
   });
 
   it("確認ダイアログで削除を選択すると deleteCompanyHolidayCalendar が呼ばれる", async () => {

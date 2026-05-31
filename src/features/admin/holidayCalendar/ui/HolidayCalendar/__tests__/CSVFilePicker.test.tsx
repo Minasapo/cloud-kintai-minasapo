@@ -67,13 +67,17 @@ describe("HolidayCalendar CSVFilePicker", () => {
   async function confirmRegister() {
     const dialogs = await screen.findAllByRole("dialog");
     const confirmDialog = dialogs[dialogs.length - 1];
-    await userEvent.click(within(confirmDialog).getByRole("button", { name: "登録" }));
+    await userEvent.click(
+      within(confirmDialog).getByRole("button", { name: "登録" }),
+    );
   }
 
   async function cancelRegister() {
     const dialogs = await screen.findAllByRole("dialog");
     const confirmDialog = dialogs[dialogs.length - 1];
-    await userEvent.click(within(confirmDialog).getByRole("button", { name: "キャンセル" }));
+    await userEvent.click(
+      within(confirmDialog).getByRole("button", { name: "キャンセル" }),
+    );
   }
 
   it("ダイアログを開いてファイル選択できる", async () => {
@@ -81,7 +85,9 @@ describe("HolidayCalendar CSVFilePicker", () => {
     await openDialog();
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "ファイルを選択" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "ファイルを選択" }),
+    ).toBeInTheDocument();
   });
 
   it("有効なCSVを登録すると bulkCreate が呼ばれる", async () => {

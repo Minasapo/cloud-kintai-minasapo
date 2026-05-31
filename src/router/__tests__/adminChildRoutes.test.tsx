@@ -2,7 +2,9 @@ import { adminChildRoutes } from "../adminChildRoutes";
 
 describe("adminChildRoutes", () => {
   it("treats /admin/master/shift as not found", () => {
-    const masterRoute = adminChildRoutes.find((route) => route.path === "master");
+    const masterRoute = adminChildRoutes.find(
+      (route) => route.path === "master",
+    );
     const shiftRoute = masterRoute?.children?.find(
       (route) => route.path === "shift",
     );

@@ -116,9 +116,7 @@ describe("CellCommentDialog", () => {
   describe("コメントが空の場合", () => {
     it("「コメントはまだありません」と表示される", () => {
       renderDialog({ comments: [] });
-      expect(
-        screen.getByText("コメントはまだありません"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("コメントはまだありません")).toBeInTheDocument();
     });
   });
 
@@ -210,7 +208,9 @@ describe("CellCommentDialog", () => {
       expect(screen.getByDisplayValue("テストコメント")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "保存" })).toBeInTheDocument();
       // Multiple キャンセル buttons exist (edit form + dialog actions)
-      const cancelButtons = screen.getAllByRole("button", { name: "キャンセル" });
+      const cancelButtons = screen.getAllByRole("button", {
+        name: "キャンセル",
+      });
       expect(cancelButtons.length).toBeGreaterThanOrEqual(1);
     });
 
@@ -276,7 +276,9 @@ describe("CellCommentDialog", () => {
 
       await user.click(screen.getByRole("button", { name: "編集" }));
       // First キャンセル is the edit form's cancel; second is DialogActions cancel
-      const cancelButtons = screen.getAllByRole("button", { name: "キャンセル" });
+      const cancelButtons = screen.getAllByRole("button", {
+        name: "キャンセル",
+      });
       await user.click(cancelButtons[0]);
 
       expect(
@@ -315,9 +317,7 @@ describe("CellCommentDialog", () => {
 
       await user.click(screen.getByRole("button", { name: /返信/ }));
 
-      expect(
-        screen.getByPlaceholderText("返信を入力..."),
-      ).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("返信を入力...")).toBeInTheDocument();
     });
 
     it("返信フォームが表示されているとき「返信」ボタン（開くためのもの）が非表示になる", async () => {
@@ -378,7 +378,9 @@ describe("CellCommentDialog", () => {
 
       await user.click(screen.getByRole("button", { name: /返信/ }));
       // First キャンセル is the reply form's cancel; second is DialogActions cancel
-      const cancelButtons = screen.getAllByRole("button", { name: "キャンセル" });
+      const cancelButtons = screen.getAllByRole("button", {
+        name: "キャンセル",
+      });
       await user.click(cancelButtons[0]);
 
       expect(
@@ -580,7 +582,9 @@ describe("CellCommentDialog", () => {
 
       // DialogActions にある「キャンセル」ボタンをクリック
       // There may be multiple "キャンセル" buttons if editing is active
-      const cancelButtons = screen.getAllByRole("button", { name: "キャンセル" });
+      const cancelButtons = screen.getAllByRole("button", {
+        name: "キャンセル",
+      });
       // The last one is in DialogActions
       await user.click(cancelButtons[cancelButtons.length - 1]);
 

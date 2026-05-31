@@ -75,11 +75,12 @@ async function confirmRegister(user: ReturnType<typeof userEvent.setup>) {
 async function cancelRegister(user: ReturnType<typeof userEvent.setup>) {
   const dialogs = await screen.findAllByRole("dialog");
   const confirmDialog = dialogs[dialogs.length - 1];
-  await user.click(within(confirmDialog).getByRole("button", { name: "キャンセル" }));
+  await user.click(
+    within(confirmDialog).getByRole("button", { name: "キャンセル" }),
+  );
 }
 
 // ── Tests ──────────────────────────────────────────────────────────────────
-
 
 describe("CSVFilePicker - 初期表示・ダイアログ・キャンセル", () => {
   beforeEach(() => {
@@ -173,7 +174,6 @@ describe("CSVFilePicker - 初期表示・ダイアログ・キャンセル", () 
     await cancelRegister(user);
     expect(bulkMock).not.toHaveBeenCalled();
   });
-
 });
 
 describe("CSVFilePicker - 登録フロー", () => {
@@ -321,7 +321,6 @@ describe("CSVFilePicker - 登録フロー", () => {
     });
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
-
 });
 
 describe("CSVFilePicker - parseSummaryとリセット", () => {
