@@ -60,18 +60,6 @@ const AttendanceListRoute = createLazyRoute(
   },
 );
 const LoginRoute = createLazyRoute(() => import("./pages/Login/LoginShell"));
-const OfficeHomeRoute = createLazyRoute(
-  () => import("./pages/office/home/OfficeHomePage"),
-);
-const OfficeLayoutRoute = createLazyRoute(
-  () => import("./pages/office/layout/OfficeLayoutPage"),
-);
-const OfficeQrRoute = createLazyRoute(
-  () => import("./pages/office/qr/OfficeQrPage"),
-);
-const OfficeQrRegisterRoute = createLazyRoute(
-  () => import("./pages/office/qr-register/OfficeQrRegisterPage"),
-);
 const DesignTokenPreviewRoute = createLazyRoute(
   () => import("./pages/preview/DesignTokenPreviewPage"),
 );
@@ -209,28 +197,6 @@ const router = createBrowserRouter([
               ...extensionAdminRoutes,
               ...adminChildRoutes,
             ],
-          },
-        ],
-      },
-      {
-        path: "office",
-        lazy: OfficeLayoutRoute,
-        children: [
-          {
-            index: true,
-            lazy: OfficeHomeRoute,
-          },
-          {
-            path: "qr",
-            lazy: OfficeQrRoute,
-          },
-          {
-            path: "qr/register",
-            lazy: OfficeQrRegisterRoute,
-          },
-          {
-            path: "*",
-            lazy: NotFoundRoute,
           },
         ],
       },

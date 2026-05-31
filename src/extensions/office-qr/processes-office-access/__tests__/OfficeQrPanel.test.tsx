@@ -4,7 +4,7 @@
  * 純粋な UI コンポーネント。Props を渡すだけでテスト可能。
  * qrcode.react は Suspense 経由の lazy import のためスタブ化する。
  */
-import { OfficeQrPanel } from "@features/attendance/office-qr";
+import { OfficeQrPanel } from "@extensions/office-qr/features/office-qr";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 

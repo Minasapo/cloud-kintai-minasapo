@@ -1,6 +1,6 @@
 import { webcrypto } from "node:crypto";
 
-import { generateOfficeQrToken } from "@features/attendance/office-qr/lib/generateToken";
+import { generateOfficeQrToken } from "@extensions/office-qr/features/office-qr/lib/generateToken";
 import dayjs from "dayjs";
 
 import { validateOfficeQrToken } from "../validateToken";

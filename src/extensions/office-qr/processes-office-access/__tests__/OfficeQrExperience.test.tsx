@@ -8,7 +8,7 @@
 
 // qrcode.react スタブ
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
-import { OfficeQrExperience } from "@processes/office-access";
+import { OfficeQrExperience } from "@extensions/office-qr/processes-office-access";
 import { renderWithProviders } from "@shared/test-utils";
 import { screen } from "@testing-library/react";
 
@@ -21,8 +21,8 @@ jest.mock("qrcode.react", () => ({
   ),
 }));
 
-jest.mock("@features/attendance/office-qr", () => ({
-  ...jest.requireActual("@features/attendance/office-qr"),
+jest.mock("@extensions/office-qr/features/office-qr", () => ({
+  ...jest.requireActual("@extensions/office-qr/features/office-qr"),
   useOfficeQr: () => mockUseOfficeQr(),
 }));
 

@@ -1,7 +1,7 @@
 import { AuthContext } from "@app/providers/auth/AuthContext";
 import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
-import { OfficeQrPanel, useOfficeQr } from "@features/attendance/office-qr";
+import { OfficeQrPanel, useOfficeQr } from "@extensions/office-qr/features/office-qr";
 import { useContext } from "react";
 
 export function OfficeQrExperience() {

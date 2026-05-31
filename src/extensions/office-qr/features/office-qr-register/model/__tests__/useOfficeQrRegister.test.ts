@@ -9,8 +9,8 @@ import {
   clockInAction,
   clockOutAction,
 } from "@entities/attendance/lib/actions/attendanceActions";
-import { validateOfficeQrToken } from "@features/attendance/office-qr-register/lib/validateToken";
-import { useOfficeQrRegister } from "@features/attendance/office-qr-register/model/useOfficeQrRegister";
+import { validateOfficeQrToken } from "@extensions/office-qr/features/office-qr-register/lib/validateToken";
+import { useOfficeQrRegister } from "@extensions/office-qr/features/office-qr-register/model/useOfficeQrRegister";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import React from "react";
@@ -40,7 +40,7 @@ jest.mock("@entities/attendance/lib/time", () => ({
   getNowISOStringWithZeroSeconds: jest.fn(() => "2024-01-15T09:00:00"),
 }));
 jest.mock(
-  "@features/attendance/office-qr-register/lib/validateToken",
+  "@extensions/office-qr/features/office-qr-register/lib/validateToken",
   () => ({
     validateOfficeQrToken: jest.fn(),
   }),

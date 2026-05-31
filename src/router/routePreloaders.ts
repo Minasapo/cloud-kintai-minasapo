@@ -83,7 +83,8 @@ const moduleLoaders: Partial<Record<string, () => Promise<unknown>>> = {
   "/workflow": () => import("../pages/workflow/list/Workflow"),
   "/admin": () => import("../pages/admin/AdminLayout"),
   "/profile": () => import("../pages/Profile"),
-  "/office/qr": () => import("../pages/office/qr/OfficeQrPage"),
+  "/office/qr": () =>
+    import("@extensions/office-qr/pages/qr/OfficeQrPage"),
 };
 
 export function preloadRoute(href: string): void {
