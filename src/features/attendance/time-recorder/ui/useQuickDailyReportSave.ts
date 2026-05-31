@@ -27,9 +27,8 @@ const ERROR_MESSAGES = {
   SAVE_SUCCESS: "日報を保存しました",
 } as const;
 
-const extractErrorMessage = (
-  errors: readonly { message: string }[],
-): string => errors.map((err) => err.message).join("\n");
+const extractErrorMessage = (errors: readonly { message: string }[]): string =>
+  errors.map((err) => err.message).join("\n");
 
 type UseSaveParams = {
   staffId: string | null | undefined;

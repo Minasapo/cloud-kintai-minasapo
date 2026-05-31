@@ -151,10 +151,7 @@ export const ShiftCollaborativePageInner =
               suggestionsBadgeCount={suggestionsBadgeCount}
             />
 
-            <SyncPanel
-              syncError={state.error}
-              onClearError={_clearSyncError}
-            />
+            <SyncPanel syncError={state.error} onClearError={_clearSyncError} />
 
             <ShiftConnectionAlerts
               isOnline={state.isOnline}

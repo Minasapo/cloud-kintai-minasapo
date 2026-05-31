@@ -34,8 +34,9 @@ export function useTimeRecorderSubscription({
       })
       .subscribe({
         next: (event) => {
-          const updatedAttendance = (event.data as OnUpdateAttendanceSubscription)
-            ?.onUpdateAttendance;
+          const updatedAttendance = (
+            event.data as OnUpdateAttendanceSubscription
+          )?.onUpdateAttendance;
           if (!updatedAttendance) return;
           if (Date.now() < localAttendanceUpdateIgnoreUntilRef.current) return;
           void refreshTimeRecorderData();

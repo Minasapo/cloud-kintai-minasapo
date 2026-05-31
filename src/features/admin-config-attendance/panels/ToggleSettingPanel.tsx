@@ -1,10 +1,7 @@
 import AdminSettingsSection from "@features/admin/layout/ui/AdminSettingsSection";
 import { SettingsSwitch } from "@features/admin/layout/ui/SettingsPrimitives";
 
-import {
-  AutoSaveStatus,
-  useToggleSetting,
-} from "../attendanceSettingsHooks";
+import { AutoSaveStatus, useToggleSetting } from "../attendanceSettingsHooks";
 
 export default function ToggleSettingPanel({
   title,

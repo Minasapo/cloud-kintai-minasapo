@@ -8,9 +8,8 @@ import { useEffect } from "react";
 const QUERY_LIMIT = 1;
 const FETCH_FAILED = "日報の取得に失敗しました。";
 
-const extractErrorMessage = (
-  errors: readonly { message: string }[],
-): string => errors.map((err) => err.message).join("\n");
+const extractErrorMessage = (errors: readonly { message: string }[]): string =>
+  errors.map((err) => err.message).join("\n");
 
 type UseQuickDailyReportLoadParams = {
   staffId: string | null | undefined;

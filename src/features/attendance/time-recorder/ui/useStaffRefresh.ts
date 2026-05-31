@@ -11,7 +11,10 @@ type UseStaffRefreshParams = {
   dispatch: ReturnType<typeof useDispatch>;
 };
 
-export function useStaffRefresh({ cognitoId, dispatch }: UseStaffRefreshParams) {
+export function useStaffRefresh({
+  cognitoId,
+  dispatch,
+}: UseStaffRefreshParams) {
   const [staff, setStaff] = useState<Staff | undefined>(undefined);
   const refreshStaff = useCallback(async () => {
     if (!cognitoId) return;
@@ -19,7 +22,9 @@ export function useStaffRefresh({ cognitoId, dispatch }: UseStaffRefreshParams) 
       const latestStaff = await fetchStaff(cognitoId);
       setStaff(latestStaff);
     } catch {
-      dispatch(pushNotification({ tone: "error", message: MESSAGE_CODE.E00001 }));
+      dispatch(
+        pushNotification({ tone: "error", message: MESSAGE_CODE.E00001 }),
+      );
     }
   }, [cognitoId, dispatch]);
   return { staff, refreshStaff };

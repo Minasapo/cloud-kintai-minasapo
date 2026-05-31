@@ -62,10 +62,7 @@ export default function AdminLogsMobileList({
               <Typography variant="caption" color="text.secondary">
                 対象
               </Typography>
-              <Typography
-                variant="subtitle2"
-                sx={{ wordBreak: "break-word" }}
-              >
+              <Typography variant="subtitle2" sx={{ wordBreak: "break-word" }}>
                 {row.resourceDisplay}
               </Typography>
             </Box>

@@ -206,11 +206,14 @@ export function useAutoSaveObjectState<TState extends object>(
 
 export function useToggleSetting(getter: () => boolean, saveKey: string) {
   const getInitialState = useCallback(() => getter(), [getter]);
-  const { state: enabled, setStateAndQueueSave, saving } =
-    useAutoSaveConfigState({
-      getInitialState,
-      createPayload: (state) => ({ [saveKey]: state }),
-    });
+  const {
+    state: enabled,
+    setStateAndQueueSave,
+    saving,
+  } = useAutoSaveConfigState({
+    getInitialState,
+    createPayload: (state) => ({ [saveKey]: state }),
+  });
 
   return { enabled, setEnabledAndQueueSave: setStateAndQueueSave, saving };
 }

@@ -6,7 +6,10 @@ type UseQuickDailyReportAutoSaveParams = {
   staffId: string | null | undefined;
   content: string;
   savedContent: string;
-  handleSave: (showNotification?: boolean, isManualSave?: boolean) => Promise<void>;
+  handleSave: (
+    showNotification?: boolean,
+    isManualSave?: boolean,
+  ) => Promise<void>;
 };
 
 export function useQuickDailyReportAutoSave({

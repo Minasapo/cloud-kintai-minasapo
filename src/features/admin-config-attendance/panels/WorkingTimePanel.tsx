@@ -49,9 +49,9 @@ export default function WorkingTimePanel() {
     validate: (state) =>
       Boolean(
         state.startTime &&
-          state.endTime &&
-          state.lunchRestStartTime &&
-          state.lunchRestEndTime,
+        state.endTime &&
+        state.lunchRestStartTime &&
+        state.lunchRestEndTime,
       ),
     onInvalid: () => notifyValidationError(),
   });

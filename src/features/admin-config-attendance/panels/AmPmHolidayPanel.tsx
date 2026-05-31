@@ -40,13 +40,11 @@ export default function AmPmHolidayPanel() {
   const getInitialState = useCallback(
     (): AmPmHolidayState => ({
       amHolidayStartTime:
-        getAmHolidayStartTime() ??
-        dayjs(DEFAULT_AM_HOLIDAY_START, TIME_FORMAT),
+        getAmHolidayStartTime() ?? dayjs(DEFAULT_AM_HOLIDAY_START, TIME_FORMAT),
       amHolidayEndTime:
         getAmHolidayEndTime() ?? dayjs(DEFAULT_AM_HOLIDAY_END, TIME_FORMAT),
       pmHolidayStartTime:
-        getPmHolidayStartTime() ??
-        dayjs(DEFAULT_PM_HOLIDAY_START, TIME_FORMAT),
+        getPmHolidayStartTime() ?? dayjs(DEFAULT_PM_HOLIDAY_START, TIME_FORMAT),
       pmHolidayEndTime:
         getPmHolidayEndTime() ?? dayjs(DEFAULT_PM_HOLIDAY_END, TIME_FORMAT),
       enabled: getAmPmHolidayEnabled(),
@@ -81,9 +79,9 @@ export default function AmPmHolidayPanel() {
     validate: (state) =>
       Boolean(
         state.amHolidayStartTime &&
-          state.amHolidayEndTime &&
-          state.pmHolidayStartTime &&
-          state.pmHolidayEndTime,
+        state.amHolidayEndTime &&
+        state.pmHolidayStartTime &&
+        state.pmHolidayEndTime,
       ),
     onInvalid: () => notifyValidationError(),
   });
@@ -107,7 +105,9 @@ export default function AmPmHolidayPanel() {
         </div>
 
         <div className="flex flex-row flex-wrap items-end gap-4">
-          <span className="w-12 text-sm font-semibold text-slate-700">午前</span>
+          <span className="w-12 text-sm font-semibold text-slate-700">
+            午前
+          </span>
           <SettingsTimeField
             label="開始"
             value={amHolidayStartTime}
@@ -126,7 +126,9 @@ export default function AmPmHolidayPanel() {
         </div>
 
         <div className="flex flex-row flex-wrap items-end gap-4">
-          <span className="w-12 text-sm font-semibold text-slate-700">午後</span>
+          <span className="w-12 text-sm font-semibold text-slate-700">
+            午後
+          </span>
           <SettingsTimeField
             label="開始"
             value={pmHolidayStartTime}

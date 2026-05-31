@@ -78,11 +78,7 @@ export default function AdminLogsDesktopTable({
               </TableCell>
               <TableCell sx={{ verticalAlign: "top" }}>
                 <Tooltip title={row.summaryDisplay}>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    noWrap
-                  >
+                  <Typography variant="body2" color="text.secondary" noWrap>
                     {row.summaryDisplay}
                   </Typography>
                 </Tooltip>

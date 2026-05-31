@@ -2,10 +2,7 @@ import { createLogger } from "@shared/lib/logger";
 import dayjs from "dayjs";
 
 import type { useCollaborativePageState } from "../hooks/useCollaborativePageState";
-import type {
-  DataSyncStatus,
-  Mention,
-} from "../types/collaborative.types";
+import type { DataSyncStatus, Mention } from "../types/collaborative.types";
 
 const logger = createLogger("ShiftCollaborative");
 

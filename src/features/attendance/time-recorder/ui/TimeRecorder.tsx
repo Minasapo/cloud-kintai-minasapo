@@ -46,10 +46,8 @@ function useTimeRecorderState({
   const VISIBILITY_REFRESH_THRESHOLD_MINUTES = 5;
   const { cognitoUser } = useContext(AuthContext);
   const dispatch = useDispatch();
-  const {
-    getLunchRestStartTime,
-    getLunchRestEndTime,
-  } = useContext(AppConfigContext);
+  const { getLunchRestStartTime, getLunchRestEndTime } =
+    useContext(AppConfigContext);
   const currentWorkDate = useWorkDateInterval();
   const {
     shouldFetchAttendance,
