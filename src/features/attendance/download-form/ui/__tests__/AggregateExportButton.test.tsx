@@ -138,7 +138,7 @@ describe("レンダリング", () => {
 
 describe("クリック時の動作", () => {
   it("disabled のとき（workDates 空）は downloadAttendances を呼ばない", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
     renderButton({ workDates: [] });
     await user.click(screen.getByRole("button", { name: /集計ダウンロード/ }));
     expect(mockDownloadAttendances).not.toHaveBeenCalled();

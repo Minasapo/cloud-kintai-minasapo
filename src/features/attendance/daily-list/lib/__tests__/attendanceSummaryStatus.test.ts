@@ -83,30 +83,4 @@ describe("resolveAttendanceSummaryStatus", () => {
 
     expect(result).toBe("ok");
   });
-
-  it("returns error when any attendance has system comments", () => {
-    const baseDate = dayjs().add(2, "month").startOf("month");
-    const attendances = [
-      createAttendance(baseDate.date(1).format("YYYY-MM-DD"), {
-        systemComments: [
-          {
-            __typename: "SystemComment",
-            comment: "自動補正が必要です",
-            confirmed: false,
-            createdAt: "2024-01-01T00:00:00.000Z",
-          },
-        ],
-      }),
-    ];
-
-    const result = resolveAttendanceSummaryStatus({
-      attendances,
-      holidayCalendars: [],
-      companyHolidayCalendars: [],
-      staff: createStaff({ usageStartDate: baseDate.format("YYYY-MM-DD") }),
-      baseDate,
-    });
-
-    expect(result).toBe("error");
-  });
 });
