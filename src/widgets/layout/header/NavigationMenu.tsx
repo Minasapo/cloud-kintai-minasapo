@@ -56,7 +56,9 @@ export default function NavigationMenu() {
       return null;
     }
 
-    return staffs.find((staff) => staff.cognitoUserId === cognitoUser.id) ?? null;
+    return (
+      staffs.find((staff) => staff.cognitoUserId === cognitoUser.id) ?? null
+    );
   })();
 
   const canAccessShiftMenu = isShiftWorkType(currentStaff?.workType);
@@ -109,7 +111,10 @@ export default function NavigationMenu() {
           (m.menuItems ?? []).includes(item),
         );
         if (manifest?.isEnabled && !manifest.isEnabled(derived)) return false;
-        if (item.isVisible && !item.isVisible({ derived, isAdmin: isAdminUser }))
+        if (
+          item.isVisible &&
+          !item.isVisible({ derived, isAdmin: isAdminUser })
+        )
           return false;
         if (item.roles && item.roles.length > 0) {
           const allowed = item.roles.some((role) =>

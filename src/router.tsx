@@ -13,21 +13,33 @@ import RouteErrorBoundary from "./router/RouteErrorBoundary";
 import { wrapWithMuiXDateProvider } from "./router/wrapWithMuiXDateProvider";
 
 const loadAdminDashboardLoader = async () =>
-  (await import("./router/loaders/adminDashboardLoader")).adminDashboardLoader();
+  (
+    await import("./router/loaders/adminDashboardLoader")
+  ).adminDashboardLoader();
 
 const loadAttendanceListLoader = async () =>
-  (await import("./router/loaders/attendanceListLoader")).attendanceListLoader();
+  (
+    await import("./router/loaders/attendanceListLoader")
+  ).attendanceListLoader();
 
-const loadWorkflowDetailLoader = async (args: Parameters<
-  Awaited<typeof import("./router/loaders/workflowDetailLoader")>["workflowDetailLoader"]
->[0]) =>
+const loadWorkflowDetailLoader = async (
+  args: Parameters<
+    Awaited<
+      typeof import("./router/loaders/workflowDetailLoader")
+    >["workflowDetailLoader"]
+  >[0],
+) =>
   (await import("./router/loaders/workflowDetailLoader")).workflowDetailLoader(
     args,
   );
 
-const loadWorkflowEditLoader = async (args: Parameters<
-  Awaited<typeof import("./router/loaders/workflowEditLoader")>["workflowEditLoader"]
->[0]) =>
+const loadWorkflowEditLoader = async (
+  args: Parameters<
+    Awaited<
+      typeof import("./router/loaders/workflowEditLoader")
+    >["workflowEditLoader"]
+  >[0],
+) =>
   (await import("./router/loaders/workflowEditLoader")).workflowEditLoader(
     args,
   );

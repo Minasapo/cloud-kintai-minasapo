@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
-import { mkdirSync, writeFileSync, existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -31,9 +31,7 @@ if (existsSync(dir)) {
 
 const camel = name
   .split("-")
-  .map((part, i) =>
-    i === 0 ? part : part[0].toUpperCase() + part.slice(1),
-  )
+  .map((part, i) => (i === 0 ? part : part[0].toUpperCase() + part.slice(1)))
   .join("");
 const manifestVar = `${camel}Manifest`;
 

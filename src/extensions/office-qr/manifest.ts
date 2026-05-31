@@ -8,9 +8,7 @@ const OfficeHomeRoute = createLazyRoute(
 const OfficeLayoutRoute = createLazyRoute(
   () => import("./pages/layout/OfficeLayoutPage"),
 );
-const OfficeQrRoute = createLazyRoute(
-  () => import("./pages/qr/OfficeQrPage"),
-);
+const OfficeQrRoute = createLazyRoute(() => import("./pages/qr/OfficeQrPage"));
 const OfficeQrRegisterRoute = createLazyRoute(
   () => import("./pages/qr-register/OfficeQrRegisterPage"),
 );

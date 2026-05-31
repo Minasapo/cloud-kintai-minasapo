@@ -3,12 +3,9 @@ import { wrapWithMuiXDateProvider } from "@/router/wrapWithMuiXDateProvider";
 
 import type { ExtensionManifest } from "../_types";
 
-const DailyReportRoute = createLazyRoute(
-  () => import("./pages/DailyReport"),
-  {
-    wrap: wrapWithMuiXDateProvider,
-  },
-);
+const DailyReportRoute = createLazyRoute(() => import("./pages/DailyReport"), {
+  wrap: wrapWithMuiXDateProvider,
+});
 
 const AdminDailyReportRoute = createLazyRoute(
   () => import("./admin/AdminDailyReport"),

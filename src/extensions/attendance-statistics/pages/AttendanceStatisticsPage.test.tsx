@@ -25,7 +25,10 @@ function renderPage(enabled: boolean) {
           getOfficeMode: jest.fn(() => false),
           getAttendanceStatisticsEnabled: jest.fn(() => enabled),
           getWorkflowNotificationEnabled: jest.fn(() => false),
-          getTimeRecorderAnnouncement: jest.fn(() => ({ enabled: false, message: "" })),
+          getTimeRecorderAnnouncement: jest.fn(() => ({
+            enabled: false,
+            message: "",
+          })),
           getShiftCollaborativeEnabled: jest.fn(() => false),
           getShiftDefaultMode: jest.fn(() => "normal"),
           getQuickInputStartTimes: jest.fn(() => []),
@@ -48,8 +51,14 @@ function renderPage(enabled: boolean) {
         }}
       >
         <Routes>
-          <Route path="/attendance/stats" element={<AttendanceStatisticsPage />} />
-          <Route path="/attendance/list" element={<div>attendance list page</div>} />
+          <Route
+            path="/attendance/stats"
+            element={<AttendanceStatisticsPage />}
+          />
+          <Route
+            path="/attendance/list"
+            element={<div>attendance list page</div>}
+          />
         </Routes>
       </AppConfigContext.Provider>
     </MemoryRouter>,
