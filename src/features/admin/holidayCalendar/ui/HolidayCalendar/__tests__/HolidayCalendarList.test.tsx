@@ -11,6 +11,7 @@
  * - フィルタークリア
  * - ページネーション
  */
+import { cancelInDialog, confirmInDialog } from "@shared/test-utils";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
@@ -247,19 +248,11 @@ function renderComponent() {
 // ── Tests ──────────────────────────────────────────────────────────────────
 
 // ConfirmDialog 内の「削除」ボタン (確認ボタン) を取得
-async function clickConfirmDelete(user: ReturnType<typeof userEvent.setup>) {
-  const dialog = await screen.findByRole("dialog");
-  const confirmButton = within(dialog).getByRole("button", { name: "削除" });
-  await user.click(confirmButton);
-}
+const clickConfirmDelete = (user: ReturnType<typeof userEvent.setup>) =>
+  confirmInDialog(user, "削除");
 
-async function clickConfirmCancel(user: ReturnType<typeof userEvent.setup>) {
-  const dialog = await screen.findByRole("dialog");
-  const cancelButton = within(dialog).getByRole("button", {
-    name: "キャンセル",
-  });
-  await user.click(cancelButton);
-}
+const clickConfirmCancel = (user: ReturnType<typeof userEvent.setup>) =>
+  cancelInDialog(user);
 
 describe("HolidayCalendarList", () => {
   beforeEach(() => {

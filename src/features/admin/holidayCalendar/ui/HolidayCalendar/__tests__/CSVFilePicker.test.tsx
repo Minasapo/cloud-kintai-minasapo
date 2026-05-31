@@ -1,4 +1,5 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { cancelInDialog, confirmInDialog } from "@shared/test-utils";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import {
@@ -64,21 +65,8 @@ describe("HolidayCalendar CSVFilePicker", () => {
     jest.restoreAllMocks();
   });
 
-  async function confirmRegister() {
-    const dialogs = await screen.findAllByRole("dialog");
-    const confirmDialog = dialogs[dialogs.length - 1];
-    await userEvent.click(
-      within(confirmDialog).getByRole("button", { name: "登録" }),
-    );
-  }
-
-  async function cancelRegister() {
-    const dialogs = await screen.findAllByRole("dialog");
-    const confirmDialog = dialogs[dialogs.length - 1];
-    await userEvent.click(
-      within(confirmDialog).getByRole("button", { name: "キャンセル" }),
-    );
-  }
+  const confirmRegister = () => confirmInDialog(userEvent.setup(), "登録");
+  const cancelRegister = () => cancelInDialog(userEvent.setup());
 
   it("ダイアログを開いてファイル選択できる", async () => {
     renderComponent();

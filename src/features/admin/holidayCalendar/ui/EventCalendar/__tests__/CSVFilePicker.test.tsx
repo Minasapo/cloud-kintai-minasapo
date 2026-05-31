@@ -13,7 +13,8 @@
  * - isSubmitting 中のボタン disabled
  * - キャンセルボタンでダイアログが閉じる
  */
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { cancelInDialog, confirmInDialog } from "@shared/test-utils";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import {
@@ -66,19 +67,11 @@ async function openDialog() {
   return openFileBulkAddDialog();
 }
 
-async function confirmRegister(user: ReturnType<typeof userEvent.setup>) {
-  const dialogs = await screen.findAllByRole("dialog");
-  const confirmDialog = dialogs[dialogs.length - 1];
-  await user.click(within(confirmDialog).getByRole("button", { name: "登録" }));
-}
+const confirmRegister = (user: ReturnType<typeof userEvent.setup>) =>
+  confirmInDialog(user, "登録");
 
-async function cancelRegister(user: ReturnType<typeof userEvent.setup>) {
-  const dialogs = await screen.findAllByRole("dialog");
-  const confirmDialog = dialogs[dialogs.length - 1];
-  await user.click(
-    within(confirmDialog).getByRole("button", { name: "キャンセル" }),
-  );
-}
+const cancelRegister = (user: ReturnType<typeof userEvent.setup>) =>
+  cancelInDialog(user);
 
 // ── Tests ──────────────────────────────────────────────────────────────────
 
