@@ -1,4 +1,4 @@
-import { TextField } from "@mui/material";
+import { AppTextField } from "@shared/ui/form";
 import type { FieldValues, Path, UseFormRegister } from "react-hook-form";
 
 type StaffNameTableCellProps<TFieldValues extends FieldValues> = {
@@ -13,7 +13,7 @@ export function StaffNameTableCell<TFieldValues extends FieldValues>({
   return (
     <td className={VALUE_CELL_CLASS}>
       <div className="flex flex-col gap-2 sm:flex-row">
-        <TextField
+        <AppTextField
           {...register("familyName" as Path<TFieldValues>, {
             required: true,
           })}
@@ -21,7 +21,7 @@ export function StaffNameTableCell<TFieldValues extends FieldValues>({
           label="姓"
           sx={{ width: { xs: "100%", sm: 200 } }}
         />
-        <TextField
+        <AppTextField
           {...register("givenName" as Path<TFieldValues>, {
             required: true,
           })}
