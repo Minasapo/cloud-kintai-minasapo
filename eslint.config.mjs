@@ -218,6 +218,31 @@ export default [
     },
   },
   {
+    // Discourage hard-coded hex color literals; prefer designTokenVar() from
+    // src/shared/designSystem. Existing occurrences should be migrated
+    // incrementally — kept as a warning (not error) to avoid blocking CI.
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: [
+      "src/shared/designSystem/**",
+      "src/**/*.test.{ts,tsx}",
+      "src/**/*.spec.{ts,tsx}",
+      "src/__tests__/**",
+      "src/**/__tests__/**",
+      "src/ui-components/**",
+    ],
+    rules: {
+      "no-restricted-syntax": [
+        "warn",
+        {
+          selector:
+            "Literal[value=/^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
+          message:
+            "Avoid hard-coded hex color literals. Use designTokenVar() from @shared/designSystem instead.",
+        },
+      ],
+    },
+  },
+  {
     files: [
       "src/shared/ui/button/AppButton.tsx",
       "src/shared/ui/button/AppIconButton.tsx",
