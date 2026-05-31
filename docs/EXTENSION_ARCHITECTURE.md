@@ -143,13 +143,13 @@ export const extensionManifests = [sampleManifest] as const;
 
 ## 移設済み拡張
 
-| 拡張名 | 移設元 | enabledKey | manifest |
-|---|---|---|---|
-| `attendance-statistics` | `src/pages/attendance/statistics/`, `src/features/attendance/statistics/` | `attendanceStatisticsEnabled` | ✅ |
-| `workflow-notification` | `src/pages/notifications/WorkflowNotificationsPage.tsx` | `workflowNotificationEnabled` | ✅（page のみ。Header ボタン・inbox hook 等は core 残置） |
-| `daily-report` | `src/pages/attendance/daily-report/`, `src/features/attendance/daily-report/`, `src/pages/admin/AdminDailyReport/` | （フラグなし、常時有効） | ✅ |
-| `shift-collaborative` | `src/pages/shift/collaborative/`, `src/features/shift/collaborative/` | `shiftCollaborativeEnabled` | ❌（route 登録は core 残置。ファイル配置のみ extension 化） |
-| `office-qr` | `src/pages/office/`, `src/features/attendance/office-{layout,qr,qr-register}/`, `src/processes/office-access/` | `officeMode` | ✅ |
+| 拡張名                  | 移設元                                                                                                             | enabledKey                    | manifest                                                   |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------- | ---------------------------------------------------------- |
+| `attendance-statistics` | `src/pages/attendance/statistics/`, `src/features/attendance/statistics/`                                          | `attendanceStatisticsEnabled` | ✅                                                          |
+| `workflow-notification` | `src/pages/notifications/WorkflowNotificationsPage.tsx`                                                            | `workflowNotificationEnabled` | ✅（page のみ。Header ボタン・inbox hook 等は core 残置）   |
+| `daily-report`          | `src/pages/attendance/daily-report/`, `src/features/attendance/daily-report/`, `src/pages/admin/AdminDailyReport/` | （フラグなし、常時有効）      | ✅                                                          |
+| `shift-collaborative`   | `src/pages/shift/collaborative/`, `src/features/shift/collaborative/`                                              | `shiftCollaborativeEnabled`   | ❌（route 登録は core 残置。ファイル配置のみ extension 化） |
+| `office-qr`             | `src/pages/office/`, `src/features/attendance/office-{layout,qr,qr-register}/`, `src/processes/office-access/`     | `officeMode`                  | ✅                                                          |
 
 ---
 
