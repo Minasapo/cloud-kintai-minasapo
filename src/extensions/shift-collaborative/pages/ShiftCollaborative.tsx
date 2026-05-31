@@ -1,15 +1,14 @@
 import { AuthContext } from "@app/providers/auth/AuthContext";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import { ShiftCollaborativePageInner } from "@extensions/shift-collaborative/features/components/ShiftCollaborativePageInner";
+import { InfoBadge } from "@extensions/shift-collaborative/features/components/ui/Badges";
+import { InlineAlert } from "@extensions/shift-collaborative/features/components/ui/InlineAlert";
+import { PageLoadingBar } from "@extensions/shift-collaborative/features/components/ui/PageLoadingBar";
+import { CollaborativeShiftProvider } from "@extensions/shift-collaborative/features/providers/CollaborativeShiftProvider";
 import { PageContent } from "@shared/ui/layout";
 import Page from "@shared/ui/page/Page";
 import dayjs from "dayjs";
 import { useCallback, useContext, useMemo, useState } from "react";
-
-import { ShiftCollaborativePageInner } from "../../../features/shift/collaborative/components/ShiftCollaborativePageInner";
-import { InfoBadge } from "../../../features/shift/collaborative/components/ui/Badges";
-import { InlineAlert } from "../../../features/shift/collaborative/components/ui/InlineAlert";
-import { PageLoadingBar } from "../../../features/shift/collaborative/components/ui/PageLoadingBar";
-import { CollaborativeShiftProvider } from "../../../features/shift/collaborative/providers/CollaborativeShiftProvider";
 
 export default function ShiftCollaborativePage() {
   const { authStatus, cognitoUser } = useContext(AuthContext);

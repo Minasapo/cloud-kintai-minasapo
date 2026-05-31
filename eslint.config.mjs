@@ -289,6 +289,8 @@ export default [
       "src/app/providers/AppRootProviders.tsx",
       "src/widgets/layout/header/NavigationMenu.tsx",
       "src/features/admin/layout/model/adminSplitPanelRegistry.ts",
+      "src/pages/shift/management/index.tsx",
+      "src/pages/shift/request/index.tsx",
       "src/**/*.test.{ts,tsx}",
       "src/**/*.spec.{ts,tsx}",
       "src/__tests__/**",

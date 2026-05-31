@@ -82,7 +82,7 @@ const ShiftRequestRoute = createLazyRoute(
   () => import("./pages/shift/request"),
 );
 const ShiftCollaborativeRoute = createLazyRoute(
-  () => import("./pages/shift/collaborative"),
+  () => import("@extensions/shift-collaborative/pages"),
 );
 const WorkflowDetailRoute = createLazyRoute(
   () => import("./pages/workflow/detail/WorkflowDetail"),

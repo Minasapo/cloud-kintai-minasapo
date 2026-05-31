@@ -24,7 +24,7 @@ jest.mock("@entities/staff/model/useStaffs/useStaffs", () => {
   };
 });
 
-jest.mock("@/pages/shift/collaborative/ShiftCollaborative", () => ({
+jest.mock("@extensions/shift-collaborative/pages/ShiftCollaborative", () => ({
   __esModule: true,
   default: () => <div>shift-collaborative-page</div>,
 }));
