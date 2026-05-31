@@ -15,6 +15,22 @@ jest.mock("../../hooks/useShiftComments", () => ({
 }));
 
 jest.mock("@shared/ui/button", () => ({
+  /* eslint-disable react/prop-types */
+  AppButton: ({
+    children,
+    onClick,
+    disabled,
+    ...rest
+  }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    tone?: string;
+    variant?: string;
+    size?: string;
+    startIcon?: React.ReactNode;
+  }) => (
+    <button type="button" onClick={onClick} disabled={disabled} {...rest}>
+      {children}
+    </button>
+  ),
   AppIconButton: ({
     children,
     "aria-label": ariaLabel,
