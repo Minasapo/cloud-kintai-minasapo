@@ -1,5 +1,6 @@
 import type { ExtensionManifest } from "./_types";
 import { attendanceStatisticsManifest } from "./attendance-statistics/manifest";
+import { dailyReportManifest } from "./daily-report/manifest";
 import { workflowNotificationManifest } from "./workflow-notification/manifest";
 
 /**
@@ -9,6 +10,7 @@ import { workflowNotificationManifest } from "./workflow-notification/manifest";
  */
 export const extensionManifests: ReadonlyArray<ExtensionManifest> = [
   attendanceStatisticsManifest,
+  dailyReportManifest,
   workflowNotificationManifest,
 ];
 

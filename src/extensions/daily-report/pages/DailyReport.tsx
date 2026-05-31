@@ -2,7 +2,7 @@ import "./styles.scss";
 
 import {
   DailyReportCalendar,
-} from "@features/attendance/daily-report";
+} from "@extensions/daily-report/features";
 import { useAppNotification } from "@shared/lib/useAppNotification";
 import {
   DashboardInnerSurface,

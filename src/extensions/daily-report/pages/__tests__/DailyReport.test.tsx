@@ -46,7 +46,7 @@ jest.mock("@shared/lib/useAppNotification", () => ({
 }));
 
 jest.mock(
-  "@features/attendance/daily-report/lib/sendDailyReportSubmissionNotification",
+  "@extensions/daily-report/features/lib/sendDailyReportSubmissionNotification",
   () => ({
     sendDailyReportSubmissionNotification: jest
       .fn()
@@ -59,7 +59,7 @@ jest.mock("@entities/operation-log/model/dailyReportOperationLog", () => ({
 }));
 
 // Stub heavy sub-components to isolate DailyReport logic
-jest.mock("@features/attendance/daily-report", () => ({
+jest.mock("@extensions/daily-report/features", () => ({
   DailyReportCalendar: ({
     onChange,
   }: {
@@ -284,7 +284,7 @@ beforeEach(() => {
   logDailyReportMutation.mockResolvedValue(undefined);
 
   const { sendDailyReportSubmissionNotification } = jest.requireMock(
-    "@features/attendance/daily-report/lib/sendDailyReportSubmissionNotification",
+    "@extensions/daily-report/features/lib/sendDailyReportSubmissionNotification",
   ) as { sendDailyReportSubmissionNotification: jest.Mock };
   sendDailyReportSubmissionNotification.mockResolvedValue(undefined);
 

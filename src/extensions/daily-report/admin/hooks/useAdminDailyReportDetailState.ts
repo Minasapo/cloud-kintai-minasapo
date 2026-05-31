@@ -6,7 +6,7 @@ import {
 import useCognitoUser from "@entities/staff/model/useCognitoUser";
 import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import { sendDailyReportCommentNotification } from "@features/attendance/daily-report/lib/sendDailyReportCommentNotification";
+import { sendDailyReportCommentNotification } from "@extensions/daily-report/features/lib/sendDailyReportCommentNotification";
 import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { getDailyReport } from "@shared/api/graphql/documents/queries";
 import type {

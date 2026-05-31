@@ -8,7 +8,7 @@ const AdminAttendanceComponent = lazy(
   () => import("@/pages/admin/AdminAttendance"),
 );
 const AdminDailyReportComponent = lazy(
-  () => import("@/pages/admin/AdminDailyReport/AdminDailyReport"),
+  () => import("@extensions/daily-report/admin/AdminDailyReport"),
 );
 const AdminStaffComponent = lazy(
   () => import("@/features/admin/staff/ui/AdminStaff"),

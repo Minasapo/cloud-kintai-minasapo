@@ -8,7 +8,7 @@ import {
 import type { AdminDailyReport } from "../data";
 
 jest.mock(
-  "@features/attendance/daily-report/lib/sendDailyReportCommentNotification",
+  "@extensions/daily-report/features/lib/sendDailyReportCommentNotification",
   () => ({
     sendDailyReportCommentNotification: jest.fn(),
   }),

@@ -1,4 +1,3 @@
-import { lazy, type ReactNode,Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 
 import {
@@ -11,7 +10,7 @@ import Layout from "./Layout";
 import { adminChildRoutes } from "./router/adminChildRoutes";
 import { createLazyRoute } from "./router/lazyRoute";
 import RouteErrorBoundary from "./router/RouteErrorBoundary";
-import RouterFallback from "./shared/ui/feedback/RouterFallback";
+import { wrapWithMuiXDateProvider } from "./router/wrapWithMuiXDateProvider";
 
 const loadAdminDashboardLoader = async () =>
   (await import("./router/loaders/adminDashboardLoader")).adminDashboardLoader();
@@ -36,16 +35,6 @@ const loadWorkflowEditLoader = async (args: Parameters<
 const loadWorkflowListLoader = async () =>
   (await import("./router/loaders/workflowListLoader")).workflowListLoader();
 
-const LazyMuiXDateProvider = lazy(
-  () => import("./shared/providers/MuiXDateProvider"),
-);
-
-const wrapWithMuiXDateProvider = (node: ReactNode) => (
-  <Suspense fallback={<RouterFallback />}>
-    <LazyMuiXDateProvider>{node}</LazyMuiXDateProvider>
-  </Suspense>
-);
-
 const AdminLayoutRoute = createLazyRoute(
   () => import("./pages/admin/AdminLayout"),
 );
@@ -54,12 +43,6 @@ const AdminDashboardRoute = createLazyRoute(
 );
 const AdminGuardRoute = createLazyRoute(
   () => import("./pages/admin/AdminGuard"),
-  {
-    wrap: wrapWithMuiXDateProvider,
-  },
-);
-const DailyReportRoute = createLazyRoute(
-  () => import("./pages/attendance/daily-report/DailyReport"),
   {
     wrap: wrapWithMuiXDateProvider,
   },
@@ -150,10 +133,6 @@ const router = createBrowserRouter([
             path: "list",
             lazy: AttendanceListRoute,
             loader: loadAttendanceListLoader,
-          },
-          {
-            path: "report",
-            lazy: DailyReportRoute,
           },
           {
             path: ":targetWorkDate/edit",

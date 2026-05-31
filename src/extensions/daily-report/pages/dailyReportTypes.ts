@@ -1,4 +1,4 @@
-import type { DailyReportFormData } from "@features/attendance/daily-report";
+import type { DailyReportFormData } from "@extensions/daily-report/features";
 import type {
   DailyReportReactionType,
   DailyReportStatus,

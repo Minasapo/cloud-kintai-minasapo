@@ -1,7 +1,7 @@
 import {
   DailyReportFormChangeHandler,
   DailyReportFormFields,
-} from "@features/attendance/daily-report";
+} from "@extensions/daily-report/features";
 import { SubsectionTitle } from "@shared/ui/typography";
 import { type FormEvent } from "react";
 

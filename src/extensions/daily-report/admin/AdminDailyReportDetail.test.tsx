@@ -35,7 +35,7 @@ jest.mock("@entities/staff/model/useCognitoUser", () => ({
   default: (...args: unknown[]) => cognitoUserHookMock(...args),
 }));
 
-jest.mock("@/features/attendance/daily-report/lib/sendDailyReportCommentNotification", () => ({
+jest.mock("@extensions/daily-report/features/lib/sendDailyReportCommentNotification", () => ({
   sendDailyReportCommentNotification: jest.fn().mockResolvedValue(undefined),
 }));
 

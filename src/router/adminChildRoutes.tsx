@@ -34,13 +34,6 @@ const TimeRecorderAnnouncementRoute = createLazyRoute(
 const ReasonsRoute = createLazyRoute(
   () => import("@/features/admin/configManagement/ui/Reasons"),
 );
-const AdminDailyReportDetailRoute = createLazyRoute(
-  () =>
-    import("../pages/admin/AdminDailyReport/AdminDailyReportDetail"),
-);
-const AdminDailyReportRoute = createLazyRoute(
-  () => import("../pages/admin/AdminDailyReport/AdminDailyReport"),
-);
 const AdminHolidayCalendarRoute = createLazyRoute(
   () =>
     import("@/features/admin/holidayCalendar/ui/HolidayCalendar/AdminHolidayCalendar"),
@@ -265,23 +258,6 @@ export const adminChildRoutes: RouteObject[] = [
   {
     path: "logs",
     lazy: AdminLogsRoute,
-  },
-  {
-    path: "daily-report",
-    children: [
-      {
-        index: true,
-        lazy: AdminDailyReportRoute,
-      },
-      {
-        path: ":id",
-        lazy: AdminDailyReportDetailRoute,
-      },
-      {
-        path: "*",
-        lazy: NotFoundRoute,
-      },
-    ],
   },
   {
     path: "*",

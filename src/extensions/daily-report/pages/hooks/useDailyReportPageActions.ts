@@ -1,6 +1,6 @@
 import { logDailyReportMutation } from "@entities/operation-log/model/dailyReportOperationLog";
 import type { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
-import { sendDailyReportSubmissionNotification } from "@features/attendance/daily-report/lib/sendDailyReportSubmissionNotification";
+import { sendDailyReportSubmissionNotification } from "@extensions/daily-report/features/lib/sendDailyReportSubmissionNotification";
 import { DailyReportStatus } from "@shared/api/graphql/types";
 import { createLogger } from "@shared/lib/logger";
 import { useAppNotification } from "@shared/lib/useAppNotification";

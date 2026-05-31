@@ -2,7 +2,7 @@ import {
   logDailyReportCommentAdd,
   logDailyReportReactionUpdate,
 } from "@entities/operation-log/model/dailyReportOperationLog";
-import { sendDailyReportCommentNotification } from "@features/attendance/daily-report/lib/sendDailyReportCommentNotification";
+import { sendDailyReportCommentNotification } from "@extensions/daily-report/features/lib/sendDailyReportCommentNotification";
 import { createLogger } from "@shared/lib/logger";
 import { useEffect, useState } from "react";
 

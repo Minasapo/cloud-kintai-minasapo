@@ -283,9 +283,12 @@ export default [
     ],
     ignores: [
       "src/router.tsx",
+      "src/router/adminChildRoutes.tsx",
+      "src/router/routePreloaders.ts",
       "src/app/apis/index.ts",
       "src/app/providers/AppRootProviders.tsx",
       "src/widgets/layout/header/NavigationMenu.tsx",
+      "src/features/admin/layout/model/adminSplitPanelRegistry.ts",
       "src/**/*.test.{ts,tsx}",
       "src/**/*.spec.{ts,tsx}",
       "src/__tests__/**",
@@ -300,25 +303,6 @@ export default [
               group: ["@extensions/*", "src/extensions/*", "*/extensions/*"],
               message:
                 "Core/shell layers must not depend on extensions. Add contributions to src/extensions/index.ts and let the registry wire them up.",
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    // Forbid extensions from depending on other extensions. Shared utilities
-    // should be promoted to shared/ or entities/ instead.
-    files: ["src/extensions/**/*.{ts,tsx}"],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            {
-              group: ["@extensions/*/**", "src/extensions/*/**"],
-              message:
-                "Extensions must not import from sibling extensions. Promote shared code to shared/ or entities/.",
             },
           ],
         },

@@ -33,7 +33,7 @@ jest.mock("@entities/operation-log/model/dailyReportOperationLog", () => ({
 }));
 
 jest.mock(
-  "@features/attendance/daily-report/lib/sendDailyReportCommentNotification",
+  "@extensions/daily-report/features/lib/sendDailyReportCommentNotification",
   () => ({
     sendDailyReportCommentNotification: jest.fn().mockResolvedValue(undefined),
   }),

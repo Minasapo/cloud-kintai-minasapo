@@ -1,7 +1,7 @@
 import {
   DailyReportFormChangeHandler,
   DailyReportFormFields,
-} from "@features/attendance/daily-report";
+} from "@extensions/daily-report/features";
 import { DailyReportStatus } from "@shared/api/graphql/types";
 import {
   formatDateTimeReadable,
