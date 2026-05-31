@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import React from "react";
 
 import type { CellComment } from "../../types/collaborative.types";
 import { CellCommentDialog } from "../CellCommentDialog";
@@ -14,9 +13,11 @@ jest.mock("../../hooks/useShiftComments", () => ({
   }),
 }));
 
-jest.mock("@shared/ui/button", () =>
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  require("@shared/test-utils/mocks/sharedUiButton").sharedUiButtonMock,
+jest.mock(
+  "@shared/ui/button",
+  () =>
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require("@shared/test-utils/mocks/sharedUiButton").sharedUiButtonMock,
 );
 
 // ----------------------------------------------------------------
