@@ -37,11 +37,11 @@ const shiftStateConfig: Record<
   ShiftState,
   { label: string; color: string; text: string }
 > = {
-  work: { label: "○", color: "#4caf50", text: "出勤" },
-  fixedOff: { label: "固", color: "#f44336", text: "固定休" },
-  requestedOff: { label: "希", color: "#ff9800", text: "希望休" },
-  auto: { label: "△", color: "#2196f3", text: "自動調整枠" },
-  empty: { label: "-", color: "#9e9e9e", text: "未入力" },
+  work: { label: "○", color: "rgb(76 175 80)", text: "出勤" },
+  fixedOff: { label: "固", color: "rgb(244 67 54)", text: "固定休" },
+  requestedOff: { label: "希", color: "rgb(255 152 0)", text: "希望休" },
+  auto: { label: "△", color: "rgb(33 150 243)", text: "自動調整枠" },
+  empty: { label: "-", color: "rgb(158 158 158)", text: "未入力" },
 };
 
 /**
@@ -101,7 +101,7 @@ const PrintableShiftTableComponent = ({
         <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
           シフト調整表
         </Typography>
-        <Typography variant="body2" sx={{ color: "#666" }}>
+        <Typography variant="body2" sx={{ color: "rgb(102 102 102)" }}>
           {dayjs(targetMonth).format("YYYY年M月")}
         </Typography>
       </Box>
@@ -111,16 +111,16 @@ const PrintableShiftTableComponent = ({
         <Table
           sx={{
             borderCollapse: "collapse",
-            border: "1px solid #333",
+            border: "1px solid rgb(51 51 51)",
             fontSize: "12px",
             width: "100%",
           }}
         >
           <TableHead>
-            <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+            <TableRow sx={{ bgcolor: "rgb(245 245 245)" }}>
               <TableCell
                 sx={{
-                  border: "1px solid #ccc",
+                  border: "1px solid rgb(204 204 204)",
                   padding: "8px",
                   fontWeight: "bold",
                   textAlign: "center",
@@ -134,7 +134,7 @@ const PrintableShiftTableComponent = ({
                 <TableCell
                   key={day.format("YYYY-MM-DD")}
                   sx={{
-                    border: "1px solid #ccc",
+                    border: "1px solid rgb(204 204 204)",
                     padding: "4px",
                     fontWeight: "bold",
                     textAlign: "center",
@@ -142,12 +142,12 @@ const PrintableShiftTableComponent = ({
                     whiteSpace: "nowrap",
                     backgroundColor:
                       day.day() === 0 || day.day() === 6
-                        ? "#ffe0e0"
+                        ? "rgb(255 224 224)"
                         : undefined,
                   }}
                 >
                   <Box sx={{ fontSize: "10px" }}>{day.format("D")}</Box>
-                  <Box sx={{ fontSize: "9px", color: "#666" }}>
+                  <Box sx={{ fontSize: "9px", color: "rgb(102 102 102)" }}>
                     ({getWeekday(day)})
                   </Box>
                 </TableCell>
@@ -159,7 +159,7 @@ const PrintableShiftTableComponent = ({
               <TableRow key={staff.id}>
                 <TableCell
                   sx={{
-                    border: "1px solid #ccc",
+                    border: "1px solid rgb(204 204 204)",
                     padding: "8px",
                     fontWeight: "500",
                     textAlign: "left",
@@ -179,7 +179,7 @@ const PrintableShiftTableComponent = ({
                     <TableCell
                       key={`${staff.id}-${dayKey}`}
                       sx={{
-                        border: "1px solid #ccc",
+                        border: "1px solid rgb(204 204 204)",
                         padding: "4px",
                         textAlign: "center",
                         width: "32px",
@@ -201,7 +201,11 @@ const PrintableShiftTableComponent = ({
 
       {/* 凡例 */}
       <Box
-        sx={{ pageBreakInside: "avoid", borderTop: "1px solid #ccc", pt: 2 }}
+        sx={{
+          pageBreakInside: "avoid",
+          borderTop: "1px solid rgb(204 204 204)",
+          pt: 2,
+        }}
       >
         <Typography variant="body2" sx={{ fontWeight: "bold", mb: 1 }}>
           凡例
@@ -244,10 +248,10 @@ const PrintableShiftTableComponent = ({
       <Box
         sx={{
           pageBreakInside: "avoid",
-          borderTop: "1px solid #ccc",
+          borderTop: "1px solid rgb(204 204 204)",
           pt: 2,
           fontSize: "10px",
-          color: "#999",
+          color: "rgb(153 153 153)",
           textAlign: "right",
         }}
       >

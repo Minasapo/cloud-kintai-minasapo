@@ -11,7 +11,8 @@ import {
   List,
   ListItem,
   ListItemText,
-  Stack,  Typography,
+  Stack,
+  Typography,
 } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
 import { AppTextField } from "@shared/ui/form";
@@ -47,13 +48,14 @@ const SHIFT_STATE_LABELS: Record<ShiftState, string> = {
 const formatShiftState = (state?: ShiftState) =>
   state ? SHIFT_STATE_LABELS[state] : "未設定";
 
-const stateOptions: Array<{ state: ShiftState; label: string; color: string }> = [
-  { state: "work", label: "出勤", color: "#4caf50" },
-  { state: "requestedOff", label: "希望休", color: "#ff9800" },
-  { state: "fixedOff", label: "固定休", color: "#f44336" },
-  { state: "auto", label: "自動調整", color: "#2196f3" },
-  { state: "empty", label: "未入力", color: "#9e9e9e" },
-];
+const stateOptions: Array<{ state: ShiftState; label: string; color: string }> =
+  [
+    { state: "work", label: "出勤", color: "rgb(76 175 80)" },
+    { state: "requestedOff", label: "希望休", color: "rgb(255 152 0)" },
+    { state: "fixedOff", label: "固定休", color: "rgb(244 67 54)" },
+    { state: "auto", label: "自動調整", color: "rgb(33 150 243)" },
+    { state: "empty", label: "未入力", color: "rgb(158 158 158)" },
+  ];
 
 interface CellEditLockSectionProps {
   cellEditLockHolders: EditLockHolder[];
@@ -240,7 +242,9 @@ export const CellCommentsSection = ({
           />
           <AppButton
             variant="solid"
-            startIcon={isAddingComment ? <CircularProgress size={16} /> : <MessageIcon />}
+            startIcon={
+              isAddingComment ? <CircularProgress size={16} /> : <MessageIcon />
+            }
             onClick={onAddComment}
             disabled={!commentText.trim() || isAddingComment || isUpdating}
             size="sm"
@@ -263,12 +267,20 @@ export const CellCommentsSection = ({
             borderColor: "divider",
           }}
         >
-          <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            display="block"
+            mb={1}
+          >
             {comments.length}件のコメント
           </Typography>
           <Stack spacing={1.5}>
             {comments.map((comment, index) => (
-              <Box key={`${comment.id}-${comment.createdAt}-${index}`} sx={{ display: "flex", gap: 1 }}>
+              <Box
+                key={`${comment.id}-${comment.createdAt}-${index}`}
+                sx={{ display: "flex", gap: 1 }}
+              >
                 <Avatar
                   sx={{
                     width: 28,
@@ -344,7 +356,11 @@ export const CellHistorySection = ({
         </AppButton>
         <Collapse in={historyExpanded}>
           {cellHistory.length === 0 ? (
-            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: "block", mt: 0.5 }}
+            >
               変更履歴はありません
             </Typography>
           ) : (
@@ -353,7 +369,12 @@ export const CellHistorySection = ({
                 <ListItem key={record.id} disableGutters sx={{ py: 0.5 }}>
                   <ListItemText
                     primary={
-                      <Stack direction="row" spacing={0.5} alignItems="center" flexWrap="wrap">
+                      <Stack
+                        direction="row"
+                        spacing={0.5}
+                        alignItems="center"
+                        flexWrap="wrap"
+                      >
                         <Typography variant="caption" color="text.secondary">
                           {dayjs(record.changedAt).format("M/D HH:mm")}
                         </Typography>
@@ -370,7 +391,8 @@ export const CellHistorySection = ({
                     secondary={
                       <Stack spacing={0}>
                         <Typography variant="caption" color="text.primary">
-                          {formatShiftState(record.previousState)} → {formatShiftState(record.newState)}
+                          {formatShiftState(record.previousState)} →{" "}
+                          {formatShiftState(record.newState)}
                         </Typography>
                         <Typography variant="caption" color="text.disabled">
                           {record.changedByName || "不明"}

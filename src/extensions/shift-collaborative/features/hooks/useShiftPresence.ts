@@ -62,14 +62,14 @@ const createSessionId = () =>
  */
 const generateUserColor = (userId: string): string => {
   const colors = [
-    "#2196f3", // blue
-    "#4caf50", // green
-    "#ff9800", // orange
-    "#f44336", // red
-    "#9c27b0", // purple
-    "#00bcd4", // cyan
-    "#e91e63", // pink
-    "#673ab7", // deep purple
+    "rgb(33 150 243)", // blue
+    "rgb(76 175 80)", // green
+    "rgb(255 152 0)", // orange
+    "rgb(244 67 54)", // red
+    "rgb(156 39 176)", // purple
+    "rgb(0 188 212)", // cyan
+    "rgb(233 30 99)", // pink
+    "rgb(103 58 183)", // deep purple
   ];
   const hash = userId.split("").reduce((acc, char) => {
     return acc + char.charCodeAt(0);
@@ -85,7 +85,9 @@ const isString = (value: unknown): value is string => typeof value === "string";
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);
 
-const isPresenceEditingCell = (value: unknown): value is PresenceEditingCell => {
+const isPresenceEditingCell = (
+  value: unknown,
+): value is PresenceEditingCell => {
   if (!isRecord(value)) {
     return false;
   }
@@ -564,7 +566,11 @@ export const useShiftPresence = ({
         try {
           window.localStorage.removeItem(key);
         } catch (error) {
-          logger.error("Failed to remove invalid presence from storage:", key, error);
+          logger.error(
+            "Failed to remove invalid presence from storage:",
+            key,
+            error,
+          );
         }
       });
     } catch (error) {

@@ -20,16 +20,14 @@ export interface BuildPrintHtmlParams {
   includeTimestamp: boolean;
 }
 
-const SHIFT_STATE_CONFIG: Record<
-  ShiftState,
-  { label: string; color: string }
-> = {
-  work: { label: "○", color: "#4caf50" },
-  fixedOff: { label: "固", color: "#f44336" },
-  requestedOff: { label: "希", color: "#ff9800" },
-  auto: { label: "△", color: "#2196f3" },
-  empty: { label: "-", color: "#9e9e9e" },
-};
+const SHIFT_STATE_CONFIG: Record<ShiftState, { label: string; color: string }> =
+  {
+    work: { label: "○", color: "rgb(76 175 80)" },
+    fixedOff: { label: "固", color: "rgb(244 67 54)" },
+    requestedOff: { label: "希", color: "rgb(255 152 0)" },
+    auto: { label: "△", color: "rgb(33 150 243)" },
+    empty: { label: "-", color: "rgb(158 158 158)" },
+  };
 
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 
@@ -107,7 +105,12 @@ function buildTableBody(
 }
 
 function buildLegendHtml(): string {
-  const items = (Object.entries(SHIFT_STATE_CONFIG) as [ShiftState, { label: string; color: string }][])
+  const items = (
+    Object.entries(SHIFT_STATE_CONFIG) as [
+      ShiftState,
+      { label: string; color: string },
+    ][]
+  )
     .map(
       ([, cfg]) =>
         `<div class="legend-item">

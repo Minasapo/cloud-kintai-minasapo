@@ -2,7 +2,12 @@ import LockIcon from "@mui/icons-material/Lock";
 import { alpha } from "@mui/material/styles";
 import dayjs from "dayjs";
 import PropTypes, { type Validator } from "prop-types";
-import React, { type CSSProperties, type FC, memo, type MouseEvent } from "react";
+import React, {
+  type CSSProperties,
+  type FC,
+  memo,
+  type MouseEvent,
+} from "react";
 
 import type {
   ShiftCellEditLockOwner,
@@ -98,35 +103,37 @@ export const ShiftCellBase: FC<ShiftCellProps> = ({
     </div>
   );
 
-  const themeColor = editorColor || "#2196f3";
-  const selfEditingColor = "#2196f3";
+  const themeColor = editorColor || "rgb(33 150 243)";
+  const selfEditingColor = "rgb(33 150 243)";
 
   const backgroundColor = isLocked
     ? "rgba(148, 163, 184, 0.12)"
     : isSelfEditing
       ? alpha(selfEditingColor, 0.14)
       : isOtherEditing
-    ? alpha(themeColor, 0.1)
-    : isPending
-      ? alpha("#ff9800", 0.1)
-      : isSelected
-        ? alpha("#9c27b0", 0.15)
-        : "#ffffff";
+        ? alpha(themeColor, 0.1)
+        : isPending
+          ? alpha("rgb(255 152 0)", 0.1)
+          : isSelected
+            ? alpha("rgb(156 39 176)", 0.15)
+            : "rgb(255 255 255)";
   const borderColor = isLocked
     ? "rgba(100, 116, 139, 0.5)"
     : isSelfEditing
       ? selfEditingColor
       : isOtherEditing
-    ? themeColor
-    : isFocused
-      ? "#9c27b0"
-      : "rgba(226,232,240,0.7)";
+        ? themeColor
+        : isFocused
+          ? "rgb(156 39 176)"
+          : "rgba(226,232,240,0.7)";
 
   const editorTab =
     !isLocked && isEditing && editorName ? (
       <div
         className="absolute right-[-2px] top-[-2px] z-10 flex h-4 w-4 items-center justify-center rounded-sm text-[9px] font-bold text-white shadow-sm"
-        style={{ backgroundColor: isSelfEditing ? selfEditingColor : themeColor }}
+        style={{
+          backgroundColor: isSelfEditing ? selfEditingColor : themeColor,
+        }}
       >
         {editorName.charAt(0)}
       </div>
@@ -151,17 +158,32 @@ export const ShiftCellBase: FC<ShiftCellProps> = ({
             : "none",
       }}
       onMouseLeave={(event) => {
-        if (!isLocked && !isOtherEditing && !isSelfEditing && !isPending && !isSelected) {
-          event.currentTarget.style.backgroundColor = "#ffffff";
+        if (
+          !isLocked &&
+          !isOtherEditing &&
+          !isSelfEditing &&
+          !isPending &&
+          !isSelected
+        ) {
+          event.currentTarget.style.backgroundColor = "rgb(255 255 255)";
         }
       }}
       onMouseOver={(event) => {
-        if (!isLocked && !isOtherEditing && !isSelfEditing && !isPending && !isSelected) {
-          event.currentTarget.style.backgroundColor = alpha("#2196f3", 0.05);
+        if (
+          !isLocked &&
+          !isOtherEditing &&
+          !isSelfEditing &&
+          !isPending &&
+          !isSelected
+        ) {
+          event.currentTarget.style.backgroundColor = alpha(
+            "rgb(33 150 243)",
+            0.05,
+          );
         }
       }}
       onFocus={(event) => {
-        event.currentTarget.style.borderColor = "#9c27b0";
+        event.currentTarget.style.borderColor = "rgb(156 39 176)";
       }}
       onBlur={(event) => {
         event.currentTarget.style.borderColor = borderColor;
@@ -199,8 +221,13 @@ export const ShiftCellBase: FC<ShiftCellProps> = ({
 };
 
 ShiftCellBase.propTypes = {
-  state: PropTypes.oneOf(["work", "fixedOff", "requestedOff", "auto", "empty"] as const)
-    .isRequired as Validator<ShiftState>,
+  state: PropTypes.oneOf([
+    "work",
+    "fixedOff",
+    "requestedOff",
+    "auto",
+    "empty",
+  ] as const).isRequired as Validator<ShiftState>,
   isLocked: PropTypes.bool.isRequired,
   isEditing: PropTypes.bool.isRequired,
   editLockOwner: PropTypes.oneOf(["self", "other", null] as const) as Validator<
