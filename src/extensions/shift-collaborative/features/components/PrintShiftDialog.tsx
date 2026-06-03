@@ -226,7 +226,7 @@ const PrintShiftDialogComponent = ({
       <DialogTitle>シフト調整表を印刷</DialogTitle>
       <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {/* 印刷設定セクション */}
-        <Paper sx={{ p: 2, bgcolor: "#f5f5f5" }}>
+        <Paper sx={{ p: 2, bgcolor: "rgb(245 245 245)" }}>
           <Typography variant="subtitle2" sx={{ fontWeight: "bold", mb: 2 }}>
             印刷設定
           </Typography>

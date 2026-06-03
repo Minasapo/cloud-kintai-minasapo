@@ -99,8 +99,12 @@ export function useOfficeQrRegister() {
     }, [timestamp, token]);
     useEffect(() => {
         if (!isOfficeModeEnabled || !cognitoUser?.id) {
-            setAttendance(null);
-            return;
+            const timeoutId = window.setTimeout(() => {
+                setAttendance(null);
+            }, 0);
+            return () => {
+                window.clearTimeout(timeoutId);
+            };
         }
         let isMounted = true;
         triggerGetAttendance({ staffId: cognitoUser.id, workDate: currentWorkDate })

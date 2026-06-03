@@ -17,12 +17,12 @@ const ShiftPlanFooter: React.FC<ShiftPlanFooterProps> = ({
     <div className="flex items-center justify-between px-6 py-3">
       <div className="flex flex-col gap-1">
         {isAutoSaving && (
-          <span className="text-xs" style={{ color: "#3C7EDB" }}>
+          <span className="text-xs" style={{ color: "rgb(60 126 219)" }}>
             自動保存中...
           </span>
         )}
         {lastAutoSaveTime && !isAutoSaving && (
-          <span className="text-xs" style={{ color: "#7D9288" }}>
+          <span className="text-xs" style={{ color: "rgb(125 146 136)" }}>
             最後の自動保存: {lastAutoSaveTime}
           </span>
         )}

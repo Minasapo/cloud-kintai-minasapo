@@ -75,7 +75,7 @@ export default function AdminAttendance() {
             overflow: "visible",
             borderRadius: "24px",
             border: "1px solid rgba(226,232,240,0.8)",
-            backgroundColor: "#ffffff",
+            backgroundColor: "rgb(255 255 255)",
             boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
           }}
         >
@@ -90,7 +90,7 @@ export default function AdminAttendance() {
             zIndex: 10,
             borderRadius: "24px",
             border: "1px solid rgba(226,232,240,0.8)",
-            backgroundColor: "#ffffff",
+            backgroundColor: "rgb(255 255 255)",
             boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
           }}
         >

@@ -95,7 +95,7 @@ const ShiftCellPanelBase = ({
         zIndex: 1000,
         opacity: isUpdating ? 0.6 : 1,
         pointerEvents: isUpdating ? "none" : "auto",
-        bgcolor: "#ffffff",
+        bgcolor: "rgb(255 255 255)",
         boxShadow: "0 28px 60px -36px rgba(15,23,42,0.4)",
       }}
     >

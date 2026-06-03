@@ -21,8 +21,14 @@ export default function TimeElapsedErrorDialog({
 
   useEffect(() => {
     if (!isTimeElapsedError) {
-      setDismissed(false);
+      const timeoutId = window.setTimeout(() => {
+        setDismissed(false);
+      }, 0);
+      return () => {
+        window.clearTimeout(timeoutId);
+      };
     }
+    return undefined;
   }, [isTimeElapsedError]);
 
   const open = isTimeElapsedError && !dismissed;

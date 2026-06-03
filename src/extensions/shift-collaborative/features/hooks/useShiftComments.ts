@@ -395,7 +395,7 @@ export const useShiftComments = () => {
       cellKey: c.cellKey,
       userId: c.staffId,
       userName: c.authorName ?? "",
-      userColor: "#1976d2",
+      userColor: "rgb(25 118 210)",
       content: c.body,
       mentions: [],
       createdAt: c.createdAt,

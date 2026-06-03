@@ -96,7 +96,7 @@ export const UndoRedoToolbar: React.FC<UndoRedoToolbarProps> = ({
         borderRadius: "24px",
         border: "1px solid rgba(226,232,240,0.8)",
         boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
-        bgcolor: "#ffffff",
+        bgcolor: "rgb(255 255 255)",
       }}
     >
       <Stack direction="row" spacing={0.5} alignItems="center">

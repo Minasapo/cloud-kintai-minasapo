@@ -128,7 +128,7 @@ export const CollaborativeShiftProvider: React.FC<
     currentUserId, currentUserName, shiftRequestId, targetMonth,
   });
   const currentUserColor = useMemo(
-    () => activeUsers.find((u) => u.userId === currentUserId)?.color || "#1976d2",
+    () => activeUsers.find((u) => u.userId === currentUserId)?.color || "rgb(25 118 210)",
     [activeUsers, currentUserId],
   );
 

@@ -76,7 +76,7 @@ export function ShiftCalendarPanel({
         borderRadius: "24px",
         border: "1px solid rgba(226,232,240,0.8)",
         boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
-        bgcolor: "#ffffff",
+        bgcolor: "rgb(255 255 255)",
       }}
     >
       {isLoading && (
@@ -148,7 +148,7 @@ export function ShiftCalendarPanel({
               <Typography
                 variant="subtitle2"
                 gutterBottom
-                sx={{ color: "#475569", fontWeight: 700 }}
+                sx={{ color: "rgb(71 85 105)", fontWeight: 700 }}
               >
                 カレンダー
               </Typography>

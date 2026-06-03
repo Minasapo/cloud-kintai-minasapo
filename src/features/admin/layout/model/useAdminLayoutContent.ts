@@ -234,9 +234,9 @@ export function useAdminLayoutContent(): UseAdminLayoutContentResult {
   }, []);
 
   useEffect(() => {
-    if (!isMobile) {
-      setIsMobileRailOpen(false);
-    }
+    if (isMobile) return undefined;
+    const timeoutId = window.setTimeout(() => setIsMobileRailOpen(false), 0);
+    return () => window.clearTimeout(timeoutId);
   }, [isMobile]);
 
   useEffect(() => {

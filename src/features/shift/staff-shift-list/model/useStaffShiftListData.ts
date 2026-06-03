@@ -233,7 +233,13 @@ export const useStaffShiftListData = ({
   }, [notify, shiftRequestError, staff?.id, targetMonth]);
 
   useEffect(() => {
-    setShiftStates(buildShiftStatesFromRequest(shiftRequest));
+    const timeoutId = window.setTimeout(() => {
+      setShiftStates(buildShiftStatesFromRequest(shiftRequest));
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [
     shiftRequest?.id,
     shiftRequest?.updatedAt,

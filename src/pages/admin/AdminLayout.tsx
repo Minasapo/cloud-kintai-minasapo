@@ -27,7 +27,7 @@ const SURFACE_SECTION_SX = {
   overflow: "hidden",
   borderRadius: "16px",
   border: "1px solid rgba(226,232,240,0.8)",
-  backgroundColor: "#ffffff",
+  backgroundColor: "rgb(255 255 255)",
   boxShadow: "0 28px 60px -42px rgba(15,23,42,0.35)",
 } as const;
 
