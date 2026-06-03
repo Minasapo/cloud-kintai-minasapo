@@ -54,7 +54,10 @@ export default function CommonBreadcrumbs({
     >
       <ol className="flex flex-wrap items-center gap-[var(--breadcrumbs-gap)]">
         {items.map((item, idx) => (
-          <li key={`${item.label}-${idx}`} className="flex items-center gap-[var(--breadcrumbs-gap)]">
+          <li
+            key={`${item.label}-${idx}`}
+            className="flex items-center gap-[var(--breadcrumbs-gap)]"
+          >
             {item.href ? (
               <Link
                 href={item.href}

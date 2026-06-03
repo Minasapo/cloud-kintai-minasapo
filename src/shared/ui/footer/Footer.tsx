@@ -5,7 +5,10 @@ interface FooterProps {
   themeColor?: string;
 }
 
-const FOOTER_ACCENT = designTokenVar("component.footer.accent", "rgb(11 109 83)");
+const FOOTER_ACCENT = designTokenVar(
+  "component.footer.accent",
+  "rgb(11 109 83)",
+);
 const FOOTER_BACKGROUND = designTokenVar(
   "component.footer.background",
   "rgb(243 248 245)",
@@ -14,7 +17,10 @@ const FOOTER_BORDER = designTokenVar(
   "component.footer.borderColor",
   "rgba(15, 168, 94, 0.12)",
 );
-const FOOTER_TEXT = designTokenVar("component.footer.textColor", "rgb(69 87 79)");
+const FOOTER_TEXT = designTokenVar(
+  "component.footer.textColor",
+  "rgb(69 87 79)",
+);
 const FOOTER_MUTED_TEXT = designTokenVar(
   "component.footer.mutedTextColor",
   "rgb(94 114 106)",

@@ -11,13 +11,22 @@ interface HeaderBarProps {
   signInOutButton: ReactNode;
 }
 
-const HEADER_ACCENT = designTokenVar("component.headerBar.accent", "rgb(15 168 94)");
-const HEADER_SURFACE = designTokenVar("component.headerBar.surface", "rgb(247 252 248)");
+const HEADER_ACCENT = designTokenVar(
+  "component.headerBar.accent",
+  "rgb(15 168 94)",
+);
+const HEADER_SURFACE = designTokenVar(
+  "component.headerBar.surface",
+  "rgb(247 252 248)",
+);
 const HEADER_BORDER = designTokenVar(
   "component.headerBar.borderColor",
   "rgba(15, 168, 94, 0.14)",
 );
-const HEADER_TEXT = designTokenVar("component.headerBar.textColor", "rgb(30 42 37)");
+const HEADER_TEXT = designTokenVar(
+  "component.headerBar.textColor",
+  "rgb(30 42 37)",
+);
 const HEADER_CONTENT_MAX_WIDTH = designTokenVar(
   "component.headerBar.contentMaxWidth",
   "1280px",

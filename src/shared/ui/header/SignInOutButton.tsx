@@ -5,25 +5,31 @@ import { CSSProperties } from "react";
 const SIGN_BUTTON_GAP = designTokenVar("component.headerSignButton.gap", "8px");
 const SIGN_BUTTON_PADDING_X = designTokenVar(
   "component.headerSignButton.paddingX",
-  "20px"
+  "20px",
 );
 const SIGN_BUTTON_RADIUS = designTokenVar(
   "component.headerSignButton.borderRadius",
-  "8px"
+  "8px",
 );
 const SIGN_BUTTON_FONT_WEIGHT = designTokenVar(
   "component.headerSignButton.fontWeight",
-  "500"
+  "500",
 );
-const LOGIN_BUTTON_BG = designTokenVar("color.brand.primary.base", "rgb(15 168 94)");
+const LOGIN_BUTTON_BG = designTokenVar(
+  "color.brand.primary.base",
+  "rgb(15 168 94)",
+);
 const LOGIN_BUTTON_TEXT = designTokenVar(
   "color.brand.primary.contrastText",
-  "rgb(255 255 255)"
+  "rgb(255 255 255)",
 );
-const LOGOUT_BUTTON_BG = designTokenVar("color.feedback.danger.base", "rgb(215 68 62)");
+const LOGOUT_BUTTON_BG = designTokenVar(
+  "color.feedback.danger.base",
+  "rgb(215 68 62)",
+);
 const LOGOUT_BUTTON_TEXT = designTokenVar(
   "color.brand.primary.contrastText",
-  "rgb(255 255 255)"
+  "rgb(255 255 255)",
 );
 const SIGN_BUTTON_TEXT = designTokenVar(
   "component.headerSignButton.textColor",

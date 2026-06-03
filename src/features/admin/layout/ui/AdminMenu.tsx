@@ -48,7 +48,7 @@ const AdminMenu = ({ items, selectedHref, onSelect }: AdminMenuProps) => {
 
   const handleClick = (
     event: MouseEvent<HTMLElement>,
-    item: AdminHeaderMenuItem
+    item: AdminHeaderMenuItem,
   ) => {
     // Let modified or non-left clicks fall back to the browser so Cmd/Ctrl+Click opens a new tab.
     if (
@@ -116,7 +116,9 @@ const AdminMenu = ({ items, selectedHref, onSelect }: AdminMenuProps) => {
                       borderColor: isActive
                         ? "rgba(6,95,70,0.35)"
                         : "rgba(148,163,184,0.28)",
-                      backgroundColor: isActive ? "rgb(25 185 133)" : "rgba(255,255,255,0.72)",
+                      backgroundColor: isActive
+                        ? "rgb(25 185 133)"
+                        : "rgba(255,255,255,0.72)",
                       color: isActive ? "rgb(255 255 255)" : "rgb(15 23 42)",
                       px: { xs: 2, sm: 2.25 },
                       py: 1.15,
@@ -126,9 +128,12 @@ const AdminMenu = ({ items, selectedHref, onSelect }: AdminMenuProps) => {
                       boxShadow: isActive
                         ? "inset 0 -2px 0 rgba(0,0,0,0.12), 0 12px 24px -18px rgba(5,150,105,0.55)"
                         : "0 6px 18px -18px rgba(15,23,42,0.12)",
-                      transition: "background-color 160ms ease, border-color 160ms ease",
+                      transition:
+                        "background-color 160ms ease, border-color 160ms ease",
                       "&:hover": {
-                        backgroundColor: isActive ? "rgb(23 171 123)" : "rgba(255,255,255,1)",
+                        backgroundColor: isActive
+                          ? "rgb(23 171 123)"
+                          : "rgba(255,255,255,1)",
                       },
                     }}
                     aria-label={accessibleLabel}
@@ -150,7 +155,10 @@ const AdminMenu = ({ items, selectedHref, onSelect }: AdminMenuProps) => {
                         {item.primaryLabel}
                       </Box>
                       {item.secondaryLabel ? (
-                        <Box component="span" sx={{ fontSize: "0.85rem", mt: 0.25 }}>
+                        <Box
+                          component="span"
+                          sx={{ fontSize: "0.85rem", mt: 0.25 }}
+                        >
                           {item.secondaryLabel}
                         </Box>
                       ) : null}

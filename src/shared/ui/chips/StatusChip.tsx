@@ -10,7 +10,7 @@ type PaletteVars = {
 
 const createFeedbackPalette = (
   key: FeedbackKey,
-  defaults: PaletteVars
+  defaults: PaletteVars,
 ): PaletteVars => ({
   base: designTokenVar(`color.feedback.${key}.base`, defaults.base),
   surface: designTokenVar(`color.feedback.${key}.surface`, defaults.surface),
@@ -43,45 +43,45 @@ const FEEDBACK_COLORS: Record<FeedbackKey, PaletteVars> = {
 const FALLBACK_COLORS: PaletteVars = {
   base: designTokenVar(
     "component.workflowList.statusChip.fallback.base",
-    "rgb(69 87 79)"
+    "rgb(69 87 79)",
   ),
   surface: designTokenVar(
     "component.workflowList.statusChip.fallback.surface",
-    "rgb(237 241 239)"
+    "rgb(237 241 239)",
   ),
   border: designTokenVar(
     "component.workflowList.statusChip.fallback.border",
-    "rgba(69, 87, 79, 0.4)"
+    "rgba(69, 87, 79, 0.4)",
   ),
 };
 
 const STATUS_CHIP_BORDER_RADIUS = designTokenVar(
   "component.workflowList.statusChip.borderRadius",
-  "999px"
+  "999px",
 );
 const STATUS_CHIP_FONT_SIZE = designTokenVar(
   "component.workflowList.statusChip.fontSize",
-  "14px"
+  "14px",
 );
 const STATUS_CHIP_GAP = designTokenVar(
   "component.workflowList.statusChip.gap",
-  "4px"
+  "4px",
 );
 const STATUS_CHIP_PADDING_X = designTokenVar(
   "component.workflowList.statusChip.paddingX",
-  "8px"
+  "8px",
 );
 const STATUS_CHIP_FONT_WEIGHT = designTokenVar(
   "component.workflowList.statusChip.fontWeight",
-  "500"
+  "500",
 );
 const STATUS_CHIP_EASING = designTokenVar(
   "component.workflowList.statusChip.transitionEasing",
-  "cubic-bezier(0.2, 0.8, 0.4, 1)"
+  "cubic-bezier(0.2, 0.8, 0.4, 1)",
 );
 const STATUS_CHIP_DURATION = designTokenVar(
   "component.workflowList.statusChip.transitionMs",
-  "120ms"
+  "120ms",
 );
 
 type StatusChipProps<T extends string = string> = {
@@ -98,7 +98,8 @@ export default function StatusChip<T extends string = string>({
 }: StatusChipProps<T>) {
   const label = status != null ? (labelMap[status] ?? status) : "-";
   const feedbackKey = status != null ? colorMap[status] : undefined;
-  const palette = feedbackKey != null ? FEEDBACK_COLORS[feedbackKey] : FALLBACK_COLORS;
+  const palette =
+    feedbackKey != null ? FEEDBACK_COLORS[feedbackKey] : FALLBACK_COLORS;
 
   return (
     <span

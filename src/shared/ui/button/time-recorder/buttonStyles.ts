@@ -34,7 +34,10 @@ const ACTION_BUTTON_DISABLED_MUTED = designTokenVar(
   "rgb(148 163 184)",
 );
 
-const PRIMARY_BASE = designTokenVar("color.brand.primary.base", "rgb(15 168 94)");
+const PRIMARY_BASE = designTokenVar(
+  "color.brand.primary.base",
+  "rgb(15 168 94)",
+);
 const PRIMARY_SURFACE = designTokenVar(
   "component.timeRecorder.actionCard.primarySurface",
   "rgb(236 253 243)",
@@ -43,7 +46,10 @@ const PRIMARY_DEEP = designTokenVar(
   "component.timeRecorder.actionCard.primaryDeep",
   "rgb(4 120 87)",
 );
-const DANGER_BASE = designTokenVar("color.feedback.danger.base", "rgb(215 68 62)");
+const DANGER_BASE = designTokenVar(
+  "color.feedback.danger.base",
+  "rgb(215 68 62)",
+);
 const DANGER_SURFACE = designTokenVar(
   "component.timeRecorder.actionCard.dangerSurface",
   "rgb(254 242 242)",

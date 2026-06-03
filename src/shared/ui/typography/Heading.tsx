@@ -50,7 +50,8 @@ const getHeadingAppearanceToken = (
   appearance: HeadingAppearance,
   key: string,
   fallback: string,
-) => designTokenVar(`component.heading.appearance.${appearance}.${key}`, fallback);
+) =>
+  designTokenVar(`component.heading.appearance.${appearance}.${key}`, fallback);
 
 const buildResponsiveFontSize = (level: HeadingLevel) =>
   `clamp(${getHeadingLevelToken(level, "fontSizeMobile", "16px")}, 2.6vw, ${getHeadingLevelToken(level, "fontSizeDesktop", "18px")})`;
@@ -65,7 +66,10 @@ const getHeadingTextColor = (
   }
 
   if (contrast === "inverse") {
-    return designTokenVar("component.heading.contrast.inverse.textColor", "rgb(226 232 240)");
+    return designTokenVar(
+      "component.heading.contrast.inverse.textColor",
+      "rgb(226 232 240)",
+    );
   }
 
   if (contrast === "default") {

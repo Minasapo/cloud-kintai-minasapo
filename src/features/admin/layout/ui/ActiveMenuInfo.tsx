@@ -52,7 +52,13 @@ export function ActiveMenuInfo({
           {primaryLabel}
         </Box>
         {description ? (
-          <Box sx={{ color: "rgb(100 116 139)", lineHeight: 1.7, fontSize: "0.92rem" }}>
+          <Box
+            sx={{
+              color: "rgb(100 116 139)",
+              lineHeight: 1.7,
+              fontSize: "0.92rem",
+            }}
+          >
             {description}
           </Box>
         ) : null}
