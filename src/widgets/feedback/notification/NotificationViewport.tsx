@@ -187,16 +187,16 @@ function NotificationCard({
 }
 
 export default function NotificationViewport() {
-  const notifications = useAppSelectorV2(selectNotifications);
+  const notifications: NotificationItem[] = useAppSelectorV2(selectNotifications);
 
   if (notifications.length === 0) {
     return null;
   }
 
-  const topRightNotifications = notifications.filter(
+  const topRightNotifications: NotificationItem[] = notifications.filter(
     (item) => item.placement === "top-right",
   );
-  const bottomRightNotifications = notifications
+  const bottomRightNotifications: NotificationItem[] = notifications
     .filter((item) => item.placement === "bottom-right")
     .slice(-3);
 

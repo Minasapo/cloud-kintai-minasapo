@@ -43,16 +43,16 @@ export function ActiveMenuInfo({
             fontSize: "0.8rem",
             fontWeight: 700,
             letterSpacing: "0.04em",
-            color: "#0f766e",
+            color: "rgb(15 118 110)",
           }}
         >
           現在のカテゴリ
         </Box>
-        <Box sx={{ fontSize: "1rem", fontWeight: 700, color: "#020617" }}>
+        <Box sx={{ fontSize: "1rem", fontWeight: 700, color: "rgb(2 6 23)" }}>
           {primaryLabel}
         </Box>
         {description ? (
-          <Box sx={{ color: "#64748b", lineHeight: 1.7, fontSize: "0.92rem" }}>
+          <Box sx={{ color: "rgb(100 116 139)", lineHeight: 1.7, fontSize: "0.92rem" }}>
             {description}
           </Box>
         ) : null}
@@ -68,7 +68,7 @@ export function ActiveMenuInfo({
               py: 0.35,
               fontSize: "0.74rem",
               fontWeight: 700,
-              color: "#047857",
+              color: "rgb(4 120 87)",
             }}
           >
             {ctaLabel}

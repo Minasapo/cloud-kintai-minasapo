@@ -11,13 +11,13 @@ interface HeaderBarProps {
   signInOutButton: ReactNode;
 }
 
-const HEADER_ACCENT = designTokenVar("component.headerBar.accent", "#0FA85E");
-const HEADER_SURFACE = designTokenVar("component.headerBar.surface", "#F7FCF8");
+const HEADER_ACCENT = designTokenVar("component.headerBar.accent", "rgb(15 168 94)");
+const HEADER_SURFACE = designTokenVar("component.headerBar.surface", "rgb(247 252 248)");
 const HEADER_BORDER = designTokenVar(
   "component.headerBar.borderColor",
   "rgba(15, 168, 94, 0.14)",
 );
-const HEADER_TEXT = designTokenVar("component.headerBar.textColor", "#1E2A25");
+const HEADER_TEXT = designTokenVar("component.headerBar.textColor", "rgb(30 42 37)");
 const HEADER_CONTENT_MAX_WIDTH = designTokenVar(
   "component.headerBar.contentMaxWidth",
   "1280px",
@@ -68,15 +68,15 @@ export default function HeaderBar({
           "--header-surface": HEADER_SURFACE,
           "--header-border": HEADER_BORDER,
           "--header-text": HEADER_TEXT,
-          "--ds-component-header-menu-color": "#45574F",
-          "--ds-component-header-menu-active-color": "#065F46",
-          "--ds-component-header-menu-active-background": "#ECFDF3",
+          "--ds-component-header-menu-color": "rgb(69 87 79)",
+          "--ds-component-header-menu-active-color": "rgb(6 95 70)",
+          "--ds-component-header-menu-active-background": "rgb(236 253 243)",
           "--ds-component-header-menu-hover-background":
             "rgba(15, 168, 94, 0.1)",
-          "--ds-component-header-actions-icon-color": "#45574F",
+          "--ds-component-header-actions-icon-color": "rgb(69 87 79)",
           "--ds-component-header-actions-icon-hover-background":
             "rgba(15, 168, 94, 0.1)",
-          "--ds-component-header-sign-button-text-color": "#1E2A25",
+          "--ds-component-header-sign-button-text-color": "rgb(30 42 37)",
           "--header-content-max-width": HEADER_CONTENT_MAX_WIDTH,
           "--header-padding-x": HEADER_PADDING_X,
           "--header-padding-y": HEADER_PADDING_Y,
@@ -87,7 +87,7 @@ export default function HeaderBar({
       className="overflow-visible border-b border-[var(--header-border)] bg-[linear-gradient(180deg,rgba(15,168,94,0.16)_0%,rgba(236,253,245,0.92)_52%,rgba(248,250,249,0.88)_100%)]"
     >
       <div className="mx-auto w-full max-w-[var(--header-content-max-width)] px-2 py-2 sm:px-[var(--header-padding-x)] sm:py-[var(--header-padding-y)]">
-        <div className="rounded-[8px] border border-[var(--header-border)] bg-[linear-gradient(135deg,var(--header-surface)_0%,#ECFDF5_52%,#FFFFFF_100%)] text-[color:var(--header-text)] shadow-[0_24px_40px_-34px_rgba(15,23,42,0.26)] sm:rounded-[10px]">
+        <div className="rounded-[8px] border border-[var(--header-border)] bg-[linear-gradient(135deg,var(--header-surface)_0%,rgb(236_253_245)_52%,rgb(255_255_255)_100%)] text-[color:var(--header-text)] shadow-[0_24px_40px_-34px_rgba(15,23,42,0.26)] sm:rounded-[10px]">
           <div className="px-2.5 py-2 sm:px-[var(--header-inner-padding-x)] sm:py-[var(--header-inner-padding-y)]">
             <div className="mb-2 flex min-w-0 items-center justify-between gap-2 lg:hidden">
               <div className="flex min-w-0 max-w-[min(52vw,180px)] items-center overflow-hidden">

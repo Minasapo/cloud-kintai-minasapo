@@ -1,8 +1,18 @@
+import { Logger } from "@shared/lib/logger";
 import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
 
-import { type UseAttendanceEditorHandlersProps } from "./common";
 import { useAttendanceGoDirectlyHandler } from "./useAttendanceGoDirectlyHandler";
 import { useAttendanceHolidayHandlers } from "./useAttendanceHolidayHandlers";
+
+type UseAttendanceEditorHandlersProps = Omit<
+  Parameters<typeof useAttendanceHolidayHandlers>[0],
+  "logger"
+> &
+  Parameters<typeof useAttendanceGoDirectlyHandler>[0] & {
+    isDirty: boolean;
+    isSubmitting: boolean;
+    logger: Logger;
+  };
 
 /**
  * Hook to handle attendance editor event handlers.

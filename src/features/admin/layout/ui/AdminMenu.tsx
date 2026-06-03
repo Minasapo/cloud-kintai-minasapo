@@ -83,7 +83,7 @@ const AdminMenu = ({ items, selectedHref, onSelect }: AdminMenuProps) => {
                 fontSize: "0.68rem",
                 fontWeight: 700,
                 letterSpacing: "0.1em",
-                color: "#64748b",
+                color: "rgb(100 116 139)",
                 px: 0.25,
               }}
             >
@@ -116,8 +116,8 @@ const AdminMenu = ({ items, selectedHref, onSelect }: AdminMenuProps) => {
                       borderColor: isActive
                         ? "rgba(6,95,70,0.35)"
                         : "rgba(148,163,184,0.28)",
-                      backgroundColor: isActive ? "#19b985" : "rgba(255,255,255,0.72)",
-                      color: isActive ? "#ffffff" : "#0f172a",
+                      backgroundColor: isActive ? "rgb(25 185 133)" : "rgba(255,255,255,0.72)",
+                      color: isActive ? "rgb(255 255 255)" : "rgb(15 23 42)",
                       px: { xs: 2, sm: 2.25 },
                       py: 1.15,
                       minWidth: { xs: "calc(50% - 4px)", sm: 124 },
@@ -128,7 +128,7 @@ const AdminMenu = ({ items, selectedHref, onSelect }: AdminMenuProps) => {
                         : "0 6px 18px -18px rgba(15,23,42,0.12)",
                       transition: "background-color 160ms ease, border-color 160ms ease",
                       "&:hover": {
-                        backgroundColor: isActive ? "#17ab7b" : "rgba(255,255,255,1)",
+                        backgroundColor: isActive ? "rgb(23 171 123)" : "rgba(255,255,255,1)",
                       },
                     }}
                     aria-label={accessibleLabel}

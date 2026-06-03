@@ -65,17 +65,17 @@ const getHeadingTextColor = (
   }
 
   if (contrast === "inverse") {
-    return designTokenVar("component.heading.contrast.inverse.textColor", "#E2E8F0");
+    return designTokenVar("component.heading.contrast.inverse.textColor", "rgb(226 232 240)");
   }
 
   if (contrast === "default") {
     return designTokenVar(
       "component.heading.contrast.default.textColor",
-      getHeadingLevelToken(level, "textColor", "#1E2A25"),
+      getHeadingLevelToken(level, "textColor", "rgb(30 42 37)"),
     );
   }
 
-  return getHeadingLevelToken(level, "textColor", "#1E2A25");
+  return getHeadingLevelToken(level, "textColor", "rgb(30 42 37)");
 };
 
 const buildHeadingStyle = (

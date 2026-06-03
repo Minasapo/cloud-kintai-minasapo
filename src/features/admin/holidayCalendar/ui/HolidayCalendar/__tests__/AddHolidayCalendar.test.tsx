@@ -29,11 +29,14 @@ import { AddHolidayCalendar } from "../AddHolidayCalendar";
 let capturedTrigger: (() => Promise<boolean>) | null = null;
 
 jest.mock("react-hook-form", () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const actual = jest.requireActual<any>("react-hook-form");
+  const actual = jest.requireActual<typeof import("react-hook-form")>(
+    "react-hook-form",
+  );
+  type UseFormOptions = Parameters<typeof actual.useForm>[0];
+
   return {
     ...actual,
-    useForm: (options?: unknown) => {
+    useForm: (options?: UseFormOptions) => {
       const form = actual.useForm(options);
       capturedTrigger = form.trigger;
       return form;

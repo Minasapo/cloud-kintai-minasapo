@@ -23,15 +23,15 @@ type AppShellProps = {
 
 const APP_BACKGROUND = designTokenVar(
   "component.appShell.background",
-  "#F8FAF9"
+  "rgb(248 250 249)"
 );
 const APP_TEXT_COLOR = designTokenVar(
   "component.appShell.textColor",
-  "#1E2A25"
+  "rgb(30 42 37)"
 );
 const CONTENT_BACKGROUND = designTokenVar(
   "component.appShell.contentBackground",
-  "#F8FAF9"
+  "rgb(248 250 249)"
 );
 export default function AppShell({
   header,

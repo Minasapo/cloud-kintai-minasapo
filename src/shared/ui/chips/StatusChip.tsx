@@ -19,23 +19,23 @@ const createFeedbackPalette = (
 
 const FEEDBACK_COLORS: Record<FeedbackKey, PaletteVars> = {
   success: createFeedbackPalette("success", {
-    base: "#1EAA6A",
-    surface: "#ECF8F1",
+    base: "rgb(30 170 106)",
+    surface: "rgb(236 248 241)",
     border: "rgba(30, 170, 106, 0.4)",
   }),
   warning: createFeedbackPalette("warning", {
-    base: "#E8A447",
-    surface: "#FFF7EA",
+    base: "rgb(232 164 71)",
+    surface: "rgb(255 247 234)",
     border: "rgba(232, 164, 71, 0.4)",
   }),
   danger: createFeedbackPalette("danger", {
-    base: "#D7443E",
-    surface: "#FDECEC",
+    base: "rgb(215 68 62)",
+    surface: "rgb(253 236 236)",
     border: "rgba(215, 68, 62, 0.4)",
   }),
   info: createFeedbackPalette("info", {
-    base: "#3C7EDB",
-    surface: "#EDF2FC",
+    base: "rgb(60 126 219)",
+    surface: "rgb(237 242 252)",
     border: "rgba(60, 126, 219, 0.4)",
   }),
 };
@@ -43,11 +43,11 @@ const FEEDBACK_COLORS: Record<FeedbackKey, PaletteVars> = {
 const FALLBACK_COLORS: PaletteVars = {
   base: designTokenVar(
     "component.workflowList.statusChip.fallback.base",
-    "#45574F"
+    "rgb(69 87 79)"
   ),
   surface: designTokenVar(
     "component.workflowList.statusChip.fallback.surface",
-    "#EDF1EF"
+    "rgb(237 241 239)"
   ),
   border: designTokenVar(
     "component.workflowList.statusChip.fallback.border",

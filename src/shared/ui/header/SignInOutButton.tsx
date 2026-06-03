@@ -15,19 +15,19 @@ const SIGN_BUTTON_FONT_WEIGHT = designTokenVar(
   "component.headerSignButton.fontWeight",
   "500"
 );
-const LOGIN_BUTTON_BG = designTokenVar("color.brand.primary.base", "#0FA85E");
+const LOGIN_BUTTON_BG = designTokenVar("color.brand.primary.base", "rgb(15 168 94)");
 const LOGIN_BUTTON_TEXT = designTokenVar(
   "color.brand.primary.contrastText",
-  "#FFFFFF"
+  "rgb(255 255 255)"
 );
-const LOGOUT_BUTTON_BG = designTokenVar("color.feedback.danger.base", "#D7443E");
+const LOGOUT_BUTTON_BG = designTokenVar("color.feedback.danger.base", "rgb(215 68 62)");
 const LOGOUT_BUTTON_TEXT = designTokenVar(
   "color.brand.primary.contrastText",
-  "#FFFFFF"
+  "rgb(255 255 255)"
 );
 const SIGN_BUTTON_TEXT = designTokenVar(
   "component.headerSignButton.textColor",
-  "#1E2A25",
+  "rgb(30 42 37)",
 );
 
 export interface SignInOutButtonProps {
