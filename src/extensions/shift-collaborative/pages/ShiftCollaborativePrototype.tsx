@@ -60,7 +60,7 @@ const mockActiveUsers: MockUser[] = [
     id: "user1",
     name: "管理者 (Taro)",
     role: "admin",
-    color: "#1976d2",
+    color: "rgb(25 118 210)",
     editingCell: "staff2-15",
     status: "editing",
   },
@@ -68,14 +68,14 @@ const mockActiveUsers: MockUser[] = [
     id: "user2",
     name: "Hanako",
     role: "staff",
-    color: "#9c27b0",
+    color: "rgb(156 39 176)",
     status: "viewing",
   },
   {
     id: "user3",
     name: "Jiro",
     role: "staff",
-    color: "#f57c00",
+    color: "rgb(245 124 0)",
     editingCell: "staff3-10",
     status: "editing",
   },
@@ -342,9 +342,9 @@ function PrototypeShiftTable({
                   align="center"
                   sx={{
                     bgcolor: needsAttention
-                      ? alpha("#f44336", 0.1)
+                      ? alpha("rgb(244 67 54)", 0.1)
                       : isWeekend
-                        ? alpha("#2196f3", 0.05)
+                        ? alpha("rgb(33 150 243)", 0.05)
                         : "background.paper",
                     minWidth: 60,
                     borderLeft: day.date() === 1 ? "2px solid" : undefined,
@@ -448,8 +448,8 @@ function PrototypeShiftTable({
                             : "transparent",
                           "&:hover": {
                             bgcolor: cell.isLocked
-                              ? alpha("#666", 0.05)
-                              : alpha("#1976d2", 0.08),
+                              ? alpha("rgb(102 102 102)", 0.05)
+                              : alpha("rgb(25 118 210)", 0.08),
                           },
                         }}
                       >

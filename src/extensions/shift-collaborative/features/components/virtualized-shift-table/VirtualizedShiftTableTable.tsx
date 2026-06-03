@@ -109,9 +109,9 @@ const StaffTableRow = ({
   return (
     <TableRow
       sx={{
-        backgroundColor: isCurrentUser ? alpha("#2196F3", 0.1) : "transparent",
+        backgroundColor: isCurrentUser ? alpha("rgb(33 150 243)", 0.1) : "transparent",
         "&:hover": {
-          backgroundColor: isCurrentUser ? alpha("#2196F3", 0.15) : undefined,
+          backgroundColor: isCurrentUser ? alpha("rgb(33 150 243)", 0.15) : undefined,
         },
       }}
     >
@@ -120,7 +120,7 @@ const StaffTableRow = ({
           position: "sticky",
           left: 0,
           zIndex: 2,
-          bgcolor: isCurrentUser ? alpha("#2196F3", 0.1) : "background.paper",
+          bgcolor: isCurrentUser ? alpha("rgb(33 150 243)", 0.1) : "background.paper",
           fontWeight: isCurrentUser ? 700 : 600,
           color: isCurrentUser ? "primary.main" : undefined,
           whiteSpace: "nowrap",
@@ -278,7 +278,7 @@ const ShiftTableHeader = ({
             key={dayKey}
             align="center"
             sx={{
-              bgcolor: isWeekend(day) ? alpha("#f44336", 0.05) : "background.paper",
+              bgcolor: isWeekend(day) ? alpha("rgb(244 67 54)", 0.05) : "background.paper",
               minWidth: 50,
             }}
           >
@@ -433,7 +433,7 @@ export const VirtualizedShiftTableTable = ({
       borderRadius: "24px",
       border: "1px solid rgba(226,232,240,0.8)",
       boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
-      bgcolor: "#ffffff",
+      bgcolor: "rgb(255 255 255)",
       overflowX: "auto",
       overflowY: "hidden",
     }}
@@ -451,7 +451,7 @@ export const VirtualizedShiftTableTable = ({
           borderRight: "none",
         },
         "& .MuiTableHead-root .MuiTableCell-root": {
-          bgcolor: "#f8fafc",
+          bgcolor: "rgb(248 250 252)",
         },
       }}
     >
