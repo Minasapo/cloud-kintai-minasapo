@@ -76,14 +76,26 @@ export default function QuickDailyReportCard({
 
   useEffect(() => {
     if (error) {
-      setIsOpen(true);
+      const timeoutId = window.setTimeout(() => {
+        setIsOpen(true);
+      }, 0);
+      return () => {
+        window.clearTimeout(timeoutId);
+      };
     }
+    return undefined;
   }, [error]);
 
   useEffect(() => {
     if (!staffId) {
-      setIsDialogOpen(false);
+      const timeoutId = window.setTimeout(() => {
+        setIsDialogOpen(false);
+      }, 0);
+      return () => {
+        window.clearTimeout(timeoutId);
+      };
     }
+    return undefined;
   }, [staffId]);
 
   useQuickDailyReportAutoSave({

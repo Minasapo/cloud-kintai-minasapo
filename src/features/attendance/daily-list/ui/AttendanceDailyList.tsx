@@ -68,7 +68,7 @@ const searchTextFieldSx = {
   maxWidth: 360,
   "& .MuiOutlinedInput-root": {
     borderRadius: "18px",
-    backgroundColor: "#ffffff",
+    backgroundColor: "rgb(255 255 255)",
     "& fieldset": {
       borderColor: "rgba(148,163,184,0.35)",
     },
@@ -76,7 +76,7 @@ const searchTextFieldSx = {
       borderColor: "rgba(100,116,139,0.45)",
     },
     "&.Mui-focused fieldset": {
-      borderColor: "#19b985",
+      borderColor: "rgb(25 185 133)",
       borderWidth: "1px",
     },
   },

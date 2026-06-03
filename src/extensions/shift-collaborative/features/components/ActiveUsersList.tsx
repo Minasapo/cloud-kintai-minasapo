@@ -54,9 +54,9 @@ const USER_STATUS_META: Record<
   UserPresenceStatus,
   { label: string; chipColor: "success" | "warning" | "default"; dotColor: string }
 > = {
-  online: { label: "オンライン", chipColor: "success", dotColor: "#4caf50" },
-  idle: { label: "アイドル", chipColor: "warning", dotColor: "#ff9800" },
-  offline: { label: "オフライン", chipColor: "default", dotColor: "#9e9e9e" },
+  online: { label: "オンライン", chipColor: "success", dotColor: "rgb(76 175 80)" },
+  idle: { label: "アイドル", chipColor: "warning", dotColor: "rgb(255 152 0)" },
+  offline: { label: "オフライン", chipColor: "default", dotColor: "rgb(158 158 158)" },
 };
 
 /**

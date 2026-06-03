@@ -29,11 +29,11 @@ import { ChangeRequestQuickViewButton } from "./ChangeRequestQuickViewButton";
 
 const HIGHLIGHT_BORDER = designTokenVar(
   "color.feedback.warning.base",
-  "#E8A447",
+  "rgb(232 164 71)",
 );
 const HIGHLIGHT_BACKGROUND = designTokenVar(
   "color.feedback.warning.surface",
-  "#FFF7EA",
+  "rgb(255 247 234)",
 );
 const STACK_SPACING = designTokenVar("spacing.md", "12px");
 

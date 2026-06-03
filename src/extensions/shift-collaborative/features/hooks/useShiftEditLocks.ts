@@ -654,7 +654,7 @@ export const useShiftEditLocks = ({
       return {
         userId: editor.userId,
         userName: editor.userName,
-        color: editor.userId === currentUserId ? "#2196f3" : "#4caf50",
+        color: editor.userId === currentUserId ? "rgb(33 150 243)" : "rgb(76 175 80)",
         lastActivity: editor.startTime,
       };
     },
