@@ -4,14 +4,14 @@ import { Attendance } from "@shared/api/graphql/types";
 export default async function handleApproveChangeRequest(
   attendance: Attendance | null,
   updateAttendance: (input: UpdateAttendanceMutationArg) => Promise<Attendance>,
-  comment: string | undefined
+  comment: string | undefined,
 ) {
   if (!attendance || !attendance.changeRequests) {
     throw new Error("attendance or attendance.changeRequests is null");
   }
 
   const changeRequests = attendance.changeRequests.filter(
-    (item): item is NonNullable<typeof item> => item !== null
+    (item): item is NonNullable<typeof item> => item !== null,
   );
   const targetChangeRequest =
     changeRequests.find((request) => !request.completed) || changeRequests[0];
@@ -37,6 +37,7 @@ export default async function handleApproveChangeRequest(
         : attendance.endTime,
     goDirectlyFlag:
       targetChangeRequest.goDirectlyFlag ?? attendance.goDirectlyFlag,
+    absentFlag: targetChangeRequest.absentFlag ?? attendance.absentFlag,
     returnDirectlyFlag:
       targetChangeRequest.returnDirectlyFlag ?? attendance.returnDirectlyFlag,
     remarks:
