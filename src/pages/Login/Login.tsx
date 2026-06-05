@@ -3,11 +3,14 @@ import "./styles.scss";
 
 import { useSession } from "@app/providers/session/useSession";
 import { Authenticator } from "@aws-amplify/ui-react";
+import { createLogger } from "@shared/lib/logger";
 import { signIn } from "aws-amplify/auth";
 import { useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import logo from "./logo_large.png";
+
+const logger = createLogger("Login");
 
 const readSignInCredentials = (input: unknown) => {
   if (!input || typeof input !== "object") {
@@ -54,13 +57,20 @@ const parseAuthError = (error: unknown) => {
   };
 };
 
+const readRedirectPath = (state: unknown): string => {
+  if (!state || typeof state !== "object" || !("from" in state)) {
+    return "/";
+  }
+
+  const { from } = state;
+  return typeof from === "string" ? from : "/";
+};
+
 export default function Login() {
   const { authStatus, cognitoUser } = useSession();
   const location = useLocation();
   const navigate = useNavigate();
-  // eslint-disable-next-line max-len
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-  const from = (location.state?.from as string) || "/";
+  const from = readRedirectPath(location.state);
 
   useEffect(() => {
     if (authStatus !== "authenticated") return;
@@ -85,7 +95,7 @@ export default function Login() {
         } catch (error) {
           if (import.meta.env.DEV) {
             const parsedError = parseAuthError(error);
-            console.error("[Auth] Sign in failed", {
+            logger.error("Sign in failed", {
               ...parsedError,
               username: credentials.username,
             });

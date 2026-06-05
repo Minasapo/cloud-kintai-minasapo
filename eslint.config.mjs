@@ -86,6 +86,7 @@ export default [
         { type: "features", pattern: "src/features/**" },
         { type: "entities", pattern: "src/entities/**" },
         { type: "shared", pattern: "src/shared/**" },
+        { type: "extensions", pattern: "src/extensions/**" },
       ],
     },
     rules: {
@@ -179,16 +180,26 @@ export default [
   }),
   {
     files: ["src/**/*.{ts,tsx,js,jsx}"],
+    ignores: ["src/shared/lib/logger.ts"],
     rules: {
+      "no-restricted-properties": [
+        "error",
+        {
+          object: "console",
+          property: "error",
+          message:
+            "Use logger.error from @shared/lib/logger instead of console.error in production code.",
+        },
+      ],
       "no-restricted-imports": [
         "error",
         {
           paths: [
             {
               name: "@mui/material",
-              importNames: ["Button", "IconButton"],
+              importNames: ["Button", "IconButton", "TextField"],
               message:
-                "Use AppButton/AppIconButton from @/shared/ui/button instead.",
+                "Use AppButton/AppIconButton from @/shared/ui/button or AppTextField from @/shared/ui/form instead.",
             },
             {
               name: "@mui/material/Button",
@@ -198,30 +209,46 @@ export default [
               name: "@mui/material/IconButton",
               message: "Use AppIconButton from @/shared/ui/button instead.",
             },
+            {
+              name: "@mui/material/TextField",
+              message: "Use AppTextField from @/shared/ui/form instead.",
+            },
           ],
         },
       ],
     },
   },
   {
+    // Discourage hard-coded hex color literals; prefer designTokenVar() from
+    // src/shared/designSystem. Existing occurrences should be migrated
+    // incrementally — kept as a warning (not error) to avoid blocking CI.
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: [
+      "src/shared/designSystem/**",
+      "src/**/*.test.{ts,tsx}",
+      "src/**/*.spec.{ts,tsx}",
+      "src/__tests__/**",
+      "src/**/__tests__/**",
+      "src/ui-components/**",
+    ],
+    rules: {
+      "no-restricted-syntax": [
+        "warn",
+        {
+          selector:
+            "Literal[value=/^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/]",
+          message:
+            "Avoid hard-coded hex color literals. Use designTokenVar() from @shared/designSystem instead.",
+        },
+      ],
+    },
+  },
+  {
     files: [
-      "src/features/admin/holidayCalendar/**/*.{ts,tsx,js,jsx}",
-      "src/features/admin/staff/ui/actions/CreateStaffDialog.tsx",
-      "src/features/admin/staff/ui/editor/AdminStaffEditor.tsx",
-      "src/features/admin/staffAttendanceList/**/*.{ts,tsx,js,jsx}",
-      "src/features/attendance/daily-list/**/*.{ts,tsx,js,jsx}",
-      "src/features/attendance/edit/ui/ChangeRequestDialog/**/*.{ts,tsx,js,jsx}",
-      "src/features/attendance/list/**/*.{ts,tsx,js,jsx}",
-      "src/features/attendance/statistics/**/*.{ts,tsx,js,jsx}",
-      "src/features/shift/collaborative/components/**/*.{ts,tsx,js,jsx}",
-      "src/features/shift/management/**/*.{ts,tsx,js,jsx}",
-      "src/features/shift/request-form/**/*.{ts,tsx,js,jsx}",
-      "src/features/splitView/**/*.{ts,tsx,js,jsx}",
-      "src/pages/admin/AdminLayout.tsx",
-      "src/pages/preview/**/*.{ts,tsx,js,jsx}",
-      "src/pages/shift/collaborative/ShiftCollaborativePrototype.tsx",
       "src/shared/ui/button/AppButton.tsx",
       "src/shared/ui/button/AppIconButton.tsx",
+      "src/shared/ui/form/AppTextField.tsx",
+      "src/pages/preview/**/*.{ts,tsx,js,jsx}",
     ],
     rules: {
       "no-restricted-imports": "off",
@@ -235,6 +262,53 @@ export default [
     ],
     rules: {
       "max-lines-per-function": "off",
+      "no-restricted-properties": "off",
+    },
+  },
+  {
+    // Forbid the core/shell layers from depending on extensions. Extensions
+    // register themselves via the manifest registry (src/extensions/index.ts).
+    // The few well-known integration points (router, store apis, root
+    // providers, navigation menu) opt out below.
+    files: [
+      "src/app/**/*.{ts,tsx}",
+      "src/processes/**/*.{ts,tsx}",
+      "src/pages/**/*.{ts,tsx}",
+      "src/features/**/*.{ts,tsx}",
+      "src/entities/**/*.{ts,tsx}",
+      "src/shared/**/*.{ts,tsx}",
+      "src/widgets/**/*.{ts,tsx}",
+      "src/router.tsx",
+      "src/router/**/*.{ts,tsx}",
+    ],
+    ignores: [
+      "src/router.tsx",
+      "src/router/adminChildRoutes.tsx",
+      "src/router/routePreloaders.ts",
+      "src/app/apis/index.ts",
+      "src/app/providers/AppRootProviders.tsx",
+      "src/widgets/layout/header/NavigationMenu.tsx",
+      "src/features/admin/layout/model/adminSplitPanelRegistry.ts",
+      "src/pages/shift/management/index.tsx",
+      "src/pages/shift/request/index.tsx",
+      "src/**/*.test.{ts,tsx}",
+      "src/**/*.spec.{ts,tsx}",
+      "src/__tests__/**",
+      "src/**/__tests__/**",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@extensions/*", "src/extensions/*", "*/extensions/*"],
+              message:
+                "Core/shell layers must not depend on extensions. Add contributions to src/extensions/index.ts and let the registry wire them up.",
+            },
+          ],
+        },
+      ],
     },
   },
 ];

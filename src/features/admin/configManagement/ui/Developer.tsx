@@ -3,7 +3,7 @@ import AdminSettingsLayout from "@features/admin/layout/ui/AdminSettingsLayout";
 import AdminSettingsSection from "@features/admin/layout/ui/AdminSettingsSection";
 import { SettingsButton, SettingsSwitch } from "@features/admin/layout/ui/SettingsPrimitives";
 import { SubsectionTitle } from "@shared/ui/typography";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 
 import { useSaveAppConfigSection } from "../lib/useSaveAppConfigSection";
 
@@ -15,12 +15,8 @@ type DeveloperSettingItem = {
 };
 export default function Developer() {
   const { getWorkflowNotificationEnabled } = useContext(AppConfigContext);
-  const [workflowNotificationEnabled, setWorkflowNotificationEnabled] = useState(false);
+  const [workflowNotificationEnabled, setWorkflowNotificationEnabled] = useState(() => getWorkflowNotificationEnabled());
   const saveAppConfigSection = useSaveAppConfigSection();
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setWorkflowNotificationEnabled(getWorkflowNotificationEnabled());
-  }, [getWorkflowNotificationEnabled]);
   const handleChange = (checked: boolean) => {
     setWorkflowNotificationEnabled(checked);
   };

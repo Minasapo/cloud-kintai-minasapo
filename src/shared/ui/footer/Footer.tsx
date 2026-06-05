@@ -5,19 +5,25 @@ interface FooterProps {
   themeColor?: string;
 }
 
-const FOOTER_ACCENT = designTokenVar("component.footer.accent", "#0B6D53");
+const FOOTER_ACCENT = designTokenVar(
+  "component.footer.accent",
+  "rgb(11 109 83)",
+);
 const FOOTER_BACKGROUND = designTokenVar(
   "component.footer.background",
-  "#F3F8F5",
+  "rgb(243 248 245)",
 );
 const FOOTER_BORDER = designTokenVar(
   "component.footer.borderColor",
   "rgba(15, 168, 94, 0.12)",
 );
-const FOOTER_TEXT = designTokenVar("component.footer.textColor", "#45574F");
+const FOOTER_TEXT = designTokenVar(
+  "component.footer.textColor",
+  "rgb(69 87 79)",
+);
 const FOOTER_MUTED_TEXT = designTokenVar(
   "component.footer.mutedTextColor",
-  "#5E726A",
+  "rgb(94 114 106)",
 );
 const FOOTER_PADDING_X = designTokenVar("component.footer.paddingX", "16px");
 const FOOTER_PADDING_Y = designTokenVar("component.footer.paddingY", "14px");

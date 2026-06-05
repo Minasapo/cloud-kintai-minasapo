@@ -18,10 +18,10 @@ export default function useShiftSelection({
   staffIdToIndex,
 }: UseShiftSelectionArgs) {
   const [selectedStaffIds, setSelectedStaffIds] = useState<Set<string>>(
-    () => new Set()
+    () => new Set(),
   );
   const [selectedDayKeys, setSelectedDayKeys] = useState<Set<string>>(
-    () => new Set()
+    () => new Set(),
   );
 
   const lastStaffSelectionIndexRef = useRef<number | null>(null);
@@ -125,49 +125,48 @@ export default function useShiftSelection({
     lastDaySelectionIndexRef.current = null;
   }, [dayKeyList]);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSelectedStaffIds((prev) => {
-      let changed = false;
-      const next = new Set<string>();
-      prev.forEach((id) => {
-        if (staffIdToIndex.has(id)) {
-          next.add(id);
-        } else {
-          changed = true;
-        }
-      });
-      return changed ? next : prev;
-    });
-  }, [staffIdToIndex]);
+  const visibleStaffIds = useMemo(
+    () => new Set(displayedStaffOrder.map((staff) => staff.id)),
+    [displayedStaffOrder],
+  );
+  const dayKeySet = useMemo(() => new Set(dayKeyList), [dayKeyList]);
 
-  useEffect(() => {
-    const dayKeySet = new Set(dayKeyList);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSelectedDayKeys((prev) => {
-      let changed = false;
-      const next = new Set<string>();
-      prev.forEach((key) => {
-        if (dayKeySet.has(key)) {
-          next.add(key);
-        } else {
-          changed = true;
-        }
-      });
-      return changed ? next : prev;
+  const prunedSelectedStaffIds = useMemo(() => {
+    let changed = false;
+    const next = new Set<string>();
+    selectedStaffIds.forEach((id) => {
+      if (visibleStaffIds.has(id) && staffIdToIndex.has(id)) {
+        next.add(id);
+      } else {
+        changed = true;
+      }
     });
-  }, [dayKeyList]);
+    return changed ? next : selectedStaffIds;
+  }, [selectedStaffIds, staffIdToIndex, visibleStaffIds]);
+
+  const prunedSelectedDayKeys = useMemo(() => {
+    let changed = false;
+    const next = new Set<string>();
+    selectedDayKeys.forEach((key) => {
+      if (dayKeySet.has(key)) {
+        next.add(key);
+      } else {
+        changed = true;
+      }
+    });
+    return changed ? next : selectedDayKeys;
+  }, [dayKeySet, selectedDayKeys]);
 
   const hasBulkSelection =
-    selectedStaffIds.size > 0 && selectedDayKeys.size > 0;
+    prunedSelectedStaffIds.size > 0 && prunedSelectedDayKeys.size > 0;
   const selectedCellCount = useMemo(
-    () => selectedStaffIds.size * selectedDayKeys.size,
-    [selectedStaffIds, selectedDayKeys]
+    () => prunedSelectedStaffIds.size * prunedSelectedDayKeys.size,
+    [prunedSelectedDayKeys, prunedSelectedStaffIds],
   );
 
   return {
-    selectedStaffIds,
-    selectedDayKeys,
+    selectedStaffIds: prunedSelectedStaffIds,
+    selectedDayKeys: prunedSelectedDayKeys,
     hasBulkSelection,
     selectedCellCount,
     handleStaffCheckboxChange,

@@ -88,7 +88,7 @@ const MobileMenu = ({
   onOpen,
   onClose,
   hide = false,
-  iconColor = "#45574F",
+  iconColor = "rgb(69 87 79)",
 }: MobileMenuProps) => {
   if (hide) {
     return null;

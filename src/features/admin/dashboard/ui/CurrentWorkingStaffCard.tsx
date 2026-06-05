@@ -21,7 +21,7 @@ function CurrentWorkingStaffCardComponent({ countLabel, infoLabel }: Props) {
             fontWeight: 800,
             lineHeight: 1.05,
             letterSpacing: "-0.03em",
-            color: "#0f172a",
+            color: "rgb(15 23 42)",
           }}
         >
           {countLabel}

@@ -1,6 +1,7 @@
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import { AppButton } from "@shared/ui/button";
 import AppDialog from "@shared/ui/feedback/AppDialog";
+import ConfirmDialog from "@shared/ui/feedback/ConfirmDialog";
 import { type Dispatch, type ReactNode, type SetStateAction, useState } from "react";
 
 export type BulkUploadDialogRenderProps<T> = {
@@ -42,7 +43,9 @@ export function BulkUploadDialogShell<T>({
   onClose,
 }: BulkUploadDialogShellProps<T>) {
   const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [uploadedData, setUploadedData] = useState<T[]>([]);
+  const [pendingUploadedData, setPendingUploadedData] = useState<readonly T[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleOpen = () => {
@@ -55,7 +58,7 @@ export function BulkUploadDialogShell<T>({
     setOpen(false);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (isSubmitting) {
       return;
     }
@@ -67,12 +70,25 @@ export function BulkUploadDialogShell<T>({
       return;
     }
 
-    // eslint-disable-next-line no-alert
-    const result = window.confirm(confirmMessage(uploadedData.length));
-    if (!result) {
-      if (closeMode === "always") {
-        handleClose();
-      }
+    setPendingUploadedData(uploadedData);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmCancel = () => {
+    setConfirmOpen(false);
+    setPendingUploadedData([]);
+
+    if (closeMode === "always") {
+      handleClose();
+    }
+  };
+
+  const handleConfirmSubmit = async () => {
+    const targetData = pendingUploadedData;
+    setConfirmOpen(false);
+    setPendingUploadedData([]);
+
+    if (targetData.length === 0) {
       return;
     }
 
@@ -84,7 +100,7 @@ export function BulkUploadDialogShell<T>({
     let isSucceeded = false;
 
     try {
-      isSucceeded = await onSubmit(uploadedData, { setUploadedData });
+      isSucceeded = await onSubmit(targetData, { setUploadedData });
     } finally {
       setIsSubmitting(false);
     }
@@ -128,6 +144,17 @@ export function BulkUploadDialogShell<T>({
       >
         {renderContent({ uploadedData, setUploadedData, isSubmitting })}
       </AppDialog>
+      <ConfirmDialog
+        open={confirmOpen}
+        title="一括登録の確認"
+        message={confirmMessage(pendingUploadedData.length)}
+        confirmLabel={registerLabel}
+        cancelLabel="キャンセル"
+        onConfirm={() => {
+          void handleConfirmSubmit();
+        }}
+        onCancel={handleConfirmCancel}
+      />
     </>
   );
 }

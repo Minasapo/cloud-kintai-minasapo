@@ -3,24 +3,15 @@ import { appendItem, removeItemAt, updateItem } from "@features/admin/configMana
 import AdminSettingsLayout from "@features/admin/layout/ui/AdminSettingsLayout";
 import AdminSettingsSection from "@features/admin/layout/ui/AdminSettingsSection";
 import { SettingsButton } from "@features/admin/layout/ui/SettingsPrimitives";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 
 import { useSaveAppConfigSection } from "../lib/useSaveAppConfigSection";
 import LinkListSection from "./LinkListSection";
 
 export default function Links() {
     const { getLinks } = useContext(AppConfigContext);
-    const [links, setLinks] = useState<{
-        label: string;
-        url: string;
-        enabled: boolean;
-        icon: string;
-    }[]>([]);
+    const [links, setLinks] = useState(() => getLinks());
     const saveAppConfigSection = useSaveAppConfigSection();
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setLinks(getLinks());
-    }, [getLinks]);
     const handleAddLink = () => setLinks(appendItem(links, { label: "", url: "", enabled: true, icon: "" }));
     const handleLinkChange = (index: number, field: "label" | "url" | "enabled" | "icon", value: string | boolean) => {
         setLinks(updateItem(links, index, (l) => ({ ...l, [field]: value } as typeof l)));

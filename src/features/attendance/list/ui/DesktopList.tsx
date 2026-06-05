@@ -164,11 +164,13 @@ export default function DesktopList() {
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ color: "#64748b", fontWeight: 700 }} />
+                    <TableCell
+                      sx={{ color: "rgb(100 116 139)", fontWeight: 700 }}
+                    />
                     <TableCell
                       sx={{
                         whiteSpace: "nowrap",
-                        color: "#64748b",
+                        color: "rgb(100 116 139)",
                         fontWeight: 700,
                       }}
                     >
@@ -177,7 +179,7 @@ export default function DesktopList() {
                     <TableCell
                       sx={{
                         whiteSpace: "nowrap",
-                        color: "#64748b",
+                        color: "rgb(100 116 139)",
                         fontWeight: 700,
                       }}
                     >
@@ -186,7 +188,7 @@ export default function DesktopList() {
                     <TableCell
                       sx={{
                         whiteSpace: "nowrap",
-                        color: "#64748b",
+                        color: "rgb(100 116 139)",
                         fontWeight: 700,
                       }}
                     >
@@ -195,7 +197,7 @@ export default function DesktopList() {
                     <TableCell
                       sx={{
                         whiteSpace: "nowrap",
-                        color: "#64748b",
+                        color: "rgb(100 116 139)",
                         fontWeight: 700,
                       }}
                     >
@@ -204,7 +206,7 @@ export default function DesktopList() {
                     <TableCell
                       sx={{
                         whiteSpace: "nowrap",
-                        color: "#64748b",
+                        color: "rgb(100 116 139)",
                         fontWeight: 700,
                       }}
                     >
@@ -213,7 +215,7 @@ export default function DesktopList() {
                     <TableCell
                       sx={{
                         whiteSpace: "nowrap",
-                        color: "#64748b",
+                        color: "rgb(100 116 139)",
                         fontWeight: 700,
                       }}
                     >

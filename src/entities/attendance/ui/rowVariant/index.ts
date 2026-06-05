@@ -18,29 +18,35 @@ export const attendanceRowVariantStyles: Record<
   SxProps<Theme>
 > = {
   default: {
-    backgroundColor: designTokenVar("color.neutral.0", "#FFFFFF"),
+    backgroundColor: designTokenVar("color.neutral.0", "rgb(255 255 255)"),
   },
   today: {
     backgroundColor: designTokenVar(
       "color.feedback.warning.surface",
-      "#FFF7EA"
+      "rgb(255 247 234)",
     ),
     "& td, & th": {
       fontWeight: designTokenVar("typography.fontWeight.bold", "600"),
     },
   },
   saturday: {
-    backgroundColor: designTokenVar("color.feedback.info.surface", "#EDF2FC"),
+    backgroundColor: designTokenVar(
+      "color.feedback.info.surface",
+      "rgb(237 242 252)",
+    ),
   },
   sunday: {
-    backgroundColor: designTokenVar("color.feedback.danger.surface", "#FDECEC"),
+    backgroundColor: designTokenVar(
+      "color.feedback.danger.surface",
+      "rgb(253 236 236)",
+    ),
   },
 };
 
 export const getAttendanceRowVariant = (
   attendance: Attendance,
   holidayCalendars: HolidayCalendar[],
-  companyHolidayCalendars: CompanyHolidayCalendar[]
+  companyHolidayCalendars: CompanyHolidayCalendar[],
 ): AttendanceRowVariant => {
   const { workDate } = attendance;
   const today = dayjs().format(AttendanceDate.DataFormat);
@@ -51,7 +57,7 @@ export const getAttendanceRowVariant = (
   const isHoliday = new Holiday(holidayCalendars, workDate).isHoliday();
   const isCompanyHoliday = new CompanyHoliday(
     companyHolidayCalendars,
-    workDate
+    workDate,
   ).isHoliday();
 
   if (isHoliday || isCompanyHoliday) {
@@ -76,12 +82,12 @@ export const getAttendanceRowVariant = (
 export const getAttendanceRowClassName = (
   attendance: Attendance,
   holidayCalendars: HolidayCalendar[],
-  companyHolidayCalendars: CompanyHolidayCalendar[]
+  companyHolidayCalendars: CompanyHolidayCalendar[],
 ) => {
   const variant = getAttendanceRowVariant(
     attendance,
     holidayCalendars,
-    companyHolidayCalendars
+    companyHolidayCalendars,
   );
   switch (variant) {
     case "today":

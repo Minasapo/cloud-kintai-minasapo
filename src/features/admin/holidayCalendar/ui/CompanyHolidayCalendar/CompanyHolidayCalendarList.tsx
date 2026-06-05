@@ -17,13 +17,15 @@ import {
   getNextVersion,
 } from "@shared/api/graphql/concurrency";
 import { CompanyHolidayCalendar } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { CompanyHolidayCalendarMessage } from "@shared/lib/message/CompanyHolidayCalendarMessage";
 import { MessageStatus } from "@shared/lib/message/Message";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { AppDeleteIconButton } from "@shared/ui/button/AppActionIconButton";
 import { ProgressBar } from "@shared/ui/feedback";
+import ConfirmDialog from "@shared/ui/feedback/ConfirmDialog";
 import dayjs from "dayjs";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import * as MESSAGE_CODE from "@/errors";
 
@@ -32,11 +34,15 @@ import AddCompanyHolidayCalendar from "./AddCompanyHolidayCalendar";
 import CompanyHolidayCalendarCopy from "./CompanyHolidayCalendarCopy";
 import CompanyHolidayCalendarEdit from "./CompanyHolidayCalendarEdit";
 
+const logger = createLogger("CompanyHolidayCalendarList");
+
 const YEAR_RANGE = 5;
 const YEAR_OFFSET = 4;
 
 export default function CompanyHolidayCalendarList() {
   const dispatch = useAppDispatchV2();
+  const [deleteTarget, setDeleteTarget] =
+    useState<CompanyHolidayCalendar | null>(null);
   const {
     data: companyHolidayCalendars = [],
     isLoading: isCompanyHolidayCalendarsLoading,
@@ -90,7 +96,7 @@ export default function CompanyHolidayCalendarList() {
 
   useEffect(() => {
     if (companyHolidayCalendarsError) {
-      console.error(companyHolidayCalendarsError);
+      logger.error(companyHolidayCalendarsError);
       dispatch(
         pushNotification({
           tone: "error",
@@ -122,24 +128,35 @@ export default function CompanyHolidayCalendarList() {
     yearOffset: YEAR_OFFSET,
   });
 
-  if (calendarLoading) {
-    return <ProgressBar className="w-full" />;
-  }
+  const deleteMessage = useMemo(() => {
+    if (!deleteTarget) {
+      return "";
+    }
 
-  const handleDelete = async (companyHolidayCalendar: CompanyHolidayCalendar) => {
-    const beDeleteDate = dayjs(companyHolidayCalendar.holidayDate).format(
+    const beDeleteDate = dayjs(deleteTarget.holidayDate).format(
       AttendanceDate.DisplayFormat,
     );
-    const beDeleteName = companyHolidayCalendar.name;
-    const message = `「${beDeleteDate}(${beDeleteName})」を削除しますか？\n削除したデータは元に戻せません。`;
-    const confirm = window.confirm(message);
+    return `「${beDeleteDate}(${deleteTarget.name})」を削除しますか？\n削除したデータは元に戻せません。`;
+  }, [deleteTarget]);
 
-    if (!confirm) {
+  const handleOpenDeleteConfirm = (companyHolidayCalendar: CompanyHolidayCalendar) => {
+    setDeleteTarget(companyHolidayCalendar);
+  };
+
+  const handleCloseDeleteConfirm = () => {
+    setDeleteTarget(null);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) {
       return;
     }
 
+    const target = deleteTarget;
+    setDeleteTarget(null);
+
     const companyHolidayCalendarMessage = CompanyHolidayCalendarMessage();
-    await deleteCompanyHolidayCalendar({ id: companyHolidayCalendar.id })
+    await deleteCompanyHolidayCalendar({ id: target.id })
       .then(() =>
         dispatch(
           pushNotification({
@@ -158,8 +175,14 @@ export default function CompanyHolidayCalendarList() {
       );
   };
 
+
+  if (calendarLoading) {
+    return <ProgressBar className="w-full" />;
+  }
+
   return (
-    <HolidayCalendarListScaffold
+    <>
+      <HolidayCalendarListScaffold
       actions={
         <>
           <AddCompanyHolidayCalendar
@@ -204,7 +227,9 @@ export default function CompanyHolidayCalendarList() {
             companyHolidayCalendar={holidayCalendar}
             createCompanyHolidayCalendar={createCompanyHolidayCalendar}
           />
-          <AppDeleteIconButton onClick={() => handleDelete(holidayCalendar)} />
+          <AppDeleteIconButton
+            onClick={() => handleOpenDeleteConfirm(holidayCalendar)}
+          />
         </>
       )}
       renderDataCells={(holidayCalendar) => (
@@ -216,6 +241,17 @@ export default function CompanyHolidayCalendarList() {
           <CreatedAtTableCell holidayCalendar={holidayCalendar} />
         </>
       )}
-    />
+      />
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="削除確認"
+        message={deleteMessage}
+        confirmLabel="削除"
+        onConfirm={() => {
+          void handleDelete();
+        }}
+        onCancel={handleCloseDeleteConfirm}
+      />
+    </>
   );
 }

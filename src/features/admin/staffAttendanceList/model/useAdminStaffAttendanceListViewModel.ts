@@ -7,6 +7,7 @@ import { useCalendars } from "@entities/calendar/model/useCalendars";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { mappingStaffRole, StaffType, } from "@entities/staff/model/useStaffs/useStaffs";
 import { Attendance, CloseDate, CompanyHolidayCalendar, HolidayCalendar, Staff, } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import type { Dayjs } from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -17,6 +18,8 @@ import * as MESSAGE_CODE from "@/errors";
 import type { PendingAttendanceControls } from "../ui/components";
 import { useAdminAttendanceChangeRequests } from "./useAdminAttendanceChangeRequests";
 import { useAttendanceSubscription } from "./useAttendanceSubscription";
+
+const logger = createLogger("AdminStaffAttendanceListViewModel");
 
 export type AdminStaffAttendanceListViewModel = ReturnType<typeof useAdminStaffAttendanceListViewModel>;
 export const useAdminStaffAttendanceListViewModel = (staffId?: string, currentMonth?: Dayjs) => {
@@ -117,7 +120,7 @@ export const useAdminStaffAttendanceListViewModel = (staffId?: string, currentMo
     }, [attendancesError, dispatch]);
     useEffect(() => {
         if (calendarsError) {
-            console.error(calendarsError);
+            logger.error(calendarsError);
             dispatch(pushNotification({
                 tone: "error",
                 message: MESSAGE_CODE.E00001

@@ -42,6 +42,26 @@ export function formatISOToTimeOrEmpty(
 }
 
 /**
+ * ISO 8601形式の日時文字列を HH:mm に変換。null/invalid の場合はフォールバック文字列を返す。
+ *
+ * @example
+ * formatISOToTimeOr("2024-01-15T09:30:00+09:00") // "09:30"
+ * formatISOToTimeOr(null) // "-"
+ * formatISOToTimeOr(undefined, "—") // "—"
+ */
+export function formatISOToTimeOr(
+  isoString?: string | null,
+  fallback: string = "-",
+): string {
+  if (!isoString) {
+    return fallback;
+  }
+
+  const parsed = dayjs(isoString);
+  return parsed.isValid() ? parsed.format("HH:mm") : fallback;
+}
+
+/**
  * HH:mm形式の時刻を指定日付のISO 8601形式に変換
  *
  * @param timeString - HH:mm形式の時刻文字列 (例: "09:00")

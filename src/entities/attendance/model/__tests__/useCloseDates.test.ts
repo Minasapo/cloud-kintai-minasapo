@@ -1,4 +1,8 @@
 import { graphqlClient } from "@shared/api/amplify/graphqlClient";
+import {
+  type CreateCloseDateInput,
+  type UpdateCloseDateInput,
+} from "@shared/api/graphql/types";
 import { act, renderHook, waitFor } from "@testing-library/react";
 
 import useCloseDates from "../useCloseDates";
@@ -41,6 +45,22 @@ const makeCloseDate = (overrides = {}) => ({
   endDate: "2024-01-31",
   version: 1,
   updatedAt: "2024-01-01T00:00:00Z",
+  ...overrides,
+});
+
+const makeCreateCloseDateInput = (
+  overrides: Partial<CreateCloseDateInput> = {},
+): CreateCloseDateInput => ({
+  closeDate: "2024-01-31",
+  startDate: "2024-01-01",
+  endDate: "2024-01-31",
+  ...overrides,
+});
+
+const makeUpdateCloseDateInput = (
+  overrides: Partial<UpdateCloseDateInput> = {},
+): UpdateCloseDateInput => ({
+  id: "upd-1",
   ...overrides,
 });
 
@@ -106,8 +126,7 @@ describe("useCloseDates", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     await act(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await result.current.createCloseDate({} as any);
+      await result.current.createCloseDate(makeCreateCloseDateInput());
     });
 
     expect(result.current.closeDates).toContainEqual(newDate);
@@ -122,8 +141,7 @@ describe("useCloseDates", () => {
 
     await expect(
       act(async () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await result.current.createCloseDate({} as any);
+        await result.current.createCloseDate(makeCreateCloseDateInput());
       }),
     ).rejects.toThrow("Create failed");
 
@@ -183,10 +201,7 @@ describe("useCloseDates", () => {
     await waitFor(() => expect(result.current.closeDates).toHaveLength(1));
 
     await act(async () => {
-      await result.current.updateCloseDate({
-        id: "upd-1",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      await result.current.updateCloseDate(makeUpdateCloseDateInput());
     });
 
     expect(result.current.closeDates[0]).toEqual(updated);
@@ -202,8 +217,7 @@ describe("useCloseDates", () => {
     await waitFor(() => expect(result.current.closeDates).toHaveLength(1));
 
     await act(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await result.current.updateCloseDate({ id: "upd-1" } as any);
+      await result.current.updateCloseDate(makeUpdateCloseDateInput());
     });
 
     expect(updateCloseDateDataMock).toHaveBeenCalledWith(

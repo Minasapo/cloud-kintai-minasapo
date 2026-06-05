@@ -33,31 +33,32 @@ export const attendanceStatusChipColorMap: Partial<
   [AttendanceStatus.Working]: "info",
 };
 
-export const attendanceStatusTextColorMap: Partial<Record<AttendanceStatus, string>> =
-  {
-    [AttendanceStatus.Ok]: "var(--mui-palette-success-main)",
-    [AttendanceStatus.Error]: "var(--mui-palette-error-main)",
-    [AttendanceStatus.Late]: "var(--mui-palette-warning-main)",
-    [AttendanceStatus.Requesting]: "var(--mui-palette-info-main)",
-    [AttendanceStatus.Working]: "var(--mui-palette-info-main)",
-  };
+export const attendanceStatusTextColorMap: Partial<
+  Record<AttendanceStatus, string>
+> = {
+  [AttendanceStatus.Ok]: "var(--mui-palette-success-main)",
+  [AttendanceStatus.Error]: "var(--mui-palette-error-main)",
+  [AttendanceStatus.Late]: "var(--mui-palette-warning-main)",
+  [AttendanceStatus.Requesting]: "var(--mui-palette-info-main)",
+  [AttendanceStatus.Working]: "var(--mui-palette-info-main)",
+};
 
 const ERROR_BADGE_META: AttendanceStatusBadgeMeta = {
   label: "エラー",
   backgroundColor: "rgba(211, 47, 47, 0.14)",
-  color: "#8f1d1d",
+  color: "rgb(143 29 29)",
 };
 
 const LATE_BADGE_META: AttendanceStatusBadgeMeta = {
   label: "遅刻",
   backgroundColor: "rgba(237, 108, 2, 0.18)",
-  color: "#8a3b00",
+  color: "rgb(138 59 0)",
 };
 
 const OK_BADGE_META: AttendanceStatusBadgeMeta = {
   label: "正常",
   backgroundColor: "rgba(46, 125, 50, 0.14)",
-  color: "#1f5f24",
+  color: "rgb(31 95 36)",
 };
 
 const EMPTY_BADGE_META: AttendanceStatusBadgeMeta = {
@@ -78,25 +79,25 @@ export const getAttendanceStatusBadgeMeta = (
 const ERROR_DAY_CELL_STYLE: AttendanceDayCellStyle = {
   backgroundColor: "rgba(211, 47, 47, 0.14)",
   borderColor: "var(--mui-palette-error-main)",
-  color: "#8f1d1d",
+  color: "rgb(143 29 29)",
 };
 
 const LATE_DAY_CELL_STYLE: AttendanceDayCellStyle = {
   backgroundColor: "rgba(237, 108, 2, 0.18)",
   borderColor: "var(--mui-palette-warning-main)",
-  color: "#8a3b00",
+  color: "rgb(138 59 0)",
 };
 
 const OK_DAY_CELL_STYLE: AttendanceDayCellStyle = {
   backgroundColor: "rgba(46, 125, 50, 0.14)",
   borderColor: "rgba(46, 125, 50, 0.32)",
-  color: "#1f5f24",
+  color: "rgb(31 95 36)",
 };
 
 const ACTIVE_DAY_CELL_STYLE: AttendanceDayCellStyle = {
   backgroundColor: "rgba(2, 136, 209, 0.12)",
   borderColor: "rgba(2, 136, 209, 0.34)",
-  color: "#0b5f8a",
+  color: "rgb(11 95 138)",
 };
 
 const HOLIDAY_DAY_CELL_STYLE: AttendanceDayCellStyle = {
@@ -120,10 +121,14 @@ export const getAttendanceStatusDayCellStyle = ({
   hasError: boolean;
   isHolidayLike?: boolean;
 }): AttendanceDayCellStyle => {
-  if (status === AttendanceStatus.Error || hasError) return ERROR_DAY_CELL_STYLE;
+  if (status === AttendanceStatus.Error || hasError)
+    return ERROR_DAY_CELL_STYLE;
   if (status === AttendanceStatus.Late) return LATE_DAY_CELL_STYLE;
   if (status === AttendanceStatus.Ok) return OK_DAY_CELL_STYLE;
-  if (status === AttendanceStatus.Requesting || status === AttendanceStatus.Working) {
+  if (
+    status === AttendanceStatus.Requesting ||
+    status === AttendanceStatus.Working
+  ) {
     return ACTIVE_DAY_CELL_STYLE;
   }
   if (isHolidayLike) return HOLIDAY_DAY_CELL_STYLE;

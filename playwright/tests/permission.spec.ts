@@ -235,7 +235,7 @@ test.describe("未認証ユーザーの権限チェック", () => {
       await expect(page).toHaveURL(/\/login/);
 
       const loginForm = page.locator(
-        'input[name="username"], input[name="password"]'
+        'input[name="username"], input[name="password"]',
       );
       await expect(loginForm.first()).toBeVisible({ timeout: 5000 });
     });
@@ -249,7 +249,7 @@ test.describe("未認証ユーザーの権限チェック", () => {
       await expect(page).toHaveURL(/\/login/);
 
       const loginForm = page.locator(
-        'input[name="username"], input[name="password"]'
+        'input[name="username"], input[name="password"]',
       );
       await expect(loginForm.first()).toBeVisible({ timeout: 5000 });
     });
@@ -263,7 +263,7 @@ test.describe("未認証ユーザーの権限チェック", () => {
       await expect(page).toHaveURL(/\/login/);
 
       const loginForm = page.locator(
-        'input[name="username"], input[name="password"]'
+        'input[name="username"], input[name="password"]',
       );
       await expect(loginForm.first()).toBeVisible({ timeout: 5000 });
     });
@@ -275,7 +275,7 @@ test.describe("未認証ユーザーの権限チェック", () => {
 
       // ログインフォームが表示されることを確認
       const loginForm = page.locator(
-        'input[name="username"], input[name="password"]'
+        'input[name="username"], input[name="password"]',
       );
       await expect(loginForm.first()).toBeVisible({ timeout: 5000 });
     });

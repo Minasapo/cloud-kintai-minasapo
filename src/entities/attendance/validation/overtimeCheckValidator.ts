@@ -1,4 +1,5 @@
 import { validationMessages } from "@shared/config/validationMessages";
+import { isCompleteTime, parseTimeToISOOrNull } from "@shared/lib/time";
 import dayjs, { Dayjs } from "dayjs";
 
 export interface OvertimeCheckContext {
@@ -42,63 +43,72 @@ export function validateOvertimeCheck(
     return { isValid: true };
   }
 
-  try {
-    // endTime が HH:mm 形式の場合、dayjs で直接処理できないため、
-    // createTimeFromHHmm で処理する必要がある
-    let endTimeDayjs: Dayjs;
-    if (/^\d{2}:\d{2}$/.test(endTime)) {
-      endTimeDayjs = createTimeFromHHmm(endTime);
-    } else {
-      endTimeDayjs = dayjs(endTime);
+  const endTimeDayjs = parseComparableTime(endTime);
+  if (!endTimeDayjs) {
+    return {
+      isValid: false,
+      errorMessage: validationMessages.common.invalidDateTime,
+    };
+  }
+
+  const workEndTimeDayjs = parseComparableTime(context.workEndTime);
+  if (!workEndTimeDayjs) {
+    return {
+      isValid: false,
+      errorMessage: validationMessages.common.invalidDateTime,
+    };
+  }
+
+  // 退勤時刻が業務終了時間を超えているかチェック
+  if (endTimeDayjs.isAfter(workEndTimeDayjs)) {
+    // 残業申請が存在するかチェック
+    if (!context.hasOvertimeRequest) {
+      return {
+        isValid: false,
+        errorMessage:
+          validationMessages.attendance.overtime?.notRequested ||
+          "業務終了時間を超過しています。残業申請が必要です。",
+      };
     }
 
-    const workEndTimeDayjs = createTimeFromHHmm(context.workEndTime);
-
-    // 退勤時刻が業務終了時間を超えているかチェック
-    if (endTimeDayjs.isAfter(workEndTimeDayjs)) {
-      // 残業申請が存在するかチェック
-      if (!context.hasOvertimeRequest) {
+    // 残業申請の終了時刻が設定されている場合、超過チェック
+    if (context.overtimeRequestEndTime) {
+      const overtimeEndTimeDayjs = parseComparableTime(
+        context.overtimeRequestEndTime,
+      );
+      if (!overtimeEndTimeDayjs) {
         return {
           isValid: false,
-          errorMessage:
-            validationMessages.attendance.overtime?.notRequested ||
-            "業務終了時間を超過しています。残業申請が必要です。",
+          errorMessage: validationMessages.common.invalidDateTime,
         };
       }
 
-      // 残業申請の終了時刻が設定されている場合、超過チェック
-      if (context.overtimeRequestEndTime) {
-        const overtimeEndTimeDayjs = createTimeFromHHmm(
-          context.overtimeRequestEndTime,
-        );
-
-        if (endTimeDayjs.isAfter(overtimeEndTimeDayjs)) {
-          return {
-            isValid: false,
-            errorMessage:
-              validationMessages.attendance.overtime?.exceededApprovedTime ||
-              "残業申請の終了時刻を超過しています。",
-          };
-        }
+      if (endTimeDayjs.isAfter(overtimeEndTimeDayjs)) {
+        return {
+          isValid: false,
+          errorMessage:
+            validationMessages.attendance.overtime?.exceededApprovedTime ||
+            "残業申請の終了時刻を超過しています。",
+        };
       }
     }
-
-    return { isValid: true };
-  } catch {
-    // eslint-disable-next-line no-empty
-    // 時刻のパース失敗時はチェック対象外とする
-    return { isValid: true };
   }
+
+  return { isValid: true };
 }
 
-/**
- * HH:mm 形式の文字列から同じ日の dayjs オブジェクトを作成
- * @param timeStr HH:mm 形式の文字列
- * @returns dayjs オブジェクト
- */
-function createTimeFromHHmm(timeStr: string): Dayjs {
-  const [hours, minutes] = timeStr.split(":").map(Number);
-  return dayjs().hour(hours).minute(minutes).second(0).millisecond(0);
+function parseComparableTime(timeStr: string | null | undefined): Dayjs | null {
+  if (!timeStr) {
+    return null;
+  }
+
+  if (isCompleteTime(timeStr)) {
+    const isoTime = parseTimeToISOOrNull(timeStr, "2000-01-01");
+    return isoTime ? dayjs(isoTime) : null;
+  }
+
+  const parsed = dayjs(timeStr);
+  return parsed.isValid() ? parsed : null;
 }
 
 /**

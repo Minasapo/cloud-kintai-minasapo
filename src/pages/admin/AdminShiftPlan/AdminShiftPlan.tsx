@@ -1,5 +1,6 @@
 import { useCalendars } from "@entities/calendar/model/useCalendars";
 import { designTokenVar } from "@shared/designSystem";
+import { createLogger } from "@shared/lib/logger";
 import { useAppNotification } from "@shared/lib/useAppNotification";
 import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
 import dayjs from "dayjs";
@@ -9,6 +10,8 @@ import * as MESSAGE_CODE from "@/errors";
 
 import { ShiftPlanFooter, ShiftPlanHeader, ShiftPlanTable } from "./components";
 import { useAutoSave, useDayCellFocus, useShiftPlanData } from "./hooks";
+
+const logger = createLogger("AdminShiftPlan");
 
 const PAGE_PADDING_X_XS = designTokenVar("spacing.sm", "8px");
 const PAGE_PADDING_X_MD = designTokenVar("spacing.xxl", "32px");
@@ -38,7 +41,7 @@ export default function AdminShiftPlan() {
 
   useEffect(() => {
     if (calendarsError) {
-      console.error(calendarsError);
+      logger.error(calendarsError);
       notify({
         title: "エラー",
         description: MESSAGE_CODE.E00001,

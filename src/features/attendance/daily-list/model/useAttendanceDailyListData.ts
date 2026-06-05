@@ -4,6 +4,7 @@ import useAttendanceDaily, {
 } from "@entities/attendance/model/useAttendanceDaily";
 import { useCalendars } from "@entities/calendar/model/useCalendars";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo } from "react";
@@ -13,6 +14,8 @@ import { useParams } from "react-router-dom";
 import * as MESSAGE_CODE from "@/errors";
 
 import { useAttendanceDailyFetch } from "./useAttendanceDailyFetch";
+
+const logger = createLogger("AttendanceDailyList");
 
 type UseAttendanceDailyListDataResult = {
   targetWorkDate?: string;
@@ -84,7 +87,7 @@ export function useAttendanceDailyListData({
 
     const dateToLoad = targetWorkDate || today;
     loadAttendanceDataByMonth(dateToLoad).catch((loadError) => {
-      console.error("Failed to load attendance data for month:", loadError);
+      logger.error("Failed to load attendance data for month:", loadError);
     });
   }, [targetWorkDate, today, loadAttendanceDataByMonth]);
 
@@ -99,7 +102,7 @@ export function useAttendanceDailyListData({
         message: MESSAGE_CODE.E00001,
       }),
     );
-    console.error(error);
+    logger.error("Failed to load attendance data:", error);
   }, [dispatch, error]);
 
   useEffect(() => {
@@ -113,7 +116,7 @@ export function useAttendanceDailyListData({
         message: MESSAGE_CODE.E00001,
       }),
     );
-    console.error(calendarsError);
+    logger.error("Failed to load holiday calendars:", calendarsError);
   }, [calendarsError, dispatch]);
 
   const sortedAttendanceList = useMemo(() => {

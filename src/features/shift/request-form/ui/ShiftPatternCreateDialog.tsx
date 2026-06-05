@@ -4,12 +4,11 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Stack,
-  TextField,
-  Typography,
+  Stack,  Typography,
 } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
 import { AppDialog } from "@shared/ui/feedback";
+import { AppTextField } from "@shared/ui/form";
 
 import { ShiftRequestDayStatus } from "../model/statusMapping";
 import { STATUS_LABEL_MAP, WEEKDAY_LABELS } from "./constants";
@@ -53,7 +52,7 @@ export function ShiftPatternCreateDialog({
       }
     >
       <Stack spacing={2} sx={{ mt: 1 }}>
-        <TextField
+        <AppTextField
           label="パターン名"
           value={newPatternName}
           onChange={(event) => onChangeName(event.target.value)}

@@ -3,8 +3,11 @@ import {
   mapCognitoGroupsToStaffRoles,
   StaffRole,
 } from "@entities/staff/lib/staffRoleMapping";
+import { createLogger } from "@shared/lib/logger";
 import { fetchAuthSession } from "aws-amplify/auth";
 import { useEffect, useState } from "react";
+
+const logger = createLogger("CognitoUser");
 
 export interface CognitoUser {
   id: string;
@@ -92,7 +95,7 @@ export default function useCognitoUser() {
           setLoading(false);
         }
       } catch (error) {
-        console.error(error);
+        logger.error("Failed to load cognito user", error);
         if (isMounted) {
           setCognitoUser(null);
           setLoading(false);

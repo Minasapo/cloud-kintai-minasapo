@@ -1,11 +1,11 @@
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import { CopyCalendarItem } from "@features/admin/holidayCalendar/ui/components/CopyCalendarItem";
-import { TextField } from "@mui/material";
 import {
   CreateEventCalendarInput,
   EventCalendar,
 } from "@shared/api/graphql/types";
 import { EventCalendarMessage } from "@shared/lib/message/EventCalendarMessage";
+import { AppTextField } from "@shared/ui/form";
 
 export default function EventCalendarCopy({
   eventCalendar,
@@ -36,7 +36,7 @@ export default function EventCalendarCopy({
       })}
       createItem={createEventCalendar}
       renderExtraFields={(register) => (
-        <TextField
+        <AppTextField
           label="詳細 (任意)"
           multiline
           rows={3}

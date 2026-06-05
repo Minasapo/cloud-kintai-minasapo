@@ -1,3 +1,4 @@
+import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -5,6 +6,8 @@ import { useDispatch } from "react-redux";
 import * as MESSAGE_CODE from "@/errors";
 
 import { ShiftState } from "../lib/generateMockShifts";
+
+const logger = createLogger("ShiftManagementDialogs");
 
 export type ShiftEditingTarget = {
     staffId: string;
@@ -44,7 +47,7 @@ export default function useShiftManagementDialogs(applyShiftState: ApplyShiftSta
             closeShiftEditDialog();
         }
         catch (error) {
-            console.error("Failed to save shift edit", error);
+            logger.error("Failed to save shift edit", error);
             dispatch(pushNotification({
                 tone: "error",
                 message: MESSAGE_CODE.E16001
@@ -82,7 +85,7 @@ export default function useShiftManagementDialogs(applyShiftState: ApplyShiftSta
             closeBulkEditDialog();
         }
         catch (error) {
-            console.error("Failed to apply bulk shift edit", error);
+            logger.error("Failed to apply bulk shift edit", error);
             dispatch(pushNotification({
                 tone: "error",
                 message: MESSAGE_CODE.E16001

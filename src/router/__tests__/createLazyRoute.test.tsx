@@ -67,6 +67,35 @@ describe("createLazyRoute", () => {
     expect(screen.getByTestId("error")).toHaveTextContent("error");
   });
 
+  it("sets default ErrorBoundary when no boundary option is provided", async () => {
+    const lazy = createLazyRoute(async () => ({ default: Component }));
+    const route = await lazy();
+
+    expect(route.ErrorBoundary).toBeDefined();
+  });
+
+  it("wraps component with feature error boundary", async () => {
+    const ThrowingComponent: React.FC = () => {
+      throw new Error("feature crash");
+    };
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    const lazy = createLazyRoute(async () => ({ default: ThrowingComponent }));
+    const route = await lazy();
+    const RouteComponent = route.Component!;
+
+    render(<RouteComponent />);
+
+    expect(
+      screen.getByText("画面の一部で問題が発生しました")
+    ).toBeInTheDocument();
+    expect(screen.getByText("feature crash")).toBeInTheDocument();
+
+    consoleErrorSpy.mockRestore();
+  });
+
   it("supports hydrateFallback as element or component", async () => {
     const elementFallback = <div data-testid="fallback-element">fallback</div>;
     const lazyElement = createLazyRoute(async () => ({ default: Component }), {

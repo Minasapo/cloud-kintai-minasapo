@@ -49,15 +49,14 @@ describe("AdminShiftSettings", () => {
 
     renderWithRouter(<AdminShiftSettings />);
 
-    const shiftGroupTabElement = screen.getByRole("tab", { name: shiftGroupTab });
+    const shiftGroupTabElement = screen.getByRole("tab", {
+      name: shiftGroupTab,
+    });
     const shiftDisplayTabElement = screen.getByRole("tab", {
       name: shiftDisplayTab,
     });
 
-    expect(shiftGroupTabElement).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
+    expect(shiftGroupTabElement).toHaveAttribute("aria-selected", "true");
     expect(shiftGroupTabElement).toHaveAttribute(
       "aria-controls",
       "admin-shift-settings-panel-shift-group",
@@ -75,10 +74,7 @@ describe("AdminShiftSettings", () => {
 
     await user.click(shiftDisplayTabElement);
 
-    expect(shiftDisplayTabElement).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
+    expect(shiftDisplayTabElement).toHaveAttribute("aria-selected", "true");
     expect(screen.getByText("表示モード")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "共同編集モード" }),

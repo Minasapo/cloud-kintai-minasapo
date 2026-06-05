@@ -7,12 +7,15 @@ import {
   ShiftPlanYearByTargetYearQuery,
   ShiftPlanYearByTargetYearQueryVariables,
 } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { GraphQLResult } from "aws-amplify/api";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import { buildRowsFromPlans, ShiftPlanRow } from "../shiftPlanUtils";
 import type { ShiftPlanRecordMeta } from "./useShiftPlanData";
+
+const logger = createLogger("ShiftPlanFetching");
 
 type UseShiftPlanFetchingParams = {
   selectedYear: number;
@@ -81,7 +84,7 @@ export const useShiftPlanFetching = ({
           });
         }
       } catch (error) {
-        console.error(error);
+        logger.error("Failed to fetch shift plan", error);
         if (isMounted) {
           dispatch(
             pushNotification({

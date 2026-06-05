@@ -18,9 +18,9 @@ type ShiftPlanTableProps = {
   onRegisterCellRef: (cellId: string, element: HTMLElement | null) => void;
 };
 
-const thCell = "px-2 py-2 text-xs font-semibold text-left whitespace-nowrap border-b border-[#D9E2DD]";
-const thCellCenter = "px-1 py-2 text-xs font-semibold text-center whitespace-nowrap border-b border-[#D9E2DD]";
-const tdCell = "px-2 py-1.5 text-sm whitespace-nowrap border-b border-[#EDF1EF]";
+const thCell = "px-2 py-2 text-xs font-semibold text-left whitespace-nowrap border-b border-[rgb(217,226,221)]";
+const thCellCenter = "px-1 py-2 text-xs font-semibold text-center whitespace-nowrap border-b border-[rgb(217,226,221)]";
+const tdCell = "px-2 py-1.5 text-sm whitespace-nowrap border-b border-[rgb(237,241,239)]";
 
 const ShiftPlanTableBase: React.FC<ShiftPlanTableProps> = ({
   selectedYear,
@@ -36,15 +36,15 @@ const ShiftPlanTableBase: React.FC<ShiftPlanTableProps> = ({
   return (
     <div className="relative overflow-x-auto rounded-2xl border border-[rgba(226,232,240,0.8)] bg-white shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)]">
       {isBusy && (
-        <div className="absolute inset-x-0 top-0 h-[3px] z-10 overflow-hidden rounded-t-2xl bg-[#EDF1EF]">
+        <div className="absolute inset-x-0 top-0 h-[3px] z-10 overflow-hidden rounded-t-2xl bg-[rgb(237,241,239)]">
           <div
             className="h-full animate-pulse"
-            style={{ backgroundColor: "#0FA85E" }}
+            style={{ backgroundColor: "rgb(15 168 94)" }}
           />
         </div>
       )}
       <table className="w-full border-collapse text-sm">
-        <thead className="bg-[#F8FAF9]">
+        <thead className="bg-[rgb(248,250,249)]">
           <tr>
             <th rowSpan={2} className={thCell} style={{ width: 72 }}>月</th>
             <th rowSpan={2} className={thCell} style={{ width: 152 }}>申請開始</th>
@@ -53,7 +53,7 @@ const ShiftPlanTableBase: React.FC<ShiftPlanTableProps> = ({
             <th
               colSpan={DAY_COLUMNS.length}
               className={thCellCenter}
-              style={{ borderLeft: "1px solid #D9E2DD" }}
+              style={{ borderLeft: "1px solid rgb(217 226 221)" }}
             >
               日別人数
             </th>
@@ -63,7 +63,7 @@ const ShiftPlanTableBase: React.FC<ShiftPlanTableProps> = ({
               <th
                 key={`day-header-${day}`}
                 className={thCellCenter}
-                style={{ minWidth: 52, padding: "4px 2px", borderLeft: day === 1 ? "1px solid #D9E2DD" : undefined }}
+                style={{ minWidth: 52, padding: "4px 2px", borderLeft: day === 1 ? "1px solid rgb(217 226 221)" : undefined }}
               >
                 {day}
               </th>
@@ -75,9 +75,9 @@ const ShiftPlanTableBase: React.FC<ShiftPlanTableProps> = ({
             const monthCursor = dayjs().year(selectedYear).month(row.month - 1);
             const rowDaysInMonth = monthCursor.daysInMonth();
             return (
-              <tr key={`${selectedYear}-${row.month}`} className="hover:bg-[#F8FAF9] transition-colors">
+              <tr key={`${selectedYear}-${row.month}`} className="hover:bg-[rgb(248,250,249)] transition-colors">
                 <td className={tdCell}>
-                  <span className="font-bold" style={{ color: "#1E2A25" }}>
+                  <span className="font-bold" style={{ color: "rgb(30 42 37)" }}>
                     {row.month}月
                   </span>
                 </td>
@@ -86,8 +86,8 @@ const ShiftPlanTableBase: React.FC<ShiftPlanTableProps> = ({
                     type="date"
                     value={row.editStart}
                     onChange={(e) => onFieldChange(row.month, "editStart", e.target.value)}
-                    className="text-sm px-2 py-1 rounded-md border border-[#C3CFC7] focus:outline-none focus:ring-2 focus:ring-[rgba(15,168,94,0.3)] w-full max-w-[160px]"
-                    style={{ color: "#2E3D36" }}
+                    className="text-sm px-2 py-1 rounded-md border border-[rgb(195,207,199)] focus:outline-none focus:ring-2 focus:ring-[rgba(15,168,94,0.3)] w-full max-w-[160px]"
+                    style={{ color: "rgb(46 61 54)" }}
                   />
                 </td>
                 <td className={tdCell}>
@@ -95,8 +95,8 @@ const ShiftPlanTableBase: React.FC<ShiftPlanTableProps> = ({
                     type="date"
                     value={row.editEnd}
                     onChange={(e) => onFieldChange(row.month, "editEnd", e.target.value)}
-                    className="text-sm px-2 py-1 rounded-md border border-[#C3CFC7] focus:outline-none focus:ring-2 focus:ring-[rgba(15,168,94,0.3)] w-full max-w-[160px]"
-                    style={{ color: "#2E3D36" }}
+                    className="text-sm px-2 py-1 rounded-md border border-[rgb(195,207,199)] focus:outline-none focus:ring-2 focus:ring-[rgba(15,168,94,0.3)] w-full max-w-[160px]"
+                    style={{ color: "rgb(46 61 54)" }}
                   />
                 </td>
                 <td className={`${tdCell} text-center`}>
@@ -131,8 +131,8 @@ const ShiftPlanTableBase: React.FC<ShiftPlanTableProps> = ({
                           padding: "0 2px",
                           minWidth: 52,
                           whiteSpace: "nowrap",
-                          borderBottom: "1px solid #EDF1EF",
-                          borderLeft: day === 1 ? "1px solid #D9E2DD" : undefined,
+                          borderBottom: "1px solid rgb(237 241 239)",
+                          borderLeft: day === 1 ? "1px solid rgb(217 226 221)" : undefined,
                         }}
                       />
                     );

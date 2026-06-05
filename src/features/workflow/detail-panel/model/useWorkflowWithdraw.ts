@@ -23,9 +23,9 @@ export function useWorkflowWithdraw({
   notify,
   navigate,
 }: UseWorkflowWithdrawParams) {
-  const handleWithdraw = useCallback(async () => {
+  const executeWithdraw = useCallback(async () => {
     if (!workflow?.id) return;
-    if (!window.confirm("本当に取り下げますか？")) return;
+
     try {
       const statusInput: UpdateWorkflowInput = {
         id: workflow.id,
@@ -54,5 +54,5 @@ export function useWorkflowWithdraw({
     }
   }, [workflow, updateWorkflow, setWorkflow, notify, navigate]);
 
-  return { handleWithdraw };
+  return { executeWithdraw };
 }

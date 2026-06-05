@@ -1,6 +1,6 @@
 import { useAppDispatchV2 } from "@app/hooks";
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
-import { Stack, TextField } from "@mui/material";
+import { Stack } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import type { MessageGenerator } from "@shared/lib/message/Message";
 import { MessageStatus } from "@shared/lib/message/Message";
@@ -9,6 +9,7 @@ import { AppButton } from "@shared/ui/button";
 import { AppCopyIconButton } from "@shared/ui/button/AppActionIconButton";
 import AppDialog from "@shared/ui/feedback/AppDialog";
 import { useDialogCloseGuard } from "@shared/ui/feedback/useDialogCloseGuard";
+import { AppTextField } from "@shared/ui/form";
 import dayjs from "dayjs";
 import { type ReactNode, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -90,24 +91,23 @@ export function CopyCalendarItem<TItem, TInput>({
   const serialize = serializeDate ?? ((d: dayjs.Dayjs) => d.toISOString());
 
   const onSubmit = async (data: BaseCopyInputs) => {
-    await createItem(buildCreateInput(data))
-      .then(() => {
-        dispatch(
-          pushNotification({
-            tone: "success",
-            message: messageFactory.create(MessageStatus.SUCCESS),
-          }),
-        );
-        closeWithoutGuard();
-      })
-      .catch(() => {
-        dispatch(
-          pushNotification({
-            tone: "error",
-            message: messageFactory.create(MessageStatus.ERROR),
-          }),
-        );
-      });
+    try {
+      await createItem(buildCreateInput(data));
+      dispatch(
+        pushNotification({
+          tone: "success",
+          message: messageFactory.create(MessageStatus.SUCCESS),
+        }),
+      );
+      closeWithoutGuard();
+    } catch {
+      dispatch(
+        pushNotification({
+          tone: "error",
+          message: messageFactory.create(MessageStatus.ERROR),
+        }),
+      );
+    }
   };
 
   return (
@@ -163,7 +163,7 @@ export function CopyCalendarItem<TItem, TInput>({
               );
             }}
           />
-          <TextField
+          <AppTextField
             label={nameLabel}
             required
             {...register("name", { required: true })}

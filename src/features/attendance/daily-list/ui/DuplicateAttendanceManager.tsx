@@ -26,8 +26,11 @@ import {
   Typography,
 } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
+import { formatISOToTimeOr } from "@shared/lib/time";
 import { AppButton } from "@shared/ui/button";
+import ConfirmDialog from "@shared/ui/feedback/ConfirmDialog";
 import dayjs from "dayjs";
 import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -38,6 +41,8 @@ import {
   DuplicateSelectionMode,
   useDuplicateSelectionModel,
 } from "../model/useDuplicateSelectionModel";
+
+const logger = createLogger("DuplicateAttendanceManager");
 
 const diffWrapperSx = { whiteSpace: "pre-wrap" } as const;
 const diffHighlightSx = {
@@ -107,15 +112,14 @@ type DuplicateAttendanceBadgeProps = {
 };
 
 function buildConfirmFieldRows(): ConfirmFieldRow[] {
-  const formatTime = (value?: string | null) =>
-    value ? dayjs(value).format("HH:mm") : "-";
+  const formatTime = (value?: string | null) => formatISOToTimeOr(value);
   const formatDate = (value?: string | null) =>
     value ? dayjs(value).format("YYYY/MM/DD") : "-";
   const formatBool = (value?: boolean | null) => (value ? "○" : "-");
   const formatRests = (rests?: Attendance["rests"]) => {
     const items = (rests ?? []).filter(Boolean).map((rest) => {
-      const start = rest?.startTime ? dayjs(rest.startTime).format("HH:mm") : "-";
-      const end = rest?.endTime ? dayjs(rest.endTime).format("HH:mm") : "-";
+      const start = formatISOToTimeOr(rest?.startTime);
+      const end = formatISOToTimeOr(rest?.endTime);
       return `${start}-${end}`;
     });
     return items.length ? items.join(" / ") : "-";
@@ -124,8 +128,8 @@ function buildConfirmFieldRows(): ConfirmFieldRow[] {
     hourlyTimes?: Attendance["hourlyPaidHolidayTimes"],
   ) => {
     const items = (hourlyTimes ?? []).filter(Boolean).map((time) => {
-      const start = time?.startTime ? dayjs(time.startTime).format("HH:mm") : "-";
-      const end = time?.endTime ? dayjs(time.endTime).format("HH:mm") : "-";
+      const start = formatISOToTimeOr(time?.startTime);
+      const end = formatISOToTimeOr(time?.endTime);
       return `${start}-${end}`;
     });
     return items.length ? items.join(" / ") : "-";
@@ -134,10 +138,8 @@ function buildConfirmFieldRows(): ConfirmFieldRow[] {
     changeRequests?: Attendance["changeRequests"],
   ) => {
     const items = (changeRequests ?? []).filter(Boolean).map((request, idx) => {
-      const start = request?.startTime
-        ? dayjs(request.startTime).format("HH:mm")
-        : "-";
-      const end = request?.endTime ? dayjs(request.endTime).format("HH:mm") : "-";
+      const start = formatISOToTimeOr(request?.startTime);
+      const end = formatISOToTimeOr(request?.endTime);
       const completed = request?.completed ? "済" : "未";
       return `#${idx + 1}: ${start}-${end} / ${completed}`;
     });
@@ -384,6 +386,11 @@ type UseDuplicateConfirmStateParams = {
   selectedRecordIndex: number | null;
 };
 
+type UseDuplicateAttendanceManagerStateParams = {
+  duplicates: DuplicateAttendanceDaily[];
+  staffNameMap: Record<string, string>;
+};
+
 function useDuplicateConfirmState({
   dispatch,
   duplicates,
@@ -401,6 +408,8 @@ function useDuplicateConfirmState({
   const [confirmTargetName, setConfirmTargetName] = useState("");
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [confirmRecords, setConfirmRecords] = useState<Attendance[]>([]);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteTargetIds, setDeleteTargetIds] = useState<string[]>([]);
 
   const handleOpenConfirm = useCallback(
     async (staffId: string) => {
@@ -422,7 +431,7 @@ function useDuplicateConfirmState({
               const response = await triggerGetAttendanceById({ id }).unwrap();
               return response ?? null;
             } catch (error) {
-              console.error(error);
+              logger.error("Failed to fetch attendance", error);
               return null;
             }
           }),
@@ -437,13 +446,13 @@ function useDuplicateConfirmState({
           });
         setConfirmRecords(validRecords);
       } catch (error) {
+        logger.error("Failed to handle duplicate attendance", error);
         dispatch(
           pushNotification({
             tone: "error",
             message: MESSAGE_CODE.E00001,
           }),
         );
-        console.error(error);
       } finally {
         setConfirmLoading(false);
       }
@@ -467,12 +476,11 @@ function useDuplicateConfirmState({
     resetSelection();
   }, [resetSelection]);
 
-  const handleDeleteDuplicates = useCallback(async () => {
+  const handleRequestDeleteDuplicates = useCallback(() => {
     if (selectedRecordIndex === null) {
       return;
     }
 
-    const selected = confirmRecords[selectedRecordIndex];
     const toDelete = confirmRecords
       .filter((_, index) => index !== selectedRecordIndex)
       .map((record) => record.id)
@@ -482,22 +490,31 @@ function useDuplicateConfirmState({
       return;
     }
 
-    const ok = window.confirm(
-      `選択したデータのみを残し、他の重複レコードを削除します。対象件数: ${toDelete.length}
-削除対象ID: ${toDelete.join(", ")}
-この操作は取り消せません。実行しますか？`,
-    );
-    if (!ok) {
+    setDeleteTargetIds(toDelete);
+    setDeleteConfirmOpen(true);
+  }, [confirmRecords, selectedRecordIndex]);
+
+  const handleCancelDeleteDuplicates = useCallback(() => {
+    setDeleteConfirmOpen(false);
+    setDeleteTargetIds([]);
+  }, []);
+
+  const handleDeleteDuplicates = useCallback(async () => {
+    if (selectedRecordIndex === null || deleteTargetIds.length === 0) {
       return;
     }
 
+    const selected = confirmRecords[selectedRecordIndex];
+    setDeleteConfirmOpen(false);
+    setDeleteTargetIds([]);
+
     setConfirmLoading(true);
     try {
-      for (const id of toDelete) {
+      for (const id of deleteTargetIds) {
         try {
           await deleteAttendance({ id }).unwrap();
         } catch (error) {
-          console.error("Failed to delete attendance:", id, error);
+          logger.error("Failed to delete attendance:", id, error);
           dispatch(
             pushNotification({
               tone: "error",
@@ -517,7 +534,15 @@ function useDuplicateConfirmState({
     } finally {
       setConfirmLoading(false);
     }
-  }, [confirmRecords, deleteAttendance, dispatch, selectedRecordIndex]);
+  }, [confirmRecords, deleteAttendance, deleteTargetIds, dispatch, selectedRecordIndex]);
+
+  const deleteConfirmMessage = useMemo(() => {
+    if (deleteTargetIds.length === 0) {
+      return "";
+    }
+
+    return `選択したデータのみを残し、他の重複レコードを削除します。対象件数: ${deleteTargetIds.length}\n削除対象ID: ${deleteTargetIds.join(", ")}\nこの操作は取り消せません。実行しますか？`;
+  }, [deleteTargetIds]);
 
   return {
     confirmOpen,
@@ -528,20 +553,22 @@ function useDuplicateConfirmState({
     handleOpenConfirm,
     handleOpenConfirmClick,
     handleCloseConfirm,
+    handleRequestDeleteDuplicates,
+    handleCancelDeleteDuplicates,
     handleDeleteDuplicates,
+    deleteConfirmOpen,
+    deleteConfirmMessage,
   };
 }
 
-export function DuplicateAttendanceManager({
+function useDuplicateAttendanceManagerState({
   duplicates,
   staffNameMap,
-}: DuplicateAttendanceManagerProps) {
+}: UseDuplicateAttendanceManagerStateParams) {
   const dispatch = useDispatch();
   const [triggerGetAttendanceById] = useLazyGetAttendanceByIdQuery();
   const [deleteAttendance] = useDeleteAttendanceMutation();
-
   const confirmFieldRows = useMemo(() => buildConfirmFieldRows(), []);
-
   const {
     selectionMode,
     selectedRecordIndex,
@@ -554,7 +581,6 @@ export function DuplicateAttendanceManager({
   } = useDuplicateSelectionModel({
     fieldLabels: confirmFieldRows.map((row) => row.label),
   });
-
   const {
     confirmOpen,
     confirmTargetStaffId,
@@ -563,7 +589,11 @@ export function DuplicateAttendanceManager({
     confirmRecords,
     handleOpenConfirmClick,
     handleCloseConfirm,
+    handleRequestDeleteDuplicates,
+    handleCancelDeleteDuplicates,
     handleDeleteDuplicates,
+    deleteConfirmOpen,
+    deleteConfirmMessage,
   } = useDuplicateConfirmState({
     dispatch,
     duplicates,
@@ -573,6 +603,58 @@ export function DuplicateAttendanceManager({
     resetToRecordMode,
     resetSelection,
     selectedRecordIndex,
+  });
+
+  return {
+    confirmFieldRows,
+    selectionMode,
+    selectedRecordIndex,
+    fieldSelections,
+    handleChangeSelectionMode,
+    handleSelectRecord,
+    handleSelectField,
+    confirmOpen,
+    confirmTargetStaffId,
+    confirmTargetName,
+    confirmLoading,
+    confirmRecords,
+    handleOpenConfirmClick,
+    handleCloseConfirm,
+    handleRequestDeleteDuplicates,
+    handleCancelDeleteDuplicates,
+    handleDeleteDuplicates,
+    deleteConfirmOpen,
+    deleteConfirmMessage,
+  };
+}
+
+export function DuplicateAttendanceManager({
+  duplicates,
+  staffNameMap,
+}: DuplicateAttendanceManagerProps) {
+  const {
+    confirmFieldRows,
+    selectionMode,
+    selectedRecordIndex,
+    fieldSelections,
+    handleChangeSelectionMode,
+    handleSelectRecord,
+    handleSelectField,
+    confirmOpen,
+    confirmTargetStaffId,
+    confirmTargetName,
+    confirmLoading,
+    confirmRecords,
+    handleOpenConfirmClick,
+    handleCloseConfirm,
+    handleRequestDeleteDuplicates,
+    handleCancelDeleteDuplicates,
+    handleDeleteDuplicates,
+    deleteConfirmOpen,
+    deleteConfirmMessage,
+  } = useDuplicateAttendanceManagerState({
+    duplicates,
+    staffNameMap,
   });
 
   if (duplicates.length === 0) {
@@ -677,7 +759,11 @@ export function DuplicateAttendanceManager({
         </DialogContent>
         <DialogActions>
           {selectionMode === "record" && selectedRecordIndex !== null && (
-            <AppButton variant="outline" tone="danger" onClick={handleDeleteDuplicates}>
+            <AppButton
+              variant="outline"
+              tone="danger"
+              onClick={handleRequestDeleteDuplicates}
+            >
               選択したデータを残す
             </AppButton>
           )}
@@ -686,6 +772,17 @@ export function DuplicateAttendanceManager({
           </AppButton>
         </DialogActions>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title="重複データ削除の確認"
+        message={deleteConfirmMessage}
+        confirmLabel="削除する"
+        onConfirm={() => {
+          void handleDeleteDuplicates();
+        }}
+        onCancel={handleCancelDeleteDuplicates}
+      />
     </>
   );
 }

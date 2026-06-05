@@ -5,8 +5,11 @@ import {
   ShiftPlanYearByTargetYearQuery,
   ShiftPlanYearByTargetYearQueryVariables,
 } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { GraphQLResult } from "aws-amplify/api";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+const logger = createLogger("ShiftPlanYear");
 
 type UseShiftPlanYearResult = {
   plans: ShiftPlanMonthSetting[] | null;
@@ -80,7 +83,7 @@ const useShiftPlanYear = (
 
       setPlans(normalizePlans(record?.plans));
     } catch (err) {
-      console.error(err);
+      logger.error("Failed to fetch shift plan year", err);
       if (!isMountedRef.current) return;
       setError(buildErrorMessage(err));
       setPlans(null);
