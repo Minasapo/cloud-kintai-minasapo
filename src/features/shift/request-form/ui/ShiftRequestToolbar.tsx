@@ -3,12 +3,11 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import {
   Box,
-  Button,
   CircularProgress,
   Paper,
   Typography,
 } from "@mui/material";
-import { AppIconButton } from "@shared/ui/button";
+import { AppButton, AppIconButton } from "@shared/ui/button";
 import dayjs from "dayjs";
 
 type ShiftRequestToolbarProps = {
@@ -41,7 +40,7 @@ export function ShiftRequestToolbar({
         borderRadius: "24px",
         border: "1px solid rgba(226,232,240,0.8)",
         boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
-        bgcolor: "#ffffff",
+        bgcolor: "rgb(255 255 255)",
       }}
     >
       <Box
@@ -65,7 +64,7 @@ export function ShiftRequestToolbar({
             <ArrowBackIcon />
           </AppIconButton>
           <Typography
-            sx={{ fontSize: "1.05rem", fontWeight: 700, color: "#0f172a" }}
+            sx={{ fontSize: "1.05rem", fontWeight: 700, color: "rgb(15 23 42)" }}
           >
             {monthLabel}
           </Typography>
@@ -105,7 +104,8 @@ export function ShiftRequestToolbar({
         </Box>
 
         <Box sx={{ width: { xs: "100%", sm: "auto" } }}>
-          <Button
+          <AppButton
+            variant="solid"
             startIcon={<AddIcon />}
             onClick={onOpenPatterns}
             fullWidth={isMobile}
@@ -113,18 +113,17 @@ export function ShiftRequestToolbar({
               minWidth: 140,
               borderRadius: "9999px",
               border: "1px solid rgba(6,95,70,0.35)",
-              backgroundColor: "#19b985",
-              color: "#ffffff",
+              backgroundColor: "rgb(25 185 133)",
+              color: "rgb(255 255 255)",
               boxShadow:
                 "inset 0 -2px 0 rgba(0,0,0,0.12), 0 12px 24px -18px rgba(5,150,105,0.55)",
-              "&:hover": { backgroundColor: "#17ab7b" },
+              "&:hover": { backgroundColor: "rgb(23 171 123)" },
             }}
           >
             マイパターン
-          </Button>
+          </AppButton>
         </Box>
       </Box>
     </Paper>
   );
 }
-

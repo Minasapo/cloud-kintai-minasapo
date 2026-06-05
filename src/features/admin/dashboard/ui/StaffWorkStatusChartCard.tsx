@@ -44,7 +44,7 @@ function StaffWorkStatusChartCardComponent({
           {hasDuplicateAttendances ? (
             <Typography
               data-testid="admin-dashboard-staff-work-status-warning"
-              sx={{ mt: 1, fontSize: "0.75rem", color: "#b45309" }}
+              sx={{ mt: 1, fontSize: "0.75rem", color: "rgb(180 83 9)" }}
             >
               重複勤怠がある{duplicateAttendanceDayCount}日分を含む可能性があります
             </Typography>

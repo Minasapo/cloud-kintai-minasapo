@@ -15,6 +15,7 @@
 - スタイリングは MUI `sx` を主軸、Tailwind は補助、新規 SCSS は作らない
 - デザイントークンは `designTokenVar()` 経由で参照する
 - フォームは React Hook Form + Zod を基本にする
+- 拡張モジュールは `src/extensions/<name>/` 配下に `manifest.ts` を置いて宣言する。新規追加は `node scripts/create-extension.mjs <name>` で雛形生成。詳細は `docs/EXTENSION_ARCHITECTURE.md`
 
 ## アンチリグレッション・レビュー基準（肥大化防止）
 

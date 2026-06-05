@@ -5,6 +5,10 @@ import {
   StaffRole,
   useStaffs,
 } from "@entities/staff/model/useStaffs/useStaffs";
+import {
+  collectExtensionMenuItems,
+  extensionManifests,
+} from "@extensions/index";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -41,8 +45,7 @@ export default function NavigationMenu() {
   const { isOpen, closeDrawer, openDrawer } = useMobileDrawer();
   const { isCognitoUserRole, cognitoUser, authStatus } =
     useContext(AuthContext);
-  const { getOfficeMode, getAttendanceStatisticsEnabled } =
-    useContext(AppConfigContext);
+  const { getOfficeMode, derived } = useContext(AppConfigContext);
   const isAuthenticated = authStatus === "authenticated";
   const { staffs } = useStaffs({ isAuthenticated });
 
@@ -53,7 +56,9 @@ export default function NavigationMenu() {
       return null;
     }
 
-    return staffs.find((staff) => staff.cognitoUserId === cognitoUser.id) ?? null;
+    return (
+      staffs.find((staff) => staff.cognitoUserId === cognitoUser.id) ?? null
+    );
   })();
 
   const canAccessShiftMenu = isShiftWorkType(currentStaff?.workType);
@@ -62,7 +67,6 @@ export default function NavigationMenu() {
     () => [
       { label: "勤怠打刻", href: "/register" },
       { label: "勤怠一覧", href: "/attendance/list" },
-      { label: "稼働統計", href: "/attendance/stats" },
       { label: "日報", href: "/attendance/report" },
       { label: "シフト", href: "/shift" },
       { label: "ワークフロー", href: "/workflow" },
@@ -76,7 +80,6 @@ export default function NavigationMenu() {
   );
 
   const officeMode = getOfficeMode();
-  const attendanceStatisticsEnabled = getAttendanceStatisticsEnabled();
   const operatorMenuList: DesktopMenuItem[] = officeMode
     ? [{ label: "QR表示", href: "/office/qr" }]
     : [];
@@ -92,9 +95,6 @@ export default function NavigationMenu() {
 
   const desktopMenuItems = useMemo(() => {
     const filteredMenuList = menuList.filter((menu) => {
-      if (menu.href === "/attendance/stats") {
-        return attendanceStatisticsEnabled;
-      }
       if (menu.href === "/shift") {
         return canAccessShiftMenu;
       }
@@ -103,22 +103,48 @@ export default function NavigationMenu() {
 
     if (!isMailVerified) return [];
 
+    // Extension-contributed menu items, filtered by manifest enabled state
+    // and per-item role/visibility constraints.
+    const extensionItems = collectExtensionMenuItems(extensionManifests)
+      .filter((item) => {
+        const manifest = extensionManifests.find((m) =>
+          (m.menuItems ?? []).includes(item),
+        );
+        if (manifest?.isEnabled && !manifest.isEnabled(derived)) return false;
+        if (
+          item.isVisible &&
+          !item.isVisible({ derived, isAdmin: isAdminUser })
+        )
+          return false;
+        if (item.roles && item.roles.length > 0) {
+          const allowed = item.roles.some((role) =>
+            isCognitoUserRole(StaffRole[role]),
+          );
+          if (!allowed) return false;
+        }
+        return true;
+      })
+      .map<DesktopMenuItem>((item) => ({
+        label: item.label,
+        href: item.href,
+      }));
+
     if (isAdminUser) {
-      return [...filteredMenuList, ...operatorMenuList];
+      return [...filteredMenuList, ...extensionItems, ...operatorMenuList];
     }
 
     if (isCognitoUserRole(StaffRole.STAFF)) {
-      return filteredMenuList;
+      return [...filteredMenuList, ...extensionItems];
     }
 
     if (isCognitoUserRole(StaffRole.OPERATOR)) {
-      return operatorMenuList;
+      return [...operatorMenuList, ...extensionItems];
     }
 
     return [];
   }, [
-    attendanceStatisticsEnabled,
     canAccessShiftMenu,
+    derived,
     isAdminUser,
     isCognitoUserRole,
     isMailVerified,

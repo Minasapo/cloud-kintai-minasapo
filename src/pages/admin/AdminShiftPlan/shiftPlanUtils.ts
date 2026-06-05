@@ -12,7 +12,10 @@ export type ShiftPlanRow = {
   dailyCapacity: string[];
 };
 
-export type EditableField = Extract<keyof ShiftPlanRow, "editStart" | "editEnd">;
+export type EditableField = Extract<
+  keyof ShiftPlanRow,
+  "editStart" | "editEnd"
+>;
 
 // デフォルトは「月初〜月末」のフルレンジになるよう事前入力しておく
 export const MAX_DAYS_IN_MONTH = 31;
@@ -22,14 +25,14 @@ export const DAY_COLUMNS = Array.from(
 );
 export const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 // デザインシステムのフィードバックカラー（feedback.danger/info/warning.surface）
-export const SUNDAY_BG = "#FDECEC";
-export const SATURDAY_BG = "#EDF2FC";
-export const HOLIDAY_BG = "#FFF7EA";
+export const SUNDAY_BG = "rgb(253 236 236)";
+export const SATURDAY_BG = "rgb(237 242 252)";
+export const HOLIDAY_BG = "rgb(255 247 234)";
 // テキストカラー（feedback.danger/info/warning.base + neutral.500）
-export const SUNDAY_TEXT = "#D7443E";
-export const SATURDAY_TEXT = "#3C7EDB";
-export const NORMAL_TEXT = "#7D9288";
-export const HOLIDAY_TEXT = "#E8A447";
+export const SUNDAY_TEXT = "rgb(215 68 62)";
+export const SATURDAY_TEXT = "rgb(60 126 219)";
+export const NORMAL_TEXT = "rgb(125 146 136)";
+export const HOLIDAY_TEXT = "rgb(232 164 71)";
 export const INPUT_PLACEHOLDER = "入力";
 // 自動保存の遅延時間（ミリ秒）
 export const AUTO_SAVE_DELAY = 1000;
@@ -108,7 +111,10 @@ export const getOrInitYearRows = (
   rowsByYear: Record<number, ShiftPlanRow[]>,
 ): ShiftPlanRow[] => rowsByYear[year] ?? createDefaultRows(year);
 
-export const areRowsEqual = (left: ShiftPlanRow[], right: ShiftPlanRow[]): boolean => {
+export const areRowsEqual = (
+  left: ShiftPlanRow[],
+  right: ShiftPlanRow[],
+): boolean => {
   if (left.length !== right.length) return false;
   for (let i = 0; i < left.length; i += 1) {
     const a = left[i];

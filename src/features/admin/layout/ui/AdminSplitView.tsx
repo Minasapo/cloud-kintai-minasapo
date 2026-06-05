@@ -6,7 +6,7 @@ import { Group, Panel, Separator } from "react-resizable-panels";
 
 const PANEL_SEPARATOR_STYLE = {
   width: "8px",
-  backgroundColor: "#e2e8f0",
+  backgroundColor: "rgb(226 232 240)",
   cursor: "col-resize",
 } as const;
 
@@ -32,7 +32,7 @@ const EmptyPanelState = memo(function EmptyPanelState({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        color: "#64748b",
+        color: "rgb(100 116 139)",
         fontSize: "0.9rem",
       }}
     >

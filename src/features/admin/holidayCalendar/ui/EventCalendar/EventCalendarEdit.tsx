@@ -1,7 +1,7 @@
 import { EditCalendarItem } from "@features/admin/holidayCalendar/ui/components/EditCalendarItem";
-import { TextField } from "@mui/material";
 import { EventCalendar } from "@shared/api/graphql/types";
 import { EventCalendarMessage } from "@shared/lib/message/EventCalendarMessage";
+import { AppTextField } from "@shared/ui/form";
 
 export default function EventCalendarEdit({
   eventCalendar,
@@ -28,7 +28,7 @@ export default function EventCalendarEdit({
       })}
       updateItem={updateEventCalendar}
       renderExtraFields={(register) => (
-        <TextField
+        <AppTextField
           label="詳細 (任意)"
           multiline
           rows={3}

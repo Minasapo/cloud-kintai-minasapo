@@ -1,13 +1,14 @@
 import { type UpdateAttendanceMutationArg } from "@entities/attendance/api/attendanceApi";
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
-import { Stack, TextField, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
 import { createLogger } from "@shared/lib/logger";
 import { GenericMailSender } from "@shared/lib/mail/GenericMailSender";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { AppButton } from "@shared/ui/button";
 import AppDialog from "@shared/ui/feedback/AppDialog";
+import { AppTextField } from "@shared/ui/form";
 import dayjs from "dayjs";
 import { useCallback, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -226,7 +227,7 @@ export default function ChangeRequestDialog({
         />
         <Stack direction="column" spacing={1}>
           <Typography variant="body1">【スタッフからのコメント】</Typography>
-          <TextField
+          <AppTextField
             fullWidth
             multiline
             disabled
@@ -236,7 +237,7 @@ export default function ChangeRequestDialog({
         </Stack>
         <Stack direction="column" spacing={1}>
           <Typography variant="body1">【スタッフへのコメント】</Typography>
-          <TextField
+          <AppTextField
             label="コメント"
             fullWidth
             multiline

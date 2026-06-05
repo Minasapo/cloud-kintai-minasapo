@@ -45,15 +45,15 @@ const DesktopMenu = ({
   );
   const MENU_ITEM_COLOR = designTokenVar(
     "component.headerMenu.color",
-    "#45574F",
+    "rgb(69 87 79)",
   );
   const MENU_ITEM_ACTIVE_COLOR = designTokenVar(
     "component.headerMenu.activeColor",
-    "#065F46",
+    "rgb(6 95 70)",
   );
   const MENU_ITEM_ACTIVE_BACKGROUND = designTokenVar(
     "component.headerMenu.activeBackground",
-    "#ECFDF3",
+    "rgb(236 253 243)",
   );
   const MENU_ITEM_HOVER_BACKGROUND = designTokenVar(
     "component.headerMenu.hoverBackground",

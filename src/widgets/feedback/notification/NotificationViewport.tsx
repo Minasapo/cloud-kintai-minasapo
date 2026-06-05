@@ -20,40 +20,28 @@ const NOTIFICATION_TONES: Record<
   }
 > = {
   success: {
-    background: designTokenVar("color.feedback.success.surface", "#ECF8F1"),
-    color: designTokenVar("color.neutral.900", "#1E2A25"),
-    border: designTokenVar(
-      "color.feedback.success.border",
-      "rgba(30, 170, 106, 0.4)",
-    ),
-    icon: designTokenVar("color.feedback.success.base", "#1EAA6A"),
+    background: designTokenVar("color.feedback.success.surface"),
+    color: designTokenVar("color.neutral.900"),
+    border: designTokenVar("color.feedback.success.border"),
+    icon: designTokenVar("color.feedback.success.base"),
   },
   error: {
-    background: designTokenVar("color.feedback.danger.surface", "#FDECEC"),
-    color: designTokenVar("color.neutral.900", "#1E2A25"),
-    border: designTokenVar(
-      "color.feedback.danger.border",
-      "rgba(215, 68, 62, 0.4)",
-    ),
-    icon: designTokenVar("color.feedback.danger.base", "#D7443E"),
+    background: designTokenVar("color.feedback.danger.surface"),
+    color: designTokenVar("color.neutral.900"),
+    border: designTokenVar("color.feedback.danger.border"),
+    icon: designTokenVar("color.feedback.danger.base"),
   },
   warning: {
-    background: designTokenVar("color.feedback.warning.surface", "#FFF7EA"),
-    color: designTokenVar("color.neutral.900", "#1E2A25"),
-    border: designTokenVar(
-      "color.feedback.warning.border",
-      "rgba(232, 164, 71, 0.4)",
-    ),
-    icon: designTokenVar("color.feedback.warning.base", "#E8A447"),
+    background: designTokenVar("color.feedback.warning.surface"),
+    color: designTokenVar("color.neutral.900"),
+    border: designTokenVar("color.feedback.warning.border"),
+    icon: designTokenVar("color.feedback.warning.base"),
   },
   info: {
-    background: designTokenVar("color.feedback.info.surface", "#EDF2FC"),
-    color: designTokenVar("color.neutral.900", "#1E2A25"),
-    border: designTokenVar(
-      "color.feedback.info.border",
-      "rgba(60, 126, 219, 0.4)",
-    ),
-    icon: designTokenVar("color.feedback.info.base", "#3C7EDB"),
+    background: designTokenVar("color.feedback.info.surface"),
+    color: designTokenVar("color.neutral.900"),
+    border: designTokenVar("color.feedback.info.border"),
+    icon: designTokenVar("color.feedback.info.base"),
   },
 };
 
@@ -199,16 +187,16 @@ function NotificationCard({
 }
 
 export default function NotificationViewport() {
-  const notifications = useAppSelectorV2(selectNotifications);
+  const notifications: NotificationItem[] = useAppSelectorV2(selectNotifications);
 
   if (notifications.length === 0) {
     return null;
   }
 
-  const topRightNotifications = notifications.filter(
+  const topRightNotifications: NotificationItem[] = notifications.filter(
     (item) => item.placement === "top-right",
   );
-  const bottomRightNotifications = notifications
+  const bottomRightNotifications: NotificationItem[] = notifications
     .filter((item) => item.placement === "bottom-right")
     .slice(-3);
 

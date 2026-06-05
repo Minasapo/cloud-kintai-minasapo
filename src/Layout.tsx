@@ -14,7 +14,13 @@ import { FullPageLoading } from "@shared/ui/feedback/LoadingPrimitives";
 import { AppShell } from "@shared/ui/layout";
 import { Hub } from "aws-amplify/utils";
 import dayjs from "dayjs";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { scheduleIdleRoutePreload } from "@/router/routePreloaders";
@@ -35,15 +41,6 @@ function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
     error: closeDatesError,
   } = useCloseDates();
   const [dismissed, setDismissed] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
-
-  // ローディング完了を追跡
-  useEffect(() => {
-    if (!closeDatesLoading && !hasLoaded) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setHasLoaded(true);
-    }
-  }, [closeDatesLoading, hasLoaded]);
 
   const isCurrentDateCovered = useMemo(() => {
     const today = dayjs().startOf("day").valueOf();
@@ -56,11 +53,9 @@ function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
 
   // 派生状態として計算：データロード完了後、エラーがなく、却下されておらず、日付がカバーされていない場合のみ表示
   const open = useMemo(() => {
-    if (!hasLoaded || closeDatesLoading || closeDatesError || dismissed)
-      return false;
+    if (closeDatesLoading || closeDatesError || dismissed) return false;
     return !isCurrentDateCovered;
   }, [
-    hasLoaded,
     closeDatesLoading,
     closeDatesError,
     dismissed,

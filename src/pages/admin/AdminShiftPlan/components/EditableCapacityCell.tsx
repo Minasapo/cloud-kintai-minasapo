@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { INPUT_PLACEHOLDER, sanitizeCapacityValue } from "../shiftPlanUtils";
 
@@ -20,14 +20,6 @@ const EditableCapacityCell: React.FC<EditableCapacityCellProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(value);
   const skipBlurCommitRef = useRef(false);
-
-  // Sync draft to value when not editing
-  useEffect(() => {
-    if (!isEditing) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setDraft(value);
-    }
-  }, [value, isEditing]);
 
   const handleCommit = useCallback(() => {
     const normalized = sanitizeCapacityValue(draft);
@@ -89,7 +81,7 @@ const EditableCapacityCell: React.FC<EditableCapacityCellProps> = ({
             textAlign: "center",
             fontSize: "0.75rem",
             padding: "4px 2px",
-            border: "1px solid #C3CFC7",
+            border: "1px solid rgb(195 207 199)",
             borderRadius: 4,
             outline: "none",
             boxShadow: "0 0 0 2px rgba(15,168,94,0.25)",
@@ -98,16 +90,19 @@ const EditableCapacityCell: React.FC<EditableCapacityCellProps> = ({
       ) : (
         <button
           type="button"
-          onClick={() => setIsEditing(true)}
+          onClick={() => {
+            setDraft(value);
+            setIsEditing(true);
+          }}
           style={{
             width: 52,
             borderRadius: 4,
-            border: value ? "1px dashed #C3CFC7" : "1px dashed #57D4A0",
+            border: value ? "1px dashed rgb(195 207 199)" : "1px dashed rgb(87 212 160)",
             padding: "2px 4px",
             background: "transparent",
             cursor: "pointer",
             fontSize: "0.75rem",
-            color: value ? "#2E3D36" : "#A0B1A7",
+            color: value ? "rgb(46 61 54)" : "rgb(160 177 167)",
           }}
         >
           {value || INPUT_PLACEHOLDER}

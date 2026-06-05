@@ -57,13 +57,20 @@ const parseAuthError = (error: unknown) => {
   };
 };
 
+const readRedirectPath = (state: unknown): string => {
+  if (!state || typeof state !== "object" || !("from" in state)) {
+    return "/";
+  }
+
+  const { from } = state;
+  return typeof from === "string" ? from : "/";
+};
+
 export default function Login() {
   const { authStatus, cognitoUser } = useSession();
   const location = useLocation();
   const navigate = useNavigate();
-  // eslint-disable-next-line max-len
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-  const from = (location.state?.from as string) || "/";
+  const from = readRedirectPath(location.state);
 
   useEffect(() => {
     if (authStatus !== "authenticated") return;

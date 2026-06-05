@@ -1,6 +1,12 @@
 import { ROLE_OPTIONS } from "@features/admin/staff/model/staffForm";
-import { Autocomplete, TextField } from "@mui/material";
-import type { Control, FieldValues, Path, UseFormSetValue } from "react-hook-form";
+import { Autocomplete } from "@mui/material";
+import { AppTextField } from "@shared/ui/form";
+import type {
+  Control,
+  FieldValues,
+  Path,
+  UseFormSetValue,
+} from "react-hook-form";
 import { Controller } from "react-hook-form";
 
 type StaffRoleTableCellProps<TFieldValues extends FieldValues> = {
@@ -23,13 +29,14 @@ export function StaffRoleTableCell<TFieldValues extends FieldValues>({
           <Autocomplete
             {...field}
             value={
-              ROLE_OPTIONS.find((option) => String(option.value) === field.value) ??
-              null
+              ROLE_OPTIONS.find(
+                (option) => String(option.value) === field.value,
+              ) ?? null
             }
             options={ROLE_OPTIONS}
             getOptionLabel={(option) => option.label}
             renderInput={(params) => (
-              <TextField
+              <AppTextField
                 {...params}
                 size="small"
                 sx={{ width: { xs: "100%", sm: 400 } }}

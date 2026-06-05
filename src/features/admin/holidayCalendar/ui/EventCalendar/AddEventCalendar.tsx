@@ -1,7 +1,7 @@
 import { AddCalendarItem } from "@features/admin/holidayCalendar/ui/components/AddCalendarItem";
-import { TextField } from "@mui/material";
 import { CreateEventCalendarInput, EventCalendar } from "@shared/api/graphql/types";
 import { EventCalendarMessage } from "@shared/lib/message/EventCalendarMessage";
+import { AppTextField } from "@shared/ui/form";
 
 type CreateEventCalendarHandler = (input: CreateEventCalendarInput) => Promise<void | EventCalendar>;
 type BulkCreateEventCalendarHandler = (inputs: CreateEventCalendarInput[]) => Promise<void | EventCalendar[]>;
@@ -36,7 +36,7 @@ export function AddEventCalendar({
       createItem={createEventCalendar}
       bulkCreateItems={bulkCreateEventCalendar}
       renderExtraFields={(register) => (
-        <TextField label="詳細 (任意)" multiline rows={3} {...register("description")} />
+        <AppTextField label="詳細 (任意)" multiline rows={3} {...register("description")} />
       )}
     />
   );

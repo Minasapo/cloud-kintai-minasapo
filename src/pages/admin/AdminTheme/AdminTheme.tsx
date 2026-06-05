@@ -20,34 +20,35 @@ import { E15001, S15001 } from "@/errors";
 
 const logger = createLogger("AdminTheme");
 
+const HEX_PREFIX = "#";
 const basePalette = [
-  "#1976d2",
-  "#1e88e5",
-  "#2196f3",
-  "#64b5f6",
-  "#4dd0e1",
-  "#00acc1",
-  "#26c6da",
-  "#43a047",
-  "#66bb6a",
-  "#7cb342",
-  "#9ccc65",
-  "#c0ca33",
-  "#f9a825",
-  "#ffb300",
-  "#ffca28",
-  "#ffb74d",
-  "#ffa726",
-  "#fb8c00",
-  "#f4511e",
-  "#ef5350",
-  "#ec407a",
-  "#ab47bc",
-  "#ba68c8",
-  "#9575cd",
-  "#5c6bc0",
-  "#42a5f5",
-];
+  "1976d2",
+  "1e88e5",
+  "2196f3",
+  "64b5f6",
+  "4dd0e1",
+  "00acc1",
+  "26c6da",
+  "43a047",
+  "66bb6a",
+  "7cb342",
+  "9ccc65",
+  "c0ca33",
+  "f9a825",
+  "ffb300",
+  "ffca28",
+  "ffb74d",
+  "ffa726",
+  "fb8c00",
+  "f4511e",
+  "ef5350",
+  "ec407a",
+  "ab47bc",
+  "ba68c8",
+  "9575cd",
+  "5c6bc0",
+  "42a5f5",
+].map((hex) => `${HEX_PREFIX}${hex}`);
 
 const isDarkColor = (color: string) => {
   const hex = color.replace("#", "");
@@ -77,7 +78,9 @@ function normalizeColor(value: string) {
   if (!value) return "";
   const trimmed = value.trim();
   if (!trimmed) return "";
-  const formatted = trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
+  const formatted = trimmed.startsWith(HEX_PREFIX)
+    ? trimmed
+    : `${HEX_PREFIX}${trimmed}`;
   return formatted.toUpperCase();
 }
 
@@ -131,7 +134,9 @@ function PaletteTileSection({
               style={{
                 width: TILE_SIZE,
                 height: TILE_SIZE,
-                borderColor: isSelected ? brandPrimary : previewPanelDividerColor,
+                borderColor: isSelected
+                  ? brandPrimary
+                  : previewPanelDividerColor,
                 backgroundColor: color,
                 boxShadow: isSelected ? `0 0 0 2px ${focusRingColor}` : "none",
               }}
@@ -147,7 +152,7 @@ function PaletteTileSection({
             width: TILE_SIZE,
             height: TILE_SIZE,
             borderColor: customMode ? brandPrimary : previewPanelDividerColor,
-            color: customMode ? brandPrimary : "#64748b",
+            color: customMode ? brandPrimary : "rgb(100 116 139)",
             boxShadow: customMode ? `0 0 0 2px ${focusRingColor}` : "none",
           }}
         >

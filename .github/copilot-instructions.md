@@ -25,14 +25,15 @@ npm run test:e2e -- smoke-test --project=chromium-admin
 
 Dependency direction is strictly **downward only**: `pages` → `processes` → `features` → `entities` → `shared`
 
-| Layer | Path | Role |
-|---|---|---|
-| `pages` | `src/pages/` | Route-level page components (lazy-loaded via `createLazyRoute`) |
-| `processes` | `src/processes/` | Cross-page business flows (e.g., `office-access`) |
-| `features` | `src/features/` | Single-screen feature units; each has `ui/`, `model/`, `lib/` |
-| `entities` | `src/entities/` | Domain types, API clients, business logic (`attendance`, `shift`, `staff`, `workflow`, etc.) |
-| `shared` | `src/shared/` | Project-wide UI components, hooks, utilities — imported via `@shared/*` |
-| `widgets` | `src/widgets/` | Large UI blocks used across pages (header, footer, snackbar) |
+| Layer        | Path              | Role                                                                                                                                                                                   |
+| ------------ | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pages`      | `src/pages/`      | Route-level page components (lazy-loaded via `createLazyRoute`)                                                                                                                        |
+| `processes`  | `src/processes/`  | Cross-page business flows (e.g., `office-access`)                                                                                                                                      |
+| `features`   | `src/features/`   | Single-screen feature units; each has `ui/`, `model/`, `lib/`                                                                                                                          |
+| `entities`   | `src/entities/`   | Domain types, API clients, business logic (`attendance`, `shift`, `staff`, `workflow`, etc.)                                                                                           |
+| `shared`     | `src/shared/`     | Project-wide UI components, hooks, utilities — imported via `@shared/*`                                                                                                                |
+| `widgets`    | `src/widgets/`    | Large UI blocks used across pages (header, footer, snackbar)                                                                                                                           |
+| `extensions` | `src/extensions/` | 拡張モジュール。AppConfig フラグで on/off 可能な機能群を `manifest.ts` で宣言。`docs/EXTENSION_ARCHITECTURE.md` 参照。新規拡張は `node scripts/create-extension.mjs <name>` で雛形生成 |
 
 ### Path aliases (tsconfig.json)
 
@@ -44,6 +45,7 @@ Dependency direction is strictly **downward only**: `pages` → `processes` → 
 @entities/* → src/entities/*
 @shared/*   → src/shared/*
 @processes/* → src/processes/*
+@extensions/* → src/extensions/*
 ```
 
 Always use aliases instead of relative `../` paths.
@@ -102,7 +104,11 @@ Unit/integration tests live in `__tests__/` next to the file under test.
 import { renderWithProviders } from "@shared/test-utils";
 
 // Factory helpers
-import { createMockAppConfig, createMockUser, createMockAttendance } from "@shared/test-utils";
+import {
+  createMockAppConfig,
+  createMockUser,
+  createMockAttendance,
+} from "@shared/test-utils";
 ```
 
 E2E tests go in `playwright/tests/<feature>/flow.spec.ts`.  
@@ -117,19 +123,19 @@ See `.github/instructions/shiftCollaborative.instructions.md` for guardrails.
 
 ## Feature-specific instruction files
 
-| File | Topic |
-|---|---|
-| `.github/instructions/font-strategy.md` | フォント戦略と使用方法 |
-| `.github/instructions/attendanceEdit.instructions.md` | 勤怠編集 |
-| `.github/instructions/attendanceList.instructions.md` | 勤怠一覧 |
-| `.github/instructions/register.instructions.md` | 打刻ページ |
-| `.github/instructions/registerDashboard.instructions.md` | ダッシュボード |
-| `.github/instructions/shift.instructions.md` | シフト全般 |
-| `.github/instructions/shiftCollaborative.instructions.md` | シフト共同編集 |
-| `.github/instructions/dailyReport.instructions.md` | 日報 |
-| `.github/instructions/testing-guide.md` | テスト規約 |
-| `.github/instructions/amplifyGraphqlGenerated.instructions.md` | 自動生成ファイル |
-| `.github/instructions/graphqlCachingStrategy.instructions.md` | GraphQL キャッシング戦略 |
+| File                                                           | Topic                    |
+| -------------------------------------------------------------- | ------------------------ |
+| `.github/instructions/font-strategy.md`                        | フォント戦略と使用方法   |
+| `.github/instructions/attendanceEdit.instructions.md`          | 勤怠編集                 |
+| `.github/instructions/attendanceList.instructions.md`          | 勤怠一覧                 |
+| `.github/instructions/register.instructions.md`                | 打刻ページ               |
+| `.github/instructions/registerDashboard.instructions.md`       | ダッシュボード           |
+| `.github/instructions/shift.instructions.md`                   | シフト全般               |
+| `.github/instructions/shiftCollaborative.instructions.md`      | シフト共同編集           |
+| `.github/instructions/dailyReport.instructions.md`             | 日報                     |
+| `.github/instructions/testing-guide.md`                        | テスト規約               |
+| `.github/instructions/amplifyGraphqlGenerated.instructions.md` | 自動生成ファイル         |
+| `.github/instructions/graphqlCachingStrategy.instructions.md`  | GraphQL キャッシング戦略 |
 
 ## Commit and issue conventions
 
@@ -139,9 +145,9 @@ See `.github/instructions/shiftCollaborative.instructions.md` for guardrails.
 
 ## Domain terms
 
-| Term | Meaning |
-|---|---|
-| 勤怠 (Attendance) | Record of staff work hours: clock-in/out, breaks |
-| 打刻 (Dakoku) | The act of recording a time stamp (clock-in/out/break) |
-| 打刻エラー | Error when a stamp is missed; resolved by staff submitting a correction request, approved by admin |
-| ワークフロー (Workflow) | Approval flow for attendance correction requests |
+| Term                    | Meaning                                                                                            |
+| ----------------------- | -------------------------------------------------------------------------------------------------- |
+| 勤怠 (Attendance)       | Record of staff work hours: clock-in/out, breaks                                                   |
+| 打刻 (Dakoku)           | The act of recording a time stamp (clock-in/out/break)                                             |
+| 打刻エラー              | Error when a stamp is missed; resolved by staff submitting a correction request, approved by admin |
+| ワークフロー (Workflow) | Approval flow for attendance correction requests                                                   |

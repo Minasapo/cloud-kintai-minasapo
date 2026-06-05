@@ -164,17 +164,18 @@ export const useStaffShiftListData = ({
   const staff = staffs.find((s) => String(s.id) === String(staffId));
 
   const [currentMonth, setCurrentMonth] = useState(dayjs());
-  const monthStart = currentMonth.startOf("month");
+  const monthStart = useMemo(
+    () => currentMonth.startOf("month"),
+    [currentMonth],
+  );
   const targetMonth = monthStart.format("YYYY-MM");
-  const daysInMonth = monthStart.daysInMonth();
-  const monthYear = monthStart.year();
-  const monthMonth = monthStart.month();
 
   const days = useMemo(
     () =>
-      Array.from({ length: daysInMonth }).map((_, i) => monthStart.add(i, "day")),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [monthYear, monthMonth, daysInMonth],
+      Array.from({ length: monthStart.daysInMonth() }).map((_, i) =>
+        monthStart.add(i, "day"),
+      ),
+    [monthStart],
   );
 
   const {
@@ -232,7 +233,13 @@ export const useStaffShiftListData = ({
   }, [notify, shiftRequestError, staff?.id, targetMonth]);
 
   useEffect(() => {
-    setShiftStates(buildShiftStatesFromRequest(shiftRequest));
+    const timeoutId = window.setTimeout(() => {
+      setShiftStates(buildShiftStatesFromRequest(shiftRequest));
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [
     shiftRequest?.id,
     shiftRequest?.updatedAt,

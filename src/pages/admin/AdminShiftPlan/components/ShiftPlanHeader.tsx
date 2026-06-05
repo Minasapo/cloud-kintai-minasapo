@@ -15,10 +15,10 @@ const ShiftPlanHeader: React.FC<ShiftPlanHeaderProps> = ({
   return (
     <div className="flex items-center justify-between">
       <div>
-        <PageTitle className="text-2xl font-bold" style={{ color: "#1E2A25" }}>
+        <PageTitle className="text-2xl font-bold" style={{ color: "rgb(30 42 37)" }}>
           シフト計画管理
         </PageTitle>
-        <p className="mt-1 text-sm" style={{ color: "#7D9288" }}>
+        <p className="mt-1 text-sm" style={{ color: "rgb(125 146 136)" }}>
           年ごとのシフト申請期間を管理し、各月の受付開始・締切日を調整できます。
         </p>
       </div>
@@ -46,7 +46,7 @@ const ShiftPlanHeader: React.FC<ShiftPlanHeaderProps> = ({
         </AppIconButton>
         <span
           className="text-xl font-bold min-w-[5rem] text-center"
-          style={{ color: "#1E2A25" }}
+          style={{ color: "rgb(30 42 37)" }}
         >
           {selectedYear}年
         </span>

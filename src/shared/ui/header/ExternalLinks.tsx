@@ -22,7 +22,7 @@ export interface ExternalLinksProps {
 
 const ACTION_ICON_COLOR = designTokenVar(
   "component.headerActions.iconColor",
-  "#45574F",
+  "rgb(69 87 79)",
 );
 const ACTION_ICON_SIZE = designTokenVar(
   "component.headerActions.iconSize",
@@ -46,7 +46,7 @@ const ACTION_BUTTON_BG = designTokenVar(
 );
 const ACTION_BUTTON_TEXT = designTokenVar(
   "component.headerActions.buttonText",
-  "#45574F",
+  "rgb(69 87 79)",
 );
 const POPPER_WIDTH = designTokenVar(
   "component.headerActions.popoverWidth",
@@ -71,11 +71,11 @@ const POPPER_RADIUS = designTokenVar(
 );
 const POPPER_SURFACE = designTokenVar(
   "component.headerActions.popoverSurface",
-  "#FFFFFF",
+  "rgb(255 255 255)",
 );
 const POPPER_SURFACE_ALT = designTokenVar(
   "component.headerActions.popoverSurfaceAlt",
-  "#FFFFFF",
+  "rgb(255 255 255)",
 );
 const POPPER_SHADOW = designTokenVar(
   "component.headerActions.popoverShadow",
@@ -88,24 +88,24 @@ const GRID_ITEM_PADDING = designTokenVar(
 );
 const GRID_HOVER_BACKGROUND = designTokenVar(
   "component.headerActions.gridHoverBackground",
-  "#EAF7F0",
+  "rgb(234 247 240)",
 );
 const GRID_ITEM_RADIUS = designTokenVar("radius.sm", "2px");
 const GRID_ICON_SURFACE = designTokenVar(
   "component.headerActions.iconSurface",
-  "#DFF1E7",
+  "rgb(223 241 231)",
 );
 const GRID_ITEM_BORDER = designTokenVar(
   "component.headerActions.gridItemBorder",
-  "1px solid #BCD7C7",
+  "1px solid rgb(188 215 199)",
 );
 const EMPTY_STATE_COLOR = designTokenVar(
   "component.headerActions.emptyStateColor",
-  "#7D9288",
+  "rgb(125 146 136)",
 );
 const PERSONAL_LINK_ERROR_COLOR = designTokenVar(
   "component.headerActions.personalLinkErrorColor",
-  "#B42318",
+  "rgb(180 35 24)",
 );
 const SECTION_TITLE_FONT_WEIGHT = designTokenVar(
   "component.headerActions.sectionTitle.fontWeight",
@@ -121,7 +121,7 @@ const SECTION_TITLE_MARGIN_BOTTOM = designTokenVar(
 );
 const SECTION_DIVIDER = designTokenVar(
   "component.headerActions.sectionDivider",
-  "#C1D9CB",
+  "rgb(193 217 203)",
 );
 const INTERACTION_TRANSITION_DURATION = designTokenVar(
   "component.headerActions.interaction.transitionDuration",
@@ -257,7 +257,7 @@ function LinkGridItem({
           event.currentTarget.style.borderColor = "rgba(20, 76, 44, 0.28)";
         }}
         onMouseLeave={(event) => {
-          event.currentTarget.style.backgroundColor = "#FFFFFF";
+          event.currentTarget.style.backgroundColor = "rgb(255 255 255)";
           event.currentTarget.style.borderColor = "";
         }}
       >

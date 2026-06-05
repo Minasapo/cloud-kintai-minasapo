@@ -28,7 +28,7 @@ const RAIL_ITEM_BUTTON_SX = (isActive: boolean) =>
     borderRadius: "10px",
     px: 1.25,
     py: 1,
-    color: isActive ? "#065f46" : "#1e293b",
+    color: isActive ? "rgb(6 95 70)" : "rgb(30 41 59)",
     backgroundColor: isActive ? "rgba(16,185,129,0.14)" : "transparent",
     fontWeight: isActive ? 700 : 500,
     "&:hover": {
@@ -50,7 +50,12 @@ const RailItemButton = memo(function RailItemButton({
   onClick: () => void;
 }) {
   return (
-    <AppButton variant="ghost" tone="neutral" onClick={onClick} sx={RAIL_ITEM_BUTTON_SX(isActive)}>
+    <AppButton
+      variant="ghost"
+      tone="neutral"
+      onClick={onClick}
+      sx={RAIL_ITEM_BUTTON_SX(isActive)}
+    >
       <Box component="span">{primaryLabel}</Box>
       <Box component="span" sx={{ fontSize: "0.72rem", opacity: 0.75 }}>
         {secondaryLabel ?? ""}
@@ -77,7 +82,8 @@ export const AdminNavigation = memo(function AdminNavigation({
   compact = false,
 }: AdminNavigationProps) {
   const isSettingsActive = activeMenuHref === SETTINGS_HREF;
-  const [settingsExpanded, setSettingsExpanded] = React.useState(isSettingsActive);
+  const [settingsExpanded, setSettingsExpanded] =
+    React.useState(isSettingsActive);
 
   React.useEffect(() => {
     if (isSettingsActive) {
@@ -99,13 +105,27 @@ export const AdminNavigation = memo(function AdminNavigation({
       }}
     >
       <Stack spacing={0.5}>
-        <Typography sx={{ fontSize: "0.74rem", fontWeight: 700, color: "#0f766e" }}>
+        <Typography
+          sx={{
+            fontSize: "0.74rem",
+            fontWeight: 700,
+            color: "rgb(15 118 110)",
+          }}
+        >
           CONTROL RAIL
         </Typography>
-        <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: "#0f172a" }}>
+        <Typography
+          sx={{ fontSize: "1rem", fontWeight: 700, color: "rgb(15 23 42)" }}
+        >
           {activeMenuItem?.primaryLabel ?? "カテゴリ"}
         </Typography>
-        <Typography sx={{ fontSize: "0.82rem", color: "#64748b", lineHeight: 1.6 }}>
+        <Typography
+          sx={{
+            fontSize: "0.82rem",
+            color: "rgb(100 116 139)",
+            lineHeight: 1.6,
+          }}
+        >
           {activeMenuItem?.ctaLabel ?? "頻出操作へすばやく遷移できます。"}
         </Typography>
       </Stack>
@@ -130,7 +150,9 @@ export const AdminNavigation = memo(function AdminNavigation({
                     component="button"
                     type="button"
                     aria-label={
-                      settingsExpanded ? "設定メニューを閉じる" : "設定メニューを開く"
+                      settingsExpanded
+                        ? "設定メニューを閉じる"
+                        : "設定メニューを開く"
                     }
                     onClick={() => setSettingsExpanded((prev) => !prev)}
                     sx={{
@@ -143,10 +165,12 @@ export const AdminNavigation = memo(function AdminNavigation({
                       border: "none",
                       background: "transparent",
                       cursor: "pointer",
-                      color: "#64748b",
+                      color: "rgb(100 116 139)",
                       fontSize: "0.75rem",
                       transition: "transform 160ms ease",
-                      transform: settingsExpanded ? "rotate(0deg)" : "rotate(-90deg)",
+                      transform: settingsExpanded
+                        ? "rotate(0deg)"
+                        : "rotate(-90deg)",
                       "&:hover": {
                         backgroundColor: "rgba(148,163,184,0.15)",
                       },
@@ -177,7 +201,7 @@ export const AdminNavigation = memo(function AdminNavigation({
                             fontSize: "0.63rem",
                             fontWeight: 700,
                             letterSpacing: "0.08em",
-                            color: "#94a3b8",
+                            color: "rgb(148 163 184)",
                             textTransform: "uppercase",
                             px: 0.5,
                             pb: 0.5,
@@ -204,7 +228,9 @@ export const AdminNavigation = memo(function AdminNavigation({
                                 minHeight: 0,
                                 fontSize: "0.83rem",
                                 lineHeight: 1.4,
-                                color: isSubActive ? "#065f46" : "#334155",
+                                color: isSubActive
+                                  ? "rgb(6 95 70)"
+                                  : "rgb(51 65 85)",
                                 backgroundColor: isSubActive
                                   ? "rgba(16,185,129,0.12)"
                                   : "transparent",

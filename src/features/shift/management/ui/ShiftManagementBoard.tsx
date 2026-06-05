@@ -223,17 +223,12 @@ export default function ShiftManagementBoard() {
     () => currentMonth.startOf("month"),
     [currentMonth],
   );
-  const daysInMonth = monthStart.daysInMonth();
-  const monthYear = monthStart.year();
-  const monthMonth = monthStart.month();
-
   const days = useMemo(
     () =>
-      Array.from({ length: daysInMonth }).map((_, i) =>
+      Array.from({ length: monthStart.daysInMonth() }).map((_, i) =>
         monthStart.add(i, "day"),
       ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [monthYear, monthMonth, daysInMonth],
+    [monthStart],
   );
 
   const dayKeyList = useMemo(

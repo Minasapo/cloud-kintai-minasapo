@@ -30,8 +30,7 @@ export function useTimeRecorderQueries({
   } = useCalendars();
   const { closeDates, loading: closeDatesLoading } = useCloseDates();
   const attendanceErrorToday = useMemo(
-    () => dayjs().startOf("day"),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    () => dayjs(currentWorkDate).startOf("day"),
     [currentWorkDate],
   );
   const attendanceErrorCurrentMonth = useMemo(
@@ -59,7 +58,6 @@ export function useTimeRecorderQueries({
   const {
     data: attendanceData,
     isLoading: isAttendanceInitialLoading,
-    isFetching: isAttendanceFetching,
     isUninitialized: isAttendanceUninitialized,
     error: attendanceError,
     refetch: refetchAttendance,
@@ -70,7 +68,6 @@ export function useTimeRecorderQueries({
   const {
     data: attendancesData,
     isLoading: isAttendancesInitialLoading,
-    isFetching: isAttendancesFetching,
     isUninitialized: isAttendancesUninitialized,
     error: attendancesError,
     refetch: refetchAttendances,
@@ -87,14 +84,11 @@ export function useTimeRecorderQueries({
   const attendanceLoading =
     !shouldFetchAttendance ||
     isAttendanceInitialLoading ||
-    isAttendanceFetching ||
     isAttendanceUninitialized;
   const attendancesLoading =
     closeDatesLoading ||
     (shouldFetchAttendanceErrors &&
-      (isAttendancesInitialLoading ||
-        isAttendancesFetching ||
-        isAttendancesUninitialized));
+      (isAttendancesInitialLoading || isAttendancesUninitialized));
   return {
     shouldFetchAttendance,
     shouldFetchAttendanceErrors,

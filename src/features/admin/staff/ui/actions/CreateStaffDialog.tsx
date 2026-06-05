@@ -22,9 +22,7 @@ import {
   Checkbox,
   FormControlLabel,
   Radio,
-  RadioGroup,
-  TextField,
-} from "@mui/material";
+  RadioGroup,} from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import {
   ApproverMultipleMode,
@@ -35,6 +33,7 @@ import {
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { AppButton } from "@shared/ui/button";
 import { useDialogCloseGuard } from "@shared/ui/feedback/useDialogCloseGuard";
+import { AppTextField } from "@shared/ui/form";
 import { SectionTitle } from "@shared/ui/typography";
 import dayjs from "dayjs";
 import { useContext, useMemo, useState } from "react";
@@ -322,22 +321,22 @@ function CreateStaffFormTable({ register, control, watch, setValue, cognitoUser,
           <tr>
             <td className={LABEL_CELL_CLASS}>汎用コード</td>
             <td className={VALUE_CELL_CLASS}>
-              <TextField {...register("sortKey")} size="small" sx={{ width: { xs: "100%", sm: 400 } }} placeholder="例：1、2、3...やZZ001、ZZ002...など" />
+              <AppTextField {...register("sortKey")} size="small" sx={{ width: { xs: "100%", sm: 400 } }} placeholder="例：1、2、3...やZZ001、ZZ002...など" />
             </td>
           </tr>
           <tr>
             <td className={LABEL_CELL_CLASS}>スタッフ名</td>
             <td className={VALUE_CELL_CLASS}>
               <div className="flex flex-col gap-2 sm:flex-row">
-                <TextField {...register("familyName")} size="small" label="姓" sx={{ width: { xs: "100%", sm: 200 } }} />
-                <TextField {...register("givenName")} size="small" label="名" sx={{ width: { xs: "100%", sm: 200 } }} />
+                <AppTextField {...register("familyName")} size="small" label="姓" sx={{ width: { xs: "100%", sm: 200 } }} />
+                <AppTextField {...register("givenName")} size="small" label="名" sx={{ width: { xs: "100%", sm: 200 } }} />
               </div>
             </td>
           </tr>
           <tr>
             <td className={LABEL_CELL_CLASS}>メールアドレス</td>
             <td className={VALUE_CELL_CLASS}>
-              <TextField {...register("mailAddress")} type="email" size="small" sx={{ width: { xs: "100%", sm: 400 } }} />
+              <AppTextField {...register("mailAddress")} type="email" size="small" sx={{ width: { xs: "100%", sm: 400 } }} />
             </td>
           </tr>
           <tr>
@@ -352,7 +351,7 @@ function CreateStaffFormTable({ register, control, watch, setValue, cognitoUser,
                     value={ROLE_OPTIONS.find((option) => String(option.value) === field.value) ?? null}
                     options={ROLE_OPTIONS}
                     getOptionLabel={(option) => option.label}
-                    renderInput={(params) => <TextField {...params} size="small" sx={{ width: { xs: "100%", sm: 400 } }} />}
+                    renderInput={(params) => <AppTextField {...params} size="small" sx={{ width: { xs: "100%", sm: 400 } }} />}
                     onChange={(_, data) => {
                       if (!data) return;
                       setValue("role", data.value, { shouldDirty: true, shouldValidate: true });
@@ -418,7 +417,7 @@ function CreateStaffFormTable({ register, control, watch, setValue, cognitoUser,
                     value={WORK_TYPE_OPTIONS.find((option) => option.value === field.value) ?? null}
                     options={WORK_TYPE_OPTIONS}
                     getOptionLabel={(option) => option.label}
-                    renderInput={(params) => <TextField {...params} size="small" sx={{ width: { xs: "100%", sm: 400 } }} />}
+                    renderInput={(params) => <AppTextField {...params} size="small" sx={{ width: { xs: "100%", sm: 400 } }} />}
                     onChange={(_, data) => {
                       if (!data) return;
                       setValue("workType", data.value, { shouldDirty: true, shouldValidate: true });
@@ -452,7 +451,7 @@ function CreateStaffFormTable({ register, control, watch, setValue, cognitoUser,
                         }}
                         isOptionEqualToValue={(option, value) => option.value === value.value}
                         renderInput={(params) => (
-                          <TextField {...params} size="small" sx={{ width: { xs: "100%", sm: 400 } }} placeholder="所属させるシフトグループを選択" onBlur={field.onBlur} />
+                          <AppTextField {...params} size="small" sx={{ width: { xs: "100%", sm: 400 } }} placeholder="所属させるシフトグループを選択" onBlur={field.onBlur} />
                         )}
                       />
                     );

@@ -58,14 +58,14 @@ function StaffShiftTableRow({
   if (workType === "shift") {
     rowBg = "transparent";
   } else if (dayKey === todayKey) {
-    rowBg = "#FFFF93";
+    rowBg = "rgb(255 255 147)";
     rowFontWeight = 700;
   } else if (isPublicHoliday || isCompanyHoliday) {
-    rowBg = "#FF9393";
+    rowBg = "rgb(255 147 147)";
   } else if (isSunday) {
-    rowBg = "#FF9393";
+    rowBg = "rgb(255 147 147)";
   } else if (isSaturday) {
-    rowBg = "#93FFFF";
+    rowBg = "rgb(147 255 255)";
   }
 
   return (

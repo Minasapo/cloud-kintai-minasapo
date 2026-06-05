@@ -135,7 +135,7 @@ export function AttendanceGraph({
       legendUsePointStyle: false,
       legendBoxWidth: 12,
       legendBoxHeight: 12,
-      tickColor: "#64748b",
+      tickColor: "rgb(100 116 139)",
       yGridColor: "rgba(148,163,184,0.22)",
       yBeginAtZero: true,
       appendHourUnitOnYAxisTicks: true,

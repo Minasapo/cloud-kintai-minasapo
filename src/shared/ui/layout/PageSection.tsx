@@ -22,7 +22,7 @@ const VARIANT_FALLBACKS = {
     paddingY: "16px",
     gap: "12px",
     radius: "6px",
-    background: "#FFFFFF",
+    background: "rgb(255 255 255)",
     shadow: "0 12px 24px rgba(17, 24, 39, 0.06)",
   },
   detail: {
@@ -30,7 +30,7 @@ const VARIANT_FALLBACKS = {
     paddingY: "12px",
     gap: "8px",
     radius: "4px",
-    background: "#F3F8F4",
+    background: "rgb(243 248 244)",
     shadow: "0 8px 20px rgba(17, 24, 39, 0.05)",
   },
 } as const;

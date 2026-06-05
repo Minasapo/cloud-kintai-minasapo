@@ -50,7 +50,7 @@ export const resolveMonthlyTerms = (
     end: monthEnd,
     source: "fallback",
     label: formatLabel(monthStart, monthEnd),
-    color: palette[0] ?? "#90CAF9",
+    color: palette[0] ?? "rgb(144 202 249)",
   };
 
   const terms = getOverlappingCloseDateRanges(currentMonth, closeDates)
@@ -61,7 +61,7 @@ export const resolveMonthlyTerms = (
         end: end.startOf("day"),
         source: "closeDate",
         label: formatLabel(start, end),
-        color: palette[index % palette.length] ?? palette[0] ?? "#90CAF9",
+        color: palette[index % palette.length] ?? palette[0] ?? "rgb(144 202 249)",
       })
     );
 

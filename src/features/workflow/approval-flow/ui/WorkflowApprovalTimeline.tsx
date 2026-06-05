@@ -25,10 +25,10 @@ export default function WorkflowApprovalTimeline({
                 ? "pending"
                 : "";
           const badgeBackground = isApplicant
-            ? "#A5B3AC"
+            ? "rgb(165 179 172)"
             : active === "done"
-              ? "#1EAA6A"
-              : "#0FA85E";
+              ? "rgb(30 170 106)"
+              : "rgb(15 168 94)";
 
           return (
             <div
@@ -41,7 +41,7 @@ export default function WorkflowApprovalTimeline({
                   style={{
                     borderRadius: "10px",
                     backgroundColor: badgeBackground,
-                    color: "#FFFFFF",
+                    color: "rgb(255 255 255)",
                   }}
                 >
                   {idx === 0 ? "申" : idx}
