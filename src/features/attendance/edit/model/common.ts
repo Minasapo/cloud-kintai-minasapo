@@ -2,6 +2,7 @@ import {
   Rest,
   UpdateAttendanceInput,
 } from "@shared/api/graphql/types";
+import { createMonthSearchParams, MONTH_QUERY_KEY } from "@shared/lib/monthQuery";
 
 export type RestInputs = {
   startTime: Rest["startTime"] | null;
@@ -49,3 +50,17 @@ export const defaultValues: AttendanceEditInputs = {
   remarkTags: [],
   rests: [],
 };
+
+export function buildAttendanceListPath(
+  searchParams: URLSearchParams,
+  targetStaffId: string | undefined,
+): string {
+  const month = searchParams.get(MONTH_QUERY_KEY);
+  const basePath = targetStaffId
+    ? `/admin/staff/${targetStaffId}/attendance`
+    : "/admin/attendances";
+  if (!month) {
+    return basePath;
+  }
+  return `${basePath}?${createMonthSearchParams(month).toString()}`;
+}

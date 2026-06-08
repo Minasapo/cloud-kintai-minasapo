@@ -1,22 +1,18 @@
 import { AuthContext } from "@app/providers/auth/AuthContext";
-import useAppConfig from "@entities/app-config/model/useAppConfig";
-import { useOvertimeRequest } from "@entities/attendance/hooks/useOvertimeRequest";
-import { collectAttendanceErrorMessages } from "@entities/attendance/validation/collectErrorMessages";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { Logger } from "@shared/lib/logger";
-import { createMonthSearchParams, MONTH_QUERY_KEY } from "@shared/lib/monthQuery";
-import { useContext, useMemo,useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
-import { useAttendanceEditForm } from "./useAttendanceEditForm";
-import { useAttendanceEditorHandlers } from "./useAttendanceEditorHandlers";
-import { useAttendanceEditorTimeSummary } from "./useAttendanceEditorTimeSummary";
-import { useAttendanceMutations } from "./useAttendanceMutations";
-import { useAttendanceRecord } from "./useAttendanceRecord";
-import { useAttendanceSubmit } from "./useAttendanceSubmit";
-import { useOvertimeError } from "./useOvertimeError";
+import { buildAttendanceListPath } from "./common";
+import { useAttendanceEditorActions } from "./useAttendanceEditorActions";
+import { useAttendanceEditorConfig } from "./useAttendanceEditorConfig";
+import { useAttendanceEditorValidation } from "./useAttendanceEditorValidation";
 
-const logger = new Logger("AttendanceEditor", import.meta.env.DEV ? "DEBUG" : "ERROR");
+const logger = new Logger(
+  "AttendanceEditor",
+  import.meta.env.DEV ? "DEBUG" : "ERROR",
+);
 
 type UseAttendanceEditorStateParams = {
   readOnly?: boolean;
@@ -25,229 +21,120 @@ type UseAttendanceEditorStateParams = {
 /**
  * Hook to manage the state of the attendance editor.
  */
-export function useAttendanceEditorState({ readOnly }: UseAttendanceEditorStateParams) {
-  const {
-    derived,
-    loading: appConfigLoading,
-    config: appConfig,
-  } = useAppConfig();
-
-  const {
-    lunchRestStartTime,
-    lunchRestEndTime,
-    hourlyPaidHolidayEnabled,
-    specialHolidayEnabled,
-    startTime: configStartTime,
-    endTime: configEndTime,
-    absentEnabled,
-  } = derived;
-
-  const getLunchRestStartTime = () => lunchRestStartTime;
-  const getLunchRestEndTime = () => lunchRestEndTime;
-  const getHourlyPaidHolidayEnabled = (): boolean => hourlyPaidHolidayEnabled ?? false;
-  const getSpecialHolidayEnabled = (): boolean => specialHolidayEnabled ?? false;
-  const getStartTime = () => configStartTime;
-  const getEndTime = () => configEndTime;
-  const getAbsentEnabled = (): boolean => absentEnabled ?? false;
-
+export function useAttendanceEditorState({
+  readOnly,
+}: UseAttendanceEditorStateParams) {
   const { targetWorkDate, staffId: targetStaffId } = useParams();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { authStatus, cognitoUser: currentUser } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
 
+  const config = useAttendanceEditorConfig();
   const { loading: staffsLoading, error: staffSError } = useStaffs({
     isAuthenticated,
   });
 
-  const { handleUpdateAttendance, handleCreateAttendance } = useAttendanceMutations();
-
-  const [highlightStartTime, setHighlightStartTime] = useState(false);
   const [enabledSendMail, setEnabledSendMail] = useState(true);
 
-  const buildAttendanceListPath = (
-    searchParams: URLSearchParams,
-    targetStaffId: string | undefined,
-  ): string => {
-    const month = searchParams.get(MONTH_QUERY_KEY);
-    const basePath = targetStaffId
-      ? `/admin/staff/${targetStaffId}/attendance`
-      : "/admin/attendances";
-    if (!month) {
-      return basePath;
-    }
-    return `${basePath}?${createMonthSearchParams(month).toString()}`;
-  };
-
-  const attendanceListPath = buildAttendanceListPath(searchParams, targetStaffId);
-
-  const {
-    register,
-    control,
-    setValue,
-    getValues,
-    watch,
-    handleSubmit,
-    reset,
-    errors,
-    isDirty,
-    isValid,
-    isSubmitting,
-    restFields,
-    restRemove,
-    restAppend,
-    restReplace,
-    restUpdate,
-    hourlyPaidHolidayTimeFields,
-    hourlyPaidHolidayTimeRemove,
-    hourlyPaidHolidayTimeAppend,
-    hourlyPaidHolidayTimeUpdate,
-    hourlyPaidHolidayTimeReplace,
-    submitErrorMessage,
-    setSubmitError,
-    clearSubmitError,
-  } = useAttendanceEditForm();
-
-  const {
-    attendance,
-    staff,
-    workDate,
-    historiesLoading,
-    sortedHistories,
-    historyIndex,
-    setHistoryIndex,
-    applyHistory,
-    hasAttendanceFetched,
-  } = useAttendanceRecord({
+  const validation = useAttendanceEditorValidation({
     targetStaffId,
     targetWorkDate,
     readOnly,
-    setValue,
-    reset,
-    restReplace,
-    hourlyPaidHolidayTimeReplace,
-  });
-
-  const { overtimeRequestEndTime, hasOvertimeRequest } = useOvertimeRequest({
-    staffId: staff?.id ?? targetStaffId ?? null,
-    workDate: workDate ? workDate.format("YYYY-MM-DD") : null,
+    appConfig: config.config,
+    configEndTime: config.configEndTime,
     isAuthenticated,
   });
 
-  const { watchedEndTime, totalProductionTime, totalHourlyPaidHolidayTime, isOnBreak } =
-    useAttendanceEditorTimeSummary(watch);
+  const attendanceListPath = buildAttendanceListPath(
+    searchParams,
+    targetStaffId,
+  );
 
-  const errorMessages = useMemo(() => collectAttendanceErrorMessages(errors), [errors]);
-
-  const overtimeError = useOvertimeError({
-    watchedEndTime,
-    appConfig,
-    configEndTime,
-    overtimeRequestEndTime,
-    hasOvertimeRequest,
-  });
-
-  const {
-    handleAbsentFlagChange,
-    handleSpecialHolidayFlagChange,
-    handleGoDirectlyChange,
-    dialog,
-    runWithoutGuard,
-  } = useAttendanceEditorHandlers({
-    getValues,
-    setValue,
-    getStartTime,
-    getEndTime,
-    getLunchRestStartTime,
-    getLunchRestEndTime,
-    targetWorkDate,
-    attendanceWorkDate: attendance?.workDate,
-    workDate,
-    restReplace,
-    hourlyPaidHolidayTimeReplace,
-    setHighlightStartTime,
-    isDirty,
-    isSubmitting,
-    logger,
-  });
-
-  const { onSubmit } = useAttendanceSubmit({
-    attendance,
-    staff,
+  const actions = useAttendanceEditorActions({
+    attendance: validation.attendance,
+    staff: validation.staff,
     currentUserId: currentUser?.id,
     enabledSendMail,
-    handleUpdateAttendance,
-    handleCreateAttendance,
     targetStaffId,
     targetWorkDate,
-    getStartTime,
-    getEndTime,
+    getStartTime: config.getStartTime,
+    getEndTime: config.getEndTime,
+    navigate,
     attendanceListPath,
-    overtimeError,
+    overtimeError: validation.overtimeError,
+    setSubmitError: validation.setSubmitError,
+    clearSubmitError: validation.clearSubmitError,
+    getValues: validation.getValues,
+    setValue: validation.setValue,
+    getLunchRestStartTime: config.getLunchRestStartTime,
+    getLunchRestEndTime: config.getLunchRestEndTime,
+    workDate: validation.workDate,
+    restReplace: validation.restReplace,
+    hourlyPaidHolidayTimeReplace: validation.hourlyPaidHolidayTimeReplace,
+    setHighlightStartTime: validation.setHighlightStartTime,
+    isDirty: validation.isDirty,
+    isSubmitting: validation.isSubmitting,
     logger,
-    navigateToAttendanceList: () => runWithoutGuard(() => navigate(attendanceListPath)),
-    setSubmitError,
-    clearSubmitError,
   });
 
-  const changeRequests = attendance?.changeRequests
-    ? attendance.changeRequests
-        .filter((item): item is NonNullable<typeof item> => item !== null)
-        .filter((item) => !item.completed)
-    : [];
-
   return {
-    appConfigLoading,
+    // Config & Loading
+    appConfigLoading: config.loading,
     staffsLoading,
-    hasAttendanceFetched,
+    hasAttendanceFetched: validation.hasAttendanceFetched,
     staffSError,
     targetStaffId,
-    staff,
-    workDate,
-    attendance,
-    onSubmit,
-    getValues,
-    setValue,
-    watch,
-    isDirty,
-    isValid,
-    isSubmitting,
-    submitErrorMessage,
-    restFields,
-    changeRequests,
-    restAppend,
-    restRemove,
-    restUpdate,
-    restReplace,
-    register,
-    control,
-    hourlyPaidHolidayTimeFields,
-    hourlyPaidHolidayTimeAppend,
-    hourlyPaidHolidayTimeRemove,
-    hourlyPaidHolidayTimeUpdate,
-    hourlyPaidHolidayTimeReplace,
-    hourlyPaidHolidayEnabled: getHourlyPaidHolidayEnabled(),
-    errorMessages,
-    isOnBreak,
-    dialog,
+    staff: validation.staff,
+    workDate: validation.workDate,
+    attendance: validation.attendance,
+
+    // Form & Validation
+    onSubmit: actions.onSubmit,
+    getValues: validation.getValues,
+    setValue: validation.setValue,
+    watch: validation.watch,
+    isDirty: validation.isDirty,
+    isValid: validation.isValid,
+    isSubmitting: validation.isSubmitting,
+    submitErrorMessage: validation.submitErrorMessage,
+    restFields: validation.restFields,
+    changeRequests: validation.changeRequests,
+    restAppend: validation.restAppend,
+    restRemove: validation.restRemove,
+    restUpdate: validation.restUpdate,
+    restReplace: validation.restReplace,
+    register: validation.register,
+    control: validation.control,
+    hourlyPaidHolidayTimeFields: validation.hourlyPaidHolidayTimeFields,
+    hourlyPaidHolidayTimeAppend: validation.hourlyPaidHolidayTimeAppend,
+    hourlyPaidHolidayTimeRemove: validation.hourlyPaidHolidayTimeRemove,
+    hourlyPaidHolidayTimeUpdate: validation.hourlyPaidHolidayTimeUpdate,
+    hourlyPaidHolidayTimeReplace: validation.hourlyPaidHolidayTimeReplace,
+
+    // Derived Values
+    hourlyPaidHolidayEnabled: config.getHourlyPaidHolidayEnabled(),
+    errorMessages: validation.errorMessages,
+    isOnBreak: validation.isOnBreak,
+    dialog: actions.dialog,
     attendanceListPath,
-    sortedHistories,
-    historyIndex,
-    historiesLoading,
-    setHistoryIndex,
-    applyHistory,
-    overtimeError,
-    totalProductionTime,
-    totalHourlyPaidHolidayTime,
-    highlightStartTime,
-    handleGoDirectlyChange,
-    getAbsentEnabled,
-    getSpecialHolidayEnabled,
-    getHourlyPaidHolidayEnabled,
-    handleAbsentFlagChange,
-    handleSpecialHolidayFlagChange,
-    handleSubmit,
-    handleUpdateAttendance,
+    sortedHistories: validation.sortedHistories,
+    historyIndex: validation.historyIndex,
+    historiesLoading: validation.historiesLoading,
+    setHistoryIndex: validation.setHistoryIndex,
+    applyHistory: validation.applyHistory,
+    overtimeError: validation.overtimeError,
+    totalProductionTime: validation.totalProductionTime,
+    totalHourlyPaidHolidayTime: validation.totalHourlyPaidHolidayTime,
+    highlightStartTime: validation.highlightStartTime,
+    handleGoDirectlyChange: actions.handleGoDirectlyChange,
+    getAbsentEnabled: config.getAbsentEnabled,
+    getSpecialHolidayEnabled: config.getSpecialHolidayEnabled,
+    getHourlyPaidHolidayEnabled: config.getHourlyPaidHolidayEnabled,
+    handleAbsentFlagChange: actions.handleAbsentFlagChange,
+    handleSpecialHolidayFlagChange: actions.handleSpecialHolidayFlagChange,
+    handleSubmit: validation.handleSubmit,
+    handleUpdateAttendance: actions.handleUpdateAttendance,
     enabledSendMail,
     toggleSendMail: () => setEnabledSendMail((prev) => !prev),
   };
