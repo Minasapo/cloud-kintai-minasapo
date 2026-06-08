@@ -1,7 +1,7 @@
 import { createLogger } from "@shared/lib/logger";
 import { useEffect } from "react";
 
-import { HEARTBEAT_INTERVAL } from "./utils";
+import { HEARTBEAT_INTERVAL } from "../utils/presenceUtils";
 
 const logger = createLogger("ShiftPresenceHeartbeat");
 

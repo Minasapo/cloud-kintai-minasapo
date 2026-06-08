@@ -6,10 +6,7 @@ import { calcTotalRestTime } from "../ui/items/RestTimeItem/RestTimeItem";
 import { calcTotalWorkTime } from "../ui/items/WorkTimeItem/WorkTimeItem";
 import { type AttendanceEditInputs } from "./common";
 
-/**
- * Hook to calculate time summaries for the attendance editor.
- */
-export function useAttendanceEditorTimeSummary(watch: UseFormWatch<AttendanceEditInputs>) {
+export const useAttendanceEditorTimeSummary = (watch: UseFormWatch<AttendanceEditInputs>) => {
   // eslint-disable-next-line react-hooks/incompatible-library -- react-hook-form's watch() is not a React hook
   const watchedEndTime = watch("endTime");
   // eslint-disable-next-line react-hooks/incompatible-library -- react-hook-form's watch() is not a React hook
@@ -62,4 +59,4 @@ export function useAttendanceEditorTimeSummary(watch: UseFormWatch<AttendanceEdi
   );
 
   return { watchedEndTime, totalProductionTime, totalHourlyPaidHolidayTime, isOnBreak };
-}
+};

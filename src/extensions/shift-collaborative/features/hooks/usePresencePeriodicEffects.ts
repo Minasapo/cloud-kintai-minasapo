@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 
 import { CollaborativeUser } from "../types/collaborative.types";
-import { EditingCellsMap } from "./types";
-import { EDIT_TIMEOUT,HEARTBEAT_INTERVAL, INACTIVE_THRESHOLD } from "./utils";
+import { EditingCellsMap } from "../types/presence.types";
+import { EDIT_TIMEOUT, HEARTBEAT_INTERVAL, INACTIVE_THRESHOLD } from "../utils/presenceUtils";
 
 export const usePresencePeriodicEffects = ({
   updateActiveUsers,

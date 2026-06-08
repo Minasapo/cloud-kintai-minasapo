@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 
 import { CollaborativeUser } from "../types/collaborative.types";
-import { EditingCellsMap } from "./types";
-import { generateUserColor } from "./utils";
+import { EditingCellsMap } from "../types/presence.types";
+import { generateUserColor } from "../utils/presenceUtils";
 
 export const usePresenceCellOperations = ({
   currentUserId,
