@@ -7,6 +7,11 @@ import {
 import { Attendance } from "@shared/api/graphql/types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import {
+  buildDuplicateInfoByStaff,
+  mergeDuplicateAttendances,
+  parseDuplicateListFromError,
+} from "../lib/duplicateAttendanceUtils";
 import { calculateTotalOvertimeMinutes } from "../lib/overtimeUtils";
 
 type UseAttendanceDailyFetchParams = {
@@ -31,59 +36,6 @@ type UseAttendanceDailyFetchResult = {
   mergedDuplicateAttendances: DuplicateAttendanceDaily[];
   duplicateInfoByStaff: Record<string, DuplicateAttendanceDaily[]>;
 };
-
-function parseDuplicateListFromError(
-  err: unknown,
-  staffId: string,
-  staffNameMap: Record<string, string>,
-): DuplicateAttendanceDaily[] {
-  const details =
-    typeof err === "object" &&
-    err !== null &&
-    "details" in err &&
-    typeof (err as { details?: unknown }).details === "object" &&
-    (err as { details?: unknown }).details !== null
-      ? (err as {
-          details: {
-            duplicates?: unknown;
-          };
-        }).details.duplicates ?? []
-      : [];
-
-  if (!Array.isArray(details)) {
-    return [];
-  }
-
-  return details
-    .map((dup) => {
-      if (
-        !dup ||
-        typeof dup !== "object" ||
-        !("workDate" in dup) ||
-        !("ids" in dup)
-      ) {
-        return null;
-      }
-      const candidate = dup as {
-        workDate?: unknown;
-        ids?: unknown;
-        staffId?: unknown;
-      };
-      if (typeof candidate.workDate !== "string" || !Array.isArray(candidate.ids)) {
-        return null;
-      }
-      const ids = candidate.ids.filter((id): id is string => typeof id === "string");
-      return {
-        staffId: typeof candidate.staffId === "string" ? candidate.staffId : staffId,
-        staffName: staffNameMap[staffId] ?? staffId,
-        workDate: candidate.workDate,
-        ids,
-      } satisfies DuplicateAttendanceDaily;
-    })
-    .filter(
-      (dup): dup is DuplicateAttendanceDaily => dup !== null && dup.ids.length > 1,
-    );
-}
 
 export function useAttendanceDailyFetch({
   attendanceDailyList,
@@ -124,9 +76,8 @@ export function useAttendanceDailyFetch({
       setAttendanceLoadingMap((state) => ({ ...state, [staffId]: true }));
       setAttendanceErrorMap((state) => ({ ...state, [staffId]: null }));
 
-      const { startDate, endDate } = getAttendanceMonthRangeInput(
-        displayDateFormatted,
-      );
+      const { startDate, endDate } =
+        getAttendanceMonthRangeInput(displayDateFormatted);
 
       triggerListAttendancesByDateRange({ staffId, startDate, endDate })
         .unwrap()
@@ -227,7 +178,12 @@ export function useAttendanceDailyFetch({
         scheduledMinute,
       );
     },
-    [getAttendanceForDisplayDate, overtimeMinutesMap, scheduledHour, scheduledMinute],
+    [
+      getAttendanceForDisplayDate,
+      overtimeMinutesMap,
+      scheduledHour,
+      scheduledMinute,
+    ],
   );
 
   const summaryDuplicateList = useMemo(
@@ -236,26 +192,15 @@ export function useAttendanceDailyFetch({
   );
 
   const mergedDuplicateAttendances = useMemo(() => {
-    if (loading) return [];
-    const unique = new Map<string, DuplicateAttendanceDaily>();
-    [...duplicateAttendances, ...summaryDuplicateList].forEach((dup) => {
-      const key = `${dup.staffId}-${dup.workDate}-${dup.ids.join("-")}`;
-      if (!unique.has(key)) {
-        unique.set(key, dup);
-      }
-    });
-    return Array.from(unique.values());
+    return mergeDuplicateAttendances(
+      duplicateAttendances,
+      summaryDuplicateList,
+      loading,
+    );
   }, [duplicateAttendances, loading, summaryDuplicateList]);
 
   const duplicateInfoByStaff = useMemo(() => {
-    return mergedDuplicateAttendances.reduce<
-      Record<string, DuplicateAttendanceDaily[]>
-    >((acc, dup) => {
-      const list = acc[dup.staffId] ?? [];
-      list.push(dup);
-      acc[dup.staffId] = list;
-      return acc;
-    }, {});
+    return buildDuplicateInfoByStaff(mergedDuplicateAttendances);
   }, [mergedDuplicateAttendances]);
 
   return {
