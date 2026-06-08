@@ -6,7 +6,7 @@ import {
 import dayjs from "dayjs";
 
 import { CompanyHoliday } from "./CompanyHoliday";
-import { Holiday } from "./Holiday";
+import { Holiday, normalizeHolidayName } from "./Holiday";
 
 export class Remarks {
   private summaryMessage: string[] = [];
@@ -17,7 +17,7 @@ export class Remarks {
     private remarks: Attendance["remarks"],
     private holidayCalendars: HolidayCalendar[],
     private companyHolidayCalendars: CompanyHolidayCalendar[],
-    private substituteHolidayDate: Attendance["substituteHolidayDate"]
+    private substituteHolidayDate: Attendance["substituteHolidayDate"],
   ) {}
 
   get() {
@@ -55,20 +55,20 @@ export class Remarks {
   private setHoliday() {
     const holiday = new Holiday(
       this.holidayCalendars,
-      this.workDate
+      this.workDate,
     ).getHoliday();
 
     if (!holiday) {
       return;
     }
 
-    this.summaryMessage.push(holiday.name);
+    this.summaryMessage.push(normalizeHolidayName(holiday.name));
   }
 
   private setCompanyHoliday() {
     const companyHoliday = new CompanyHoliday(
       this.companyHolidayCalendars,
-      this.workDate
+      this.workDate,
     ).getHoliday();
 
     if (!companyHoliday) {
