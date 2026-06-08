@@ -24,7 +24,6 @@ import {
 import { AppButton } from "@shared/ui/button";
 import ConfirmDialog from "@shared/ui/feedback/ConfirmDialog";
 import dayjs from "dayjs";
-import React from "react";
 
 import { renderInlineDiff } from "../lib/inlineDiff";
 import { useDuplicateAttendanceManagerState } from "../model/useDuplicateConfirmState";
