@@ -96,4 +96,4 @@ amplifytools.xcconfig
 .continue/
 .copilot/
 .agents/
-.clinerules/workflows/cline-workflow.md
+.clinerules/
