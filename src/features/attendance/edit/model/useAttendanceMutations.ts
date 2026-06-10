@@ -1,13 +1,7 @@
-import {
-  useCreateAttendanceMutation,
-  useUpdateAttendanceMutation,
-} from "@entities/attendance/api/attendanceApi";
+import { useCreateAttendanceMutation, useUpdateAttendanceMutation } from "@entities/attendance/api/attendanceApi";
 import { useCallback } from "react";
 
-/**
- * Hook to handle attendance mutations.
- */
-export function useAttendanceMutations() {
+export const useAttendanceMutations = () => {
   const [createAttendanceMutation] = useCreateAttendanceMutation();
   const [updateAttendanceMutation] = useUpdateAttendanceMutation();
 
@@ -24,4 +18,4 @@ export function useAttendanceMutations() {
   );
 
   return { handleUpdateAttendance, handleCreateAttendance };
-}
+};

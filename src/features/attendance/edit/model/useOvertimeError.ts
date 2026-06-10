@@ -10,16 +10,13 @@ type UseOvertimeErrorProps = {
   hasOvertimeRequest: boolean;
 };
 
-/**
- * Overtime error validation hook.
- */
-export function useOvertimeError({
+export const useOvertimeError = ({
   watchedEndTime,
   appConfig,
   configEndTime,
   overtimeRequestEndTime,
   hasOvertimeRequest,
-}: UseOvertimeErrorProps): string | null {
+}: UseOvertimeErrorProps): string | null => {
   return useMemo(() => {
     if (!watchedEndTime || !appConfig) {
       return null;
@@ -36,4 +33,4 @@ export function useOvertimeError({
     }
     return null;
   }, [watchedEndTime, appConfig, overtimeRequestEndTime, hasOvertimeRequest, configEndTime]);
-}
+};

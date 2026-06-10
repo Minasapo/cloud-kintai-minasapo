@@ -1,8 +1,7 @@
+import { useAttendanceGoDirectlyHandler } from "@features/attendance/edit/model/useAttendanceGoDirectlyHandler";
+import { useAttendanceHolidayHandlers } from "@features/attendance/edit/model/useAttendanceHolidayHandlers";
 import { Logger } from "@shared/lib/logger";
 import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
-
-import { useAttendanceGoDirectlyHandler } from "./useAttendanceGoDirectlyHandler";
-import { useAttendanceHolidayHandlers } from "./useAttendanceHolidayHandlers";
 
 type UseAttendanceEditorHandlersProps = Omit<
   Parameters<typeof useAttendanceHolidayHandlers>[0],
@@ -14,10 +13,7 @@ type UseAttendanceEditorHandlersProps = Omit<
     logger: Logger;
   };
 
-/**
- * Hook to handle attendance editor event handlers.
- */
-export function useAttendanceEditorHandlers({
+export const useAttendanceEditorHandlers = ({
   getValues,
   setValue,
   getStartTime,
@@ -33,7 +29,7 @@ export function useAttendanceEditorHandlers({
   isDirty,
   isSubmitting,
   logger,
-}: UseAttendanceEditorHandlersProps) {
+}: UseAttendanceEditorHandlersProps) => {
   const { handleAbsentFlagChange, handleSpecialHolidayFlagChange } =
     useAttendanceHolidayHandlers({
       getValues,
@@ -49,7 +45,6 @@ export function useAttendanceEditorHandlers({
       hourlyPaidHolidayTimeReplace,
       logger,
     });
-
   const { handleGoDirectlyChange } = useAttendanceGoDirectlyHandler({
     setValue,
     getValues,
@@ -58,17 +53,9 @@ export function useAttendanceEditorHandlers({
     targetWorkDate,
     setHighlightStartTime,
   });
-
   const { dialog, runWithoutGuard } = usePageLeaveGuard({
     isDirty,
     isBusy: isSubmitting,
   });
-
-  return {
-    handleAbsentFlagChange,
-    handleSpecialHolidayFlagChange,
-    handleGoDirectlyChange,
-    dialog,
-    runWithoutGuard,
-  };
-}
+  return { handleAbsentFlagChange, handleSpecialHolidayFlagChange, handleGoDirectlyChange, dialog, runWithoutGuard };
+};
