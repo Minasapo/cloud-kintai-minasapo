@@ -19,7 +19,7 @@ import RestEndTimeInput from "./RestEndTimeInput";
 // ─── AppConfig mock value ──────────────────────────────────────────────────────
 
 const mockAppConfigContext: AppConfigContextProps = {
-  ...{} as AppConfigContextProps,
+  ...({} as AppConfigContextProps),
   config: null,
   fetchConfig: async () => {},
   saveConfig: async () => {},
@@ -361,6 +361,30 @@ describe("RestEndTimeInput", () => {
       await user.click(screen.getByRole("button", { name: "outside" }));
       await waitFor(() => {
         expect(restUpdateMock).toHaveBeenCalled();
+      });
+    });
+
+    it("clears the time when the input is emptied and blurred", async () => {
+      const user = userEvent.setup({ delay: null });
+      const restUpdateMock = jest.fn();
+      render(
+        <div>
+          <Wrapper
+            endTimeValue="2024-04-01T13:00:00"
+            restUpdateMock={restUpdateMock}
+          />
+          <button type="button">outside</button>
+        </div>,
+      );
+      const input = screen.getByTestId("rest-end-time-input-desktop-0");
+      await user.click(input);
+      await user.clear(input);
+      await user.click(screen.getByRole("button", { name: "outside" }));
+      await waitFor(() => {
+        expect(restUpdateMock).toHaveBeenCalledWith(
+          0,
+          expect.objectContaining({ endTime: null }),
+        );
       });
     });
   });
