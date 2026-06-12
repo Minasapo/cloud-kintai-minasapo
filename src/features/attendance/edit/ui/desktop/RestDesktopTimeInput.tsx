@@ -42,26 +42,36 @@ export default function RestDesktopTimeInput({
   if (!workDate || !control || !restUpdate) return null;
 
   const isStart = type === "start";
-  const fieldName = isStart ? `rests.${index}.startTime` : `rests.${index}.endTime`;
-  const lunchTime = (isStart ? getLunchRestStartTime() : getLunchRestEndTime()).format("HH:mm");
+  const fieldName = isStart
+    ? `rests.${index}.startTime`
+    : `rests.${index}.endTime`;
+  const lunchTime = (
+    isStart ? getLunchRestStartTime() : getLunchRestEndTime()
+  ).format("HH:mm");
   const selectableTimes = [{ time: lunchTime, enabled: true }];
   const disabled = changeRequests.length > 0;
 
-  const applyRestUpdate = (formatted: string) => {
+  const applyRestUpdate = (formatted: string | null) => {
     restUpdate(
       index,
-      isStart ? { ...rest, startTime: formatted } : { ...rest, endTime: formatted },
+      isStart
+        ? { ...rest, startTime: formatted }
+        : { ...rest, endTime: formatted },
     );
   };
 
   return (
     <div className="flex min-w-0 flex-row gap-1">
       <Controller
-        name={fieldName as `rests.${number}.startTime` | `rests.${number}.endTime`}
+        name={
+          fieldName as `rests.${number}.startTime` | `rests.${number}.endTime`
+        }
         control={control}
         render={({ field }) => (
           <TimeInputField
-            value={isEditing ? inputDraft : toTimeValue(field.value as string | null)}
+            value={
+              isEditing ? inputDraft : toTimeValue(field.value as string | null)
+            }
             inputRef={field.ref}
             disabled={disabled}
             readOnly={!!readOnly}
@@ -83,7 +93,10 @@ export default function RestDesktopTimeInput({
             onBlur={() => {
               field.onBlur();
               const nextDraft = normalizeTimeDraft(inputDraft);
-              if (isCompleteTime(nextDraft)) {
+              if (nextDraft === "") {
+                field.onChange(null);
+                applyRestUpdate(null);
+              } else if (isCompleteTime(nextDraft)) {
                 const formatted = toIsoDateTime(nextDraft, workDate);
                 field.onChange(formatted);
                 if (formatted) applyRestUpdate(formatted);
@@ -99,6 +112,11 @@ export default function RestDesktopTimeInput({
             onChange={(draft) => {
               const nextDraft = normalizeTimeDraft(draft);
               setInputDraft(nextDraft);
+              if (nextDraft === "") {
+                field.onChange(null);
+                applyRestUpdate(null);
+                return;
+              }
               if (!isCompleteTime(nextDraft)) return;
               const formatted = toIsoDateTime(nextDraft, workDate);
               field.onChange(formatted);
