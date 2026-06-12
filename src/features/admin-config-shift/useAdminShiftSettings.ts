@@ -12,7 +12,7 @@ import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 
-import { E14001 } from "@/errors";
+import { E14001, S14001, S14002 } from "@/errors";
 import {
   buildShiftGroupPayload,
   createShiftGroup,
@@ -207,6 +207,12 @@ export function useAdminShiftSettings(
     const payloadShiftGroups = buildShiftGroupPayload(values.shiftGroups);
     try {
       const isUpdate = await persistConfig({ shiftGroups: payloadShiftGroups });
+      dispatch(
+        pushNotification({
+          tone: "success",
+          message: isUpdate ? S14002 : S14001,
+        }),
+      );
       options.onShiftGroupSaveSuccess?.(isUpdate);
       setSavedShiftGroupSnapshot(toShiftGroupSnapshot(values.shiftGroups));
       reset(values);

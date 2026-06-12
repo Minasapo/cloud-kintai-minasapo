@@ -61,7 +61,6 @@ export default function AdminShiftSettings() {
     handleSaveShiftDisplay,
   } = useAdminShiftSettings({
     enableShiftDisplayAutoSave: false,
-    onShiftGroupSaveSuccess: handleSaveSuccess,
     onShiftDisplaySaveSuccess: handleSaveSuccess,
   });
 
