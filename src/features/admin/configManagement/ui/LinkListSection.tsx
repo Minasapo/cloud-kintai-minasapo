@@ -54,13 +54,20 @@ const LinkListSection = ({
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               リンク {index + 1}
             </span>
-            <AppIconButton
-              tone="danger"
-              aria-label="削除"
-              onClick={() => onRemoveLink(index)}
-            >
-              <SettingsIcon name="delete" />
-            </AppIconButton>
+            <div className="flex items-center gap-1">
+              <SettingsCheckbox
+                checked={link.enabled}
+                onChange={(checked) => onLinkChange(index, "enabled", checked)}
+                label="有効"
+              />
+              <AppIconButton
+                tone="danger"
+                aria-label="削除"
+                onClick={() => onRemoveLink(index)}
+              >
+                <SettingsIcon name="delete" />
+              </AppIconButton>
+            </div>
           </div>
           {/* カードボディ */}
           <div className="flex flex-col gap-3 p-4">
@@ -92,11 +99,6 @@ const LinkListSection = ({
               <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2">
                 {(predefinedIcons.find((icon) => icon.value === link.icon) ?? predefinedIcons[0])?.component}
               </div>
-              <SettingsCheckbox
-                checked={link.enabled}
-                onChange={(checked) => onLinkChange(index, "enabled", checked)}
-                label="有効"
-              />
             </div>
           </div>
         </div>

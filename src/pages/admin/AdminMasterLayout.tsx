@@ -1,7 +1,4 @@
-import {
-  findAdminSettingsItemByPath,
-  resolveAdminSettingsCategory,
-} from "@features/admin/layout/model/adminSettingsNavigation";
+import { findAdminSettingsItemByPath } from "@features/admin/layout/model/adminSettingsNavigation";
 import { PageTitle } from "@shared/ui/typography";
 import { memo } from "react";
 import { Outlet, useLocation } from "react-router-dom";
@@ -9,9 +6,8 @@ import { Outlet, useLocation } from "react-router-dom";
 const SettingsContextHeader = memo(function SettingsContextHeader() {
   const location = useLocation();
   const currentItem = findAdminSettingsItemByPath(location.pathname);
-  const currentCategory = resolveAdminSettingsCategory(location.pathname);
 
-  if (!currentItem || !currentCategory) {
+  if (!currentItem) {
     return (
       <div className="flex flex-col gap-3">
         <PageTitle className="m-0 text-[1.8rem] font-bold leading-[1.1] tracking-[-0.03em] text-slate-950 md:text-[2.15rem]">
@@ -26,20 +22,12 @@ const SettingsContextHeader = memo(function SettingsContextHeader() {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="inline-flex w-fit rounded-full bg-emerald-100 px-3 py-1 text-sm font-bold text-emerald-700">
-          {currentCategory.title}
-        </span>
-      </div>
       <PageTitle className="m-0 text-[1.8rem] font-bold leading-[1.1] tracking-[-0.03em] text-slate-950 md:text-[2.1rem]">
         {currentItem.title}
       </PageTitle>
       <p className="m-0 max-w-[72ch] text-slate-500">
         {currentItem.description}
       </p>
-      <div className="inline-flex w-fit rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-        {currentItem.ctaLabel}
-      </div>
     </div>
   );
 });

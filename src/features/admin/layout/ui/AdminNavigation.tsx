@@ -106,15 +106,6 @@ export const AdminNavigation = memo(function AdminNavigation({
     >
       <Stack spacing={0.5}>
         <Typography
-          sx={{
-            fontSize: "0.74rem",
-            fontWeight: 700,
-            color: "rgb(15 118 110)",
-          }}
-        >
-          CONTROL RAIL
-        </Typography>
-        <Typography
           sx={{ fontSize: "1rem", fontWeight: 700, color: "rgb(15 23 42)" }}
         >
           {activeMenuItem?.primaryLabel ?? "カテゴリ"}
