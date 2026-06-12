@@ -1,50 +1,50 @@
-import { ROLE_OPTIONS } from "@features/admin/staff/model/staffForm";
-import { Autocomplete } from "@mui/material";
+import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
+import { StaffFormValues } from "@features/admin/staff/model/staffForm";
+import {
+  Autocomplete,
+} from "@mui/material";
 import { AppTextField } from "@shared/ui/form";
-import type {
-  Control,
-  FieldValues,
-  Path,
-  UseFormSetValue,
-} from "react-hook-form";
-import { Controller } from "react-hook-form";
-
-type StaffRoleTableCellProps<TFieldValues extends FieldValues> = {
-  control: Control<TFieldValues>;
-  setValue: UseFormSetValue<TFieldValues>;
-};
+import { Control, Controller, UseFormSetValue } from "react-hook-form";
 
 const VALUE_CELL_CLASS = "border-b border-slate-200 px-4 py-3 align-middle";
 
-export function StaffRoleTableCell<TFieldValues extends FieldValues>({
-  control,
-  setValue,
-}: StaffRoleTableCellProps<TFieldValues>) {
+type Props = {
+  control: Control<StaffFormValues>;
+  setValue: UseFormSetValue<StaffFormValues>;
+};
+
+export function StaffRoleTableCell({ control, setValue }: Props) {
   return (
     <td className={VALUE_CELL_CLASS}>
       <Controller
-        name={"role" as Path<TFieldValues>}
+        name="role"
         control={control}
         render={({ field }) => (
-          <Autocomplete
+          <Autocomplete<{ value: StaffRole; label: string }>
             {...field}
-            value={
-              ROLE_OPTIONS.find(
-                (option) => String(option.value) === field.value,
-              ) ?? null
-            }
-            options={ROLE_OPTIONS}
+            options={[
+              { value: StaffRole.ADMIN, label: "管理者" },
+              { value: StaffRole.STAFF, label: "スタッフ" },
+              { value: StaffRole.OPERATOR, label: "オペレーター" },
+            ]}
             getOptionLabel={(option) => option.label}
+            value={
+              [
+                { value: StaffRole.ADMIN, label: "管理者" },
+                { value: StaffRole.STAFF, label: "スタッフ" },
+                { value: StaffRole.OPERATOR, label: "オペレーター" },
+              ].find((opt) => opt.value === field.value) ?? null
+            }
             renderInput={(params) => (
               <AppTextField
                 {...params}
+                label="役割"
                 size="small"
-                sx={{ width: { xs: "100%", sm: 400 } }}
               />
             )}
             onChange={(_, data) => {
               if (!data) return;
-              setValue("role" as Path<TFieldValues>, data.value as never);
+              setValue("role", data.value);
               field.onChange(data.value);
             }}
           />

@@ -3,35 +3,43 @@ import useAppConfig from "@entities/app-config/model/useAppConfig";
 import { useOvertimeRequest } from "@entities/attendance/hooks/useOvertimeRequest";
 import { collectAttendanceErrorMessages } from "@entities/attendance/validation/collectErrorMessages";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
+import { useAttendanceEditForm } from "@features/attendance/edit/model/useAttendanceEditForm";
+import { useAttendanceSubmit } from "@features/attendance/edit/model/useAttendanceSubmit";
 import { Logger } from "@shared/lib/logger";
 import { createMonthSearchParams, MONTH_QUERY_KEY } from "@shared/lib/monthQuery";
-import { useContext, useMemo,useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
-import { useAttendanceEditForm } from "./useAttendanceEditForm";
+import { useAttendanceRecord } from "../model/useAttendanceRecord";
 import { useAttendanceEditorHandlers } from "./useAttendanceEditorHandlers";
 import { useAttendanceEditorTimeSummary } from "./useAttendanceEditorTimeSummary";
 import { useAttendanceMutations } from "./useAttendanceMutations";
-import { useAttendanceRecord } from "./useAttendanceRecord";
-import { useAttendanceSubmit } from "./useAttendanceSubmit";
 import { useOvertimeError } from "./useOvertimeError";
 
-const logger = new Logger("AttendanceEditor", import.meta.env.DEV ? "DEBUG" : "ERROR");
+function buildAttendanceListPath(
+  searchParams: URLSearchParams,
+  targetStaffId: string | undefined,
+): string {
+  const month = searchParams.get(MONTH_QUERY_KEY);
+  const basePath = targetStaffId
+    ? `/admin/staff/${targetStaffId}/attendance`
+    : "/admin/attendances";
+  if (!month) {
+    return basePath;
+  }
+  return `${basePath}?${createMonthSearchParams(month).toString()}`;
+}
 
 type UseAttendanceEditorStateParams = {
   readOnly?: boolean;
 };
 
-/**
- * Hook to manage the state of the attendance editor.
- */
-export function useAttendanceEditorState({ readOnly }: UseAttendanceEditorStateParams) {
+export const useAttendanceEditorState = ({ readOnly }: UseAttendanceEditorStateParams) => {
   const {
     derived,
     loading: appConfigLoading,
     config: appConfig,
   } = useAppConfig();
-
   const {
     lunchRestStartTime,
     lunchRestEndTime,
@@ -41,7 +49,6 @@ export function useAttendanceEditorState({ readOnly }: UseAttendanceEditorStateP
     endTime: configEndTime,
     absentEnabled,
   } = derived;
-
   const getLunchRestStartTime = () => lunchRestStartTime;
   const getLunchRestEndTime = () => lunchRestEndTime;
   const getHourlyPaidHolidayEnabled = (): boolean => hourlyPaidHolidayEnabled ?? false;
@@ -49,38 +56,18 @@ export function useAttendanceEditorState({ readOnly }: UseAttendanceEditorStateP
   const getStartTime = () => configStartTime;
   const getEndTime = () => configEndTime;
   const getAbsentEnabled = (): boolean => absentEnabled ?? false;
-
   const { targetWorkDate, staffId: targetStaffId } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { authStatus, cognitoUser: currentUser } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
-
   const { loading: staffsLoading, error: staffSError } = useStaffs({
     isAuthenticated,
   });
-
   const { handleUpdateAttendance, handleCreateAttendance } = useAttendanceMutations();
-
   const [highlightStartTime, setHighlightStartTime] = useState(false);
   const [enabledSendMail, setEnabledSendMail] = useState(true);
-
-  const buildAttendanceListPath = (
-    searchParams: URLSearchParams,
-    targetStaffId: string | undefined,
-  ): string => {
-    const month = searchParams.get(MONTH_QUERY_KEY);
-    const basePath = targetStaffId
-      ? `/admin/staff/${targetStaffId}/attendance`
-      : "/admin/attendances";
-    if (!month) {
-      return basePath;
-    }
-    return `${basePath}?${createMonthSearchParams(month).toString()}`;
-  };
-
   const attendanceListPath = buildAttendanceListPath(searchParams, targetStaffId);
-
   const {
     register,
     control,
@@ -96,8 +83,8 @@ export function useAttendanceEditorState({ readOnly }: UseAttendanceEditorStateP
     restFields,
     restRemove,
     restAppend,
-    restReplace,
     restUpdate,
+    restReplace,
     hourlyPaidHolidayTimeFields,
     hourlyPaidHolidayTimeRemove,
     hourlyPaidHolidayTimeAppend,
@@ -107,7 +94,6 @@ export function useAttendanceEditorState({ readOnly }: UseAttendanceEditorStateP
     setSubmitError,
     clearSubmitError,
   } = useAttendanceEditForm();
-
   const {
     attendance,
     staff,
@@ -127,18 +113,17 @@ export function useAttendanceEditorState({ readOnly }: UseAttendanceEditorStateP
     restReplace,
     hourlyPaidHolidayTimeReplace,
   });
-
   const { overtimeRequestEndTime, hasOvertimeRequest } = useOvertimeRequest({
     staffId: staff?.id ?? targetStaffId ?? null,
     workDate: workDate ? workDate.format("YYYY-MM-DD") : null,
     isAuthenticated,
   });
-
   const { watchedEndTime, totalProductionTime, totalHourlyPaidHolidayTime, isOnBreak } =
     useAttendanceEditorTimeSummary(watch);
-
-  const errorMessages = useMemo(() => collectAttendanceErrorMessages(errors), [errors]);
-
+  const errorMessages = useMemo(
+    () => collectAttendanceErrorMessages(errors),
+    [errors],
+  );
   const overtimeError = useOvertimeError({
     watchedEndTime,
     appConfig,
@@ -146,31 +131,24 @@ export function useAttendanceEditorState({ readOnly }: UseAttendanceEditorStateP
     overtimeRequestEndTime,
     hasOvertimeRequest,
   });
-
-  const {
-    handleAbsentFlagChange,
-    handleSpecialHolidayFlagChange,
-    handleGoDirectlyChange,
-    dialog,
-    runWithoutGuard,
-  } = useAttendanceEditorHandlers({
-    getValues,
-    setValue,
-    getStartTime,
-    getEndTime,
-    getLunchRestStartTime,
-    getLunchRestEndTime,
-    targetWorkDate,
-    attendanceWorkDate: attendance?.workDate,
-    workDate,
-    restReplace,
-    hourlyPaidHolidayTimeReplace,
-    setHighlightStartTime,
-    isDirty,
-    isSubmitting,
-    logger,
-  });
-
+  const { handleAbsentFlagChange, handleSpecialHolidayFlagChange, handleGoDirectlyChange, dialog, runWithoutGuard } =
+    useAttendanceEditorHandlers({
+      getValues,
+      setValue,
+      getStartTime,
+      getEndTime,
+      getLunchRestStartTime,
+      getLunchRestEndTime,
+      targetWorkDate,
+      attendanceWorkDate: attendance?.workDate,
+      workDate,
+      restReplace,
+      hourlyPaidHolidayTimeReplace,
+      setHighlightStartTime,
+      isDirty,
+      isSubmitting,
+      logger: new Logger("AttendanceEditor", import.meta.env.DEV ? "DEBUG" : "ERROR"),
+    });
   const { onSubmit } = useAttendanceSubmit({
     attendance,
     staff,
@@ -184,18 +162,17 @@ export function useAttendanceEditorState({ readOnly }: UseAttendanceEditorStateP
     getEndTime,
     attendanceListPath,
     overtimeError,
-    logger,
-    navigateToAttendanceList: () => runWithoutGuard(() => navigate(attendanceListPath)),
+    logger: new Logger("AttendanceEditor", import.meta.env.DEV ? "DEBUG" : "ERROR"),
+    navigateToAttendanceList: () =>
+      runWithoutGuard(() => navigate(attendanceListPath)),
     setSubmitError,
     clearSubmitError,
   });
-
   const changeRequests = attendance?.changeRequests
     ? attendance.changeRequests
         .filter((item): item is NonNullable<typeof item> => item !== null)
         .filter((item) => !item.completed)
     : [];
-
   return {
     appConfigLoading,
     staffsLoading,
@@ -251,4 +228,4 @@ export function useAttendanceEditorState({ readOnly }: UseAttendanceEditorStateP
     enabledSendMail,
     toggleSendMail: () => setEnabledSendMail((prev) => !prev),
   };
-}
+};

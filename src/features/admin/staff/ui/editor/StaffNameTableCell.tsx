@@ -1,33 +1,30 @@
+import { StaffFormValues } from "@features/admin/staff/model/staffForm";
 import { AppTextField } from "@shared/ui/form";
-import type { FieldValues, Path, UseFormRegister } from "react-hook-form";
-
-type StaffNameTableCellProps<TFieldValues extends FieldValues> = {
-  register: UseFormRegister<TFieldValues>;
-};
+import { UseFormRegister } from "react-hook-form";
 
 const VALUE_CELL_CLASS = "border-b border-slate-200 px-4 py-3 align-middle";
 
-export function StaffNameTableCell<TFieldValues extends FieldValues>({
-  register,
-}: StaffNameTableCellProps<TFieldValues>) {
+type Props = {
+  register: UseFormRegister<StaffFormValues>;
+};
+
+export function StaffNameTableCell({ register }: Props) {
   return (
-    <td className={VALUE_CELL_CLASS}>
-      <div className="flex flex-col gap-2 sm:flex-row">
+    <td className={VALUE_CELL_CLASS} data-testid="staff-name-cell">
+      <div className="space-y-2">
         <AppTextField
-          {...register("familyName" as Path<TFieldValues>, {
-            required: true,
-          })}
+          {...register("familyName", { required: true })}
+          inputProps={{ "data-testid": "familyName-input" }}
           size="small"
-          label="姓"
-          sx={{ width: { xs: "100%", sm: 200 } }}
+          sx={{ width: { xs: "100%", sm: 400 } }}
+          placeholder="姓"
         />
         <AppTextField
-          {...register("givenName" as Path<TFieldValues>, {
-            required: true,
-          })}
+          {...register("givenName", { required: true })}
+          inputProps={{ "data-testid": "givenName-input" }}
           size="small"
-          label="名"
-          sx={{ width: { xs: "100%", sm: 200 } }}
+          sx={{ width: { xs: "100%", sm: 400 } }}
+          placeholder="名"
         />
       </div>
     </td>

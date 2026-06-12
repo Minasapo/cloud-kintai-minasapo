@@ -10,9 +10,9 @@ import { useAutoSave } from "@shared/hooks";
 import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 
-import { E14001 } from "@/errors";
+import { E14001, S14001, S14002 } from "@/errors";
 import {
   buildShiftGroupPayload,
   createShiftGroup,
@@ -32,6 +32,35 @@ const SHIFT_GROUP_ERROR_FIELDS = [
 
 const SHIFT_DISPLAY_AUTO_SAVE_DELAY = 600;
 
+type ShiftGroupSnapshotSource = Array<{
+  label?: string | null;
+  min?: string | number | null;
+  max?: string | number | null;
+  fixed?: string | number | null;
+  description?: string | null;
+}>;
+
+const toOptionalNumberString = (value: string | number | null | undefined) => {
+  if (typeof value === "number") {
+    return Number.isNaN(value) ? "" : String(value);
+  }
+  if (typeof value === "string") {
+    return value;
+  }
+  return "";
+};
+
+const toShiftGroupSnapshot = (groups: ShiftGroupSnapshotSource) =>
+  JSON.stringify(
+    groups.map((group) => ({
+      label: group.label ?? "",
+      min: toOptionalNumberString(group.min),
+      max: toOptionalNumberString(group.max),
+      fixed: toOptionalNumberString(group.fixed),
+      description: group.description ?? "",
+    })),
+  );
+
 type UseAdminShiftSettingsOptions = {
   enableShiftDisplayAutoSave?: boolean;
   onShiftGroupSaveSuccess?: (isUpdate: boolean) => void;
@@ -39,9 +68,7 @@ type UseAdminShiftSettingsOptions = {
 };
 
 const getValidationDetails = (errors: {
-  shiftGroups?: Array<
-    Record<string, { message?: unknown } | undefined>
-  >;
+  shiftGroups?: Array<Record<string, { message?: unknown } | undefined>>;
 }): string[] => {
   const details: string[] = [];
   errors.shiftGroups?.forEach((groupError, index) => {
@@ -61,7 +88,9 @@ const getValidationDetails = (errors: {
   return details;
 };
 
-export function useAdminShiftSettings(options: UseAdminShiftSettingsOptions = {}) {
+export function useAdminShiftSettings(
+  options: UseAdminShiftSettingsOptions = {},
+) {
   const {
     getShiftGroups,
     getConfigId,
@@ -78,15 +107,15 @@ export function useAdminShiftSettings(options: UseAdminShiftSettingsOptions = {}
     useState<ShiftDisplayMode>("normal");
   const [savedShiftDefaultMode, setSavedShiftDefaultMode] =
     useState<ShiftDisplayMode>("normal");
-  const enableShiftDisplayAutoSave =
-    options.enableShiftDisplayAutoSave ?? true;
+  const [savedShiftGroupSnapshot, setSavedShiftGroupSnapshot] =
+    useState<string>("[]");
+  const enableShiftDisplayAutoSave = options.enableShiftDisplayAutoSave ?? true;
 
   const {
     control,
     handleSubmit,
     reset,
     trigger,
-    watch,
     formState: { errors },
   } = useForm<ShiftGroupFormState>({
     defaultValues: { shiftGroups: [] },
@@ -104,6 +133,7 @@ export function useAdminShiftSettings(options: UseAdminShiftSettingsOptions = {}
     reset({
       shiftGroups: initialGroups.map((group) => toShiftGroupFormValue(group)),
     });
+    setSavedShiftGroupSnapshot(toShiftGroupSnapshot(initialGroups));
     setConfigId(getConfigId());
     if (typeof getShiftDefaultMode === "function") {
       const nextMode = getShiftDefaultMode();
@@ -132,46 +162,17 @@ export function useAdminShiftSettings(options: UseAdminShiftSettingsOptions = {}
 
   const hasValidationError = validationDetails.length > 0;
 
-  const initialShiftGroupSnapshot = useMemo(
-    () =>
-      JSON.stringify(
-        getShiftGroups().map((group) => ({
-          label: group.label ?? "",
-          min:
-            typeof group.min === "number" && !Number.isNaN(group.min)
-              ? String(group.min)
-              : "",
-          max:
-            typeof group.max === "number" && !Number.isNaN(group.max)
-              ? String(group.max)
-              : "",
-          fixed:
-            typeof group.fixed === "number" && !Number.isNaN(group.fixed)
-              ? String(group.fixed)
-              : "",
-          description: group.description ?? "",
-        })),
-      ),
-    [getShiftGroups],
+  const watchedShiftGroups = useWatch({
+    control,
+    name: "shiftGroups",
+  });
+
+  const currentShiftGroupSnapshot = toShiftGroupSnapshot(
+    watchedShiftGroups ?? [],
   );
 
-  const watchedShiftGroups = watch("shiftGroups");
-
-  const currentShiftGroupSnapshot = useMemo(
-    () =>
-      JSON.stringify(
-        (watchedShiftGroups ?? []).map((field) => ({
-          label: field.label ?? "",
-          min: field.min ?? "",
-          max: field.max ?? "",
-          fixed: field.fixed ?? "",
-          description: field.description ?? "",
-        })),
-      ),
-    [watchedShiftGroups],
-  );
-
-  const isShiftGroupDirty = initialShiftGroupSnapshot !== currentShiftGroupSnapshot;
+  const isShiftGroupDirty =
+    savedShiftGroupSnapshot !== currentShiftGroupSnapshot;
   const isShiftDisplayDirty = shiftDefaultMode !== savedShiftDefaultMode;
   const isDirty = isShiftGroupDirty || isShiftDisplayDirty;
   const isBusy = savingShiftGroup || savingShiftDisplay;
@@ -206,7 +207,14 @@ export function useAdminShiftSettings(options: UseAdminShiftSettingsOptions = {}
     const payloadShiftGroups = buildShiftGroupPayload(values.shiftGroups);
     try {
       const isUpdate = await persistConfig({ shiftGroups: payloadShiftGroups });
+      dispatch(
+        pushNotification({
+          tone: "success",
+          message: isUpdate ? S14002 : S14001,
+        }),
+      );
       options.onShiftGroupSaveSuccess?.(isUpdate);
+      setSavedShiftGroupSnapshot(toShiftGroupSnapshot(values.shiftGroups));
       reset(values);
     } catch (error) {
       logger.error(error);

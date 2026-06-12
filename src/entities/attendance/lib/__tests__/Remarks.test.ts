@@ -30,10 +30,28 @@ describe("Remarks", () => {
       "メモ",
       holidayCalendar,
       companyHolidayCalendar,
-      "2024-05-03"
+      "2024-05-03",
     );
 
     expect(remarks.get()).toBe("有給休暇 振替休日 会社休日B メモ");
+  });
+
+  it("祝日データ上の振替休日は『休日』として表示する", () => {
+    const remarks = new Remarks(
+      "2024-05-01",
+      false,
+      undefined,
+      [
+        {
+          ...holidayCalendar[0],
+          name: "憲法記念日振替休日",
+        },
+      ],
+      companyHolidayCalendar,
+      null,
+    );
+
+    expect(remarks.get()).toBe("休日");
   });
 
   it("skips invalid substitute date and absent flags", () => {
@@ -43,7 +61,7 @@ describe("Remarks", () => {
       undefined,
       holidayCalendar,
       companyHolidayCalendar,
-      "not-a-date"
+      "not-a-date",
     );
 
     expect(remarks.get()).toBe("祝日A");
