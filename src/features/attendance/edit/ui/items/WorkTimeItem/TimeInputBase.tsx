@@ -68,7 +68,11 @@ export default function TimeInputBase<
             onFocus={() => {
               setIsEditing(true);
               setInputDraft(formatISOToTimeOrEmpty(field.value));
-              if (!readOnly && !disabled && quickInputTimes.some((t) => t.enabled)) {
+              if (
+                !readOnly &&
+                !disabled &&
+                quickInputTimes.some((t) => t.enabled)
+              ) {
                 if (blurTimeoutRef.current) {
                   window.clearTimeout(blurTimeoutRef.current);
                   blurTimeoutRef.current = null;
@@ -79,7 +83,10 @@ export default function TimeInputBase<
             onBlur={() => {
               field.onBlur();
               const nextDraft = normalizeTimeDraft(inputDraft);
-              if (isCompleteTime(nextDraft)) {
+              if (nextDraft === "") {
+                field.onChange(null);
+                setValue(name, null as AttendanceFieldValue<TFieldName>);
+              } else if (isCompleteTime(nextDraft)) {
                 const formatted = toIsoDateTime(
                   nextDraft,
                   workDate,
@@ -101,6 +108,11 @@ export default function TimeInputBase<
             onChange={(draft) => {
               const nextDraft = normalizeTimeDraft(draft);
               setInputDraft(nextDraft);
+              if (nextDraft === "") {
+                field.onChange(null);
+                setValue(name, null as AttendanceFieldValue<TFieldName>);
+                return;
+              }
               if (!isCompleteTime(nextDraft)) {
                 return;
               }

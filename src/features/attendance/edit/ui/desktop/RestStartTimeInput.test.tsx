@@ -19,7 +19,7 @@ import RestStartTimeInput from "./RestStartTimeInput";
 // ─── AppConfig mock value ──────────────────────────────────────────────────────
 
 const mockAppConfigContext: AppConfigContextProps = {
-  ...{} as AppConfigContextProps,
+  ...({} as AppConfigContextProps),
   config: null,
   fetchConfig: async () => {},
   saveConfig: async () => {},
@@ -346,6 +346,30 @@ describe("RestStartTimeInput", () => {
       await user.click(screen.getByRole("button", { name: "outside" }));
       await waitFor(() => {
         expect(restUpdateMock).toHaveBeenCalled();
+      });
+    });
+
+    it("clears the time when the input is emptied and blurred", async () => {
+      const user = userEvent.setup({ delay: null });
+      const restUpdateMock = jest.fn();
+      render(
+        <div>
+          <Wrapper
+            startTimeValue="2024-04-01T09:30:00"
+            restUpdateMock={restUpdateMock}
+          />
+          <button type="button">outside</button>
+        </div>,
+      );
+      const input = screen.getByTestId("rest-start-time-input-desktop-0");
+      await user.click(input);
+      await user.clear(input);
+      await user.click(screen.getByRole("button", { name: "outside" }));
+      await waitFor(() => {
+        expect(restUpdateMock).toHaveBeenCalledWith(
+          0,
+          expect.objectContaining({ startTime: null }),
+        );
       });
     });
   });
