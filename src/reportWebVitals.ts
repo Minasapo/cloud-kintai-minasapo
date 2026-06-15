@@ -1,4 +1,3 @@
-/* eslint-disable no-void */
 import { ReportCallback } from "web-vitals";
 
 const reportWebVitals = (onPerfEntry?: ReportCallback) => {
