@@ -1,3 +1,7 @@
+import { DatePicker } from "@mui/x-date-pickers";
+import dayjs, { type Dayjs } from "dayjs";
+import { useMemo, useState } from "react";
+
 type WorkDateInputProps = {
   defaultValue: string;
   ariaLabel: string;
@@ -9,13 +13,55 @@ export function WorkDateInput({
   ariaLabel,
   onChange,
 }: WorkDateInputProps) {
+  const initialValue = useMemo(() => {
+    if (!defaultValue) {
+      return null;
+    }
+
+    const parsed = dayjs(defaultValue);
+    return parsed.isValid() ? parsed : null;
+  }, [defaultValue]);
+  const [value, setValue] = useState<Dayjs | null>(initialValue);
+
   return (
-    <input
-      type="date"
-      defaultValue={defaultValue}
-      aria-label={ariaLabel}
-      onChange={(e) => onChange(e.target.value)}
-      className="w-[8rem] max-w-full rounded-[16px] border border-slate-200 bg-white px-2 py-2 text-sm text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+    <DatePicker
+      value={value}
+      format="YYYY/MM/DD"
+      onChange={(nextValue) => {
+        if (!nextValue || !nextValue.isValid()) {
+          setValue(null);
+          onChange("");
+          return;
+        }
+
+        setValue(nextValue);
+        onChange(nextValue.format("YYYY-MM-DD"));
+      }}
+      slotProps={{
+        textField: {
+          size: "small",
+          inputProps: {
+            "aria-label": ariaLabel,
+          },
+          sx: {
+            width: "8rem",
+            maxWidth: "100%",
+            "& .MuiInputBase-root": {
+              height: "34px",
+              borderRadius: "16px",
+              fontSize: "0.8125rem",
+              backgroundColor: "#fff",
+              boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.72)",
+            },
+            "& .MuiOutlinedInput-input": {
+              padding: "6px 8px",
+            },
+            "& .MuiSvgIcon-root": {
+              fontSize: "1rem",
+            },
+          },
+        },
+      }}
     />
   );
 }

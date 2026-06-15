@@ -1,6 +1,7 @@
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
 import { Label } from "@features/attendance/edit/ui/mobile/Label";
+import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useContext, useState } from "react";
 import { Controller } from "react-hook-form";
@@ -30,31 +31,57 @@ export function SubstituteHolidayDateInput({
         name="substituteHolidayDate"
         control={control}
         render={({ field, fieldState }) => {
-          const { value, onChange, ...restField } = field;
+          const { value, onChange, onBlur, name, ref: inputRef } = field;
 
           return (
             <>
               <div>
-                <input
-                  {...restField}
-                  type="date"
-                  value={value ? dayjs(value).format("YYYY-MM-DD") : ""}
-                  aria-label="勤務した日"
-                  className="w-full rounded-[10px] border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
-                  onChange={(e) => {
-                    if (!e.target.value) {
+                <DatePicker
+                  value={value ? dayjs(value) : null}
+                  format="YYYY/MM/DD"
+                  onChange={(nextValue) => {
+                    if (!nextValue) {
                       onChange(null);
                       return;
                     }
-                    const date = dayjs(e.target.value);
-                    if (date.isValid()) {
-                      setPendingDate(date);
+
+                    if (nextValue.isValid()) {
+                      setPendingDate(nextValue);
                       setConfirmOpen(true);
                     }
                   }}
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      fullWidth: true,
+                      name,
+                      onBlur,
+                      inputRef,
+                      inputProps: {
+                        "aria-label": "勤務した日",
+                      },
+                      sx: {
+                        "& .MuiInputBase-root": {
+                          height: "34px",
+                          borderRadius: "10px",
+                          fontSize: "0.8125rem",
+                          backgroundColor: "#fff",
+                          boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.72)",
+                        },
+                        "& .MuiOutlinedInput-input": {
+                          padding: "6px 12px",
+                        },
+                        "& .MuiSvgIcon-root": {
+                          fontSize: "1rem",
+                        },
+                      },
+                    },
+                  }}
                 />
                 {fieldState.error?.message ? (
-                  <p className="mt-2 text-sm text-rose-600">{fieldState.error.message}</p>
+                  <p className="mt-2 text-sm text-rose-600">
+                    {fieldState.error.message}
+                  </p>
                 ) : null}
               </div>
 
@@ -81,37 +108,41 @@ export function SubstituteHolidayDateInput({
                       <button
                         type="button"
                         className="rounded-[10px] border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                    onClick={() => {
-                      if (pendingDate) {
-                        onChange(pendingDate.format(AttendanceDate.DataFormat));
-                      }
+                        onClick={() => {
+                          if (pendingDate) {
+                            onChange(
+                              pendingDate.format(AttendanceDate.DataFormat),
+                            );
+                          }
 
-                      setConfirmOpen(false);
-                      setPendingDate(null);
-                    }}
-                  >
-                    クリアせず設定
+                          setConfirmOpen(false);
+                          setPendingDate(null);
+                        }}
+                      >
+                        クリアせず設定
                       </button>
                       <button
                         type="button"
                         className="rounded-[10px] border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600"
-                    onClick={() => {
-                      if (pendingDate) {
-                        onChange(pendingDate.format(AttendanceDate.DataFormat));
+                        onClick={() => {
+                          if (pendingDate) {
+                            onChange(
+                              pendingDate.format(AttendanceDate.DataFormat),
+                            );
 
-                        setValue("paidHolidayFlag", false);
-                        setValue("goDirectlyFlag", false);
-                        setValue("returnDirectlyFlag", false);
-                        setValue("startTime", null);
-                        setValue("endTime", null);
-                        restReplace([]);
-                      }
+                            setValue("paidHolidayFlag", false);
+                            setValue("goDirectlyFlag", false);
+                            setValue("returnDirectlyFlag", false);
+                            setValue("startTime", null);
+                            setValue("endTime", null);
+                            restReplace([]);
+                          }
 
-                      setConfirmOpen(false);
-                      setPendingDate(null);
-                    }}
-                  >
-                    クリアして設定
+                          setConfirmOpen(false);
+                          setPendingDate(null);
+                        }}
+                      >
+                        クリアして設定
                       </button>
                     </div>
                   </div>
