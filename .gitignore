@@ -99,3 +99,4 @@ amplifytools.xcconfig
 .agents/
 .clinerules/
 .github/agents/
+.playwright-cli/
