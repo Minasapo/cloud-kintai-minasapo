@@ -35,7 +35,6 @@ function AdminLayoutContent() {
   const {
     menuItems,
     activeMenuHref,
-    activeMenuItem,
     currentPath,
     isMobile,
     isMobileRailOpen,
@@ -61,7 +60,11 @@ function AdminLayoutContent() {
 
   return (
     <Stack component="section" sx={PAGE_CONTAINER_SX}>
-      <PageSection variant="surface" layoutVariant="dashboard" sx={SURFACE_SECTION_SX}>
+      <PageSection
+        variant="surface"
+        layoutVariant="dashboard"
+        sx={SURFACE_SECTION_SX}
+      >
         <Box
           sx={{
             display: "flex",
@@ -88,7 +91,6 @@ function AdminLayoutContent() {
         <AdminContent
           menuItems={menuItems}
           activeMenuHref={activeMenuHref}
-          activeMenuItem={activeMenuItem}
           currentPath={currentPath}
           onSelect={handleSelect}
           isMobile={isMobile}

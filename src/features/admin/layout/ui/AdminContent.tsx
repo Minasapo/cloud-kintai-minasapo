@@ -1,4 +1,4 @@
-import type { AdminHeaderMenuItem, UseHeaderMenuResult } from "@features/admin/layout/model/useHeaderMenu";
+import type { UseHeaderMenuResult } from "@features/admin/layout/model/useHeaderMenu";
 import { AdminNavigation } from "@features/admin/layout/ui/AdminNavigation";
 import { AdminSplitView } from "@features/admin/layout/ui/AdminSplitView";
 import { Box, Stack } from "@mui/material";
@@ -12,7 +12,6 @@ const MemoizedOutlet = memo(function MemoizedOutlet() {
 export interface AdminContentProps {
   menuItems: UseHeaderMenuResult;
   activeMenuHref: string;
-  activeMenuItem: AdminHeaderMenuItem | null;
   currentPath: string;
   onSelect: (itemHref: string) => void;
   isMobile: boolean;
@@ -38,7 +37,6 @@ export interface AdminContentProps {
 export const AdminContent = memo(function AdminContent({
   menuItems,
   activeMenuHref,
-  activeMenuItem,
   currentPath,
   onSelect,
   isMobile,
@@ -61,12 +59,14 @@ export const AdminContent = memo(function AdminContent({
   RightPanelComponent,
 }: AdminContentProps) {
   return (
-    <Stack direction={{ xs: "column", md: "row" }} sx={{ width: "100%", flex: 1 }}>
+    <Stack
+      direction={{ xs: "column", md: "row" }}
+      sx={{ width: "100%", flex: 1 }}
+    >
       {!isMobile && (
         <AdminNavigation
           menuItems={menuItems}
           activeMenuHref={activeMenuHref}
-          activeMenuItem={activeMenuItem}
           currentPath={currentPath}
           onSelect={onSelect}
         />
@@ -79,7 +79,6 @@ export const AdminContent = memo(function AdminContent({
               compact
               menuItems={menuItems}
               activeMenuHref={activeMenuHref}
-              activeMenuItem={activeMenuItem}
               currentPath={currentPath}
               onSelect={onSelect}
             />
