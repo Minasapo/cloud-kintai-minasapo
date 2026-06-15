@@ -1,12 +1,12 @@
 import { useAppDispatchV2 } from "@app/hooks";
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import { defaultValues, Inputs } from "@features/admin/jobTerm/lib/common";
+import { DatePicker } from "@mui/x-date-pickers";
 import { CloseDate, UpdateCloseDateInput } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { AppButton } from "@shared/ui/button";
 import AppDialog from "@shared/ui/feedback/AppDialog";
 import { useDialogCloseGuard } from "@shared/ui/feedback/useDialogCloseGuard";
-import DateField from "@shared/ui/form/DateField";
 import dayjs from "dayjs";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -85,9 +85,49 @@ export default function EditJobTermInputDialog({ targetData, open, onClose, cand
             </label>)}/>
 
         <div className="grid gap-3 md:grid-cols-[1fr_auto_1fr] md:items-end">
-          <Controller name="startDate" control={control} rules={{ required: true }} render={({ field }) => (<DateField label="開始日" format={AttendanceDate.DisplayFormat} value={field.value} onChange={field.onChange} errorText={!field.value ? "必須項目です" : undefined}/>)}/>
+                    <Controller
+                        name="startDate"
+                        control={control}
+                        rules={{ required: true }}
+                        render={({ field, fieldState }) => (
+                            <DatePicker
+                                label="開始日"
+                                value={field.value}
+                                onChange={field.onChange}
+                                format={AttendanceDate.DisplayFormat}
+                                slotProps={{
+                                    textField: {
+                                        size: "small",
+                                        onBlur: field.onBlur,
+                                        error: Boolean(fieldState.error),
+                                        helperText: fieldState.error ? "必須項目です" : undefined,
+                                    },
+                                }}
+                            />
+                        )}
+                    />
           <div className="pb-2 text-center text-slate-500">〜</div>
-          <Controller name="endDate" control={control} rules={{ required: true }} render={({ field }) => (<DateField label="終了日" format={AttendanceDate.DisplayFormat} value={field.value} onChange={field.onChange} errorText={!field.value ? "必須項目です" : undefined}/>)}/>
+                    <Controller
+                        name="endDate"
+                        control={control}
+                        rules={{ required: true }}
+                        render={({ field, fieldState }) => (
+                            <DatePicker
+                                label="終了日"
+                                value={field.value}
+                                onChange={field.onChange}
+                                format={AttendanceDate.DisplayFormat}
+                                slotProps={{
+                                    textField: {
+                                        size: "small",
+                                        onBlur: field.onBlur,
+                                        error: Boolean(fieldState.error),
+                                        helperText: fieldState.error ? "必須項目です" : undefined,
+                                    },
+                                }}
+                            />
+                        )}
+                    />
         </div>
       </div>
     </AppDialog>

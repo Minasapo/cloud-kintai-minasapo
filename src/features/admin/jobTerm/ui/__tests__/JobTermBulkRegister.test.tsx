@@ -34,42 +34,63 @@ jest.mock("@entities/attendance/lib/AttendanceDate", () => ({
   },
 }));
 
-// ─── Mock: DateField ──────────────────────────────────────────────────────────
-// Render as a simple labeled input that calls onChange with a dayjs value
-jest.mock("@shared/ui/form/DateField", () => {
-  const MockDateField = ({
-    label,
-    value,
-    onChange,
-    errorText,
-  }: {
+// ─── Mock: MUI DatePicker ─────────────────────────────────────────────────────
+jest.mock("@mui/x-date-pickers", () => {
+  type DatePickerMockProps = {
     label?: string;
     value: dayjs.Dayjs | null;
     onChange: (v: dayjs.Dayjs | null) => void;
-    errorText?: string;
-  }) => (
+    format?: string;
+    slotProps?: {
+      textField?: {
+        helperText?: string;
+      };
+    };
+  };
+
+  const parseInputValue = (value: string, format: string): dayjs.Dayjs | null => {
+    if (!value) return null;
+
+    if (format === "YYYY/MM") {
+      const monthMatch = value.match(/^(\d{4})\/(\d{1,2})$/);
+      if (!monthMatch) return null;
+      const [, year, month] = monthMatch;
+      const parsed = dayjs(`${year}-${month}-01`);
+      return parsed.isValid() ? parsed.startOf("month") : null;
+    }
+
+    const dayMatch = value.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+    if (!dayMatch) return null;
+    const [, year, month, day] = dayMatch;
+    const parsed = dayjs(`${year}-${month}-${day}`);
+    return parsed.isValid() ? parsed : null;
+  };
+
+  const DatePicker = ({
+    label,
+    value,
+    onChange,
+    format = "YYYY/MM/DD",
+    slotProps,
+  }: DatePickerMockProps) => (
     <div>
       {label && <span>{label}</span>}
       <input
-        aria-label={label ?? "date-field"}
+        aria-label={label ?? "date-picker"}
         type="text"
-        value={value ? value.format("YYYY/MM") : ""}
+        value={value ? value.format(format === "YYYY/MM" ? "YYYY/MM" : "YYYY/MM/DD") : ""}
         onChange={(e) => {
-          const val = e.target.value;
-          if (!val) {
-            onChange(null);
-          } else {
-            const d = dayjs(val, "YYYY/MM", true);
-            if (d.isValid()) onChange(d.startOf("month"));
-            else onChange(null);
-          }
+          const parsed = parseInputValue(e.target.value, format);
+          onChange(parsed);
         }}
       />
-      {errorText && <p role="alert">{errorText}</p>}
+      {slotProps?.textField?.helperText ? (
+        <p role="alert">{slotProps.textField.helperText}</p>
+      ) : null}
     </div>
   );
-  MockDateField.displayName = "MockDateField";
-  return { __esModule: true, default: MockDateField };
+
+  return { DatePicker };
 });
 
 // ─── Mock: SubsectionTitle ────────────────────────────────────────────────────

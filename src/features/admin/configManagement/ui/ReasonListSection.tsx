@@ -1,8 +1,8 @@
-import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
 import {
   SettingsCheckbox,
   SettingsTextField,
 } from "@features/admin/layout/ui/SettingsPrimitives";
+import { AppButton, AppDeleteIconButton } from "@shared/ui/button";
 
 interface Reason {
   reason: string;
@@ -15,7 +15,7 @@ interface ReasonListSectionProps {
   onReasonChange: (
     index: number,
     field: "reason" | "enabled",
-    value: string | boolean
+    value: string | boolean,
   ) => void;
   onRemoveReason: (index: number) => void;
 }
@@ -28,10 +28,7 @@ const ReasonListSection = ({
 }: ReasonListSectionProps) => (
   <div className="flex flex-col gap-4">
     {reasons.map((reason, index) => (
-      <div
-        className="flex flex-row flex-wrap items-center gap-4"
-        key={index}
-      >
+      <div className="flex flex-row flex-wrap items-center gap-4" key={index}>
         <SettingsTextField
           label={`理由 ${index + 1}`}
           value={reason.reason}
@@ -45,23 +42,32 @@ const ReasonListSection = ({
             label="有効"
           />
         </div>
-        <button
-          className="text-rose-500 hover:bg-rose-50 p-2 rounded-full transition"
-          type="button"
+        <AppDeleteIconButton
+          size="sm"
           onClick={() => onRemoveReason(index)}
           aria-label="削除"
-        >
-          <SettingsIcon name="delete" />
-        </button>
+        />
       </div>
     ))}
-    <button
-      className="text-emerald-600 hover:text-emerald-700 text-sm font-medium self-start mt-2 transition"
-      type="button"
+    <AppButton
+      variant="ghost"
+      tone="primary"
+      size="sm"
       onClick={onAddReason}
+      sx={{
+        alignSelf: "flex-start",
+        mt: 1,
+        textTransform: "none",
+        fontWeight: 500,
+        color: "rgb(5 150 105)",
+        "&:hover": {
+          color: "rgb(4 120 87)",
+          backgroundColor: "transparent",
+        },
+      }}
     >
       + 理由を追加
-    </button>
+    </AppButton>
   </div>
 );
 

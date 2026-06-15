@@ -1,6 +1,7 @@
 import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
-import { AppButton } from "@shared/ui/button";
+import { AppButton, AppSplitButton } from "@shared/ui/button";
 import dayjs from "dayjs";
+import { useEffect } from "react";
 import type { UseFormSetValue } from "react-hook-form";
 
 import { useQuickInputActions } from "../model/useQuickInputActions";
@@ -9,10 +10,10 @@ import { useQuickInputSelection } from "../model/useQuickInputSelection";
 type Props = {
   setValue: UseFormSetValue<AttendanceEditInputs>;
   restReplace: (
-    items: { startTime: string | null; endTime: string | null }[]
+    items: { startTime: string | null; endTime: string | null }[],
   ) => void;
   hourlyPaidHolidayTimeReplace: (
-    items: { startTime: string | null; endTime: string | null }[]
+    items: { startTime: string | null; endTime: string | null }[],
   ) => void;
   workDate: dayjs.Dayjs | null;
   visibleMode?: "all" | "admin" | "staff";
@@ -38,11 +39,22 @@ export default function QuickInputButtonsMobile({
   const {
     open,
     selectedKey,
-    setOpen,
     setSelectedKey,
+    confirmLabel,
+    askConfirm,
     applySelectedAction,
     close,
   } = useQuickInputSelection(actions);
+
+  useEffect(() => {
+    if (actions.length === 0) return;
+    if (!actions.some((action) => action.key === selectedKey)) {
+      setSelectedKey(actions[0].key);
+    }
+  }, [actions, selectedKey, setSelectedKey]);
+
+  const selectedAction =
+    actions.find((action) => action.key === selectedKey) ?? actions[0] ?? null;
 
   // ボタンが表示されない場合は null を返す
   if (actions.length === 0) return null;
@@ -51,39 +63,34 @@ export default function QuickInputButtonsMobile({
     <div className="mb-1">
       <div className="flex flex-wrap items-center gap-2">
         <div className="mr-1 text-base font-bold text-slate-900">定型入力</div>
-        <AppButton
-          onClick={() => setOpen(true)}
+        <AppSplitButton
+          options={actions.map((action) => ({
+            key: action.key,
+            label: action.label,
+            title: action.tooltip,
+          }))}
+          selectedKey={selectedAction?.key ?? null}
+          onSelectedKeyChange={setSelectedKey}
+          onPrimaryClick={() => {
+            if (!selectedAction) return;
+            askConfirm(
+              `定型入力: 「${selectedAction.label}」を適用します。よろしいですか？`,
+              selectedAction.action,
+            );
+          }}
+          disabled={!!readOnly}
           variant="outline"
           tone="primary"
           size="sm"
-        >
-          選択
-        </AppButton>
+        />
       </div>
       {open ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 px-4">
           <div className="w-full max-w-sm rounded-[14px] border border-emerald-200 bg-white p-5 shadow-[0_24px_60px_-32px_rgba(15,23,42,0.45)]">
-            <div className="text-base font-semibold text-slate-950">定型入力</div>
-            <div className="mt-4 space-y-2">
-            {actions.map((action) => (
-              <AppButton
-                key={action.key}
-                onClick={() => setSelectedKey(action.key)}
-                variant={selectedKey === action.key ? "solid" : "outline"}
-                tone={selectedKey === action.key ? "primary" : "neutral"}
-                size="sm"
-                fullWidth
-                className="justify-start"
-              >
-                {action.label}
-              </AppButton>
-            ))}
-            {actions.length === 0 && (
-              <p className="text-sm text-slate-500">
-                操作可能な項目がありません。
-              </p>
-            )}
-            </div>
+            <div className="text-base font-semibold text-slate-950">確認</div>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              {confirmLabel}
+            </p>
             <div className="mt-5 flex justify-end gap-2">
               <AppButton
                 onClick={close}
@@ -91,11 +98,10 @@ export default function QuickInputButtonsMobile({
                 tone="neutral"
                 size="sm"
               >
-                閉じる
+                キャンセル
               </AppButton>
               <AppButton
                 onClick={applySelectedAction}
-                disabled={!selectedKey}
                 variant="solid"
                 tone="primary"
                 size="sm"

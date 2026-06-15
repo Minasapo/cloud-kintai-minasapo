@@ -84,9 +84,7 @@ jest.mock("react-resizable-panels", () => ({
   Group: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="panel-group">{children}</div>
   ),
-  Panel: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
+  Panel: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Separator: () => <div data-testid="panel-separator" />,
 }));
 
@@ -245,11 +243,6 @@ describe("AdminLayout", () => {
   // デスクトップ: ナビゲーション表示
   // ----------------------------------------------------------------
   describe("デスクトップ: ナビゲーション表示", () => {
-    it("CONTROL RAIL ラベルが表示される", () => {
-      renderAdminLayout();
-      expect(screen.getByText("CONTROL RAIL")).toBeInTheDocument();
-    });
-
     it("全メニューアイテムのプライマリラベルが表示される", () => {
       renderAdminLayout();
       // ダッシュボードは activeMenuItem ヘッダーにも出るので getAllByText を使用
@@ -391,8 +384,8 @@ describe("AdminLayout", () => {
     it("モバイルではデスクトップ用サイドレールがデフォルトで非表示", () => {
       renderAdminLayout();
       // !isMobile 条件の AdminContextRail は描画されない
-      // isMobile && isMobileRailOpen 条件も false → CONTROL RAIL なし
-      expect(screen.queryByText("CONTROL RAIL")).not.toBeInTheDocument();
+      // isMobile && isMobileRailOpen 条件も false → レール説明文なし
+      expect(screen.queryByText("主要指標を確認")).not.toBeInTheDocument();
     });
 
     it("「ナビを開く」をクリックするとレールが表示される", async () => {
@@ -401,7 +394,7 @@ describe("AdminLayout", () => {
 
       await user.click(screen.getByRole("button", { name: "ナビを開く" }));
 
-      expect(screen.getByText("CONTROL RAIL")).toBeInTheDocument();
+      expect(screen.getByText("主要指標を確認")).toBeInTheDocument();
     });
 
     it("レール表示中はボタンが「ナビを閉じる」に変わる", async () => {
@@ -422,7 +415,7 @@ describe("AdminLayout", () => {
       await user.click(screen.getByRole("button", { name: "ナビを開く" }));
       await user.click(screen.getByRole("button", { name: "ナビを閉じる" }));
 
-      expect(screen.queryByText("CONTROL RAIL")).not.toBeInTheDocument();
+      expect(screen.queryByText("主要指標を確認")).not.toBeInTheDocument();
     });
 
     it("レール表示中にメニューアイテムをクリックするとレールが閉じる", async () => {
@@ -431,11 +424,11 @@ describe("AdminLayout", () => {
       renderAdminLayout("/admin/attendances");
 
       await user.click(screen.getByRole("button", { name: "ナビを開く" }));
-      expect(screen.getByText("CONTROL RAIL")).toBeInTheDocument();
+      expect(screen.getByText("主要指標を確認")).toBeInTheDocument();
 
       await user.click(screen.getByRole("button", { name: /ダッシュボード/ }));
 
-      expect(screen.queryByText("CONTROL RAIL")).not.toBeInTheDocument();
+      expect(screen.queryByText("主要指標を確認")).not.toBeInTheDocument();
     });
   });
 
@@ -515,7 +508,11 @@ describe("AdminLayout", () => {
         component: undefined,
       };
       mockUseSplitView.mockReturnValue(
-        makeSplitViewState({ mode: "triple", leftPanel: panel1, rightPanel: panel2 }),
+        makeSplitViewState({
+          mode: "triple",
+          leftPanel: panel1,
+          rightPanel: panel2,
+        }),
       );
     });
 

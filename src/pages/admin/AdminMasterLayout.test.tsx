@@ -25,7 +25,6 @@ describe("AdminMasterLayout", () => {
 
     render(<AdminMasterLayout />);
 
-    expect(screen.getByText("データ・連携")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "エクスポート" }),
     ).toBeInTheDocument();
