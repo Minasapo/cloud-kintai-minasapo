@@ -1,12 +1,12 @@
 import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
 import {
   SettingsButton,
-  SettingsCheckbox,
   SettingsSelect,
-  SettingsTextField,
+  SettingsSwitch,
 } from "@features/admin/layout/ui/SettingsPrimitives";
 import { predefinedIcons } from "@shared/config/icons";
 import AppIconButton from "@shared/ui/button/AppIconButton";
+import { AppTextField } from "@shared/ui/form";
 import { SubsectionTitle } from "@shared/ui/typography";
 
 interface Link {
@@ -22,7 +22,7 @@ interface LinkListSectionProps {
   onLinkChange: (
     index: number,
     field: "label" | "url" | "enabled" | "icon",
-    value: string | boolean
+    value: string | boolean,
   ) => void;
   onRemoveLink: (index: number) => void;
 }
@@ -35,11 +35,16 @@ const LinkListSection = ({
 }: LinkListSectionProps) => (
   <div className="flex flex-col gap-4">
     <div className="flex flex-col gap-1">
-      <SubsectionTitle className="text-base font-semibold text-slate-800">リンク集</SubsectionTitle>
+      <SubsectionTitle className="text-base font-semibold text-slate-800">
+        リンク集
+      </SubsectionTitle>
       <p className="text-sm text-slate-500">
         ヘッダーのリンク集に表示するリンクを設定してください。
         <br />
-        URL内で<code className="bg-slate-100 px-1 rounded text-pink-600">{"{staffName}"}</code>
+        URL内で
+        <code className="bg-slate-100 px-1 rounded text-pink-600">
+          {"{staffName}"}
+        </code>
         を使用すると、スタッフ名が動的に挿入されます。
       </p>
     </div>
@@ -54,28 +59,51 @@ const LinkListSection = ({
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               リンク {index + 1}
             </span>
-            <AppIconButton
-              tone="danger"
-              aria-label="削除"
-              onClick={() => onRemoveLink(index)}
-            >
-              <SettingsIcon name="delete" />
-            </AppIconButton>
+            <div className="flex items-center gap-1">
+              <SettingsSwitch
+                checked={link.enabled}
+                onChange={(checked) => onLinkChange(index, "enabled", checked)}
+                label={link.enabled ? "有効" : "無効"}
+              />
+              <AppIconButton
+                tone="danger"
+                aria-label="削除"
+                onClick={() => onRemoveLink(index)}
+              >
+                <SettingsIcon name="delete" />
+              </AppIconButton>
+            </div>
           </div>
           {/* カードボディ */}
           <div className="flex flex-col gap-3 p-4">
             {/* 行1: ラベル + URL */}
             <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_2fr]">
-              <SettingsTextField
-                label="ラベル"
-                value={link.label}
-                onChange={(value) => onLinkChange(index, "label", value)}
-              />
-              <SettingsTextField
-                label="URL"
-                value={link.url}
-                onChange={(value) => onLinkChange(index, "url", value)}
-              />
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-slate-700">
+                  ラベル
+                </label>
+                <AppTextField
+                  size="small"
+                  fullWidth
+                  value={link.label}
+                  onChange={(event) =>
+                    onLinkChange(index, "label", event.target.value)
+                  }
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-slate-700">
+                  URL
+                </label>
+                <AppTextField
+                  size="small"
+                  fullWidth
+                  value={link.url}
+                  onChange={(event) =>
+                    onLinkChange(index, "url", event.target.value)
+                  }
+                />
+              </div>
             </div>
             {/* 行2: アイコン + プレビュー + 有効 */}
             <div className="flex items-end gap-3">
@@ -90,22 +118,18 @@ const LinkListSection = ({
                 }))}
               />
               <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2">
-                {(predefinedIcons.find((icon) => icon.value === link.icon) ?? predefinedIcons[0])?.component}
+                {
+                  (
+                    predefinedIcons.find((icon) => icon.value === link.icon) ??
+                    predefinedIcons[0]
+                  )?.component
+                }
               </div>
-              <SettingsCheckbox
-                checked={link.enabled}
-                onChange={(checked) => onLinkChange(index, "enabled", checked)}
-                label="有効"
-              />
             </div>
           </div>
         </div>
       ))}
-      <SettingsButton
-        variant="secondary"
-        size="sm"
-        onClick={onAddLink}
-      >
+      <SettingsButton variant="secondary" size="sm" onClick={onAddLink}>
         <SettingsIcon name="plus" />
         リンクを追加
       </SettingsButton>

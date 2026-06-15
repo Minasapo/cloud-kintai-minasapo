@@ -2,10 +2,7 @@ import { Autocomplete } from "@mui/material";
 import { AppTextField } from "@shared/ui/form";
 
 import { SettingsSelectProps } from "../types";
-import {
-  fieldContainerClassName,
-  fieldLabelClassName,
-} from "../utils";
+import { fieldContainerClassName, fieldLabelClassName } from "../utils";
 import { FieldMessages } from "./FieldMessages";
 
 export function SettingsSelect({
@@ -58,7 +55,7 @@ export function SettingsSelect({
           <AppTextField
             {...params}
             size="small"
-            sx={{ width: { xs: "100%", sm: 400 } }}
+            sx={{ width: "100%", maxWidth: { xs: "100%", sm: 400 } }}
             className={inputClassName}
           />
         )}

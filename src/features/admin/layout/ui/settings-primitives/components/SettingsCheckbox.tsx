@@ -9,10 +9,13 @@ export function SettingsCheckbox({
   className,
   ariaLabel,
 }: SettingsCheckboxProps) {
+  const hasDescription = Boolean(description);
+
   return (
     <label
       className={[
-        "inline-flex cursor-pointer items-start gap-3 text-sm text-slate-700",
+        "inline-flex cursor-pointer gap-3 text-sm text-slate-700",
+        hasDescription ? "items-start" : "items-center",
         disabled ? "cursor-not-allowed opacity-60" : "",
         className,
       ]
@@ -21,7 +24,12 @@ export function SettingsCheckbox({
     >
       <input
         type="checkbox"
-        className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+        className={[
+          "h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500",
+          hasDescription ? "mt-0.5" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
         disabled={disabled}

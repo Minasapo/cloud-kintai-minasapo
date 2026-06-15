@@ -1,6 +1,7 @@
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
 import { styled, Typography } from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { useContext, useState } from "react";
 import { Controller } from "react-hook-form";
@@ -11,8 +12,9 @@ const Label = styled(Typography)(() => ({
 }));
 
 export function SubstituteHolidayDateInput() {
-  const { control, setValue, restReplace, readOnly } =
-    useContext(AttendanceEditContext);
+  const { control, setValue, restReplace, readOnly } = useContext(
+    AttendanceEditContext,
+  );
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDate, setPendingDate] = useState<dayjs.Dayjs | null>(null);
@@ -28,32 +30,59 @@ export function SubstituteHolidayDateInput() {
         name="substituteHolidayDate"
         control={control}
         render={({ field, fieldState }) => {
-          const { value, onChange, ...restField } = field;
+          const { value, onChange, onBlur, name, ref: inputRef } = field;
 
           return (
             <>
               <div className="min-w-0 flex-1">
-                <input
-                  {...restField}
-                  type="date"
-                  value={value ? dayjs(value).format("YYYY-MM-DD") : ""}
-                  aria-label="勤務した日"
+                <DatePicker
+                  value={value ? dayjs(value) : null}
+                  format="YYYY/MM/DD"
                   disabled={!!readOnly}
-                  className="w-full max-w-[340px] rounded-[16px] border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
-                  onChange={(e) => {
-                    if (!e.target.value) {
+                  onChange={(nextValue) => {
+                    if (!nextValue) {
                       onChange(null);
                       return;
                     }
-                    const date = dayjs(e.target.value);
-                    if (date.isValid()) {
-                      setPendingDate(date);
+
+                    if (nextValue.isValid()) {
+                      setPendingDate(nextValue);
                       setConfirmOpen(true);
                     }
                   }}
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      fullWidth: true,
+                      name,
+                      onBlur,
+                      inputRef,
+                      inputProps: {
+                        "aria-label": "勤務した日",
+                      },
+                      sx: {
+                        maxWidth: "340px",
+                        "& .MuiInputBase-root": {
+                          height: "34px",
+                          borderRadius: "16px",
+                          fontSize: "0.8125rem",
+                          backgroundColor: "#fff",
+                          boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.72)",
+                        },
+                        "& .MuiOutlinedInput-input": {
+                          padding: "6px 12px",
+                        },
+                        "& .MuiSvgIcon-root": {
+                          fontSize: "1rem",
+                        },
+                      },
+                    },
+                  }}
                 />
                 {fieldState.error?.message ? (
-                  <p className="mt-2 text-sm text-rose-600">{fieldState.error.message}</p>
+                  <p className="mt-2 text-sm text-rose-600">
+                    {fieldState.error.message}
+                  </p>
                 ) : null}
               </div>
               {confirmOpen ? (
@@ -63,57 +92,61 @@ export function SubstituteHolidayDateInput() {
                       一部の入力内容をクリアします
                     </div>
                     <div className="mt-3 text-sm leading-6 text-slate-600">
-                    振替休日を設定すると、以下の入力内容がクリアされます。
-                    <ul>
-                      <li>勤務開始・終了時刻</li>
-                      <li>休憩時間</li>
-                      <li>有給フラグ</li>
-                      <li>直行フラグ</li>
-                      <li>直帰フラグ</li>
-                    </ul>
-                    よろしいですか？
+                      振替休日を設定すると、以下の入力内容がクリアされます。
+                      <ul>
+                        <li>勤務開始・終了時刻</li>
+                        <li>休憩時間</li>
+                        <li>有給フラグ</li>
+                        <li>直行フラグ</li>
+                        <li>直帰フラグ</li>
+                      </ul>
+                      よろしいですか？
                     </div>
                     <div className="mt-5 flex flex-wrap justify-end gap-2">
                       <button
                         type="button"
                         className="rounded-[12px] border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                    onClick={() => {
-                      if (pendingDate) {
-                        onChange(pendingDate.format(AttendanceDate.DataFormat));
-                      }
+                        onClick={() => {
+                          if (pendingDate) {
+                            onChange(
+                              pendingDate.format(AttendanceDate.DataFormat),
+                            );
+                          }
 
-                      setConfirmOpen(false);
-                      setPendingDate(null);
-                    }}
-                  >
-                    クリアせず設定
+                          setConfirmOpen(false);
+                          setPendingDate(null);
+                        }}
+                      >
+                        クリアせず設定
                       </button>
                       <button
                         type="button"
                         className="rounded-[12px] border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-600"
-                    onClick={() => {
-                      if (readOnly) {
-                        setConfirmOpen(false);
-                        setPendingDate(null);
-                        return;
-                      }
+                        onClick={() => {
+                          if (readOnly) {
+                            setConfirmOpen(false);
+                            setPendingDate(null);
+                            return;
+                          }
 
-                      if (pendingDate) {
-                        onChange(pendingDate.format(AttendanceDate.DataFormat));
+                          if (pendingDate) {
+                            onChange(
+                              pendingDate.format(AttendanceDate.DataFormat),
+                            );
 
-                        setValue("paidHolidayFlag", false);
-                        setValue("goDirectlyFlag", false);
-                        setValue("returnDirectlyFlag", false);
-                        setValue("startTime", null);
-                        setValue("endTime", null);
-                        restReplace([]);
-                      }
+                            setValue("paidHolidayFlag", false);
+                            setValue("goDirectlyFlag", false);
+                            setValue("returnDirectlyFlag", false);
+                            setValue("startTime", null);
+                            setValue("endTime", null);
+                            restReplace([]);
+                          }
 
-                      setConfirmOpen(false);
-                      setPendingDate(null);
-                    }}
-                  >
-                    クリアして設定
+                          setConfirmOpen(false);
+                          setPendingDate(null);
+                        }}
+                      >
+                        クリアして設定
                       </button>
                     </div>
                   </div>

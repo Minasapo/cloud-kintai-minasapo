@@ -6,6 +6,8 @@ export {
 export { default as AppButton } from "./AppButton";
 export { default as AppIconButton } from "./AppIconButton";
 export { default as AppSaveButton } from "./AppSaveButton";
+export type { AppSplitButtonOption } from "./AppSplitButton";
+export { default as AppSplitButton } from "./AppSplitButton";
 export type {
   ButtonSize,
   ButtonTone,
