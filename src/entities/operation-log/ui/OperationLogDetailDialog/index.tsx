@@ -1,7 +1,3 @@
-import {
-  formatOperationLogInlineValue,
-  getOperationLogDisplaySummary,
-} from "@entities/operation-log/lib/operationLogDisplay";
 import { getOperationLogLabel } from "@entities/operation-log/lib/operationLogLabels";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -18,30 +14,18 @@ import type { OperationLog, Staff } from "@shared/api/graphql/types";
 import { AppIconButton } from "@shared/ui/button";
 import dayjs from "dayjs";
 
-import { OperationLogJsonDetails } from "./OperationLogJsonDetails";
+import { getOperationLogDisplaySummary } from "@/entities/operation-log/lib/operationLogDisplay";
+
+import { OperationLogJsonDetails } from "../OperationLogJsonDetails";
+import { isNonEmptyString } from "./lib/isNonEmptyString";
+import { staffLabel } from "./lib/staffLabel";
+import { operationLogDetailDialogStyles } from "./styles";
 
 interface OperationLogDetailDialogProps {
   log: OperationLog | null;
   open: boolean;
   onClose: () => void;
   staffMap: Record<string, Staff | null>;
-}
-
-const isNonEmptyString = (value: unknown): value is string =>
-  typeof value === "string" && value.trim().length > 0;
-
-function staffLabel(
-  prefix: string,
-  id: unknown,
-  staffMap: Record<string, Staff | null>,
-) {
-  const idText = formatOperationLogInlineValue(id);
-  if (!idText) return `${prefix}: -`;
-  if (!isNonEmptyString(id)) return `${prefix}: ${idText}`;
-  if (!(id in staffMap)) return `${prefix}: ${idText}`;
-  const entry = staffMap[id];
-  if (!entry) return `${prefix}: ${idText}`;
-  return `${prefix}: ${`${entry.familyName ?? ""} ${entry.givenName ?? ""}`.trim()}`;
 }
 
 export function OperationLogDetailDialog({
@@ -57,7 +41,9 @@ export function OperationLogDetailDialog({
   const summaryIsDistinct = summary !== actionLabel;
   const workDate =
     (log.resolvedWorkDate as string | null | undefined) ??
-    (log.metadata as Record<string, unknown> | null | undefined)?.["workDate"] as string | null | undefined;
+    ((log.metadata as Record<string, unknown> | null | undefined)?.[
+      "workDate"
+    ] as string | null | undefined);
   const actorText = staffLabel("操作者", log.staffId as unknown, staffMap);
   const targetText = staffLabel(
     "対象スタッフ",
@@ -69,19 +55,19 @@ export function OperationLogDetailDialog({
     <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth>
       <DialogTitle
         component="div"
-        sx={{ display: "flex", alignItems: "center", gap: 1, pr: 6 }}
+        sx={operationLogDetailDialogStyles.dialogTitle}
       >
-        <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={operationLogDetailDialogStyles.timestamp}
+        >
           {log.timestamp
             ? dayjs(log.timestamp).format("YYYY-MM-DD HH:mm:ss")
             : "-"}
         </Typography>
         <Chip size="small" label={actionLabel} />
-        <AppIconButton
-          aria-label="閉じる"
-          onClick={onClose}
-          style={{ position: "absolute", right: 8, top: 8 }}
-        >
+        <AppIconButton aria-label="閉じる" onClick={onClose}>
           <CloseIcon fontSize="small" />
         </AppIconButton>
       </DialogTitle>
@@ -127,10 +113,7 @@ export function OperationLogDetailDialog({
                   <Typography
                     variant="caption"
                     display="block"
-                    sx={{
-                      fontFamily: "monospace", // User agent string display - monospace for readability
-                      wordBreak: "break-all",
-                    }}
+                    sx={operationLogDetailDialogStyles.userAgent}
                   >
                     ユーザーエージェント: {log.userAgent}
                   </Typography>

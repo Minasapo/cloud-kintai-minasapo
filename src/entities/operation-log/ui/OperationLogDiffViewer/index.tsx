@@ -1,103 +1,14 @@
-type DiffKind = "changed" | "added" | "removed" | "unchanged";
+import { buildDiffEntries } from "./lib/buildDiffEntries";
+import { flattenObject } from "./lib/flattenObject";
+import { isPlainObject } from "./lib/isPlainObject";
 
-interface DiffEntry {
+export type DiffKind = "changed" | "added" | "removed" | "unchanged";
+
+export interface DiffEntry {
   key: string;
   beforeValue: string | null;
   afterValue: string | null;
   kind: DiffKind;
-}
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return (
-    value !== null &&
-    typeof value === "object" &&
-    !Array.isArray(value) &&
-    !(value instanceof Date)
-  );
-}
-
-function flattenObject(
-  obj: unknown,
-  prefix = "",
-  depth = 0,
-): Record<string, unknown> {
-  if (depth > 10) return {};
-
-  if (!isPlainObject(obj)) {
-    return prefix ? { [prefix]: obj } : {};
-  }
-
-  const result: Record<string, unknown> = {};
-
-  for (const [key, value] of Object.entries(obj)) {
-    const fullKey = prefix ? `${prefix}.${key}` : key;
-
-    if (isPlainObject(value)) {
-      const nested = flattenObject(value, fullKey, depth + 1);
-      Object.assign(result, nested);
-    } else {
-      result[fullKey] = value;
-    }
-  }
-
-  return result;
-}
-
-function displayValue(value: unknown): string {
-  if (value === null || value === undefined) return "-";
-  if (typeof value === "string") return value;
-  return JSON.stringify(value);
-}
-
-function buildDiffEntries(
-  before: Record<string, unknown>,
-  after: Record<string, unknown>,
-): DiffEntry[] {
-  const allKeys = new Set([...Object.keys(before), ...Object.keys(after)]);
-
-  const entries: DiffEntry[] = [];
-  for (const key of allKeys) {
-    const inBefore = key in before;
-    const inAfter = key in after;
-
-    if (!inBefore && inAfter) {
-      entries.push({
-        key,
-        beforeValue: null,
-        afterValue: displayValue(after[key]),
-        kind: "added",
-      });
-    } else if (inBefore && !inAfter) {
-      entries.push({
-        key,
-        beforeValue: displayValue(before[key]),
-        afterValue: null,
-        kind: "removed",
-      });
-    } else {
-      const bv = displayValue(before[key]);
-      const av = displayValue(after[key]);
-      entries.push({
-        key,
-        beforeValue: bv,
-        afterValue: av,
-        kind: bv === av ? "unchanged" : "changed",
-      });
-    }
-  }
-
-  const kindOrder: Record<DiffKind, number> = {
-    changed: 0,
-    added: 1,
-    removed: 2,
-    unchanged: 3,
-  };
-
-  return entries.toSorted((a, b) => {
-    const orderDiff = kindOrder[a.kind] - kindOrder[b.kind];
-    if (orderDiff !== 0) return orderDiff;
-    return a.key.localeCompare(b.key);
-  });
 }
 
 const CELL_CLASSES: Record<DiffKind, { before: string; after: string }> = {

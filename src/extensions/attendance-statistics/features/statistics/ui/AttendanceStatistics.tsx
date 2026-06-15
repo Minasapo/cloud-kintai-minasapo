@@ -5,31 +5,38 @@ import type {
   AttendanceStatisticsProgress,
   AttendanceStatisticsSnapshot,
 } from "@entities/attendance-statistics/model/types";
-import {
-  Alert,
-  ButtonGroup,
-  Paper,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Alert, ButtonGroup, Paper, Stack, Typography } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
 import { ProgressBar } from "@shared/ui/feedback";
 import { PageTitle } from "@shared/ui/typography";
 import dayjs from "dayjs";
 import { useContext, useMemo, useState } from "react";
 
+const styles = {
+  statItem: {
+    minWidth: 140,
+    border: "1px solid",
+    borderColor: "divider",
+    borderRadius: 1,
+    p: 1.25,
+  } as const,
+  paper: {
+    elevation: 0,
+    border: "1px solid",
+    borderColor: "divider",
+    borderRadius: 2,
+    p: { xs: 2, sm: 3 },
+  } as const,
+  monthlySummaryItem: {
+    borderBottom: "1px dashed",
+    borderColor: "divider",
+    pb: 1,
+  } as const,
+};
+
 function StatItem({ label, value }: { label: string; value: string }) {
   return (
-    <Stack
-      spacing={0.5}
-      sx={{
-        minWidth: 140,
-        border: "1px solid",
-        borderColor: "divider",
-        borderRadius: 1,
-        p: 1.25,
-      }}
-    >
+    <Stack spacing={0.5} sx={styles.statItem}>
       <Typography variant="caption" color="text.secondary">
         {label}
       </Typography>
@@ -49,7 +56,10 @@ function MiniStat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function formatRangeLabel(rangeStart?: string | null, rangeEnd?: string | null) {
+function formatRangeLabel(
+  rangeStart?: string | null,
+  rangeEnd?: string | null,
+) {
   if (!rangeStart || !rangeEnd) {
     return "";
   }
@@ -92,15 +102,7 @@ function ProgressPanel(props: {
   variantText: string;
 }) {
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        border: "1px solid",
-        borderColor: "divider",
-        borderRadius: 2,
-        p: { xs: 2, sm: 3 },
-      }}
-    >
+    <Paper sx={styles.paper}>
       <Stack spacing={1.5}>
         <Stack spacing={0.5}>
           <Typography variant="subtitle1">{props.variantText}</Typography>
@@ -129,19 +131,13 @@ function SnapshotSummary({
 }: {
   snapshot: AttendanceStatisticsSnapshot;
 }) {
-  const hasFallbackTerms = snapshot.monthlySummaries.some((item) => item.isFallback);
+  const hasFallbackTerms = snapshot.monthlySummaries.some(
+    (item) => item.isFallback,
+  );
 
   return (
     <>
-      <Paper
-        elevation={0}
-        sx={{
-          border: "1px solid",
-          borderColor: "divider",
-          borderRadius: 2,
-          p: { xs: 2, sm: 3 },
-        }}
-      >
+      <Paper sx={styles.paper}>
         <Stack spacing={1.5}>
           <Typography variant="subtitle1">年間サマリー</Typography>
           <Stack
@@ -165,15 +161,7 @@ function SnapshotSummary({
         </Stack>
       </Paper>
 
-      <Paper
-        elevation={0}
-        sx={{
-          border: "1px solid",
-          borderColor: "divider",
-          borderRadius: 2,
-          p: { xs: 2, sm: 3 },
-        }}
-      >
+      <Paper sx={styles.paper}>
         <Stack spacing={1.5}>
           <Typography variant="subtitle1">月別サマリー</Typography>
           {hasFallbackTerms ? (
@@ -186,11 +174,7 @@ function SnapshotSummary({
               <Stack
                 key={stat.month}
                 spacing={0.75}
-                sx={{
-                  borderBottom: "1px dashed",
-                  borderColor: "divider",
-                  pb: 1,
-                }}
+                sx={styles.monthlySummaryItem}
               >
                 <Stack direction="row" justifyContent="space-between">
                   <Stack spacing={0.25}>
@@ -217,7 +201,11 @@ function SnapshotSummary({
                 </Stack>
               </Stack>
             ))}
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+            >
               <Typography variant="body1">年間合計</Typography>
               <Typography variant="h6">
                 {snapshot.totalWorkHours.toFixed(1)} 時間
@@ -233,7 +221,9 @@ function SnapshotSummary({
 export default function AttendanceStatistics() {
   const { cognitoUser } = useContext(AuthContext);
   const [year, setYear] = useState<number>(dayjs().year());
-  const [progress, setProgress] = useState<AttendanceStatisticsProgress | null>(null);
+  const [progress, setProgress] = useState<AttendanceStatisticsProgress | null>(
+    null,
+  );
   const [isRebuilding, setIsRebuilding] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -377,7 +367,12 @@ export default function AttendanceStatistics() {
         </Stack>
       </Stack>
 
-        {loading ? <ProgressBar data-testid="progress-bar" aria-label="稼働統計を読み込み中" /> : null}
+      {loading ? (
+        <ProgressBar
+          data-testid="progress-bar"
+          aria-label="稼働統計を読み込み中"
+        />
+      ) : null}
 
       {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
       {snapshotErrorMessage ? (
@@ -402,22 +397,17 @@ export default function AttendanceStatistics() {
         </Alert>
       ) : null}
 
-      {!hasSnapshotData &&
+      {!isRebuilding &&
+      !hasSnapshotData &&
       !loading &&
       !errorMessage &&
       !snapshotErrorMessage &&
       !currentProgress ? (
-        <Paper
-          elevation={0}
-          sx={{
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: 2,
-            p: { xs: 2, sm: 3 },
-          }}
-        >
+        <Paper sx={styles.paper}>
           <Stack spacing={1.5}>
-            <Typography variant="subtitle1">まだ統計が作成されていません</Typography>
+            <Typography variant="subtitle1">
+              まだ統計が作成されていません
+            </Typography>
             <Typography variant="body2" color="text.secondary">
               画面表示時のフルスキャンを避けるため、統計は保存済みスナップショットを表示します。
               まずは手動でこの年の統計を集計してください。
@@ -426,7 +416,9 @@ export default function AttendanceStatistics() {
         </Paper>
       ) : null}
 
-      {snapshot && hasSnapshotData ? <SnapshotSummary snapshot={snapshot} /> : null}
+      {snapshot && hasSnapshotData ? (
+        <SnapshotSummary snapshot={snapshot} />
+      ) : null}
     </Stack>
   );
 }
