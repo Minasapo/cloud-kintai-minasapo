@@ -2,6 +2,7 @@ import useCognitoUser from "@entities/staff/model/useCognitoUser";
 import { Box, Container, useMediaQuery, useTheme } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { Staff } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { useAppNotification } from "@shared/lib/useAppNotification";
 import { useAutoSave } from "@shared/lib/useAutoSave";
 import dayjs, { Dayjs } from "dayjs";
@@ -24,6 +25,8 @@ import { ShiftPatternListDialog } from "./ShiftPatternListDialog";
 import { ShiftRequestHeader } from "./ShiftRequestHeader";
 import { ShiftRequestNoteForm } from "./ShiftRequestNoteForm";
 import { ShiftRequestToolbar } from "./ShiftRequestToolbar";
+
+const logger = createLogger("ShiftRequestForm");
 
 function buildCalendarDays(monthStart: Dayjs): Dayjs[] {
   const start = monthStart.startOf("week");
@@ -155,7 +158,7 @@ function useShiftRequestAutoSave({
       });
     },
     onSaveError: (error) => {
-      console.error("Auto-save error:", error);
+      logger.error("Auto-save error:", error);
       notify({
         title: "自動保存エラー",
         description: "シフトの自動保存に失敗しました",

@@ -11,7 +11,7 @@ export function ShiftRequestHeader() {
             fontWeight: 700,
             lineHeight: 1.15,
             letterSpacing: "-0.02em",
-            color: "#020617",
+            color: "rgb(2 6 23)",
           }}
         >
           希望シフト
@@ -19,7 +19,7 @@ export function ShiftRequestHeader() {
         <Typography
           sx={{
             maxWidth: 760,
-            color: "#64748b",
+            color: "rgb(100 116 139)",
             lineHeight: 1.9,
           }}
         >

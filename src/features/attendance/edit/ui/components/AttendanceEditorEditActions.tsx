@@ -7,7 +7,6 @@ import GroupContainer from "@shared/ui/group-container/GroupContainer";
 import { Dayjs } from "dayjs";
 import { UseFieldArrayReplace } from "react-hook-form";
 
-// eslint-disable-next-line import/no-cycle
 import EditAttendanceHistoryList from "../EditAttendanceHistoryList/EditAttendanceHistoryList";
 import QuickInputButtons from "../QuickInputButtons";
 

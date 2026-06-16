@@ -19,6 +19,8 @@ export { CenteredSpinner } from "./CenteredSpinner";
 export { default as ConfirmDialog } from "./ConfirmDialog";
 export { DataStateContainer } from "./DataStateContainer";
 export { EmptyState } from "./EmptyState";
+export { ErrorFallbackPanel } from "./ErrorFallbackPanel";
+export { FeatureErrorBoundary } from "./FeatureErrorBoundary";
 export { FormSkeleton } from "./FormSkeleton";
 export { InlineAlert } from "./InlineAlert";
 export { default as LeaveGuardDialog } from "./LeaveGuardDialog";

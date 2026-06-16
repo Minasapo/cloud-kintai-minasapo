@@ -6,13 +6,28 @@
 - コミットメッセージは英語で書く
 - push 前に `npm run typecheck` が `.githooks` で自動実行される
 
+## 最低限のエラー解消
+
+- `npm run typecheck` でエラーが出ない状態を保つこと
+  - 既存のエラーがある場合は、修正対象コードに新たなエラーを追加しないこと（例: `src/features/attendance/edit/ui/AttendanceEditPage.tsx` に既に `5` 個エラーがあるなら、修正後も `5` 個以下に抑える）
+- `npm run lint -- --fix` を定期的に実行して、ESLint エラーを増やさないこと
+  - 既存の ESLint エラーがある場合は、修正対象コードに新たなエラーを追加しないこと（例: `src/features/attendance/edit/ui/AttendanceEditPage.tsx` に既に `10` 個エラーがあるなら、修正後も `10` 個以下に抑える）
+
+## タスクやファイル書き込み時の注意点
+
+- 使用しているAIモデルのコンテキストウィンドウサイズを超える大規模な変更を行う場合は、変更内容を複数の小さなタスクに分割して実行すること
+- ファイルサイズが大きい場合は、変更内容を複数の小さなタスクに分割して実行すること（例: `AttendanceEditPage.tsx` が `500` 行ある場合は、変更内容を複数の小さなタスクに分割して実行する）
+
 ## 実装時の重要制約
 
-- `src/shared/api/graphql/` と `src/ui-components/` は Amplify 自動生成のため手動編集禁止
+- `src/shared/api/graphql/documents/` 配下の生成ファイル（`mutations.ts`, `queries.ts`, `subscriptions.ts`）および `src/shared/api/graphql/types.ts` は Amplify 自動生成のため手動編集禁止
+- `src/ui-components/` は Amplify 自動生成のため手動編集禁止
+- キャッシュ戦略ユーティリティ（`graphqlBaseQuery.ts`、`tagBuilder.ts`、`concurrency.ts`、`paginatedQuery.ts` など）は手動管理ファイルのため編集可能
 - MUI コンポーネントの新規直接 import は禁止（`src/shared/ui/` の共通 UI を使う）
 - スタイリングは MUI `sx` を主軸、Tailwind は補助、新規 SCSS は作らない
 - デザイントークンは `designTokenVar()` 経由で参照する
 - フォームは React Hook Form + Zod を基本にする
+- 拡張モジュールは `src/extensions/<name>/` 配下に `manifest.ts` を置いて宣言する。新規追加は `node scripts/create-extension.mjs <name>` で雛形生成。詳細は `docs/EXTENSION_ARCHITECTURE.md`
 
 ## アンチリグレッション・レビュー基準（肥大化防止）
 
@@ -55,9 +70,11 @@
 | `shiftCollaborative.instructions.md`      | シフト共同編集のガードレール                 |
 | `dailyReport.instructions.md`             | 日報                                         |
 | `amplifyGraphqlGenerated.instructions.md` | 自動生成ファイルの扱い                       |
+| `graphqlCachingStrategy.instructions.md`  | GraphQL キャッシング戦略・RTK Query 規約     |
 
 ## 自動生成ファイル（編集禁止）
 
-- `src/shared/api/graphql/**`
+- `src/shared/api/graphql/documents/mutations.ts`, `queries.ts`, `subscriptions.ts`（`amplify codegen` で生成）
+- `src/shared/api/graphql/types.ts`（`amplify codegen` で生成）
 - `src/ui-components/**`
 - `src/aws-exports.js`（`amplify pull` で生成）。ソースツリー（git worktree）使用時はメインリポジトリのファイルをリンクして使用する

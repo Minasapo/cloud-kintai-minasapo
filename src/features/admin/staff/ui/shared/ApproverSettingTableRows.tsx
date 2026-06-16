@@ -9,10 +9,9 @@ import {
   Chip,
   FormControlLabel,
   Radio,
-  RadioGroup,
-  TextField,
-} from "@mui/material";
+  RadioGroup,} from "@mui/material";
 import { ApproverMultipleMode, ApproverSettingMode } from "@shared/api/graphql/types";
+import { AppTextField } from "@shared/ui/form";
 import { useMemo } from "react";
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
 
@@ -86,7 +85,7 @@ export function ApproverSettingTableRows<
                       option.value === value.value
                     }
                     renderInput={(params) => (
-                      <TextField
+                      <AppTextField
                         {...params}
                         size="small"
                         sx={{ width: { xs: "100%", sm: 400 } }}
@@ -160,7 +159,7 @@ export function ApproverSettingTableRows<
                         ))
                       }
                       renderInput={(params) => (
-                        <TextField
+                        <AppTextField
                           {...params}
                           size="small"
                           sx={{ width: { xs: "100%", sm: 400 } }}

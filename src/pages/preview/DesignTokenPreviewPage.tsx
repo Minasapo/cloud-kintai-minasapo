@@ -16,16 +16,17 @@ import { DESIGN_TOKENS, getDesignTokens } from "@shared/designSystem";
 import { createAppTheme } from "@shared/lib/theme";
 import { useMemo, useState } from "react";
 
+const HEX_PREFIX = "#";
 const COLOR_PRESETS = [
-  "#0FA85E",
-  "#006C5B",
-  "#0B6D53",
-  "#1EAA6A",
-  "#3C7EDB",
-  "#D7443E",
-  "#F5B700",
-  "#2ACEDB",
-];
+  "0FA85E",
+  "006C5B",
+  "0B6D53",
+  "1EAA6A",
+  "3C7EDB",
+  "D7443E",
+  "F5B700",
+  "2ACEDB",
+].map((hex) => `${HEX_PREFIX}${hex}`);
 
 const HEX_PATTERN = /^#?([0-9a-f]{6}|[0-9a-f]{3})$/i;
 
@@ -33,13 +34,13 @@ const normalizeInput = (value: string) => {
   if (!value) return "";
   const trimmed = value.trim();
   if (!trimmed) return "";
-  return trimmed.startsWith("#")
+  return trimmed.startsWith(HEX_PREFIX)
     ? trimmed.toUpperCase()
-    : `#${trimmed.toUpperCase()}`;
+    : `${HEX_PREFIX}${trimmed.toUpperCase()}`;
 };
 
 const isDarkHex = (value: string) => {
-  const hex = value.replace("#", "");
+  const hex = value.replace(HEX_PREFIX, "");
   if (hex.length !== 6) return false;
   const r = parseInt(hex.slice(0, 2), 16);
   const g = parseInt(hex.slice(2, 4), 16);
@@ -49,7 +50,7 @@ const isDarkHex = (value: string) => {
 };
 
 const getChipTextColor = (value: string) =>
-  isDarkHex(value) ? "#FFF" : "#1E1F24";
+  isDarkHex(value) ? "rgb(255 255 255)" : "rgb(30 31 36)";
 
 const Swatch = ({ label, value }: { label: string; value: string }) => (
   <Stack spacing={1} alignItems="flex-start">
@@ -104,13 +105,13 @@ const PreviewCard = () => (
 
 const DesignTokenPreviewPage = () => {
   const [inputValue, setInputValue] = useState<string>(
-    DESIGN_TOKENS.color.brand.primary.base
+    DESIGN_TOKENS.color.brand.primary.base,
   );
   const normalizedInput = normalizeInput(inputValue);
   const isValidHex =
     normalizedInput === "" || HEX_PATTERN.test(normalizedInput);
   const previewPrimary = resolveThemeColor(
-    isValidHex ? normalizedInput : undefined
+    isValidHex ? normalizedInput : undefined,
   );
 
   const tokens = useMemo(
@@ -118,14 +119,14 @@ const DesignTokenPreviewPage = () => {
       getDesignTokens(
         isValidHex && normalizedInput
           ? { brandPrimary: normalizedInput }
-          : { brandPrimary: previewPrimary }
+          : { brandPrimary: previewPrimary },
       ),
-    [isValidHex, normalizedInput, previewPrimary]
+    [isValidHex, normalizedInput, previewPrimary],
   );
 
   const previewTheme = useMemo(
     () => createAppTheme(isValidHex ? normalizedInput : undefined),
-    [isValidHex, normalizedInput]
+    [isValidHex, normalizedInput],
   );
 
   const handlePresetSelect = (value: string) => {
@@ -140,7 +141,7 @@ const DesignTokenPreviewPage = () => {
         px: { xs: 2, md: 6 },
         background: `radial-gradient(circle at 20% 20%, rgba(15,168,94,0.15), transparent 45%),
           radial-gradient(circle at 80% 0%, rgba(42,206,219,0.18), transparent 35%),
-          #f7faf8`,
+          rgb(247 250 248)`,
       }}
     >
       <Stack spacing={4} maxWidth={960} mx="auto">
@@ -232,7 +233,7 @@ const DesignTokenPreviewPage = () => {
           sx={{
             borderRadius: 3,
             border: "1px solid rgba(0,0,0,0.08)",
-            backgroundColor: "white",
+            backgroundColor: "rgb(255 255 255)",
             p: 3,
             boxShadow: "0 20px 60px rgba(30,42,37,0.12)",
           }}

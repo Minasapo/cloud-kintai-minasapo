@@ -1,4 +1,4 @@
-name: Playwright Daily Test
+name: CI
 on:
   workflow_dispatch:
   push:
@@ -61,69 +61,3 @@ jobs:
         run: npm run test:unit
         env:
           TZ: Asia/Tokyo
-
-  playwright-test:
-    needs: lint-check
-    if: startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/feature/')
-    name: Run E2E Playwright tests (${{ matrix.project }})
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        project: [chromium-staff, chromium-admin]
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-      - name: Cache node_modules
-        uses: actions/cache@v3
-        id: cache-node-modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
-      - name: Install dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: npm ci --prefer-offline
-      - name: Cache Playwright browsers
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-      - name: Run Playwright smoke tests
-        run: npm run test:e2e -- smoke-test --project=${{ matrix.project }}
-        env:
-          PLAYWRIGHT_BASE_URL: ${{ secrets.VITE_BASE_PATH }}
-          VITE_BASE_PATH: ${{ secrets.VITE_BASE_PATH }}
-          PLAYWRIGHT_LAZY_USER_EMAIL: ${{ secrets.PLAYWRIGHT_LAZY_USER_EMAIL }}
-          PLAYWRIGHT_LAZY_USER_PASSWORD: ${{ secrets.PLAYWRIGHT_LAZY_USER_PASSWORD }}
-          PLAYWRIGHT_LOGIN_EMAIL: ${{ secrets.PLAYWRIGHT_LOGIN_EMAIL }}
-          PLAYWRIGHT_LOGIN_PASSWORD: ${{ secrets.PLAYWRIGHT_LOGIN_PASSWORD }}
-          PLAYWRIGHT_OUT_USER_EMAIL: ${{ secrets.PLAYWRIGHT_OUT_USER_EMAIL }}
-          PLAYWRIGHT_OUT_USER_PASSWORD: ${{ secrets.PLAYWRIGHT_OUT_USER_PASSWORD }}
-          PLAYWRIGHT_ADMIN_EMAIL: ${{ secrets.PLAYWRIGHT_ADMIN_EMAIL }}
-          PLAYWRIGHT_ADMIN_PASSWORD: ${{ secrets.PLAYWRIGHT_ADMIN_PASSWORD }}
-      - name: Upload test-results artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-${{ matrix.project }}
-          path: test-results
-      - name: Upload playwright-logs artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-logs-${{ matrix.project }}
-          path: playwright-logs
-      - name: Upload playwright-report artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-${{ matrix.project }}
-          path: playwright-report

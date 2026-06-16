@@ -1,7 +1,7 @@
 import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
 import AttendanceOperationLogHistory from "@features/attendance/edit/ui/AttendanceOperationLogHistory";
 import { SectionTitle } from "@shared/ui/typography";
-import { type MouseEvent, useContext, useEffect, useState } from "react";
+import { type MouseEvent, useContext, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 function HistoryIcon() {
@@ -39,15 +39,9 @@ function HistoryIcon() {
 
 export default function EditAttendanceHistoryList() {
   const { getValues, attendance } = useContext(AttendanceEditContext);
-  const [open, setOpen] = useState(false);
   const [searchParams] = useSearchParams();
-
   const readOnly = searchParams.get("readOnly") === "true";
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (readOnly) setOpen(true);
-  }, [readOnly]);
+  const [open, setOpen] = useState(readOnly);
 
   const handleClickOpen = () => {
     setOpen(true);

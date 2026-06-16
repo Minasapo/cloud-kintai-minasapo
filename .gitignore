@@ -96,3 +96,5 @@ amplifytools.xcconfig
 .continue/
 .copilot/
 .agents/
+.clinerules/
+.github/agents/

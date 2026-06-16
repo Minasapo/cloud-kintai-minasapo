@@ -1,5 +1,5 @@
 import { pushNotification } from "@shared/lib/store/notificationSlice";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 /**
  * Hook that wraps a delete function with a confirmation dialog and notification.
@@ -16,20 +16,39 @@ export function useDeleteWithConfirm<TInput>(
   successMessage: string,
   errorMessage: string
 ) {
-  const onDelete = useCallback(
-    async (input: TInput) => {
-      const confirmed = window.confirm(message);
-      if (!confirmed) return;
-      try {
-        await deleteFn(input);
-        pushNotification({ tone: "success", message: successMessage });
-      } catch {
-        pushNotification({ tone: "error", message: errorMessage });
-      }
+  const [pendingInput, setPendingInput] = useState<TInput | null>(null);
+
+  const requestDelete = useCallback((input: TInput) => {
+    setPendingInput(input);
+  }, []);
+
+  const handleCancel = useCallback(() => {
+    setPendingInput(null);
+  }, []);
+
+  const handleConfirm = useCallback(async () => {
+    if (pendingInput == null) return;
+
+    const target = pendingInput;
+    setPendingInput(null);
+
+    try {
+      await deleteFn(target);
+      pushNotification({ tone: "success", message: successMessage });
+    } catch {
+      pushNotification({ tone: "error", message: errorMessage });
+    }
+  }, [pendingInput, deleteFn, successMessage, errorMessage]);
+
+  return {
+    requestDelete,
+    confirmDialogProps: {
+      open: pendingInput !== null,
+      message,
+      onConfirm: handleConfirm,
+      onCancel: handleCancel,
     },
-    [message, deleteFn, successMessage, errorMessage]
-  );
-  return onDelete;
+  };
 }
 
 export default useDeleteWithConfirm;

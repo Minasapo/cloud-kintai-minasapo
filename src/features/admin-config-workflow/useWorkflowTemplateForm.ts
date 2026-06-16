@@ -1,6 +1,9 @@
 import { useAppDispatchV2 } from "@app/hooks";
+import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+
+const logger = createLogger("WorkflowTemplateForm");
 
 type Template = { id: string; name: string; title: string; content: string };
 
@@ -37,6 +40,11 @@ export function useWorkflowTemplateForm({
   const [initialTemplateName, setInitialTemplateName] = useState("");
   const [initialTemplateTitle, setInitialTemplateTitle] = useState("");
   const [initialTemplateContent, setInitialTemplateContent] = useState("");
+  const [templateDeleteConfirmOpen, setTemplateDeleteConfirmOpen] =
+    useState(false);
+  const [pendingDeleteTemplateId, setPendingDeleteTemplateId] = useState<string | null>(
+    null,
+  );
 
   const hasTemplateChanges =
     templateName !== initialTemplateName ||
@@ -104,7 +112,7 @@ export function useWorkflowTemplateForm({
 
       resetTemplateForm();
     } catch (error) {
-      console.error(error);
+      logger.error("Failed to save template", error);
       dispatch(
         pushNotification({
           tone: "error",
@@ -131,18 +139,37 @@ export function useWorkflowTemplateForm({
     setInitialTemplateContent(target.content);
   };
 
-  const handleTemplateDelete = async (templateId: string) => {
-    const target = templates.find((template) => template.id === templateId);
+  const handleTemplateDelete = (templateId: string) => {
+    setPendingDeleteTemplateId(templateId);
+    setTemplateDeleteConfirmOpen(true);
+  };
+
+  const handleCancelTemplateDelete = () => {
+    setTemplateDeleteConfirmOpen(false);
+    setPendingDeleteTemplateId(null);
+  };
+
+  const templateDeleteConfirmMessage = useMemo(() => {
+    if (!pendingDeleteTemplateId) {
+      return "";
+    }
+
+    const target = templates.find((template) => template.id === pendingDeleteTemplateId);
     if (!target) {
+      return "";
+    }
+
+    return `テンプレート「${target.name}」を削除します。よろしいですか？`;
+  }, [pendingDeleteTemplateId, templates]);
+
+  const handleConfirmTemplateDelete = async () => {
+    if (!pendingDeleteTemplateId) {
       return;
     }
 
-    const confirmed = window.confirm(
-      `テンプレート「${target.name}」を削除します。よろしいですか？`,
-    );
-    if (!confirmed) {
-      return;
-    }
+    const templateId = pendingDeleteTemplateId;
+    setTemplateDeleteConfirmOpen(false);
+    setPendingDeleteTemplateId(null);
 
     try {
       await removeTemplate(templateId);
@@ -156,7 +183,7 @@ export function useWorkflowTemplateForm({
         }),
       );
     } catch (error) {
-      console.error(error);
+      logger.error("Failed to delete template", error);
       dispatch(
         pushNotification({
           tone: "error",
@@ -180,5 +207,9 @@ export function useWorkflowTemplateForm({
     handleTemplateSubmit,
     handleTemplateEdit,
     handleTemplateDelete,
+    templateDeleteConfirmOpen,
+    templateDeleteConfirmMessage,
+    handleConfirmTemplateDelete,
+    handleCancelTemplateDelete,
   };
 }

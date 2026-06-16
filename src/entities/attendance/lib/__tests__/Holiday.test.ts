@@ -106,14 +106,14 @@ describe("Holiday", () => {
 });
 
 describe("normalizeHolidayName", () => {
-  it("「休日」を「振替休日」に変換する", () => {
-    expect(normalizeHolidayName("休日")).toBe("振替休日");
+  it("「休日」を「休日」のまま返す", () => {
+    expect(normalizeHolidayName("休日")).toBe("休日");
   });
 
-  it("「○○振替休日」を「振替休日」に変換する", () => {
-    expect(normalizeHolidayName("憲法記念日振替休日")).toBe("振替休日");
-    expect(normalizeHolidayName("こどもの日振替休日")).toBe("振替休日");
-    expect(normalizeHolidayName("振替休日")).toBe("振替休日");
+  it("「○○振替休日」を「休日」に変換する", () => {
+    expect(normalizeHolidayName("憲法記念日振替休日")).toBe("休日");
+    expect(normalizeHolidayName("こどもの日振替休日")).toBe("休日");
+    expect(normalizeHolidayName("振替休日")).toBe("休日");
   });
 
   it("通常の祝日名はそのまま返す", () => {

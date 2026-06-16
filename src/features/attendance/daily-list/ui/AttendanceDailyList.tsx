@@ -17,14 +17,14 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
 import { AppIconButton } from "@shared/ui/button";
+import { AppTextField } from "@shared/ui/form";
 import dayjs from "dayjs";
-import { type ReactNode,useCallback, useContext } from "react";
+import { type ReactNode, useCallback, useContext } from "react";
 
 import { formatMinutesToHHmm } from "../lib/overtimeUtils";
 import { useAttendanceDailyListData } from "../model/useAttendanceDailyListData";
@@ -52,7 +52,10 @@ const summaryCellSx = {
   textOverflow: "ellipsis",
   overflow: "hidden",
 } as const;
-const overtimeCellSx = { textAlign: "right" as const, whiteSpace: "nowrap" } as const;
+const overtimeCellSx = {
+  textAlign: "right" as const,
+  whiteSpace: "nowrap",
+} as const;
 const col90Sx = { width: 90 } as const;
 const noWrapCellSx = { whiteSpace: "nowrap" } as const;
 
@@ -69,7 +72,7 @@ const searchTextFieldSx = {
   maxWidth: 360,
   "& .MuiOutlinedInput-root": {
     borderRadius: "18px",
-    backgroundColor: "#ffffff",
+    backgroundColor: "rgb(255 255 255)",
     "& fieldset": {
       borderColor: "rgba(148,163,184,0.35)",
     },
@@ -77,7 +80,7 @@ const searchTextFieldSx = {
       borderColor: "rgba(100,116,139,0.45)",
     },
     "&.Mui-focused fieldset": {
-      borderColor: "#19b985",
+      borderColor: "rgb(25 185 133)",
       borderWidth: "1px",
     },
   },
@@ -129,8 +132,12 @@ function renderAttendanceSummaryMessage(
   return (
     <Box component="span">
       <Stack direction="row" spacing={0.5} alignItems="center">
-        {specialHolidayFlag && <Chip size="small" label="特別休暇" color="info" />}
-        {paidHolidayFlag && <Chip size="small" label="有給休暇" color="success" />}
+        {specialHolidayFlag && (
+          <Chip size="small" label="特別休暇" color="info" />
+        )}
+        {paidHolidayFlag && (
+          <Chip size="small" label="有給休暇" color="success" />
+        )}
         {absentFlag && <Chip size="small" label="欠勤" color="error" />}
         {needTruncate ? (
           <Tooltip title={full} arrow placement="top">
@@ -145,6 +152,27 @@ function renderAttendanceSummaryMessage(
         )}
       </Stack>
     </Box>
+  );
+}
+
+function AttendanceListTableHeader() {
+  return (
+    <TableHead>
+      <TableRow>
+        <TableCell />
+        <TableCell sx={col90Sx}>重複</TableCell>
+        <TableCell className="table-cell-header--staff-name">氏名</TableCell>
+        <TableCell className="table-cell-header--start-time">
+          出勤時刻
+        </TableCell>
+        <TableCell className="table-cell-header--end-time">退勤時刻</TableCell>
+        <TableCell className="table-cell-header--overtime" sx={overtimeCellSx}>
+          残業時間
+        </TableCell>
+        <TableCell sx={summaryCellSx}>摘要</TableCell>
+        <TableCell />
+      </TableRow>
+    </TableHead>
   );
 }
 
@@ -201,7 +229,10 @@ export default function AttendanceDailyList() {
           targetWorkDate={displayDateFormatted}
         />
         <TableCell sx={col90Sx}>
-          <DuplicateAttendanceBadge row={row} duplicateInfoByStaff={duplicateInfoByStaff} />
+          <DuplicateAttendanceBadge
+            row={row}
+            duplicateInfoByStaff={duplicateInfoByStaff}
+          />
         </TableCell>
         <TableCell>{`${row.familyName} ${row.givenName}`}</TableCell>
         <StartTimeTableCell
@@ -243,7 +274,12 @@ export default function AttendanceDailyList() {
       />
 
       <Box sx={listHeaderBoxSx}>
-        <MoveDateItem workDate={dayjs(targetWorkDate || today, AttendanceDate.QueryParamFormat)} />
+        <MoveDateItem
+          workDate={dayjs(
+            targetWorkDate || today,
+            AttendanceDate.QueryParamFormat,
+          )}
+        />
         <Box sx={searchBoxSx}>
           <AppIconButton
             aria-label="スタッフ名検索を表示"
@@ -253,7 +289,7 @@ export default function AttendanceDailyList() {
             <SearchIcon fontSize="small" />
           </AppIconButton>
           {isSearchVisible && (
-            <TextField
+            <AppTextField
               label="スタッフ名で検索"
               variant="outlined"
               size="small"
@@ -277,20 +313,7 @@ export default function AttendanceDailyList() {
             </Alert>
             <TableContainer sx={tableContainerSx}>
               <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell />
-                    <TableCell sx={col90Sx}>重複</TableCell>
-                    <TableCell className="table-cell-header--staff-name">氏名</TableCell>
-                    <TableCell className="table-cell-header--start-time">出勤時刻</TableCell>
-                    <TableCell className="table-cell-header--end-time">退勤時刻</TableCell>
-                    <TableCell className="table-cell-header--overtime" sx={overtimeCellSx}>
-                      残業時間
-                    </TableCell>
-                    <TableCell sx={summaryCellSx}>摘要</TableCell>
-                    <TableCell />
-                  </TableRow>
-                </TableHead>
+                <AttendanceListTableHeader />
                 <TableBody>
                   {pendingList.map((row, index) =>
                     renderAttendanceRow(row, `pending-${row.sub}-${index}`),
@@ -304,20 +327,7 @@ export default function AttendanceDailyList() {
 
       <TableContainer sx={tableContainerSx}>
         <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell />
-              <TableCell sx={col90Sx}>重複</TableCell>
-              <TableCell className="table-cell-header--staff-name">氏名</TableCell>
-              <TableCell className="table-cell-header--start-time">出勤時刻</TableCell>
-              <TableCell className="table-cell-header--end-time">退勤時刻</TableCell>
-              <TableCell className="table-cell-header--overtime" sx={overtimeCellSx}>
-                残業時間
-              </TableCell>
-              <TableCell sx={summaryCellSx}>摘要</TableCell>
-              <TableCell />
-            </TableRow>
-          </TableHead>
+          <AttendanceListTableHeader />
           <TableBody>
             {filteredAttendanceList.map((row, index) =>
               renderAttendanceRow(row, `list-${row.sub}-${index}`),

@@ -53,13 +53,21 @@ jest.mock("@/pages/admin/AdminShiftSettings/shiftGroupFactory", () => ({
 
 // ─── Default AppConfigContext mock values ─────────────────────────────────────
 
-const makeMockContext = (overrides: Partial<{
-  shiftGroups: { label: string; min?: number; max?: number; fixed?: number; description?: string }[];
-  configId: string | null;
-  shiftDefaultMode: ShiftDisplayMode;
-  saveConfig: jest.Mock;
-  fetchConfig: jest.Mock;
-}> = {}) => {
+const makeMockContext = (
+  overrides: Partial<{
+    shiftGroups: {
+      label: string;
+      min?: number;
+      max?: number;
+      fixed?: number;
+      description?: string;
+    }[];
+    configId: string | null;
+    shiftDefaultMode: ShiftDisplayMode;
+    saveConfig: jest.Mock;
+    fetchConfig: jest.Mock;
+  }> = {},
+) => {
   const {
     shiftGroups = [],
     configId = "config-123",
@@ -104,9 +112,15 @@ const makeMockContext = (overrides: Partial<{
   } as unknown as React.ContextType<typeof AppConfigContext>;
 };
 
-const createWrapper = (contextValue: React.ContextType<typeof AppConfigContext>) => {
+const createWrapper = (
+  contextValue: React.ContextType<typeof AppConfigContext>,
+) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
-    React.createElement(AppConfigContext.Provider, { value: contextValue }, children);
+    React.createElement(
+      AppConfigContext.Provider,
+      { value: contextValue },
+      children,
+    );
   Wrapper.displayName = "AppConfigWrapper";
   return Wrapper;
 };
@@ -242,6 +256,61 @@ describe("useAdminShiftSettings", () => {
     });
   });
 
+  describe("isShiftGroupDirty", () => {
+    it("グループ追加時に true になる", async () => {
+      const ctx = makeMockContext({
+        shiftGroups: [{ label: "早番" }],
+      });
+      const { result } = renderHook(() => useAdminShiftSettings(), {
+        wrapper: createWrapper(ctx),
+      });
+
+      await waitFor(() => {
+        expect(result.current.isShiftGroupDirty).toBe(false);
+      });
+
+      act(() => {
+        result.current.handleAddGroup();
+      });
+
+      await waitFor(() => {
+        expect(result.current.isShiftGroupDirty).toBe(true);
+      });
+    });
+
+    it("追加したグループを削除して元に戻すと false になる", async () => {
+      const ctx = makeMockContext({
+        shiftGroups: [{ label: "早番" }],
+      });
+      const { result } = renderHook(() => useAdminShiftSettings(), {
+        wrapper: createWrapper(ctx),
+      });
+
+      await waitFor(() => {
+        expect(result.current.fields).toHaveLength(1);
+        expect(result.current.isShiftGroupDirty).toBe(false);
+      });
+
+      act(() => {
+        result.current.handleAddGroup();
+      });
+
+      await waitFor(() => {
+        expect(result.current.fields).toHaveLength(2);
+        expect(result.current.isShiftGroupDirty).toBe(true);
+      });
+
+      act(() => {
+        result.current.handleRemoveGroup(1);
+      });
+
+      await waitFor(() => {
+        expect(result.current.fields).toHaveLength(1);
+        expect(result.current.isShiftGroupDirty).toBe(false);
+      });
+    });
+  });
+
   // ─── handleRemoveGroup ──────────────────────────────────────────────────
 
   describe("handleRemoveGroup", () => {
@@ -286,7 +355,9 @@ describe("useAdminShiftSettings", () => {
       await waitFor(() => expect(result.current.isBusy).toBe(false));
 
       await act(async () => {
-        await result.current.handleSaveShiftGroup(new Event("submit") as unknown as React.BaseSyntheticEvent);
+        await result.current.handleSaveShiftGroup(
+          new Event("submit") as unknown as React.BaseSyntheticEvent,
+        );
       });
 
       await waitFor(() => expect(result.current.isBusy).toBe(false));
@@ -313,7 +384,9 @@ describe("useAdminShiftSettings", () => {
       await waitFor(() => expect(result.current.isBusy).toBe(false));
 
       await act(async () => {
-        await result.current.handleSaveShiftGroup(new Event("submit") as unknown as React.BaseSyntheticEvent);
+        await result.current.handleSaveShiftGroup(
+          new Event("submit") as unknown as React.BaseSyntheticEvent,
+        );
       });
 
       await waitFor(() => expect(result.current.isBusy).toBe(false));
@@ -334,7 +407,9 @@ describe("useAdminShiftSettings", () => {
       await waitFor(() => expect(result.current.isBusy).toBe(false));
 
       await act(async () => {
-        await result.current.handleSaveShiftGroup(new Event("submit") as unknown as React.BaseSyntheticEvent);
+        await result.current.handleSaveShiftGroup(
+          new Event("submit") as unknown as React.BaseSyntheticEvent,
+        );
       });
 
       await waitFor(() => expect(result.current.isBusy).toBe(false));
@@ -350,7 +425,10 @@ describe("useAdminShiftSettings", () => {
     it("保存中は savingShiftGroup が true になる", async () => {
       let resolveSave!: () => void;
       const saveConfig = jest.fn(
-        () => new Promise<void>((resolve) => { resolveSave = resolve; }),
+        () =>
+          new Promise<void>((resolve) => {
+            resolveSave = resolve;
+          }),
       );
       const ctx = makeMockContext({ saveConfig });
 
@@ -361,7 +439,9 @@ describe("useAdminShiftSettings", () => {
       await waitFor(() => expect(result.current.isBusy).toBe(false));
 
       act(() => {
-        void result.current.handleSaveShiftGroup(new Event("submit") as unknown as React.BaseSyntheticEvent);
+        void result.current.handleSaveShiftGroup(
+          new Event("submit") as unknown as React.BaseSyntheticEvent,
+        );
       });
 
       await waitFor(() => expect(result.current.savingShiftGroup).toBe(true));
@@ -381,7 +461,9 @@ describe("useAdminShiftSettings", () => {
         wrapper: createWrapper(ctx),
       });
 
-      await waitFor(() => expect(result.current.isShiftDisplayDirty).toBe(false));
+      await waitFor(() =>
+        expect(result.current.isShiftDisplayDirty).toBe(false),
+      );
 
       act(() => {
         result.current.setShiftDefaultMode("collaborative");
@@ -399,19 +481,25 @@ describe("useAdminShiftSettings", () => {
         wrapper: createWrapper(ctx),
       });
 
-      await waitFor(() => expect(result.current.isShiftDisplayDirty).toBe(false));
+      await waitFor(() =>
+        expect(result.current.isShiftDisplayDirty).toBe(false),
+      );
 
       act(() => {
         result.current.setShiftDefaultMode("collaborative");
       });
 
-      await waitFor(() => expect(result.current.isShiftDisplayDirty).toBe(true));
+      await waitFor(() =>
+        expect(result.current.isShiftDisplayDirty).toBe(true),
+      );
 
       act(() => {
         result.current.setShiftDefaultMode("normal");
       });
 
-      await waitFor(() => expect(result.current.isShiftDisplayDirty).toBe(false));
+      await waitFor(() =>
+        expect(result.current.isShiftDisplayDirty).toBe(false),
+      );
     });
   });
 
@@ -429,19 +517,27 @@ describe("useAdminShiftSettings", () => {
     it("shiftDefaultMode 変更後に 600ms で自動保存が実行される", async () => {
       const saveConfig = jest.fn().mockResolvedValue(undefined);
       const fetchConfig = jest.fn().mockResolvedValue(undefined);
-      const ctx = makeMockContext({ shiftDefaultMode: "normal", saveConfig, fetchConfig });
+      const ctx = makeMockContext({
+        shiftDefaultMode: "normal",
+        saveConfig,
+        fetchConfig,
+      });
 
       const { result } = renderHook(() => useAdminShiftSettings(), {
         wrapper: createWrapper(ctx),
       });
 
-      await waitFor(() => expect(result.current.isShiftDisplayDirty).toBe(false));
+      await waitFor(() =>
+        expect(result.current.isShiftDisplayDirty).toBe(false),
+      );
 
       act(() => {
         result.current.setShiftDefaultMode("collaborative");
       });
 
-      await waitFor(() => expect(result.current.isShiftDisplayDirty).toBe(true));
+      await waitFor(() =>
+        expect(result.current.isShiftDisplayDirty).toBe(true),
+      );
 
       // タイマーを進めて自動保存をトリガー
       await act(async () => {
@@ -452,14 +548,18 @@ describe("useAdminShiftSettings", () => {
     });
 
     it("自動保存失敗時にエラー通知を dispatch する", async () => {
-      const saveConfig = jest.fn().mockRejectedValue(new Error("auto-save failed"));
+      const saveConfig = jest
+        .fn()
+        .mockRejectedValue(new Error("auto-save failed"));
       const ctx = makeMockContext({ shiftDefaultMode: "normal", saveConfig });
 
       const { result } = renderHook(() => useAdminShiftSettings(), {
         wrapper: createWrapper(ctx),
       });
 
-      await waitFor(() => expect(result.current.isShiftDisplayDirty).toBe(false));
+      await waitFor(() =>
+        expect(result.current.isShiftDisplayDirty).toBe(false),
+      );
 
       act(() => {
         result.current.setShiftDefaultMode("collaborative");
@@ -486,7 +586,9 @@ describe("useAdminShiftSettings", () => {
         wrapper: createWrapper(ctx),
       });
 
-      await waitFor(() => expect(result.current.hasValidationError).toBe(false));
+      await waitFor(() =>
+        expect(result.current.hasValidationError).toBe(false),
+      );
     });
   });
 

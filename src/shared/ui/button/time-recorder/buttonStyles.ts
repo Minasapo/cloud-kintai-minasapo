@@ -19,58 +19,64 @@ const ACTION_BUTTON_BORDER_WIDTH = designTokenVar(
 );
 const ACTION_BUTTON_DISABLED_BORDER = designTokenVar(
   "component.timeRecorder.actionCard.disabledBorderColor",
-  "#CBD5E1",
+  "rgb(203 213 225)",
 );
 const ACTION_BUTTON_DISABLED_BACKGROUND = designTokenVar(
   "component.timeRecorder.actionCard.disabledBackground",
-  "#E2E8F0",
+  "rgb(226 232 240)",
 );
 const ACTION_BUTTON_DISABLED_TEXT = designTokenVar(
   "component.timeRecorder.actionCard.disabledTextColor",
-  "#64748B",
+  "rgb(100 116 139)",
 );
 const ACTION_BUTTON_DISABLED_MUTED = designTokenVar(
   "component.timeRecorder.actionCard.disabledMutedColor",
-  "#94A3B8",
+  "rgb(148 163 184)",
 );
 
-const PRIMARY_BASE = designTokenVar("color.brand.primary.base", "#0FA85E");
+const PRIMARY_BASE = designTokenVar(
+  "color.brand.primary.base",
+  "rgb(15 168 94)",
+);
 const PRIMARY_SURFACE = designTokenVar(
   "component.timeRecorder.actionCard.primarySurface",
-  "#ECFDF3",
+  "rgb(236 253 243)",
 );
 const PRIMARY_DEEP = designTokenVar(
   "component.timeRecorder.actionCard.primaryDeep",
-  "#047857",
+  "rgb(4 120 87)",
 );
-const DANGER_BASE = designTokenVar("color.feedback.danger.base", "#D7443E");
+const DANGER_BASE = designTokenVar(
+  "color.feedback.danger.base",
+  "rgb(215 68 62)",
+);
 const DANGER_SURFACE = designTokenVar(
   "component.timeRecorder.actionCard.dangerSurface",
-  "#FEF2F2",
+  "rgb(254 242 242)",
 );
 const DANGER_DEEP = designTokenVar(
   "component.timeRecorder.actionCard.dangerDeep",
-  "#B91C1C",
+  "rgb(185 28 28)",
 );
 const INFO_SURFACE = designTokenVar(
   "component.timeRecorder.actionCard.infoSurface",
-  "#EFF6FF",
+  "rgb(239 246 255)",
 );
 const INDIGO_BASE = designTokenVar(
   "component.timeRecorder.actionCard.indigoBase",
-  "#DC2626",
+  "rgb(220 38 38)",
 );
 const INDIGO_DEEP = designTokenVar(
   "component.timeRecorder.actionCard.indigoDeep",
-  "#B91C1C",
+  "rgb(185 28 28)",
 );
 const AMBER_BASE = designTokenVar(
   "component.timeRecorder.actionCard.amberBase",
-  "#2563EB",
+  "rgb(37 99 235)",
 );
 const AMBER_DEEP = designTokenVar(
   "component.timeRecorder.actionCard.amberDeep",
-  "#1D4ED8",
+  "rgb(29 78 216)",
 );
 
 type ActionButtonPalette = {
@@ -88,62 +94,62 @@ type ActionButtonPalette = {
 
 export const TIME_RECORDER_BUTTON_PALETTES = {
   clockIn: {
-    background: `linear-gradient(160deg, ${PRIMARY_SURFACE} 0%, #ffffff 100%)`,
+    background: `linear-gradient(160deg, ${PRIMARY_SURFACE} 0%, rgb(255 255 255) 100%)`,
     border: PRIMARY_BASE,
     text: PRIMARY_DEEP,
     mutedText: PRIMARY_BASE,
     iconBackground: "rgba(15,168,94,0.08)",
     iconText: PRIMARY_BASE,
-    hoverBackground: `linear-gradient(160deg, ${PRIMARY_SURFACE} 0%, #F7FFFB 100%)`,
-    hoverBorder: "#10B981",
+    hoverBackground: `linear-gradient(160deg, ${PRIMARY_SURFACE} 0%, rgb(247 255 251) 100%)`,
+    hoverBorder: "rgb(16 185 129)",
     hoverText: PRIMARY_DEEP,
     glow: "rgba(16, 185, 129, 0.18)",
   },
   clockOut: {
-    background: `linear-gradient(160deg, ${DANGER_SURFACE} 0%, #ffffff 100%)`,
+    background: `linear-gradient(160deg, ${DANGER_SURFACE} 0%, rgb(255 255 255) 100%)`,
     border: DANGER_BASE,
     text: DANGER_DEEP,
     mutedText: DANGER_BASE,
     iconBackground: "rgba(215,68,62,0.08)",
     iconText: DANGER_BASE,
-    hoverBackground: `linear-gradient(160deg, ${DANGER_SURFACE} 0%, #FFF7F7 100%)`,
-    hoverBorder: "#F87171",
+    hoverBackground: `linear-gradient(160deg, ${DANGER_SURFACE} 0%, rgb(255 247 247) 100%)`,
+    hoverBorder: "rgb(248 113 113)",
     hoverText: DANGER_DEEP,
     glow: "rgba(239, 68, 68, 0.16)",
   },
   rest: {
-    background: `linear-gradient(160deg, ${INFO_SURFACE} 0%, #ffffff 100%)`,
+    background: `linear-gradient(160deg, ${INFO_SURFACE} 0%, rgb(255 255 255) 100%)`,
     border: AMBER_BASE,
     text: AMBER_DEEP,
     mutedText: AMBER_BASE,
     iconBackground: "rgba(37,99,235,0.08)",
     iconText: AMBER_BASE,
-    hoverBackground: `linear-gradient(160deg, ${INFO_SURFACE} 0%, #F8FBFF 100%)`,
-    hoverBorder: "#60A5FA",
+    hoverBackground: `linear-gradient(160deg, ${INFO_SURFACE} 0%, rgb(248 251 255) 100%)`,
+    hoverBorder: "rgb(96 165 250)",
     hoverText: AMBER_DEEP,
     glow: "rgba(37, 99, 235, 0.16)",
   },
   subtle: {
-    background: `linear-gradient(160deg, ${PRIMARY_SURFACE} 0%, #ffffff 100%)`,
+    background: `linear-gradient(160deg, ${PRIMARY_SURFACE} 0%, rgb(255 255 255) 100%)`,
     border: PRIMARY_BASE,
     text: PRIMARY_DEEP,
     mutedText: PRIMARY_BASE,
     iconBackground: "rgba(15,168,94,0.08)",
     iconText: PRIMARY_BASE,
-    hoverBackground: `linear-gradient(160deg, ${PRIMARY_SURFACE} 0%, #F7FFFB 100%)`,
-    hoverBorder: "#10B981",
+    hoverBackground: `linear-gradient(160deg, ${PRIMARY_SURFACE} 0%, rgb(247 255 251) 100%)`,
+    hoverBorder: "rgb(16 185 129)",
     hoverText: PRIMARY_DEEP,
     glow: "rgba(16, 185, 129, 0.18)",
   },
   subtleDanger: {
-    background: `linear-gradient(160deg, ${DANGER_SURFACE} 0%, #ffffff 100%)`,
+    background: `linear-gradient(160deg, ${DANGER_SURFACE} 0%, rgb(255 255 255) 100%)`,
     border: INDIGO_BASE,
     text: INDIGO_DEEP,
     mutedText: INDIGO_BASE,
     iconBackground: "rgba(220,38,38,0.08)",
     iconText: INDIGO_BASE,
-    hoverBackground: `linear-gradient(160deg, ${DANGER_SURFACE} 0%, #FFF7F7 100%)`,
-    hoverBorder: "#F87171",
+    hoverBackground: `linear-gradient(160deg, ${DANGER_SURFACE} 0%, rgb(255 247 247) 100%)`,
+    hoverBorder: "rgb(248 113 113)",
     hoverText: INDIGO_DEEP,
     glow: "rgba(239, 68, 68, 0.16)",
   },

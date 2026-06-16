@@ -77,15 +77,13 @@ const moduleLoaders: Partial<Record<string, () => Promise<unknown>>> = {
   "/register": () => import("../pages/Register"),
   "/attendance/list": () =>
     import("../pages/attendance/list/AttendanceListPage"),
-  "/attendance/stats": () =>
-    import("../pages/attendance/statistics/AttendanceStatisticsPage"),
   "/attendance/report": () =>
-    import("../pages/attendance/daily-report/DailyReport"),
+    import("@extensions/daily-report/pages/DailyReport"),
   "/shift": () => import("../pages/shift/request"),
   "/workflow": () => import("../pages/workflow/list/Workflow"),
   "/admin": () => import("../pages/admin/AdminLayout"),
   "/profile": () => import("../pages/Profile"),
-  "/office/qr": () => import("../pages/office/qr/OfficeQrPage"),
+  "/office/qr": () => import("@extensions/office-qr/pages/qr/OfficeQrPage"),
 };
 
 export function preloadRoute(href: string): void {

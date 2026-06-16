@@ -8,6 +8,8 @@ declare module "@shared/ui/feedback" {
   export * from "./ConfirmDialog";
   export * from "./DataStateContainer";
   export * from "./EmptyState";
+  export * from "./ErrorFallbackPanel";
+  export * from "./FeatureErrorBoundary";
   export * from "./FormSkeleton";
   export * from "./InlineAlert";
   export * from "./LeaveGuardDialog";

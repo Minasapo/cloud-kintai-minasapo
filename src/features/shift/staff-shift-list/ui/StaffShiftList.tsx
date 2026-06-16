@@ -1,6 +1,4 @@
 import { AuthContext } from "@app/providers/auth/AuthContext";
-import { useCalendars } from "@entities/calendar/model/useCalendars";
-import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import {
   Box,
@@ -18,38 +16,39 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useAppNotification } from "@shared/lib/useAppNotification";
 import CommonBreadcrumbs from "@shared/ui/breadcrumbs/CommonBreadcrumbs";
-import { ProgressBar } from "@shared/ui/feedback";
-import dayjs, { Dayjs } from "dayjs";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { EmptyState, ProgressBar } from "@shared/ui/feedback";
+import dayjs from "dayjs";
+import { useContext } from "react";
 import { useParams } from "react-router-dom";
 
-import * as MESSAGE_CODE from "@/errors";
-
-type ShiftState = "work" | "off" | undefined;
+import { useStaffShiftListData } from "../model/useStaffShiftListData";
 
 type StaffShiftTableRowProps = {
-  d: Dayjs;
   dayKey: string;
-  state: ShiftState;
+  dateLabel: string;
+  weekdayLabel: string;
+  state: "work" | "off" | undefined;
   isPublicHoliday: boolean;
   isCompanyHoliday: boolean;
   isSunday: boolean;
   isSaturday: boolean;
   workType: string | null | undefined;
+  disabled?: boolean;
   onShiftChange: (key: string, value: string | null) => void;
 };
 
 function StaffShiftTableRow({
-  d,
   dayKey,
+  dateLabel,
+  weekdayLabel,
   state,
   isPublicHoliday,
   isCompanyHoliday,
   isSunday,
   isSaturday,
   workType,
+  disabled,
   onShiftChange,
 }: StaffShiftTableRowProps) {
   const todayKey = dayjs().format("YYYY-MM-DD");
@@ -59,14 +58,14 @@ function StaffShiftTableRow({
   if (workType === "shift") {
     rowBg = "transparent";
   } else if (dayKey === todayKey) {
-    rowBg = "#FFFF93";
+    rowBg = "rgb(255 255 147)";
     rowFontWeight = 700;
   } else if (isPublicHoliday || isCompanyHoliday) {
-    rowBg = "#FF9393";
+    rowBg = "rgb(255 147 147)";
   } else if (isSunday) {
-    rowBg = "#FF9393";
+    rowBg = "rgb(255 147 147)";
   } else if (isSaturday) {
-    rowBg = "#93FFFF";
+    rowBg = "rgb(147 255 255)";
   }
 
   return (
@@ -98,11 +97,9 @@ function StaffShiftTableRow({
             >
               <CalendarTodayIcon sx={{ mr: 1 }} fontSize="small" />
               <Box sx={{ display: "flex", flexDirection: "column" }}>
-                <Typography sx={{ fontWeight: 600 }}>
-                  {d.format("M月D日")}
-                </Typography>
+                <Typography sx={{ fontWeight: 600 }}>{dateLabel}</Typography>
                 <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
-                  {d.format("dddd")}
+                  {weekdayLabel}
                 </Typography>
               </Box>
             </Box>
@@ -136,6 +133,7 @@ function StaffShiftTableRow({
             value={state ?? ""}
             exclusive
             size="small"
+            disabled={disabled}
             onChange={(_, val) => onShiftChange(dayKey, val)}
           >
             <ToggleButton value="">未登録</ToggleButton>
@@ -149,95 +147,33 @@ function StaffShiftTableRow({
 }
 
 export default function StaffShiftList() {
-  const { notify } = useAppNotification();
   const { staffId } = useParams();
-  const { authStatus } = useContext(AuthContext);
+  const { authStatus, cognitoUser } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
-  const { staffs } = useStaffs({ isAuthenticated });
-
-  const staff = staffs.find((s) => String(s.id) === String(staffId));
-
-  const [currentMonth, setCurrentMonth] = useState(dayjs());
-  const monthStart = currentMonth.startOf("month");
-  const daysInMonth = monthStart.daysInMonth();
-  const monthYear = monthStart.year();
-  const monthMonth = monthStart.month();
-
-  const days = useMemo(
-    () =>
-      Array.from({ length: daysInMonth }).map((_, i) =>
-        monthStart.add(i, "day"),
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [monthYear, monthMonth, daysInMonth],
-  );
+  const currentUserId = cognitoUser?.id ?? "unknown";
 
   const {
-    holidayCalendars,
-    companyHolidayCalendars,
-    isLoading: calendarLoading,
-    error: calendarsError,
-  } = useCalendars();
-
-  useEffect(() => {
-    if (calendarsError) {
-      console.error(calendarsError);
-      notify({
-        title: "エラー",
-        description: MESSAGE_CODE.E00001,
-        tone: "error",
-        dedupeKey: "holiday-calendar-error",
-      });
-    }
-  }, [calendarsError, notify]);
-
-  const publicHolidaySet = useMemo(
-    () => new Set(holidayCalendars.map((h) => h.holidayDate)),
-    [holidayCalendars],
-  );
-
-  const companyHolidaySet = useMemo(
-    () => new Set(companyHolidayCalendars.map((h) => h.holidayDate)),
-    [companyHolidayCalendars],
-  );
-
-  // モックデータ: 未登録 / 出勤 / 休み を表示・編集できるよう state にする
-  const [shifts, setShifts] = useState<
-    Record<string, "work" | "off" | undefined>
-  >(() => {
-    const map: Record<string, "work" | "off" | undefined> = {};
-    days.forEach((d) => {
-      const r = Math.random();
-      if (r < 0.2)
-        map[d.format("YYYY-MM-DD")] = undefined; // 未登録
-      else map[d.format("YYYY-MM-DD")] = r > 0.6 ? "work" : "off";
-    });
-    return map;
+    staff,
+    monthStart,
+    days,
+    shiftStates,
+    publicHolidaySet,
+    companyHolidaySet,
+    isSaving,
+    calendarLoading,
+    shiftRequestLoading,
+    shiftRequestFetching,
+    shiftRequest,
+    prevMonth,
+    nextMonth,
+    handleShiftChange,
+  } = useStaffShiftListData({
+    staffId,
+    isAuthenticated,
+    currentUserId,
   });
 
-  // 月が切り替わったらモックデータを再生成する
-  useEffect(() => {
-    const map: Record<string, "work" | "off" | undefined> = {};
-    days.forEach((d) => {
-      const r = Math.random();
-      if (r < 0.2) map[d.format("YYYY-MM-DD")] = undefined;
-      else map[d.format("YYYY-MM-DD")] = r > 0.6 ? "work" : "off";
-    });
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setShifts(map);
-  }, [monthStart.year(), monthStart.month(), daysInMonth]);
-
-  const handleShiftChange = (key: string, value: string | null) => {
-    setShifts((prev) => ({
-      ...prev,
-      [key]: value === "work" ? "work" : value === "off" ? "off" : undefined,
-    }));
-  };
-
-  const prevMonth = () => setCurrentMonth((m) => m.subtract(1, "month"));
-  const nextMonth = () => setCurrentMonth((m) => m.add(1, "month"));
-
-  if (calendarLoading) {
+  if (calendarLoading || (shiftRequestLoading && !shiftRequest)) {
     return <ProgressBar className="w-full" />;
   }
 
@@ -249,7 +185,7 @@ export default function StaffShiftList() {
             { label: "TOP", href: "/" },
             { label: "シフト管理", href: "/admin/shift" },
           ]}
-          current={"シフト詳細"}
+          current="シフト詳細"
         />
       </Box>
 
@@ -267,11 +203,28 @@ export default function StaffShiftList() {
             : "スタッフが見つかりません"}
         </Typography>
         <Box>
-          <Chip label="前月" onClick={prevMonth} sx={{ mr: 1 }} clickable />
+          <Chip
+            label="前月"
+            onClick={prevMonth}
+            sx={{ mr: 1 }}
+            clickable
+            disabled={isSaving}
+          />
           <Chip label={monthStart.format("YYYY年 M月")} sx={{ mr: 1 }} />
-          <Chip label="翌月" onClick={nextMonth} clickable />
+          <Chip
+            label="翌月"
+            onClick={nextMonth}
+            clickable
+            disabled={isSaving}
+          />
         </Box>
       </Box>
+
+      {staff && !shiftRequest && (
+        <Box sx={{ mb: 2 }}>
+          <EmptyState message="この月のシフトは未登録です" />
+        </Box>
+      )}
 
       {staff && (
         <Paper
@@ -312,19 +265,23 @@ export default function StaffShiftList() {
             <TableBody>
               {days.map((d) => {
                 const key = d.format("YYYY-MM-DD");
-                const state = shifts[key];
+                const dateLabel = d.format("M月D日");
+                const weekdayLabel = d.format("dddd");
+                const state = shiftStates[key];
 
                 return (
                   <StaffShiftTableRow
                     key={key}
-                    d={d}
                     dayKey={key}
+                    dateLabel={dateLabel}
+                    weekdayLabel={weekdayLabel}
                     state={state}
                     isPublicHoliday={publicHolidaySet.has(key)}
                     isCompanyHoliday={companyHolidaySet.has(key)}
                     isSunday={d.day() === 0}
                     isSaturday={d.day() === 6}
                     workType={staff?.workType}
+                    disabled={isSaving || shiftRequestFetching}
                     onShiftChange={handleShiftChange}
                   />
                 );

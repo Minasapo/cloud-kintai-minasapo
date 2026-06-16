@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 
 import { useAttendanceRecord } from "../useAttendanceRecord";
-import { createMockAttendanceRecordParams, createMockLogger } from "./testUtils";
+import { createMockAttendanceRecordParams } from "./testUtils";
 
 // ---- モック定義 ----
 
@@ -147,11 +147,9 @@ describe("useAttendanceRecord", () => {
     it("fetchStaff 失敗時に staff = null になり dispatch が呼ばれる", async () => {
       fetchStaffMock.mockRejectedValue(new Error("Network error"));
 
-      const mockLogger = createMockLogger();
       const params = createMockAttendanceRecordParams({
-      targetStaffId: "staff-001",
-      logger: mockLogger,
-    });
+        targetStaffId: "staff-001",
+      });
 
       const { result } = renderHook(() => useAttendanceRecord(params));
 
@@ -159,10 +157,6 @@ describe("useAttendanceRecord", () => {
         expect(result.current.staff).toBeNull();
         expect(mockDispatch).toHaveBeenCalled();
       });
-
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining("staff-001"),
-      );
     });
   });
 
@@ -345,6 +339,53 @@ describe("useAttendanceRecord", () => {
 
       expect(result.current.historyIndex).toBe(2);
     });
+
+    it("readOnly のとき setHistoryIndex しても最新履歴(index 0)が維持される", async () => {
+      const olderHistory = {
+        ...historyEntry,
+        startTime: "2024-01-15T08:00:00.000Z",
+        createdAt: "2024-01-15T08:00:00.000Z",
+      };
+      const newerHistory = {
+        ...historyEntry,
+        startTime: "2024-01-15T09:30:00.000Z",
+        createdAt: "2024-01-15T10:00:00.000Z",
+      };
+
+      mockAttendanceQueryData = {
+        id: "att-1",
+        workDate: "2024-01-15",
+        startTime: null,
+        endTime: null,
+        histories: [olderHistory, newerHistory],
+        rests: [],
+        hourlyPaidHolidayTimes: [],
+        changeRequests: [],
+      };
+
+      const mockSetValue = jest.fn();
+      const params = createMockAttendanceRecordParams({
+        readOnly: true,
+        setValue: mockSetValue,
+      });
+      const { result } = renderHook(() => useAttendanceRecord(params));
+
+      await waitFor(() => {
+        expect(result.current.historyIndex).toBe(0);
+      });
+
+      mockSetValue.mockClear();
+      act(() => {
+        result.current.setHistoryIndex(1);
+      });
+
+      await waitFor(() => {
+        expect(result.current.historyIndex).toBe(0);
+      });
+      expect(mockSetValue).toHaveBeenCalledWith("startTime", newerHistory.startTime);
+
+      mockAttendanceQueryData = undefined;
+    });
   });
 
   // ----------------------------------------------------------------
@@ -403,12 +444,10 @@ describe("useAttendanceRecord", () => {
         unwrap: () => Promise.reject(new Error("refetch error")),
       });
 
-      const mockLogger = createMockLogger();
       const params = createMockAttendanceRecordParams({
-      targetStaffId: "staff-001",
-      targetWorkDate: "2024-01-15",
-      logger: mockLogger,
-    });
+        targetStaffId: "staff-001",
+        targetWorkDate: "2024-01-15",
+      });
 
       const { result } = renderHook(() => useAttendanceRecord(params));
 
@@ -422,6 +461,7 @@ describe("useAttendanceRecord", () => {
       });
 
       expect(result.current.historiesLoading).toBe(false);
+      expect(mockDispatch).toHaveBeenCalled();
     });
   });
 

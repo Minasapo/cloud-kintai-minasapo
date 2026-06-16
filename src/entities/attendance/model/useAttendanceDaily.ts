@@ -17,9 +17,12 @@ import {
   OnDeleteAttendanceSubscription,
   OnUpdateAttendanceSubscription,
 } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+const logger = createLogger("AttendanceDaily");
 
 dayjs.extend(isBetween);
 
@@ -376,7 +379,7 @@ export default function useAttendanceDaily({
           loadAttendanceDataByMonth(currentMonth),
         ]);
       } catch (e) {
-        console.error("Failed to load initial attendance data", e);
+        logger.error("Failed to load initial attendance data", e);
       }
     })();
   }, [staffs, staffLoading, staffError, loadAttendanceDataByMonth]);

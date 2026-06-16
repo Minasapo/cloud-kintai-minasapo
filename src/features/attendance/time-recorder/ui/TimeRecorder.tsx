@@ -1,19 +1,7 @@
 import { AuthContext } from "@app/providers/auth/AuthContext";
 import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
 import { getWorkStatus } from "@entities/attendance/lib/actions/workStatus";
-import { resolveCurrentBusinessWorkDate } from "@entities/attendance/lib/businessDate";
-import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
-import { graphqlClient } from "@shared/api/amplify/graphqlClient";
-import { onUpdateAttendance } from "@shared/api/graphql/documents/subscriptions";
-import {
-  Attendance,
-  CompanyHolidayCalendar,
-  HolidayCalendar,
-  OnUpdateAttendanceSubscription,
-  Staff,
-} from "@shared/api/graphql/types";
 import { Logger } from "@shared/lib/logger";
-import { pushNotification } from "@shared/lib/store/notificationSlice";
 import dayjs from "dayjs";
 import {
   useCallback,
@@ -25,8 +13,6 @@ import {
 } from "react";
 import { useDispatch } from "react-redux";
 
-import * as MESSAGE_CODE from "@/errors";
-
 import { WorkStatus } from "../lib/common";
 import {
   type TimeRecorderContextValue,
@@ -36,131 +22,32 @@ import {
   formatClockDisplayText,
   hasPendingChangeRequests,
   resolveElapsedWorkInfo,
-  summarizeAttendanceErrors,
   type TimeRecorderElapsedWorkInfo,
 } from "./timeRecorderUtils";
 import { TimeRecorderLoadingView, TimeRecorderView } from "./TimeRecorderView";
 import { useAttendanceActions } from "./useAttendanceActions";
+import { useAttendanceErrorStats } from "./useAttendanceErrorStats";
+import { useStaffRefresh } from "./useStaffRefresh";
+import { useTimeRecorderErrors } from "./useTimeRecorderErrors";
 import { useTimeRecorderQueries } from "./useTimeRecorderQueries";
-
-function useWorkDateInterval(): string {
-  const [currentWorkDate, setCurrentWorkDate] = useState(() =>
-    resolveCurrentBusinessWorkDate(),
-  );
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      const nextWorkDate = resolveCurrentBusinessWorkDate();
-      setCurrentWorkDate((prev) =>
-        prev === nextWorkDate ? prev : nextWorkDate,
-      );
-    }, 30 * 1000);
-    return () => { window.clearInterval(intervalId); };
-  }, []);
-  return currentWorkDate;
-}
-
-type UseStaffRefreshParams = { cognitoId: string | undefined; dispatch: ReturnType<typeof useDispatch> };
-function useStaffRefresh({ cognitoId, dispatch }: UseStaffRefreshParams) {
-  const [staff, setStaff] = useState<Staff | null | undefined>(undefined);
-  const refreshStaff = useCallback(async () => {
-    if (!cognitoId) return;
-    try {
-      const latestStaff = await fetchStaff(cognitoId);
-      setStaff(latestStaff);
-    } catch {
-      dispatch(pushNotification({ tone: "error", message: MESSAGE_CODE.E00001 }));
-    }
-  }, [cognitoId, dispatch]);
-  return { staff, refreshStaff };
-}
-
-type UseAttendanceErrorStatsParams = {
-  staff: Staff | null | undefined;
-  attendances: Attendance[];
-  holidayCalendars: HolidayCalendar[];
-  companyHolidayCalendars: CompanyHolidayCalendar[];
-  attendanceLoading: boolean;
-  attendancesLoading: boolean;
-  calendarLoading: boolean;
-  attendanceErrorToday: dayjs.Dayjs;
-};
-function useAttendanceErrorStats({ staff, attendances, holidayCalendars, companyHolidayCalendars, attendanceLoading, attendancesLoading, calendarLoading, attendanceErrorToday }: UseAttendanceErrorStatsParams) {
-  const { errorCount, hasTimeElapsedError } = useMemo(() => {
-    if (!staff || attendanceLoading || attendancesLoading || calendarLoading) {
-      return { errorCount: 0, hasTimeElapsedError: false };
-    }
-    return summarizeAttendanceErrors({ staff, attendances, holidayCalendars, companyHolidayCalendars, today: attendanceErrorToday });
-  }, [staff, attendances, holidayCalendars, companyHolidayCalendars, attendanceLoading, attendancesLoading, calendarLoading, attendanceErrorToday]);
-  return { attendanceErrorCount: errorCount, isAttendanceError: errorCount > 0, isTimeElapsedError: hasTimeElapsedError };
-}
-
-type UseTimeRecorderErrorsParams = {
-  attendanceError: unknown;
-  attendancesError: unknown;
-  calendarsError: unknown;
-  shouldFetchAttendance: boolean;
-  dispatch: ReturnType<typeof useDispatch>;
-  logger: Logger;
-};
-function useTimeRecorderErrors({ attendanceError, attendancesError, calendarsError, shouldFetchAttendance, dispatch, logger }: UseTimeRecorderErrorsParams) {
-  useEffect(() => {
-    if (!calendarsError) return;
-    logger.debug(calendarsError);
-    dispatch(pushNotification({ tone: "error", message: MESSAGE_CODE.E00001 }));
-  }, [calendarsError, dispatch, logger]);
-  useEffect(() => {
-    if (!shouldFetchAttendance || !attendanceError) return;
-    dispatch(pushNotification({ tone: "error", message: MESSAGE_CODE.E01001 }));
-  }, [attendanceError, dispatch, shouldFetchAttendance]);
-  useEffect(() => {
-    if (!shouldFetchAttendance || !attendancesError) return;
-    dispatch(pushNotification({ tone: "error", message: MESSAGE_CODE.E02001 }));
-  }, [attendancesError, dispatch, shouldFetchAttendance]);
-}
-
-type UseTimeRecorderSubscriptionParams = {
-  cognitoId: string | undefined;
-  currentWorkDate: string;
-  localAttendanceUpdateIgnoreUntilRef: React.MutableRefObject<number>;
-  refreshTimeRecorderData: () => Promise<void>;
-  logger: Logger;
-};
-function useTimeRecorderSubscription({ cognitoId, currentWorkDate, localAttendanceUpdateIgnoreUntilRef, refreshTimeRecorderData, logger }: UseTimeRecorderSubscriptionParams) {
-  useEffect(() => {
-    if (!cognitoId) return;
-    const subscription = graphqlClient.graphql({
-      query: onUpdateAttendance,
-      variables: { filter: { staffId: { eq: cognitoId }, workDate: { eq: currentWorkDate } } },
-      authMode: "userPool",
-    }).subscribe({
-      next: (event) => {
-        const updatedAttendance = (event.data as OnUpdateAttendanceSubscription)?.onUpdateAttendance;
-        if (!updatedAttendance) return;
-        if (Date.now() < localAttendanceUpdateIgnoreUntilRef.current) return;
-        void refreshTimeRecorderData();
-      },
-      error: (error: unknown) => { logger.error("Subscription error:", error); },
-    });
-    return () => { subscription.unsubscribe(); };
-  }, [cognitoId, currentWorkDate, logger, refreshTimeRecorderData]);
-}
+import { useTimeRecorderSubscription } from "./useTimeRecorderSubscription";
+import { useWorkDateInterval } from "./useWorkDateInterval";
 
 type TimeRecorderProps = {
   onAttendanceErrorCountChange?: (attendanceErrorCount: number) => void;
   onElapsedWorkTimeChange?: (payload: TimeRecorderElapsedWorkInfo) => void;
 };
 export type { TimeRecorderElapsedWorkInfo } from "./timeRecorderUtils";
-export default function TimeRecorder({
+
+function useTimeRecorderState({
   onAttendanceErrorCountChange,
   onElapsedWorkTimeChange,
-}: TimeRecorderProps): JSX.Element {
+}: TimeRecorderProps) {
   const VISIBILITY_REFRESH_THRESHOLD_MINUTES = 5;
   const { cognitoUser } = useContext(AuthContext);
   const dispatch = useDispatch();
-  const {
-    getLunchRestStartTime,
-    getLunchRestEndTime,
-  } = useContext(AppConfigContext);
+  const { getLunchRestStartTime, getLunchRestEndTime } =
+    useContext(AppConfigContext);
   const currentWorkDate = useWorkDateInterval();
   const {
     shouldFetchAttendance,
@@ -179,7 +66,7 @@ export default function TimeRecorder({
     calendarsError,
     attendanceErrorToday,
   } = useTimeRecorderQueries({ cognitoId: cognitoUser?.id, currentWorkDate });
-  const [workStatus, setWorkStatus] = useState<WorkStatus | null | undefined>(
+  const [workStatus, setWorkStatus] = useState<WorkStatus | undefined>(
     undefined,
   );
   const [directMode, setDirectMode] = useState(false);
@@ -197,8 +84,14 @@ export default function TimeRecorder({
     () => hasPendingChangeRequests(attendance),
     [attendance],
   );
-  const logger = new Logger("TimeRecorder", "DEBUG");
-  const { staff, refreshStaff } = useStaffRefresh({ cognitoId: cognitoUser?.id, dispatch });
+  const logger = useMemo(
+    () => new Logger("TimeRecorder", import.meta.env.DEV ? "DEBUG" : "ERROR"),
+    [],
+  );
+  const { staff, refreshStaff } = useStaffRefresh({
+    cognitoId: cognitoUser?.id,
+    dispatch,
+  });
   const {
     localAttendanceUpdateIgnoreUntilRef,
     refreshAttendanceData,
@@ -220,10 +113,25 @@ export default function TimeRecorder({
   const refreshTimeRecorderData = useCallback(async () => {
     await Promise.allSettled([refreshStaff(), refreshAttendanceData()]);
   }, [refreshAttendanceData, refreshStaff]);
-  useTimeRecorderErrors({ attendanceError, attendancesError, calendarsError, shouldFetchAttendance, dispatch, logger });
-  const { attendanceErrorCount, isAttendanceError, isTimeElapsedError } = useAttendanceErrorStats({
-    staff, attendances, holidayCalendars, companyHolidayCalendars, attendanceLoading, attendancesLoading, calendarLoading, attendanceErrorToday,
+  useTimeRecorderErrors({
+    attendanceError,
+    attendancesError,
+    calendarsError,
+    shouldFetchAttendance,
+    dispatch,
+    logger,
   });
+  const { attendanceErrorCount, isAttendanceError, isTimeElapsedError } =
+    useAttendanceErrorStats({
+      staff,
+      attendances,
+      holidayCalendars,
+      companyHolidayCalendars,
+      attendanceLoading,
+      attendancesLoading,
+      calendarLoading,
+      attendanceErrorToday,
+    });
   const clockInDisplayText = useMemo(
     () => formatClockDisplayText(attendance?.startTime, "出勤"),
     [attendance?.startTime],
@@ -279,9 +187,15 @@ export default function TimeRecorder({
   useEffect(() => {
     onElapsedWorkTimeChange?.(elapsedWorkInfo);
   }, [elapsedWorkInfo, onElapsedWorkTimeChange]);
-  useTimeRecorderSubscription({ cognitoId: cognitoUser?.id, currentWorkDate, localAttendanceUpdateIgnoreUntilRef, refreshTimeRecorderData, logger });
+  useTimeRecorderSubscription({
+    cognitoId: cognitoUser?.id,
+    currentWorkDate,
+    localAttendanceUpdateIgnoreUntilRef,
+    refreshTimeRecorderData,
+    logger,
+  });
   const contextValue = useMemo<TimeRecorderContextValue | null>(() => {
-    if (workStatus === undefined || workStatus === null) {
+    if (workStatus === undefined) {
       return null;
     }
     return {
@@ -319,20 +233,30 @@ export default function TimeRecorder({
     handleRestEnd,
     isTimeElapsedError,
   ]);
-  if (attendanceLoading || calendarLoading || workStatus === undefined) {
+  const isLoading =
+    attendanceLoading || calendarLoading || workStatus === undefined;
+
+  return {
+    isLoading,
+    contextValue,
+  };
+}
+
+export default function TimeRecorder({
+  onAttendanceErrorCountChange,
+  onElapsedWorkTimeChange,
+}: TimeRecorderProps): JSX.Element {
+  const { isLoading, contextValue } = useTimeRecorderState({
+    onAttendanceErrorCountChange,
+    onElapsedWorkTimeChange,
+  });
+
+  if (isLoading || !contextValue) {
     return <TimeRecorderLoadingView />;
   }
-  if (workStatus === null) {
-    dispatch(
-      pushNotification({
-        tone: "error",
-        message: MESSAGE_CODE.E00001,
-      }),
-    );
-    return <></>;
-  }
+
   return (
-    <TimeRecorderProvider value={contextValue!}>
+    <TimeRecorderProvider value={contextValue}>
       <TimeRecorderView />
     </TimeRecorderProvider>
   );

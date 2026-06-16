@@ -5,6 +5,7 @@ import type {
   WorkflowComment,
   WorkflowCommentInput,
 } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { WorkflowCommentMessage } from "../types";
@@ -13,6 +14,8 @@ import {
   commentsToWorkflowMessages,
   formatWorkflowCommentSender,
 } from "./workflowCommentUtils";
+
+const logger = createLogger("WorkflowCommentThread");
 
 type UseWorkflowCommentThreadParams = {
   workflow: NonNullable<GetWorkflowQuery["getWorkflow"]> | null;
@@ -122,7 +125,7 @@ const useWorkflowCommentThread = ({
         setMessages(mapCommentsToMessages(updated.comments || []));
         notifySuccess("コメントを送信しました");
       } catch (error) {
-        console.error(error);
+        logger.error("Failed to submit workflow comment", error);
         const message = error instanceof Error ? error.message : String(error);
         notifyError(message);
         setMessages((prev) =>

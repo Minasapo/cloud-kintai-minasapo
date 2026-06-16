@@ -13,6 +13,7 @@
   top: 0;
   right: 0;
   left: 0;
+  pointer-events: none;
   height: 16rem;
   background: radial-gradient(
     circle at top,
@@ -26,6 +27,7 @@
   right: 0;
   bottom: 0;
   left: 0;
+  pointer-events: none;
   height: 14rem;
   background: radial-gradient(
     circle at bottom,
@@ -36,6 +38,7 @@
 
 .register-content__inner {
   position: relative;
+  z-index: 1;
   margin: 0 auto;
   width: 100%;
   max-width: 98rem;

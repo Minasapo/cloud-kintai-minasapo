@@ -87,6 +87,8 @@
     "docs:serve": "npm --prefix docs-site run serve",
     "docs:search-preview": "npm run docs:build && npm run docs:serve",
     "lint": "eslint ./src/ --ext .ts,.tsx",
+    "format": "npm run lint -- --fix",
+    "format:check": "npm run lint",
     "eslint": "npx eslint ./src/",
     "typecheck": "tsc --noEmit",
     "validate:reduction": "npm run lint && npm run typecheck",

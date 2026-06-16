@@ -1,20 +1,21 @@
-import React from "react";
-
-import NotFound from "@/pages/NotFound";
-
 import { adminChildRoutes } from "../adminChildRoutes";
 
 describe("adminChildRoutes", () => {
   it("treats /admin/master/shift as not found", () => {
-    const masterRoute = adminChildRoutes.find((route) => route.path === "master");
+    const masterRoute = adminChildRoutes.find(
+      (route) => route.path === "master",
+    );
     const shiftRoute = masterRoute?.children?.find(
       (route) => route.path === "shift",
     );
+    const wildcardRoute = masterRoute?.children?.find(
+      (route) => route.path === "*",
+    );
 
     expect(shiftRoute).toBeDefined();
-    expect(shiftRoute?.element).toBeDefined();
-    expect(React.isValidElement(shiftRoute?.element)).toBe(true);
-    expect((shiftRoute?.element as React.ReactElement).type).toBe(NotFound);
+    expect(shiftRoute?.lazy).toBeDefined();
+    // Same lazy loader as the catch-all wildcard, i.e. routes to NotFound
+    expect(shiftRoute?.lazy).toBe(wildcardRoute?.lazy);
   });
 
   it("registers /admin/workflow with index and :id children", () => {

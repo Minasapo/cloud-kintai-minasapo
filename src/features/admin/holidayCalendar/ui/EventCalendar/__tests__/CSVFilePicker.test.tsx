@@ -13,6 +13,7 @@
  * - isSubmitting 中のボタン disabled
  * - キャンセルボタンでダイアログが閉じる
  */
+import { cancelInDialog, confirmInDialog } from "@shared/test-utils";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -66,13 +67,17 @@ async function openDialog() {
   return openFileBulkAddDialog();
 }
 
-// ── Tests ──────────────────────────────────────────────────────────────────
+const confirmRegister = (user: ReturnType<typeof userEvent.setup>) =>
+  confirmInDialog(user, "登録");
 
+const cancelRegister = (user: ReturnType<typeof userEvent.setup>) =>
+  cancelInDialog(user);
+
+// ── Tests ──────────────────────────────────────────────────────────────────
 
 describe("CSVFilePicker - 初期表示・ダイアログ・キャンセル", () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(window, "confirm").mockReturnValue(true);
     defaultBulkCreateMock.mockResolvedValue([]);
   });
 
@@ -142,11 +147,10 @@ describe("CSVFilePicker - 初期表示・ダイアログ・キャンセル", () 
     expect(screen.getByRole("button", { name: "登録" })).toBeDisabled();
   });
 
-  // ── window.confirm キャンセル ─────────────────────────────────────────────
+  // ── 確認ダイアログ・キャンセル ──────────────────────────────────────────
 
-  it("window.confirm でキャンセルを選択すると bulkCreateEventCalendar が呼ばれない", async () => {
+  it("確認ダイアログでキャンセルを選択すると bulkCreateEventCalendar が呼ばれない", async () => {
     const user = userEvent.setup();
-    jest.spyOn(window, "confirm").mockReturnValue(false);
     const bulkMock = jest.fn().mockResolvedValue([]);
     renderComponent(bulkMock);
     await openDialog();
@@ -160,15 +164,14 @@ describe("CSVFilePicker - 初期表示・ダイアログ・キャンセル", () 
     });
 
     await user.click(screen.getByRole("button", { name: "登録" }));
+    await cancelRegister(user);
     expect(bulkMock).not.toHaveBeenCalled();
   });
-
 });
 
 describe("CSVFilePicker - 登録フロー", () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(window, "confirm").mockReturnValue(true);
     defaultBulkCreateMock.mockResolvedValue([]);
   });
 
@@ -176,9 +179,9 @@ describe("CSVFilePicker - 登録フロー", () => {
     jest.restoreAllMocks();
   });
 
-  // ── 登録フロー (confirm OK) ────────────────────────────────────────────────
+  // ── 登録フロー (確認ダイアログ OK) ────────────────────────────────────────
 
-  it("ファイル選択後に登録ボタンをクリックすると window.confirm が呼ばれる", async () => {
+  it("ファイル選択後に登録ボタンをクリックすると確認ダイアログが表示される", async () => {
     const user = userEvent.setup();
     renderComponent();
     await openDialog();
@@ -192,7 +195,7 @@ describe("CSVFilePicker - 登録フロー", () => {
     });
 
     await user.click(screen.getByRole("button", { name: "登録" }));
-    expect(window.confirm).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText("一括登録の確認")).toBeInTheDocument();
   });
 
   it("登録成功時に success 通知が dispatch される", async () => {
@@ -210,6 +213,7 @@ describe("CSVFilePicker - 登録フロー", () => {
     });
 
     await user.click(screen.getByRole("button", { name: "登録" }));
+    await confirmRegister(user);
 
     await waitFor(() => {
       expect(pushNotificationMock).toHaveBeenCalledWith(
@@ -233,6 +237,7 @@ describe("CSVFilePicker - 登録フロー", () => {
     });
 
     await user.click(screen.getByRole("button", { name: "登録" }));
+    await confirmRegister(user);
 
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -254,6 +259,7 @@ describe("CSVFilePicker - 登録フロー", () => {
     });
 
     await user.click(screen.getByRole("button", { name: "登録" }));
+    await confirmRegister(user);
 
     await waitFor(() => {
       expect(pushNotificationMock).toHaveBeenCalledWith(
@@ -277,6 +283,7 @@ describe("CSVFilePicker - 登録フロー", () => {
     });
 
     await user.click(screen.getByRole("button", { name: "登録" }));
+    await confirmRegister(user);
 
     await waitFor(() => {
       expect(screen.getByText(/登録に失敗しました/)).toBeInTheDocument();
@@ -298,6 +305,7 @@ describe("CSVFilePicker - 登録フロー", () => {
     });
 
     await user.click(screen.getByRole("button", { name: "登録" }));
+    await confirmRegister(user);
 
     await waitFor(() => {
       expect(pushNotificationMock).toHaveBeenCalledWith(
@@ -306,13 +314,11 @@ describe("CSVFilePicker - 登録フロー", () => {
     });
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
-
 });
 
 describe("CSVFilePicker - parseSummaryとリセット", () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(window, "confirm").mockReturnValue(true);
     defaultBulkCreateMock.mockResolvedValue([]);
   });
 

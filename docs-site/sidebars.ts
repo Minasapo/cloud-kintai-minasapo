@@ -64,6 +64,7 @@ const mainSidebar: SidebarEntry[] = [
         "developer/amplify/setup-and-access",
         "developer/amplify/change-workflow",
         "developer/amplify/schema-change-procedure",
+        "developer/amplify/cognito-user-sync-observability",
       ]),
       createCategory("デザインシステム", [
         "developer/design-system/overview",

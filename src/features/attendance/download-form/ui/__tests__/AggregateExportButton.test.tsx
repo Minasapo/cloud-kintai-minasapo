@@ -84,7 +84,8 @@ function renderButton(props: {
     {
       hourlyPaidHolidayEnabled:
         contextOverrides.getHourlyPaidHolidayEnabled?.() ?? false,
-      specialHolidayEnabled: contextOverrides.getSpecialHolidayEnabled?.() ?? false,
+      specialHolidayEnabled:
+        contextOverrides.getSpecialHolidayEnabled?.() ?? false,
     },
   );
 }
@@ -109,22 +110,30 @@ afterEach(() => {
 describe("レンダリング", () => {
   it("「集計ダウンロード」ボタンを表示する", () => {
     renderButton({});
-    expect(screen.getByRole("button", { name: /集計ダウンロード/ })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /集計ダウンロード/ }),
+    ).toBeInTheDocument();
   });
 
   it("workDates が空のとき disabled になる", () => {
     renderButton({ workDates: [] });
-    expect(screen.getByRole("button", { name: /集計ダウンロード/ })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: /集計ダウンロード/ }),
+    ).toBeDisabled();
   });
 
   it("selectedStaff が空のとき disabled になる", () => {
     renderButton({ selectedStaff: [] });
-    expect(screen.getByRole("button", { name: /集計ダウンロード/ })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: /集計ダウンロード/ }),
+    ).toBeDisabled();
   });
 
   it("workDates も selectedStaff も空のとき disabled になる", () => {
     renderButton({ workDates: [], selectedStaff: [] });
-    expect(screen.getByRole("button", { name: /集計ダウンロード/ })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: /集計ダウンロード/ }),
+    ).toBeDisabled();
   });
 
   it("workDates と selectedStaff が両方あるとき enabled になる", () => {
@@ -132,13 +141,15 @@ describe("レンダリング", () => {
       workDates: ["2024-01-15"],
       selectedStaff: [createDownloadTestStaff()],
     });
-    expect(screen.getByRole("button", { name: /集計ダウンロード/ })).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: /集計ダウンロード/ }),
+    ).toBeEnabled();
   });
 });
 
 describe("クリック時の動作", () => {
   it("disabled のとき（workDates 空）は downloadAttendances を呼ばない", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
     renderButton({ workDates: [] });
     await user.click(screen.getByRole("button", { name: /集計ダウンロード/ }));
     expect(mockDownloadAttendances).not.toHaveBeenCalled();
@@ -179,7 +190,9 @@ describe("クリック時の動作", () => {
     renderButton({});
     await user.click(screen.getByRole("button", { name: /集計ダウンロード/ }));
     await waitFor(() => {
-      expect(window.URL.revokeObjectURL as jest.Mock).toHaveBeenCalledWith("blob:mock-url");
+      expect(window.URL.revokeObjectURL as jest.Mock).toHaveBeenCalledWith(
+        "blob:mock-url",
+      );
     });
   });
 
@@ -200,10 +213,14 @@ describe("CSV ヘッダー", () => {
 
   beforeEach(() => {
     capturedCSVContent = "";
-    global.Blob = jest.fn().mockImplementation((parts: BlobPart[], options?: BlobPropertyBag) => {
-      capturedCSVContent = parts.filter((p): p is string => typeof p === "string").join("");
-      return { type: options?.type ?? "" } as Blob;
-    }) as unknown as typeof Blob;
+    global.Blob = jest
+      .fn()
+      .mockImplementation((parts: BlobPart[], options?: BlobPropertyBag) => {
+        capturedCSVContent = parts
+          .filter((p): p is string => typeof p === "string")
+          .join("");
+        return { type: options?.type ?? "" } as Blob;
+      }) as unknown as typeof Blob;
   });
 
   afterEach(() => {
@@ -223,7 +240,9 @@ describe("CSV ヘッダー", () => {
 
   it("hourlyPaidHolidayEnabled が false のとき 時間単位休暇合計(h) ヘッダーが含まれない", async () => {
     const user = userEvent.setup();
-    renderButton({ contextOverrides: { getHourlyPaidHolidayEnabled: () => false } });
+    renderButton({
+      contextOverrides: { getHourlyPaidHolidayEnabled: () => false },
+    });
     await user.click(screen.getByRole("button", { name: /集計ダウンロード/ }));
     await waitFor(() => expect(capturedCSVContent).not.toBe(""));
     expect(capturedCSVContent).not.toContain("時間単位休暇合計(h)");
@@ -231,7 +250,9 @@ describe("CSV ヘッダー", () => {
 
   it("hourlyPaidHolidayEnabled が true のとき 時間単位休暇合計(h) ヘッダーが含まれる", async () => {
     const user = userEvent.setup();
-    renderButton({ contextOverrides: { getHourlyPaidHolidayEnabled: () => true } });
+    renderButton({
+      contextOverrides: { getHourlyPaidHolidayEnabled: () => true },
+    });
     await user.click(screen.getByRole("button", { name: /集計ダウンロード/ }));
     await waitFor(() => expect(capturedCSVContent).not.toBe(""));
     expect(capturedCSVContent).toContain("時間単位休暇合計(h)");
@@ -239,7 +260,9 @@ describe("CSV ヘッダー", () => {
 
   it("specialHolidayEnabled が false のとき 特別休暇 ヘッダーが含まれない", async () => {
     const user = userEvent.setup();
-    renderButton({ contextOverrides: { getSpecialHolidayEnabled: () => false } });
+    renderButton({
+      contextOverrides: { getSpecialHolidayEnabled: () => false },
+    });
     await user.click(screen.getByRole("button", { name: /集計ダウンロード/ }));
     await waitFor(() => expect(capturedCSVContent).not.toBe(""));
     expect(capturedCSVContent).not.toContain("特別休暇");
@@ -247,7 +270,9 @@ describe("CSV ヘッダー", () => {
 
   it("specialHolidayEnabled が true のとき 特別休暇 ヘッダーが含まれる", async () => {
     const user = userEvent.setup();
-    renderButton({ contextOverrides: { getSpecialHolidayEnabled: () => true } });
+    renderButton({
+      contextOverrides: { getSpecialHolidayEnabled: () => true },
+    });
     await user.click(screen.getByRole("button", { name: /集計ダウンロード/ }));
     await waitFor(() => expect(capturedCSVContent).not.toBe(""));
     expect(capturedCSVContent).toContain("特別休暇");
@@ -260,10 +285,14 @@ describe("CSV データ行", () => {
 
   beforeEach(() => {
     capturedCSVContent = "";
-    global.Blob = jest.fn().mockImplementation((parts: BlobPart[], options?: BlobPropertyBag) => {
-      capturedCSVContent = parts.filter((p): p is string => typeof p === "string").join("");
-      return { type: options?.type ?? "" } as Blob;
-    }) as unknown as typeof Blob;
+    global.Blob = jest
+      .fn()
+      .mockImplementation((parts: BlobPart[], options?: BlobPropertyBag) => {
+        capturedCSVContent = parts
+          .filter((p): p is string => typeof p === "string")
+          .join("");
+        return { type: options?.type ?? "" } as Blob;
+      }) as unknown as typeof Blob;
   });
 
   afterEach(() => {
@@ -331,18 +360,27 @@ describe("CSV データ行", () => {
       sortKey: "aoki",
     });
     mockDownloadAttendances.mockResolvedValue([]);
-    renderButton({ workDates: ["2024-01-15"], selectedStaff: [staffA, staffB] });
+    renderButton({
+      workDates: ["2024-01-15"],
+      selectedStaff: [staffA, staffB],
+    });
     await user.click(screen.getByRole("button", { name: /集計ダウンロード/ }));
     await waitFor(() => expect(capturedCSVContent).not.toBe(""));
     // "aoki" sorts before "suzuki", so 青木 should appear before 鈴木
-    expect(capturedCSVContent.indexOf("青木 二郎")).toBeLessThan(capturedCSVContent.indexOf("鈴木 一郎"));
+    expect(capturedCSVContent.indexOf("青木 二郎")).toBeLessThan(
+      capturedCSVContent.indexOf("鈴木 一郎"),
+    );
   });
 
   it("有給休暇フラグが立った勤怠は paidHolidayCount に加算される", async () => {
     const user = userEvent.setup();
     const staff = createDownloadTestStaff();
     mockDownloadAttendances.mockResolvedValue([
-      makeAttendance({ staffId: "staff-1", workDate: "2024-01-15", paidHolidayFlag: true }),
+      makeAttendance({
+        staffId: "staff-1",
+        workDate: "2024-01-15",
+        paidHolidayFlag: true,
+      }),
     ]);
     renderButton({ workDates: ["2024-01-15"], selectedStaff: [staff] });
     await user.click(screen.getByRole("button", { name: /集計ダウンロード/ }));
@@ -358,10 +396,22 @@ describe("CSV データ行", () => {
     const user = userEvent.setup();
     const staff = createDownloadTestStaff();
     mockDownloadAttendances.mockResolvedValue([
-      makeAttendance({ staffId: "staff-1", workDate: "2024-01-15", remarks: "メモA" }),
-      makeAttendance({ id: "att-2", staffId: "staff-1", workDate: "2024-01-16", remarks: "メモB" }),
+      makeAttendance({
+        staffId: "staff-1",
+        workDate: "2024-01-15",
+        remarks: "メモA",
+      }),
+      makeAttendance({
+        id: "att-2",
+        staffId: "staff-1",
+        workDate: "2024-01-16",
+        remarks: "メモB",
+      }),
     ]);
-    renderButton({ workDates: ["2024-01-15", "2024-01-16"], selectedStaff: [staff] });
+    renderButton({
+      workDates: ["2024-01-15", "2024-01-16"],
+      selectedStaff: [staff],
+    });
     await user.click(screen.getByRole("button", { name: /集計ダウンロード/ }));
     await waitFor(() => expect(capturedCSVContent).not.toBe(""));
     expect(capturedCSVContent).toContain("メモA メモB");
@@ -374,7 +424,9 @@ describe("CSV ファイル", () => {
     renderButton({});
     await user.click(screen.getByRole("button", { name: /集計ダウンロード/ }));
     await waitFor(() => {
-      expect(anchorMocks.capturedAnchorDownload).toMatch(/^attendance_aggregate_\d+\.csv$/);
+      expect(anchorMocks.capturedAnchorDownload).toMatch(
+        /^attendance_aggregate_\d+\.csv$/,
+      );
     });
   });
 
@@ -382,10 +434,12 @@ describe("CSV ファイル", () => {
     const user = userEvent.setup();
     const _origBlob2 = global.Blob;
     let capturedType = "";
-    global.Blob = jest.fn().mockImplementation((_parts: BlobPart[], options?: BlobPropertyBag) => {
-      capturedType = options?.type ?? "";
-      return { type: options?.type ?? "" } as Blob;
-    }) as unknown as typeof Blob;
+    global.Blob = jest
+      .fn()
+      .mockImplementation((_parts: BlobPart[], options?: BlobPropertyBag) => {
+        capturedType = options?.type ?? "";
+        return { type: options?.type ?? "" } as Blob;
+      }) as unknown as typeof Blob;
 
     renderButton({});
     await user.click(screen.getByRole("button", { name: /集計ダウンロード/ }));

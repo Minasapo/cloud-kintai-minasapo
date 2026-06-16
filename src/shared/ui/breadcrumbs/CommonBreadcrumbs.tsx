@@ -19,15 +19,15 @@ export default function CommonBreadcrumbs({
   const BREADCRUMB_GAP = designTokenVar("component.breadcrumbs.gap", "8px");
   const BREADCRUMB_SEPARATOR_COLOR = designTokenVar(
     "component.breadcrumbs.separatorColor",
-    "#A0B1A7",
+    "rgb(160 177 167)",
   );
   const BREADCRUMB_LINK_COLOR = designTokenVar(
     "component.breadcrumbs.linkColor",
-    "#0FA85E",
+    "rgb(15 168 94)",
   );
   const BREADCRUMB_TEXT_COLOR = designTokenVar(
     "component.breadcrumbs.textColor",
-    "#45574F",
+    "rgb(69 87 79)",
   );
   const BREADCRUMB_FONT_SIZE = designTokenVar(
     "component.breadcrumbs.fontSize",
@@ -54,7 +54,10 @@ export default function CommonBreadcrumbs({
     >
       <ol className="flex flex-wrap items-center gap-[var(--breadcrumbs-gap)]">
         {items.map((item, idx) => (
-          <li key={`${item.label}-${idx}`} className="flex items-center gap-[var(--breadcrumbs-gap)]">
+          <li
+            key={`${item.label}-${idx}`}
+            className="flex items-center gap-[var(--breadcrumbs-gap)]"
+          >
             {item.href ? (
               <Link
                 href={item.href}

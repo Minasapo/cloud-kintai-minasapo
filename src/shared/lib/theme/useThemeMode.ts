@@ -3,8 +3,17 @@
  * @description テーマモードを管理するカスタムフック
  */
 
-import { useThemeContext } from "@app/providers/theme/ThemeContext";
-import { useEffect, useState } from "react";
+import {
+  type ThemeMode,
+  useThemeContext,
+} from "@app/providers/theme/ThemeContext";
+import { useEffect } from "react";
+
+const THEME_MODE_STORAGE_KEY = "app-theme-mode";
+
+function isThemeMode(value: string): value is ThemeMode {
+  return value === "light" || value === "auto";
+}
 
 /**
  * テーマモード（light/auto）を管理するフック
@@ -17,24 +26,27 @@ import { useEffect, useState } from "react";
  */
 export function useThemeMode() {
   const { mode, setMode } = useThemeContext();
-  const [isHydrated, setIsHydrated] = useState(false);
 
   // LocalStorage からの復元（SSR 対応）
   useEffect(() => {
     try {
-      const savedMode = localStorage.getItem("app-theme-mode") as
-        | "light"
-        | "auto"
-        | null;
-      if (savedMode && savedMode !== mode) {
+      const savedMode = localStorage.getItem(THEME_MODE_STORAGE_KEY);
+      if (!savedMode) {
+        return;
+      }
+
+      if (!isThemeMode(savedMode)) {
+        localStorage.removeItem(THEME_MODE_STORAGE_KEY);
+        return;
+      }
+
+      if (savedMode !== mode) {
         setMode(savedMode);
       }
     } catch {
       // LocalStorage が利用不可の場合
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsHydrated(true);
   }, [mode, setMode]);
 
-  return { mode, setMode, isHydrated };
+  return { mode, setMode, isHydrated: true };
 }

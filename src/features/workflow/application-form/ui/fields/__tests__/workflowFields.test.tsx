@@ -1,4 +1,4 @@
-import { fireEvent,render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 
 import { DateField } from "../DateField";
 import { DateRangeField } from "../DateRangeField";
@@ -403,7 +403,6 @@ describe("TemplateSelectField", () => {
 
   it("テンプレート選択後に適用すると onSetField が呼ばれる", () => {
     const onSetField = jest.fn();
-    window.confirm = jest.fn(() => true);
     render(
       <TemplateSelectField
         config={tsConfig}
@@ -415,13 +414,15 @@ describe("TemplateSelectField", () => {
       />,
     );
     fireEvent.click(screen.getByRole("button", { name: "適用" }));
+    const dialog = screen.getByRole("dialog");
+    const confirmButton = within(dialog).getAllByRole("button").at(-1);
+    fireEvent.click(confirmButton!);
     expect(onSetField).toHaveBeenCalledWith("title", "タイトル1");
     expect(onSetField).toHaveBeenCalledWith("content", "内容1");
   });
 
   it("confirm がキャンセルされると onSetField は呼ばれない", () => {
     const onSetField = jest.fn();
-    window.confirm = jest.fn(() => false);
     render(
       <TemplateSelectField
         config={tsConfig}
@@ -431,6 +432,7 @@ describe("TemplateSelectField", () => {
       />,
     );
     fireEvent.click(screen.getByRole("button", { name: "適用" }));
+    fireEvent.click(screen.getByRole("button", { name: "キャンセル" }));
     expect(onSetField).not.toHaveBeenCalled();
   });
 });

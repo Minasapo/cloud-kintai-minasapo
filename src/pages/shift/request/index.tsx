@@ -1,7 +1,7 @@
 import type { ShiftDisplayMode } from "@entities/app-config/model/useAppConfig";
 import useAppConfig from "@entities/app-config/model/useAppConfig";
+import ShiftCollaborativePage from "@extensions/shift-collaborative/pages/ShiftCollaborative";
 import { ShiftRequestForm } from "@features/shift/request-form";
-import ShiftCollaborativePage from "@pages/shift/collaborative/ShiftCollaborative";
 import ShiftAccessGuard from "@pages/shift/ShiftAccessGuard";
 import { ProgressBar } from "@shared/ui/feedback";
 import { PageSection } from "@shared/ui/layout";

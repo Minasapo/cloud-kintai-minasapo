@@ -38,7 +38,10 @@ const DesktopWorkflowRowComponent = ({
       tabIndex={0}
       role="button"
       aria-label={`${item.category || EMPTY_VALUE} の申請詳細を開く`}
-      className={cx("workflow-desktop-row", isCancelled && "workflow-desktop-row--cancelled")}
+      className={cx(
+        "workflow-desktop-row",
+        isCancelled && "workflow-desktop-row--cancelled",
+      )}
     >
       <th
         scope="row"

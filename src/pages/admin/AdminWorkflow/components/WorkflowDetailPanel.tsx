@@ -27,8 +27,8 @@ import { useWorkflowDetailData } from "../hooks/useWorkflowDetailData";
 import { useWorkflowDetailViewModel } from "../hooks/useWorkflowDetailViewModel";
 import WorkflowCommentSection from "./WorkflowCommentSection";
 
-const PANEL_BACKGROUND = designTokenVar("color.surface.primary", "#FFFFFF");
-const PANEL_BORDER = designTokenVar("color.border.subtle", "#D7E0DB");
+const PANEL_BACKGROUND = designTokenVar("color.surface.primary", "rgb(255 255 255)");
+const PANEL_BORDER = designTokenVar("color.border.subtle", "rgb(215 224 219)");
 const PANEL_RADIUS = designTokenVar("radius.lg", "12px");
 const HERO_BACKGROUND = designTokenVar(
   "component.adminWorkflow.detail.hero.background",
@@ -38,11 +38,11 @@ const HERO_BORDER = designTokenVar(
   "component.adminWorkflow.detail.hero.border",
   "rgba(15, 168, 94, 0.18)",
 );
-const HERO_LABEL = designTokenVar("color.text.muted", "#5E7268");
-const HERO_TITLE = designTokenVar("color.text.primary", "#1E2A25");
-const SECTION_TITLE = designTokenVar("color.text.primary", "#1E2A25");
-const LOADING_TEXT = designTokenVar("color.text.muted", "#5E7268");
-const ERROR_TEXT = designTokenVar("color.feedback.danger.base", "#D7443E");
+const HERO_LABEL = designTokenVar("color.text.muted", "rgb(94 114 104)");
+const HERO_TITLE = designTokenVar("color.text.primary", "rgb(30 42 37)");
+const SECTION_TITLE = designTokenVar("color.text.primary", "rgb(30 42 37)");
+const LOADING_TEXT = designTokenVar("color.text.muted", "rgb(94 114 104)");
+const ERROR_TEXT = designTokenVar("color.feedback.danger.base", "rgb(215 68 62)");
 const logger = createLogger("WorkflowDetailPanel");
 
 type WorkflowDetailHeroProps = {

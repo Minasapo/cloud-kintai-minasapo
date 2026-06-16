@@ -12,11 +12,11 @@ const GROUP_ACCENT_WIDTH = designTokenVar(
 );
 const GROUP_BORDER_COLOR = designTokenVar(
   "component.groupContainer.borderColor",
-  "#D9E2DD",
+  "rgb(217 226 221)",
 );
 const GROUP_ACCENT_COLOR = designTokenVar(
   "component.groupContainer.accentColor",
-  "#0FA85E",
+  "rgb(15 168 94)",
 );
 const GROUP_RADIUS = designTokenVar(
   "component.groupContainer.borderRadius",
@@ -28,7 +28,7 @@ const GROUP_PADDING = designTokenVar(
 );
 const GROUP_BACKGROUND = designTokenVar(
   "component.groupContainer.background",
-  "#FFFFFF",
+  "rgb(255 255 255)",
 );
 const GROUP_CONTENT_GAP = designTokenVar(
   "component.groupContainer.contentGap",
@@ -36,7 +36,7 @@ const GROUP_CONTENT_GAP = designTokenVar(
 );
 const GROUP_COUNT_COLOR = designTokenVar(
   "component.groupContainer.countColor",
-  "#5E726A",
+  "rgb(94 114 106)",
 );
 
 export interface GroupContainerMobileProps {

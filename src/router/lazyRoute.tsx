@@ -1,4 +1,5 @@
-import { ComponentProps, ComponentType, ReactNode } from "react";
+import { FeatureErrorBoundary } from "@shared/ui/feedback";
+import { ComponentType, ReactNode } from "react";
 import type {
   ActionFunction,
   LazyRouteFunction,
@@ -7,13 +8,9 @@ import type {
   ShouldRevalidateFunction,
 } from "react-router-dom";
 
-/**
- * Note: `any` is used here for ComponentType generics as we need maximum flexibility
- * for lazy-loaded components. This is a common pattern in router configurations
- * where component prop types are determined at runtime.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type LazyModule<T extends ComponentType<any>> = { default: T };
+import RouteErrorBoundary from "./RouteErrorBoundary";
+
+type LazyModule<TProps extends object> = { default: ComponentType<TProps> };
 
 type LazyRouteOptions = {
   wrap?: (node: ReactNode) => ReactNode;
@@ -25,21 +22,17 @@ type LazyRouteOptions = {
   hydrateFallback?: ReactNode | ComponentType;
 };
 
-/**
- * Note: `any` is used here for ComponentType generics as we need maximum flexibility
- * for lazy-loaded components. This is a common pattern in router configurations.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function createLazyRoute<T extends ComponentType<any>>(
-  loader: () => Promise<LazyModule<T>>,
+export function createLazyRoute<TProps extends object>(
+  loader: () => Promise<LazyModule<TProps>>,
   options?: LazyRouteOptions
 ): LazyRouteFunction<RouteObject> {
   return async () => {
     const { default: Component } = await loader();
 
-    const Wrapped = (props: ComponentProps<T>) => {
+    const Wrapped = (props: TProps) => {
       const node = <Component {...props} />;
-      return options?.wrap ? <>{options.wrap(node)}</> : node;
+      const wrappedNode = options?.wrap ? <>{options.wrap(node)}</> : node;
+      return <FeatureErrorBoundary>{wrappedNode}</FeatureErrorBoundary>;
     };
 
     const result: Record<string, unknown> = {
@@ -64,6 +57,8 @@ export function createLazyRoute<T extends ComponentType<any>>(
       result.ErrorBoundary = function LazyRouteErrorBoundary() {
         return <>{options.errorElement}</>;
       };
+    } else {
+      result.ErrorBoundary = RouteErrorBoundary;
     }
 
     if (options?.hydrateFallback) {

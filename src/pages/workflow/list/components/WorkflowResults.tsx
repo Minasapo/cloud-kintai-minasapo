@@ -48,11 +48,7 @@ function WorkflowEmptyState({ isCompact }: { isCompact: boolean }) {
   }
 
   return (
-    <div
-      className={cx(
-        "workflow-empty-state",
-      )}
-    >
+    <div className={cx("workflow-empty-state")}>
       <InfoCard>該当するワークフローがありません。</InfoCard>
     </div>
   );
@@ -67,7 +63,9 @@ export default function WorkflowResults() {
 
   if (isCompact) {
     return (
-      <div className={!loading && hasData ? "workflow-mobile-results" : undefined}>
+      <div
+        className={!loading && hasData ? "workflow-mobile-results" : undefined}
+      >
         <DataStateContainer
           isLoading={loading}
           hasData={hasData}
@@ -91,11 +89,18 @@ export default function WorkflowResults() {
 
   return (
     <div className="workflow-desktop-results-shell">
-      <table className="workflow-desktop-results-head" aria-label="ワークフロー一覧">
+      <table
+        className="workflow-desktop-results-head"
+        aria-label="ワークフロー一覧"
+      >
         <thead>
           <tr>
             {WORKFLOW_LIST_COLUMNS.map((column, index) => (
-              <th key={column} id={WORKFLOW_LIST_COLUMN_HEADER_IDS[index]} scope="col">
+              <th
+                key={column}
+                id={WORKFLOW_LIST_COLUMN_HEADER_IDS[index]}
+                scope="col"
+              >
                 {column}
               </th>
             ))}

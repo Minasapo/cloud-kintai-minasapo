@@ -1,7 +1,7 @@
 import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
 import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
 import { AttendanceEditInputs } from "@features/attendance/edit/model/common";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo } from "react";
 import { UseFormRegister, UseFormSetValue } from "react-hook-form";
 
 export default function StaffCommentInput({
@@ -13,14 +13,10 @@ export default function StaffCommentInput({
 }) {
   const { getReasons } = useContext(AppConfigContext);
   const { changeRequests } = useContext(AttendanceEditContext);
-  const [reasons, setReasons] = useState<
-    { reason: string; enabled: boolean }[]
-  >([]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setReasons(getReasons().filter((reason) => reason.enabled));
-  }, [getReasons]);
+  const reasons = useMemo(
+    () => getReasons().filter((reason) => reason.enabled),
+    [getReasons],
+  );
 
   return (
     <div className="flex flex-col gap-3 md:flex-row md:items-start">

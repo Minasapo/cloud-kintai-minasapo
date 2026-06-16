@@ -1,7 +1,10 @@
 import type { StaffExternalLink } from "@entities/staff/externalLink";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
+import { createLogger } from "@shared/lib/logger";
 import type { ExternalLinkItem } from "@shared/ui/header/ExternalLinks";
 import { useEffect, useState } from "react";
+
+const logger = createLogger("usePersonalExternalLinks");
 
 const filterEnabledLinks = (links: ExternalLinkItem[]) =>
   links.filter(
@@ -36,43 +39,42 @@ const normalizeStaffExternalLinks = (
 /**
  * スタッフの個人用外部リンクを取得するカスタムフック
  * @param cognitoUserId CognitoユーザーID
- * @returns スタッフの個人用外部リンク配列
+ * @returns スタッフの個人用外部リンク情報
  */
 export function usePersonalExternalLinks(
   cognitoUserId: string | undefined
-): ExternalLinkItem[] {
+): { personalLinks: ExternalLinkItem[]; hasFetchError: boolean } {
   const [personalLinks, setPersonalLinks] = useState<ExternalLinkItem[]>([]);
+  const [hasFetchError, setHasFetchError] = useState(false);
 
   useEffect(() => {
     if (!cognitoUserId) {
-      // cognitoUserIdがundefinedの場合は空配列を返す
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setPersonalLinks([]);
       return;
     }
 
     let cancelled = false;
 
-    // 新しいフェッチが開始される際に前の結果をクリア
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPersonalLinks([]);
+   fetchStaff(cognitoUserId)
+     .then((staff) => {
+       if (cancelled) return;
+       const links = normalizeStaffExternalLinks(staff?.externalLinks);
+       setPersonalLinks(links);
+       setHasFetchError(false);
+     })
+     .catch((error) => {
+       if (cancelled) return;
 
-    fetchStaff(cognitoUserId)
-      .then((staff) => {
-        if (cancelled) return;
-        const links = normalizeStaffExternalLinks(staff?.externalLinks);
-        setPersonalLinks(links);
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setPersonalLinks([]);
-        }
-      });
+       logger.error("Failed to fetch personal external links", {
+         cognitoUserId,
+         error,
+       });
+       setHasFetchError(true);
+     });
 
-    return () => {
-      cancelled = true;
-    };
+   return () => {
+     cancelled = true;
+   };
   }, [cognitoUserId]);
 
-  return personalLinks;
+  return { personalLinks, hasFetchError };
 }

@@ -1,9 +1,5 @@
 import {
-  FormControl,
-  InputLabel,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   type StackProps,
   Table,
@@ -14,10 +10,10 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  TextField,
   Typography,
 } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
+import { AppSelect, AppTextField } from "@shared/ui/form";
 import { type ChangeEvent, type ReactNode } from "react";
 
 type YearMonthValue = number | "";
@@ -85,47 +81,34 @@ export default function HolidayCalendarListScaffold<T>({
             フィルター
           </Typography>
           <Stack direction="row" spacing={1} alignItems="center">
-            <FormControl size="small" sx={{ minWidth: 110 }}>
-              <InputLabel id={yearLabelId}>年</InputLabel>
-              <Select
-                labelId={yearLabelId}
-                value={selectedYear}
-                label="年"
-                onChange={(event) => {
-                  const year =
-                    event.target.value === "" ? "" : Number(event.target.value);
-                  onYearChange(year);
-                }}
-              >
-                <MenuItem value="">-</MenuItem>
-                {years.map((year) => (
-                  <MenuItem key={year} value={year}>
-                    {year}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl size="small" sx={{ minWidth: 100 }}>
-              <InputLabel id={monthLabelId}>月</InputLabel>
-              <Select
-                labelId={monthLabelId}
-                value={selectedMonth}
-                label="月"
-                onChange={(event) => {
-                  const month =
-                    event.target.value === "" ? "" : Number(event.target.value);
-                  onMonthChange(month);
-                }}
-              >
-                <MenuItem value="">-</MenuItem>
-                {Array.from({ length: 12 }).map((_, index) => (
-                  <MenuItem key={index + 1} value={index + 1}>
-                    {index + 1}月
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
+            <AppSelect<number>
+              label="年"
+              labelId={yearLabelId}
+              value={selectedYear}
+              sx={{ minWidth: 110 }}
+              options={[
+                { value: "", label: "-" },
+                ...years.map((year) => ({ value: year, label: year })),
+              ]}
+              parseValue={(value) => Number(value)}
+              onChange={onYearChange}
+            />
+            <AppSelect<number>
+              label="月"
+              labelId={monthLabelId}
+              value={selectedMonth}
+              sx={{ minWidth: 100 }}
+              options={[
+                { value: "", label: "-" },
+                ...Array.from({ length: 12 }).map((_, index) => ({
+                  value: index + 1,
+                  label: `${index + 1}月`,
+                })),
+              ]}
+              parseValue={(value) => Number(value)}
+              onChange={onMonthChange}
+            />
+            <AppTextField
               label={nameFilterLabel}
               size="small"
               value={nameFilter}

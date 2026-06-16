@@ -14,6 +14,7 @@ import {
   UpdateShiftPlanYearMutation,
   UpdateShiftPlanYearMutationVariables,
 } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
@@ -28,6 +29,8 @@ import {
 
 import { convertRowsToPlanInput, ShiftPlanRow, TIME_FORMAT } from "../shiftPlanUtils";
 import type { ShiftPlanRecordMeta } from "./useShiftPlanData";
+
+const logger = createLogger("ShiftPlanSave");
 
 type UseShiftPlanSaveParams = {
   selectedYear: number;
@@ -163,7 +166,7 @@ export const useShiftPlanSave = ({
           setLastAutoSaveTime(dayjs().format(TIME_FORMAT));
           return true;
         } catch (error) {
-          console.error(error);
+          logger.error("Failed to save shift plan", error);
           if (showNotification) {
             dispatch(
               pushNotification({

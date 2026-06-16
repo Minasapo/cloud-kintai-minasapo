@@ -1,5 +1,6 @@
-import { Box, CircularProgress, Paper, Stack, TextField } from "@mui/material";
+import { Box, CircularProgress, Paper, Stack } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
+import { AppTextField } from "@shared/ui/form";
 
 import { ShiftRequestSummary } from "../model/shiftRequestSummary";
 
@@ -31,12 +32,12 @@ export function ShiftRequestNoteForm({
         borderRadius: "24px",
         border: "1px solid rgba(226,232,240,0.8)",
         boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
-        bgcolor: "#ffffff",
+        bgcolor: "rgb(255 255 255)",
       }}
     >
       <Box component="form" onSubmit={(event) => event.preventDefault()}>
         <Stack spacing={2} alignItems="stretch">
-          <TextField
+          <AppTextField
             label="備考"
             multiline
             rows={2}
@@ -59,10 +60,10 @@ export function ShiftRequestNoteForm({
               disabled={!hasSelection || interactionDisabled}
               fullWidth={isMobile}
               sx={{
-                backgroundColor: "#19b985 !important",
+                backgroundColor: "rgb(25 185 133) !important",
                 borderColor: "rgba(6,95,70,0.35) !important",
                 "&:hover": {
-                  backgroundColor: "#17ab7b !important",
+                  backgroundColor: "rgb(23 171 123) !important",
                   borderColor: "rgba(6,95,70,0.35) !important",
                   boxShadow:
                     "inset 0 -2px 0 rgba(0,0,0,0.12), 0 12px 24px -18px rgba(5,150,105,0.55)",

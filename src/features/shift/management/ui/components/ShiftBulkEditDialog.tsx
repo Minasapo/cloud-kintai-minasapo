@@ -1,6 +1,7 @@
 import AppButton from "@shared/ui/button/AppButton";
+import { useDialogFocusManagement } from "@shared/ui/feedback/useDialogFocusManagement";
 import { X } from "lucide-react";
-import { useEffect } from "react";
+import { useRef } from "react";
 
 import { ShiftState } from "../../lib/generateMockShifts";
 import {
@@ -33,15 +34,20 @@ export default function ShiftBulkEditDialog({
   onStateChange,
   onSubmit,
 }: ShiftBulkEditDialogProps) {
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && open && !isSaving) {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [open, isSaving, onClose]);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const handleClose = () => {
+    if (!isSaving) {
+      onClose();
+    }
+  };
+
+  useDialogFocusManagement({
+    open,
+    onClose: handleClose,
+    dialogRef,
+    initialFocusRef: closeButtonRef,
+  });
 
   if (!open) return null;
 
@@ -50,18 +56,28 @@ export default function ShiftBulkEditDialog({
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
-        onClick={() => !isSaving && onClose()}
+        onClick={handleClose}
+        role="presentation"
       />
 
       {/* Dialog */}
-      <div className="relative w-full max-w-sm rounded-xl bg-white shadow-2xl ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-200">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="選択した項目を一括変更"
+        tabIndex={-1}
+        className="relative w-full max-w-sm rounded-xl bg-white shadow-2xl ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-200"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
           <h2 className="text-lg font-bold text-gray-900">
             選択した項目を一括変更
           </h2>
           <button
-            onClick={onClose}
+            ref={closeButtonRef}
+            type="button"
+            onClick={handleClose}
             disabled={isSaving}
             className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors disabled:opacity-50"
           >
@@ -112,7 +128,7 @@ export default function ShiftBulkEditDialog({
           <AppButton
             variant="ghost"
             tone="secondary"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isSaving}
           >
             キャンセル

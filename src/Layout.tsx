@@ -14,7 +14,13 @@ import { FullPageLoading } from "@shared/ui/feedback/LoadingPrimitives";
 import { AppShell } from "@shared/ui/layout";
 import { Hub } from "aws-amplify/utils";
 import dayjs from "dayjs";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import { scheduleIdleRoutePreload } from "@/router/routePreloaders";
@@ -35,15 +41,6 @@ function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
     error: closeDatesError,
   } = useCloseDates();
   const [dismissed, setDismissed] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
-
-  // ローディング完了を追跡
-  useEffect(() => {
-    if (!closeDatesLoading && !hasLoaded) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setHasLoaded(true);
-    }
-  }, [closeDatesLoading, hasLoaded]);
 
   const isCurrentDateCovered = useMemo(() => {
     const today = dayjs().startOf("day").valueOf();
@@ -56,11 +53,9 @@ function MissingCloseDateAlert({ onConfirm }: MissingCloseDateAlertProps) {
 
   // 派生状態として計算：データロード完了後、エラーがなく、却下されておらず、日付がカバーされていない場合のみ表示
   const open = useMemo(() => {
-    if (!hasLoaded || closeDatesLoading || closeDatesError || dismissed)
-      return false;
+    if (closeDatesLoading || closeDatesError || dismissed) return false;
     return !isCurrentDateCovered;
   }, [
-    hasLoaded,
     closeDatesLoading,
     closeDatesError,
     dismissed,
@@ -116,6 +111,8 @@ export default function Layout() {
   const { config: appConfig, isConfigLoading = false } =
     useContext(AppConfigContext);
   const cognitoUserLoading = sessionLoading;
+  const [emailVerificationDialogOpen, setEmailVerificationDialogOpen] =
+    useState(false);
 
   useEffect(() => {
     if (authStatus !== "authenticated" || cognitoUserLoading) {
@@ -193,15 +190,7 @@ export default function Layout() {
       return;
     }
 
-    alert(
-      "メール認証が完了していません。ログイン時にメール認証を行なってください。",
-    );
-
-    try {
-      void signOut();
-    } catch (error) {
-      logger.error("Failed to sign out:", error);
-    }
+    setEmailVerificationDialogOpen(true);
   }, [
     authStatus,
     cognitoUser,
@@ -213,6 +202,17 @@ export default function Layout() {
     navigate,
     signOut,
   ]);
+
+  const handleAcknowledgeEmailVerification = useCallback(async () => {
+    setEmailVerificationDialogOpen(false);
+    try {
+      await signOut();
+    } catch (error) {
+      logger.error("Failed to sign out:", error);
+    } finally {
+      navigate("/login", { replace: true });
+    }
+  }, [navigate, signOut]);
 
   const shouldBlockUnauthenticated =
     authStatus === "unauthenticated" && !isLoginRoute;
@@ -248,6 +248,25 @@ export default function Layout() {
           onConfirm={() => navigate("/admin/master/job_term")}
         />
       )}
+      <AppDialog
+        open={emailVerificationDialogOpen}
+        onClose={() => {
+          void handleAcknowledgeEmailVerification();
+        }}
+        title="メール認証が未完了です"
+        description="メール認証が完了していません。ログイン時にメール認証を行ってください。"
+        maxWidth="xs"
+        actions={
+          <AppButton
+            variant="solid"
+            onClick={() => {
+              void handleAcknowledgeEmailVerification();
+            }}
+          >
+            OK
+          </AppButton>
+        }
+      />
     </>
   );
 }

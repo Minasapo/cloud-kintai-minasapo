@@ -18,6 +18,7 @@ import {
   getNextVersion,
 } from "@shared/api/graphql/concurrency";
 import { EventCalendar } from "@shared/api/graphql/types";
+import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { ProgressBar } from "@shared/ui/feedback";
 import { useCallback, useEffect } from "react";
@@ -28,6 +29,8 @@ import { AddEventCalendar } from "./AddEventCalendar";
 import { CSVFilePicker } from "./CSVFilePicker";
 import EventCalendarCopy from "./EventCalendarCopy";
 import EventCalendarEdit from "./EventCalendarEdit";
+
+const logger = createLogger("EventCalendarList");
 
 export default function EventCalendarList() {
   const dispatch = useAppDispatchV2();
@@ -80,7 +83,7 @@ export default function EventCalendarList() {
 
   useEffect(() => {
     if (eventCalendarsError) {
-      console.error(eventCalendarsError);
+      logger.error(eventCalendarsError);
       dispatch(
         pushNotification({
           tone: "error",

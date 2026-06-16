@@ -2,18 +2,14 @@ import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
 import AdminSettingsLayout from "@features/admin/layout/ui/AdminSettingsLayout";
 import AdminSettingsSection from "@features/admin/layout/ui/AdminSettingsSection";
 import { SettingsButton, SettingsSwitch } from "@features/admin/layout/ui/SettingsPrimitives";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 
 import { useSaveAppConfigSection } from "../lib/useSaveAppConfigSection";
 
 export default function AttendanceStatistics() {
   const { getAttendanceStatisticsEnabled } = useContext(AppConfigContext);
-  const [enabled, setEnabled] = useState<boolean>(false);
+  const [enabled, setEnabled] = useState<boolean>(() => getAttendanceStatisticsEnabled());
   const saveAppConfigSection = useSaveAppConfigSection();
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setEnabled(getAttendanceStatisticsEnabled());
-  }, [getAttendanceStatisticsEnabled]);
   const handleChange = (checked: boolean) => {
     setEnabled(checked);
   };
