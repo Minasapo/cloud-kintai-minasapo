@@ -24,9 +24,215 @@ export type Inputs = {
   endDate: dayjs.Dayjs | undefined;
   staffs: StaffType[];
 };
+type CloseDateItem = {
+  closeDate: string;
+  startDate: string;
+  endDate: string;
+};
+
+type ExpandedDownloadPanelProps = {
+  closeDates: CloseDateItem[];
+  closeMonthSelectLabelId: string;
+  selectedCloseDate: string;
+  startDate: string;
+  endDate: string;
+  setStartDate: (value: string) => void;
+  setEndDate: (value: string) => void;
+  navigate: ReturnType<typeof useNavigate>;
+  staffs: StaffType[];
+  selectedStaff: StaffType[];
+  setSelectedStaff: (value: StaffType[]) => void;
+  workDates: string[];
+};
 
 const formatInputDate = (value: dayjs.Dayjs) => value.format("YYYY-MM-DD");
 
+function ExpandedDownloadPanel({
+  closeDates,
+  closeMonthSelectLabelId,
+  selectedCloseDate,
+  startDate,
+  endDate,
+  setStartDate,
+  setEndDate,
+  navigate,
+  staffs,
+  selectedStaff,
+  setSelectedStaff,
+  workDates,
+}: ExpandedDownloadPanelProps) {
+  return (
+    <div id="attendance-download-panel" className="w-full">
+      <div className="mx-auto flex w-full max-w-[880px] min-w-0 flex-col gap-6 px-1 sm:px-2 md:px-0">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+            <div className="flex-1">
+              <label className="mb-1 block text-sm font-medium text-slate-600">
+                開始日
+              </label>
+              <AppTextField
+                type="date"
+                value={startDate}
+                onChange={(event) => setStartDate(event.target.value)}
+                size="small"
+                fullWidth
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "18px",
+                    backgroundColor: "rgb(255 255 255)",
+                    "& fieldset": {
+                      borderColor: "rgb(203 213 225 / 0.7)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "rgb(148 163 184)",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "rgb(16 185 129)",
+                    },
+                  },
+                  "& .MuiOutlinedInput-input": {
+                    padding: "10px 16px",
+                    fontSize: "0.875rem",
+                    color: "rgb(15 23 42)",
+                  },
+                }}
+              />
+            </div>
+            <div className="hidden h-11 items-center text-slate-400 sm:flex">
+              〜
+            </div>
+            <div className="flex-1">
+              <label className="mb-1 block text-sm font-medium text-slate-600">
+                終了日
+              </label>
+              <AppTextField
+                type="date"
+                value={endDate}
+                onChange={(event) => setEndDate(event.target.value)}
+                size="small"
+                fullWidth
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "18px",
+                    backgroundColor: "rgb(255 255 255)",
+                    "& fieldset": {
+                      borderColor: "rgb(203 213 225 / 0.7)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "rgb(148 163 184)",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "rgb(16 185 129)",
+                    },
+                  },
+                  "& .MuiOutlinedInput-input": {
+                    padding: "10px 16px",
+                    fontSize: "0.875rem",
+                    color: "rgb(15 23 42)",
+                  },
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="flex max-w-[560px] flex-col gap-2">
+            <div className="flex flex-col gap-2">
+              <span className="whitespace-nowrap text-sm text-slate-600">
+                集計対象月から:
+              </span>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <AppSelect<string>
+                  label="対象月"
+                  labelId={closeMonthSelectLabelId}
+                  value={selectedCloseDate}
+                  onChange={(value) => {
+                    const closeDate = closeDates.find(
+                      (item) => item.closeDate === value,
+                    );
+                    if (!closeDate) return;
+                    setStartDate(formatInputDate(dayjs(closeDate.startDate)));
+                    setEndDate(formatInputDate(dayjs(closeDate.endDate)));
+                  }}
+                  options={[
+                    { value: "", label: "対象月を選択" },
+                    ...closeDates
+                      .toSorted((a, b) =>
+                        dayjs(b.closeDate).diff(dayjs(a.closeDate)),
+                      )
+                      .map((closeDate) => ({
+                        value: closeDate.closeDate,
+                        label: dayjs(closeDate.closeDate).format("YYYY/MM"),
+                      })),
+                  ]}
+                  sx={{
+                    minWidth: 0,
+                    flex: 1,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "18px",
+                      backgroundColor: "rgb(255 255 255)",
+                      "& fieldset": {
+                        borderColor: "rgb(203 213 225 / 0.7)",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "rgb(148 163 184)",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "rgb(16 185 129)",
+                      },
+                    },
+                    "& .MuiSelect-select": {
+                      padding: "10px 16px",
+                      fontSize: "0.875rem",
+                      color: "rgb(15 23 42)",
+                    },
+                  }}
+                />
+                <AppButton
+                  variant="outline"
+                  tone="secondary"
+                  size="sm"
+                  onClick={() => navigate("/admin/master/job_term")}
+                  className="rounded-full whitespace-nowrap"
+                  startIcon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
+                  sx={{
+                    boxShadow: "0 8px 24px -20px rgba(15, 23, 42, 0.18)",
+                    borderColor: "rgb(203 213 225 / 0.7)",
+                    color: "rgb(51 65 85)",
+                    backgroundColor: "rgb(255 255 255)",
+                    "&:hover": {
+                      backgroundColor: "rgb(248 250 252)",
+                    },
+                  }}
+                >
+                  新規
+                </AppButton>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <StaffSelector
+          staffs={staffs}
+          selectedStaff={selectedStaff}
+          setSelectedStaff={setSelectedStaff}
+        />
+
+        <div className="flex w-full flex-col gap-2 sm:flex-row">
+          <ExportButton
+            workDates={workDates}
+            selectedStaff={selectedStaff}
+            fullWidth
+          />
+          <AggregateExportButton
+            workDates={workDates}
+            selectedStaff={selectedStaff}
+            fullWidth
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 export default function DownloadForm() {
   const navigate = useNavigate();
   const [selectedStaff, setSelectedStaff] = useState<StaffType[]>([]);
@@ -132,179 +338,20 @@ export default function DownloadForm() {
       </div>
 
       {isExpanded && (
-        <div id="attendance-download-panel" className="w-full">
-          <div className="mx-auto flex w-full max-w-[880px] min-w-0 flex-col gap-6 px-1 sm:px-2 md:px-0">
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-                <div className="flex-1">
-                  <label className="mb-1 block text-sm font-medium text-slate-600">
-                    開始日
-                  </label>
-                  <AppTextField
-                    type="date"
-                    value={startDate}
-                    onChange={(event) => setStartDate(event.target.value)}
-                    size="small"
-                    fullWidth
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "18px",
-                        backgroundColor: "rgb(255 255 255)",
-                        "& fieldset": {
-                          borderColor: "rgb(203 213 225 / 0.7)",
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "rgb(148 163 184)",
-                        },
-                        "&.Mui-focused fieldset": {
-                          borderColor: "rgb(16 185 129)",
-                        },
-                      },
-                      "& .MuiOutlinedInput-input": {
-                        padding: "10px 16px",
-                        fontSize: "0.875rem",
-                        color: "rgb(15 23 42)",
-                      },
-                    }}
-                  />
-                </div>
-                <div className="hidden h-11 items-center text-slate-400 sm:flex">
-                  〜
-                </div>
-                <div className="flex-1">
-                  <label className="mb-1 block text-sm font-medium text-slate-600">
-                    終了日
-                  </label>
-                  <AppTextField
-                    type="date"
-                    value={endDate}
-                    onChange={(event) => setEndDate(event.target.value)}
-                    size="small"
-                    fullWidth
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "18px",
-                        backgroundColor: "rgb(255 255 255)",
-                        "& fieldset": {
-                          borderColor: "rgb(203 213 225 / 0.7)",
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "rgb(148 163 184)",
-                        },
-                        "&.Mui-focused fieldset": {
-                          borderColor: "rgb(16 185 129)",
-                        },
-                      },
-                      "& .MuiOutlinedInput-input": {
-                        padding: "10px 16px",
-                        fontSize: "0.875rem",
-                        color: "rgb(15 23 42)",
-                      },
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex max-w-[560px] flex-col gap-2">
-                <div className="flex flex-col gap-2">
-                  <span className="whitespace-nowrap text-sm text-slate-600">
-                    集計対象月から:
-                  </span>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <AppSelect<string>
-                      label="対象月"
-                      labelId={closeMonthSelectLabelId}
-                      value={selectedCloseDate}
-                      onChange={(value) => {
-                        const closeDate = closeDates.find(
-                          (item) => item.closeDate === value,
-                        );
-                        if (!closeDate) return;
-                        setStartDate(
-                          formatInputDate(dayjs(closeDate.startDate)),
-                        );
-                        setEndDate(formatInputDate(dayjs(closeDate.endDate)));
-                      }}
-                      options={[
-                        { value: "", label: "対象月を選択" },
-                        ...closeDates
-                          .toSorted((a, b) =>
-                            dayjs(b.closeDate).diff(dayjs(a.closeDate)),
-                          )
-                          .map((closeDate) => ({
-                            value: closeDate.closeDate,
-                            label: dayjs(closeDate.closeDate).format("YYYY/MM"),
-                          })),
-                      ]}
-                      sx={{
-                        minWidth: 0,
-                        flex: 1,
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "18px",
-                          backgroundColor: "rgb(255 255 255)",
-                          "& fieldset": {
-                            borderColor: "rgb(203 213 225 / 0.7)",
-                          },
-                          "&:hover fieldset": {
-                            borderColor: "rgb(148 163 184)",
-                          },
-                          "&.Mui-focused fieldset": {
-                            borderColor: "rgb(16 185 129)",
-                          },
-                        },
-                        "& .MuiSelect-select": {
-                          padding: "10px 16px",
-                          fontSize: "0.875rem",
-                          color: "rgb(15 23 42)",
-                        },
-                      }}
-                    />
-                    <AppButton
-                      variant="outline"
-                      tone="secondary"
-                      size="sm"
-                      onClick={() => navigate("/admin/master/job_term")}
-                      className="rounded-full whitespace-nowrap"
-                      startIcon={
-                        <AddCircleOutlineOutlinedIcon fontSize="small" />
-                      }
-                      sx={{
-                        boxShadow: "0 8px 24px -20px rgba(15, 23, 42, 0.18)",
-                        borderColor: "rgb(203 213 225 / 0.7)",
-                        color: "rgb(51 65 85)",
-                        backgroundColor: "rgb(255 255 255)",
-                        "&:hover": {
-                          backgroundColor: "rgb(248 250 252)",
-                        },
-                      }}
-                    >
-                      新規
-                    </AppButton>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <StaffSelector
-              staffs={staffs}
-              selectedStaff={selectedStaff}
-              setSelectedStaff={setSelectedStaff}
-            />
-
-            <div className="flex w-full flex-col gap-2 sm:flex-row">
-              <ExportButton
-                workDates={workDates}
-                selectedStaff={selectedStaff}
-                fullWidth
-              />
-              <AggregateExportButton
-                workDates={workDates}
-                selectedStaff={selectedStaff}
-                fullWidth
-              />
-            </div>
-          </div>
-        </div>
+        <ExpandedDownloadPanel
+          closeDates={closeDates}
+          closeMonthSelectLabelId={closeMonthSelectLabelId}
+          selectedCloseDate={selectedCloseDate}
+          startDate={startDate}
+          endDate={endDate}
+          setStartDate={setStartDate}
+          setEndDate={setEndDate}
+          navigate={navigate}
+          staffs={staffs}
+          selectedStaff={selectedStaff}
+          setSelectedStaff={setSelectedStaff}
+          workDates={workDates}
+        />
       )}
     </div>
   );

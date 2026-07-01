@@ -1,3 +1,4 @@
+export { AppCheckbox } from "./AppCheckbox";
 export { AppSelect } from "./AppSelect";
 export { AppSwitch } from "./AppSwitch";
 export { AppTextField } from "./AppTextField";
