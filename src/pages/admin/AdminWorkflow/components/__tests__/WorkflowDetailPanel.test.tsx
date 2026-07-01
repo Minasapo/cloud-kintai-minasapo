@@ -540,6 +540,33 @@ describe("WorkflowDetailPanel", () => {
       ).toBeInTheDocument();
     });
 
+    it("不整合データでも初期表示で修復アクションは自動選択されない", async () => {
+      const user = userEvent.setup();
+      mockUseWorkflowDetailData.mockReturnValue({
+        workflow: makeWorkflow({
+          status: WorkflowStatus.SUBMITTED,
+          approvalSteps: [],
+          assignedApproverStaffIds: [],
+        }),
+        setWorkflow: mockSetWorkflow,
+        loading: false,
+        error: null,
+      });
+
+      renderPanel();
+
+      expect(
+        screen.queryByRole("button", { name: "データを自動修復" }),
+      ).not.toBeInTheDocument();
+
+      await user.click(
+        screen.getByRole("button", { name: "select preset action" }),
+      );
+      expect(
+        screen.getByRole("menuitem", { name: "データを自動修復" }),
+      ).toBeInTheDocument();
+    });
+
     it("修復ボタンを押すと承認チェーンの修復更新が呼ばれる", async () => {
       const user = userEvent.setup();
       mockUseWorkflowDetailData.mockReturnValue({

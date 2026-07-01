@@ -127,16 +127,14 @@ function WorkflowDetailHero({
         return userSelectedAction;
       }
     }
+    const enabledOption = splitButtonOptions.find((opt) => !opt.disabled);
 
-    // 初期表示では修復を絶対に自動選択しない
-    const enabledPrimaryOption = splitButtonOptions.find(
-      (opt) => (opt.key === "approve" || opt.key === "reject") && !opt.disabled,
-    );
-    if (enabledPrimaryOption) {
-      return enabledPrimaryOption.key as "approve" | "reject" | "repair";
+    // 初期表示で修復アクションを自動選択しない。
+    if (enabledOption?.key === "repair") {
+      return "approve";
     }
 
-    return "approve";
+    return (enabledOption?.key ?? "approve") as "approve" | "reject" | "repair";
   }, [userSelectedAction, splitButtonOptions]);
 
   const handleSplitButtonAction = () => {

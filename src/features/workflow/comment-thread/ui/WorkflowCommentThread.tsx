@@ -1,10 +1,11 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { useWorkflowDetailContext } from "@features/workflow/detail-panel/model/WorkflowDetailContext";
+import SendRoundedIcon from "@mui/icons-material/SendRounded";
+import { Box, InputBase } from "@mui/material";
 import { PANEL_HEIGHTS } from "@shared/config/uiDimensions";
-import { designTokenVar } from "@shared/designSystem";
 import { AppAvatar } from "@shared/ui/avatar";
-import { AppButton } from "@shared/ui/button";
-import { AppTextField } from "@shared/ui/form";
+import { AppIconButton } from "@shared/ui/button";
+import dayjs from "dayjs";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { shouldTruncateWorkflowMessage } from "../model/workflowCommentUtils";
@@ -70,6 +71,31 @@ type CommentMessageItemProps = {
   onToggle: (id: string) => void;
 };
 
+function formatMessageTimeLabel(message: WorkflowCommentMessage) {
+  const source = message.createdAt ?? message.time;
+  if (!source) return "";
+
+  const parsed = dayjs(source);
+  if (!parsed.isValid()) return message.time;
+
+  const now = dayjs();
+  const elapsedSeconds = now.diff(parsed, "second");
+
+  if (elapsedSeconds <= 0) return "今";
+  if (elapsedSeconds < 60) return `${elapsedSeconds}秒前`;
+
+  const elapsedMinutes = now.diff(parsed, "minute");
+  if (elapsedMinutes < 60) return `${elapsedMinutes}分前`;
+
+  const elapsedHours = now.diff(parsed, "hour");
+  if (elapsedHours < 24) return `${elapsedHours}時間前`;
+
+  const elapsedDays = now.startOf("day").diff(parsed.startOf("day"), "day");
+  if (elapsedDays < 7) return `${elapsedDays}日前`;
+
+  return parsed.format("M/D");
+}
+
 function CommentMessageItem({
   message,
   displayName,
@@ -80,18 +106,28 @@ function CommentMessageItem({
 }: CommentMessageItemProps) {
   const isSystem = message.staffId === "system";
   const isTruncated = shouldTruncateWorkflowMessage(message.text, expanded);
+  const timeLabel = formatMessageTimeLabel(message);
 
-  const avatarText = staff
-    ? `${(staff.familyName || "").slice(0, 1)}${(
-      staff.givenName || ""
-    ).slice(0, 1)}` || displayName.slice(0, 1)
-    : displayName.slice(0, 1);
+  if (isSystem) {
+    return (
+      <div className="flex w-full flex-col items-center py-1">
+        <p className="m-0 max-w-[90%] text-center text-xs font-medium text-slate-500">
+          {message.text}
+        </p>
+        {timeLabel && (
+          <span className="mt-0.5 text-[11px] text-slate-400">{timeLabel}</span>
+        )}
+      </div>
+    );
+  }
 
-  const avatarBackgroundClass = isSystem
-    ? "bg-slate-500"
-    : isMine
-      ? "bg-emerald-600"
-      : "bg-emerald-900";
+  const avatarText = (() => {
+    const familyName = staff?.familyName?.trim();
+    if (familyName) return familyName.slice(0, 1);
+
+    const [surname] = displayName.trim().split(/\s+/);
+    return surname?.slice(0, 1) || displayName.slice(0, 1);
+  })();
 
   return (
     <div
@@ -102,16 +138,23 @@ function CommentMessageItem({
     >
       <div
         className={[
-          "mb-1 flex w-full min-w-0 items-center gap-3",
-          isMine ? "flex-row-reverse justify-end" : "justify-start",
+          "mb-1 flex min-w-0 items-center gap-3",
+          isMine
+            ? "ml-auto w-auto flex-row-reverse justify-end"
+            : "w-full justify-start",
         ].join(" ")}
       >
         <AppAvatar
           size="small"
-          className={[
-            "flex shrink-0 items-center justify-center rounded-full text-xs font-medium text-white",
-            avatarBackgroundClass,
-          ].join(" ")}
+          sx={{
+            flexShrink: 0,
+            fontWeight: 600,
+            bgcolor: isSystem
+              ? "grey.500"
+              : isMine
+                ? "success.main"
+                : "success.dark",
+          }}
         >
           {avatarText}
         </AppAvatar>
@@ -127,7 +170,6 @@ function CommentMessageItem({
           <span className="truncate text-sm font-semibold text-slate-900">
             {displayName}
           </span>
-          <span className="text-xs text-slate-500">{message.time}</span>
         </div>
       </div>
 
@@ -144,11 +186,11 @@ function CommentMessageItem({
           style={
             isTruncated
               ? {
-                display: "-webkit-box",
-                WebkitLineClamp: 5,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              }
+                  display: "-webkit-box",
+                  WebkitLineClamp: 5,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }
               : undefined
           }
         >
@@ -168,6 +210,17 @@ function CommentMessageItem({
           </button>
         )}
       </div>
+
+      {timeLabel && (
+        <span
+          className={[
+            "mt-1 text-xs text-slate-500",
+            isMine ? "self-end text-right" : "self-start",
+          ].join(" ")}
+        >
+          {timeLabel}
+        </span>
+      )}
     </div>
   );
 }
@@ -186,68 +239,68 @@ function CommentInputArea({
   sending,
 }: CommentInputAreaProps) {
   const sendDisabled = sending || !input.trim();
+  const isMultiline = input.includes("\n");
 
   return (
     <div className="mt-2 flex w-full flex-col gap-2 sm:flex-row sm:items-end">
       <div className="min-w-0 flex-1">
-        <AppTextField
-          value={input}
-          onChange={(event) => setInput(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
-              event.preventDefault();
-              onSend();
-            }
-          }}
-          disabled={sending}
-          multiline
-          minRows={2}
-          placeholder="メッセージを入力..."
-          className="w-full"
-          fullWidth
-          sx={{
-            width: "100%",
-            "& .MuiOutlinedInput-root": {
-              alignItems: "flex-start",
-              borderRadius: "12px",
-              backgroundColor: designTokenVar("component.pageSection.background"),
-              boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-              "& fieldset": {
-                borderColor: "rgb(203 213 225)",
-              },
-              "&:hover fieldset": {
-                borderColor: "rgb(148 163 184)",
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "rgb(16 185 129)",
-                borderWidth: "1px",
-              },
-              "&.Mui-disabled": {
-                backgroundColor: "rgb(248 250 252)",
-              },
-            },
-            "& .MuiInputBase-inputMultiline": {
-              resize: "vertical",
-              padding: "8px 12px",
-              fontSize: "0.875rem",
-              lineHeight: "1.25rem",
-              color: "rgb(15 23 42)",
-            },
-          }}
-        />
-        <p className="ml-1 mt-1 text-xs text-slate-500">
-          Cmd/Ctrl+Enterで送信
-        </p>
-      </div>
+        <div className="relative">
+          <Box
+            sx={{
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: 1,
+              px: 1.75,
+              py: 1.25,
+              pr: 5.5,
+              backgroundColor: sending
+                ? "action.disabledBackground"
+                : "background.paper",
+            }}
+          >
+            <InputBase
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+                  event.preventDefault();
+                  onSend();
+                }
+              }}
+              disabled={sending}
+              multiline
+              minRows={1}
+              maxRows={6}
+              placeholder="メッセージを入力..."
+              fullWidth
+              sx={{
+                alignItems: "flex-start",
+                "& .MuiInputBase-input": {
+                  p: 0,
+                  lineHeight: 1.5,
+                },
+              }}
+            />
+          </Box>
 
-      <AppButton
-        onClick={onSend}
-        disabled={sendDisabled}
-        size="sm"
-        className="w-full shrink-0 sm:w-auto"
-      >
-        送信
-      </AppButton>
+          <div
+            className={`absolute inset-y-0 right-1.5 z-10 flex ${
+              isMultiline ? "items-end pb-1.5" : "items-center"
+            }`}
+          >
+            <AppIconButton
+              aria-label="送信"
+              onClick={onSend}
+              disabled={sendDisabled}
+              size="sm"
+              tone="primary"
+              tooltip="Cmd/Ctrl+Enterで送信"
+            >
+              <SendRoundedIcon fontSize="small" />
+            </AppIconButton>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
