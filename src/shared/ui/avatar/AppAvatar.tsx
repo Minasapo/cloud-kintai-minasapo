@@ -1,5 +1,5 @@
-import Avatar from "@mui/material/Avatar";
 import type { AvatarProps } from "@mui/material/Avatar";
+import Avatar from "@mui/material/Avatar";
 import type { SxProps, Theme } from "@mui/material/styles";
 
 type AppAvatarSize = "small" | "medium" | "large";

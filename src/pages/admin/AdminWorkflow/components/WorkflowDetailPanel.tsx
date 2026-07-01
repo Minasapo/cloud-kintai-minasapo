@@ -26,13 +26,14 @@ import {
 } from "@shared/ui/button";
 import { AppDialog } from "@shared/ui/feedback";
 import { SectionTitle, SubsectionTitle } from "@shared/ui/typography";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 
 import { useWorkflowApprovalActions } from "../hooks/useWorkflowApprovalActions";
 import { useWorkflowDetailData } from "../hooks/useWorkflowDetailData";
 import { useWorkflowDetailViewModel } from "../hooks/useWorkflowDetailViewModel";
+import { useWorkflowRepair } from "../hooks/useWorkflowRepair";
 import { resolveWorkflowActionState } from "../services/approvalWorkflowHelpers";
-import { buildWorkflowRepairPlan } from "../services/workflowRepair";
+import { buildWorkflowRepairPlan, WorkflowRepairPlan } from "../services/workflowRepair";
 import WorkflowCommentSection from "./WorkflowCommentSection";
 
 const PANEL_BACKGROUND = designTokenVar(
@@ -102,42 +103,34 @@ function WorkflowDetailHero({
       },
       ...(handleRepair && repairActionLabel
         ? [
-            {
-              key: "repair",
-              label: repairActionLabel,
-              disabled: isRepairDisabled,
-            },
-          ]
+          {
+            key: "repair",
+            label: repairActionLabel,
+            disabled: isRepairDisabled,
+          },
+        ]
         : []),
     ],
     [handleRepair, repairActionLabel, isRepairDisabled, isApproveDisabled, isRejectDisabled],
   );
 
   // 最初の enabled なアクションを初期値とする
-  const getInitialAction = (): "approve" | "reject" | "repair" => {
-    const enabledOption = splitButtonOptions.find((opt) => !opt.disabled);
-    if (enabledOption) {
-      return enabledOption.key as "approve" | "reject" | "repair";
-    }
-    return "approve";
-  };
+  const [userSelectedAction, setUserSelectedAction] = useState<
+    "approve" | "reject" | "repair" | null
+  >(null);
 
-  const [selectedAction, setSelectedAction] = useState<
-    "approve" | "reject" | "repair"
-  >(getInitialAction());
-
-  // selectedActionが無効になった場合、最初の有効なアクションに切り替える
-  useEffect(() => {
-    const selectedOption = splitButtonOptions.find(
-      (opt) => opt.key === selectedAction,
-    );
-    if (selectedOption?.disabled) {
-      const enabledOption = splitButtonOptions.find((opt) => !opt.disabled);
-      if (enabledOption) {
-        setSelectedAction(enabledOption.key as "approve" | "reject" | "repair");
+  const selectedAction = useMemo<"approve" | "reject" | "repair">(() => {
+    if (userSelectedAction !== null) {
+      const option = splitButtonOptions.find(
+        (opt) => opt.key === userSelectedAction,
+      );
+      if (!option?.disabled) {
+        return userSelectedAction;
       }
     }
-  }, [selectedAction, splitButtonOptions]);
+    const enabledOption = splitButtonOptions.find((opt) => !opt.disabled);
+    return (enabledOption?.key ?? "approve") as "approve" | "reject" | "repair";
+  }, [userSelectedAction, splitButtonOptions]);
 
   const handleSplitButtonAction = () => {
     if (selectedAction === "repair") {
@@ -150,7 +143,7 @@ function WorkflowDetailHero({
   };
 
   const handleActionChange = (key: string) => {
-    setSelectedAction(key as "approve" | "reject" | "repair");
+    setUserSelectedAction(key as "approve" | "reject" | "repair");
   };
 
   return (
@@ -258,6 +251,188 @@ function WorkflowDetailHero({
   );
 }
 
+type WorkflowRepairDialogProps = {
+  open: boolean;
+  isCheckingRepairNeed: boolean;
+  isRepairing: boolean;
+  repairStep: number;
+  repairCompleted: boolean;
+  dialogRepairPlan: WorkflowRepairPlan | null;
+  onClose: () => void;
+  onConfirm: () => void;
+};
+
+function WorkflowRepairDialog({
+  open,
+  isCheckingRepairNeed,
+  isRepairing,
+  repairStep,
+  repairCompleted,
+  dialogRepairPlan,
+  onClose,
+  onConfirm,
+}: WorkflowRepairDialogProps) {
+  return (
+    <AppDialog
+      open={open}
+      title="データの修復"
+      onClose={onClose}
+      loading={false}
+      maxWidth="sm"
+    >
+      <div className="w-full">
+        <Stepper activeStep={repairStep} sx={{ mb: 3 }}>
+          <Step completed={!isCheckingRepairNeed}>
+            <StepLabel>修復要否の確認</StepLabel>
+          </Step>
+          <Step completed={repairStep > 1}>
+            <StepLabel>修復内容の確認</StepLabel>
+          </Step>
+          <Step completed={repairCompleted}>
+            <StepLabel>修復を実行</StepLabel>
+          </Step>
+        </Stepper>
+
+        {isCheckingRepairNeed && (
+          <div className="flex flex-col items-center justify-center py-6">
+            <div className="mb-4">
+              <div
+                className="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"
+                role="status"
+                aria-label="修復要否を確認中..."
+              />
+            </div>
+            <p className="text-sm font-medium text-gray-700">
+              修復の必要性を確認中...
+            </p>
+          </div>
+        )}
+
+        {!isCheckingRepairNeed && !dialogRepairPlan && (
+          <div className="flex flex-col items-center justify-center py-6">
+            <div className="mb-4 flex items-center justify-center w-16 h-16 rounded-full bg-green-100">
+              <svg
+                className="w-8 h-8 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+            <p className="text-sm font-medium text-gray-700">
+              データの修復の必要はありませんでした
+            </p>
+          </div>
+        )}
+
+        {repairStep === 1 && dialogRepairPlan && (
+          <div className="space-y-4">
+            <div>
+              <p className="m-0 text-sm font-semibold mb-2">修復理由</p>
+              <p className="m-0 text-sm text-gray-700 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                {dialogRepairPlan.repairReason}
+              </p>
+            </div>
+            <div>
+              <p className="m-0 text-sm font-semibold mb-2">修復内容</p>
+              <ul className="m-0 space-y-2">
+                {dialogRepairPlan.repairDetails.map((detail, index) => (
+                  <li
+                    key={index}
+                    className="flex items-start gap-2 text-sm text-gray-700 bg-gray-50 p-2 rounded"
+                  >
+                    <span className="text-green-600 font-bold">✓</span>
+                    <span>{detail}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {repairStep === 1 && (
+          <div className="flex flex-col items-center justify-center py-6">
+            <div className="mb-4">
+              <div
+                className="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"
+                role="status"
+                aria-label="修復中..."
+              />
+            </div>
+            <p className="text-sm font-medium text-gray-700">修復を実行中...</p>
+            <p className="text-xs text-gray-500 mt-1">しばらくお待ちください</p>
+          </div>
+        )}
+
+        {repairStep === 2 && repairCompleted && (
+          <div className="flex flex-col items-center justify-center py-6">
+            <div className="mb-4 flex items-center justify-center w-16 h-16 rounded-full bg-green-100">
+              <svg
+                className="w-8 h-8 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+            <p className="text-sm font-medium text-gray-700">修復が完了しました</p>
+            <p className="text-xs text-gray-500 mt-1">
+              {dialogRepairPlan?.successMessage}
+            </p>
+          </div>
+        )}
+
+        <Box
+          sx={{ display: "flex", gap: 1, mt: 4, justifyContent: "flex-end" }}
+        >
+          {!isCheckingRepairNeed && !dialogRepairPlan && (
+            <AppButton variant="solid" tone="primary" onClick={onClose}>
+              閉じる
+            </AppButton>
+          )}
+          {repairStep === 1 && dialogRepairPlan && (
+            <>
+              <AppButton
+                variant="outline"
+                tone="neutral"
+                onClick={onClose}
+                disabled={isRepairing}
+              >
+                キャンセル
+              </AppButton>
+              <AppButton
+                variant="solid"
+                tone="secondary"
+                onClick={onConfirm}
+                disabled={isRepairing}
+              >
+                修復する
+              </AppButton>
+            </>
+          )}
+          {repairStep === 2 && (
+            <AppButton variant="solid" tone="primary" onClick={onClose}>
+              閉じる
+            </AppButton>
+          )}
+        </Box>
+      </div>
+    </AppDialog>
+  );
+}
+
 interface WorkflowDetailPanelProps {
   workflowId?: string;
   onBack?: () => void;
@@ -351,25 +526,15 @@ export default function WorkflowDetailPanel({
       >,
     setWorkflow,
     notifySuccess: (message) =>
-      dispatch(
-        pushNotification({
-          tone: "success",
-          message: message,
-        }),
-      ),
+      dispatch(pushNotification({ tone: "success", message })),
     notifyError: (message) =>
-      dispatch(
-        pushNotification({
-          tone: "error",
-          message: message,
-        }),
-      ),
+      dispatch(pushNotification({ tone: "error", message })),
     notifyInfo: (title, description) =>
       dispatch(
         pushNotification({
           tone: "info",
           message: title,
-          description: description,
+          description,
           autoHideMs: null,
         }),
       ),
@@ -381,87 +546,26 @@ export default function WorkflowDetailPanel({
     createAttendance,
     updateAttendance,
   });
-  const [isRepairConfirmOpen, setIsRepairConfirmOpen] = useState(false);
-  const [isRepairing, setIsRepairing] = useState(false);
-  const [repairStep, setRepairStep] = useState(0);
-  const [repairCompleted, setRepairCompleted] = useState(false);
-  const [isCheckingRepairNeed, setIsCheckingRepairNeed] = useState(false);
-  const [dialogRepairPlan, setDialogRepairPlan] = useState(workflowRepairPlan);
-
-  const handleRepairClick = useCallback(() => {
-    if (!workflow?.id) return;
-
-    setIsCheckingRepairNeed(true);
-    setDialogRepairPlan(null);
-    setRepairStep(0);
-    setRepairCompleted(false);
-    setIsRepairConfirmOpen(true);
-  }, [workflow?.id]);
-
-  useEffect(() => {
-    if (!isRepairConfirmOpen || !isCheckingRepairNeed) {
-      return;
-    }
-
-    const timerId = window.setTimeout(() => {
-      setDialogRepairPlan(workflowRepairPlan);
-      setRepairStep(workflowRepairPlan ? 1 : 0);
-      setIsCheckingRepairNeed(false);
-    }, 200);
-
-    return () => {
-      window.clearTimeout(timerId);
-    };
-  }, [isCheckingRepairNeed, isRepairConfirmOpen, workflowRepairPlan]);
-
-  const handleRepairConfirm = useCallback(async () => {
-    if (!workflow?.id || !dialogRepairPlan) return;
-
-    setIsRepairing(true);
-    setRepairStep(2);
-    try {
-      const repaired = await updateWorkflow(dialogRepairPlan.input);
-      setWorkflow(repaired);
-      setRepairStep(2);
-      setRepairCompleted(true);
-      notify({
-        title: "修復しました",
-        description: dialogRepairPlan.successMessage,
-        tone: "success",
-        dedupeKey: `workflow-repair-${workflow.id}`,
-      });
-      // ダイアログを自動的に閉じる（成功時）
-      setTimeout(() => {
-        setIsRepairConfirmOpen(false);
-        setIsRepairing(false);
-        setRepairStep(0);
-        setRepairCompleted(false);
-        setIsCheckingRepairNeed(false);
-        setDialogRepairPlan(null);
-      }, 1500);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      logger.error("Workflow repair failed:", message);
-      notify({
-        title: "修復に失敗しました",
-        description: message,
-        tone: "error",
-        dedupeKey: `workflow-repair-error-${workflow?.id ?? "unknown"}`,
-      });
-      setIsRepairing(false);
-      setRepairStep(1);
-    }
-  }, [dialogRepairPlan, notify, setWorkflow, updateWorkflow, workflow]);
-
-  const handleRepairDialogClose = useCallback(() => {
-    if (!isRepairing) {
-      setIsRepairConfirmOpen(false);
-      setRepairStep(0);
-      setRepairCompleted(false);
-      setIsCheckingRepairNeed(false);
-      setDialogRepairPlan(null);
-    }
-  }, [isRepairing]);
+  const {
+    isRepairConfirmOpen,
+    isRepairing,
+    repairStep,
+    repairCompleted,
+    isCheckingRepairNeed,
+    dialogRepairPlan,
+    handleRepairClick,
+    handleRepairConfirm,
+    handleRepairDialogClose,
+  } = useWorkflowRepair({
+    workflowId: workflow?.id ?? null,
+    workflowRepairPlan,
+    executeRepair: (input) =>
+      updateWorkflow(input) as Promise<
+        NonNullable<GetWorkflowQuery["getWorkflow"]>
+      >,
+    onRepaired: setWorkflow,
+    notify,
+  });
   return (
     <section
       className="w-full p-4 sm:p-6"
@@ -487,171 +591,16 @@ export default function WorkflowDetailPanel({
         repairActionLabel="データを自動修復"
       />
 
-      <AppDialog
+      <WorkflowRepairDialog
         open={isRepairConfirmOpen}
-        title="データの修復"
+        isCheckingRepairNeed={isCheckingRepairNeed}
+        isRepairing={isRepairing}
+        repairStep={repairStep}
+        repairCompleted={repairCompleted}
+        dialogRepairPlan={dialogRepairPlan}
         onClose={handleRepairDialogClose}
-        loading={false}
-        maxWidth="sm"
-      >
-        <div className="w-full">
-          <Stepper activeStep={repairStep} sx={{ mb: 3 }}>
-            <Step completed={!isCheckingRepairNeed}>
-              <StepLabel>修復要否の確認</StepLabel>
-            </Step>
-            <Step completed={repairStep > 1}>
-              <StepLabel>修復内容の確認</StepLabel>
-            </Step>
-            <Step completed={repairCompleted}>
-              <StepLabel>修復を実行</StepLabel>
-            </Step>
-          </Stepper>
-
-          {isCheckingRepairNeed && (
-            <div className="flex flex-col items-center justify-center py-6">
-              <div className="mb-4">
-                <div
-                  className="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"
-                  role="status"
-                  aria-label="修復要否を確認中..."
-                />
-              </div>
-              <p className="text-sm font-medium text-gray-700">
-                修復の必要性を確認中...
-              </p>
-            </div>
-          )}
-
-          {!isCheckingRepairNeed && !dialogRepairPlan && (
-            <div className="flex flex-col items-center justify-center py-6">
-              <div className="mb-4 flex items-center justify-center w-16 h-16 rounded-full bg-green-100">
-                <svg
-                  className="w-8 h-8 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-              <p className="text-sm font-medium text-gray-700">
-                データの修復の必要はありませんでした
-              </p>
-            </div>
-          )}
-
-          {repairStep === 1 && dialogRepairPlan && (
-            <div className="space-y-4">
-              <div>
-                <p className="m-0 text-sm font-semibold mb-2">修復理由</p>
-                <p className="m-0 text-sm text-gray-700 bg-blue-50 p-3 rounded-lg border border-blue-200">
-                  {dialogRepairPlan.repairReason}
-                </p>
-              </div>
-              <div>
-                <p className="m-0 text-sm font-semibold mb-2">修復内容</p>
-                <ul className="m-0 space-y-2">
-                  {dialogRepairPlan.repairDetails.map((detail, index) => (
-                    <li
-                      key={index}
-                      className="flex items-start gap-2 text-sm text-gray-700 bg-gray-50 p-2 rounded"
-                    >
-                      <span className="text-green-600 font-bold">✓</span>
-                      <span>{detail}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
-
-          {repairStep === 1 && (
-            <div className="flex flex-col items-center justify-center py-6">
-              <div className="mb-4">
-                <div
-                  className="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"
-                  role="status"
-                  aria-label="修復中..."
-                />
-              </div>
-              <p className="text-sm font-medium text-gray-700">修復を実行中...</p>
-              <p className="text-xs text-gray-500 mt-1">
-                しばらくお待ちください
-              </p>
-            </div>
-          )}
-
-          {repairStep === 2 && repairCompleted && (
-            <div className="flex flex-col items-center justify-center py-6">
-              <div className="mb-4 flex items-center justify-center w-16 h-16 rounded-full bg-green-100">
-                <svg
-                  className="w-8 h-8 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-              <p className="text-sm font-medium text-gray-700">修復が完了しました</p>
-              <p className="text-xs text-gray-500 mt-1">
-                {dialogRepairPlan?.successMessage}
-              </p>
-            </div>
-          )}
-
-          <Box sx={{ display: "flex", gap: 1, mt: 4, justifyContent: "flex-end" }}>
-            {!isCheckingRepairNeed && !dialogRepairPlan && (
-              <AppButton
-                variant="solid"
-                tone="primary"
-                onClick={handleRepairDialogClose}
-              >
-                閉じる
-              </AppButton>
-            )}
-            {repairStep === 1 && dialogRepairPlan && (
-              <>
-                <AppButton
-                  variant="outline"
-                  tone="neutral"
-                  onClick={handleRepairDialogClose}
-                  disabled={isRepairing}
-                >
-                  キャンセル
-                </AppButton>
-                <AppButton
-                  variant="solid"
-                  tone="secondary"
-                  onClick={handleRepairConfirm}
-                  disabled={isRepairing}
-                >
-                  修復する
-                </AppButton>
-              </>
-            )}
-            {repairStep === 2 && (
-              <AppButton
-                variant="solid"
-                tone="primary"
-                onClick={handleRepairDialogClose}
-              >
-                閉じる
-              </AppButton>
-            )}
-          </Box>
-        </div>
-      </AppDialog>
+        onConfirm={handleRepairConfirm}
+      />
 
       {loading && (
         <p className="m-0 text-sm" style={{ color: LOADING_TEXT }}>

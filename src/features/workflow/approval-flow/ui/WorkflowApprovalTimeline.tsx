@@ -1,5 +1,5 @@
-import AppAvatar from "@shared/ui/avatar/AppAvatar";
 import WorkflowStatusChip from "@entities/workflow/ui/WorkflowStatusChip";
+import AppAvatar from "@shared/ui/avatar/AppAvatar";
 import { SubsectionTitle } from "@shared/ui/typography";
 
 import type { WorkflowApprovalStepView } from "../types";

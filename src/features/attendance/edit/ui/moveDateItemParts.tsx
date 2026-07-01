@@ -1,4 +1,5 @@
 import { DatePicker } from "@mui/x-date-pickers";
+import { designTokenVar } from "@shared/designSystem";
 import dayjs, { type Dayjs } from "dayjs";
 import { useMemo, useState } from "react";
 
@@ -50,7 +51,7 @@ export function WorkDateInput({
               height: "34px",
               borderRadius: "16px",
               fontSize: "0.8125rem",
-              backgroundColor: "#fff",
+              backgroundColor: designTokenVar("component.pageSection.background"),
               boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.72)",
             },
             "& .MuiOutlinedInput-input": {
