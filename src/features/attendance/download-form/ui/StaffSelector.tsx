@@ -7,7 +7,7 @@ import {
 } from "@shared/config/uiDimensions";
 import { AppButton } from "@shared/ui/button";
 import { AppChip } from "@shared/ui/chips";
-import { AppCheckbox } from "@shared/ui/form";
+import { AppCheckbox, AppFormControlLabel } from "@shared/ui/form";
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -161,29 +161,54 @@ function StaffDropdown({
               const checked = selectedIds.has(staff.id);
 
               return (
-                <label
+                <AppFormControlLabel
                   key={staff.id}
-                  className={[
-                    "flex cursor-pointer items-center gap-3 rounded-[16px] border px-4 py-3 text-sm transition",
-                    checked
-                      ? "border-emerald-200 bg-emerald-50 text-slate-900"
-                      : "border-transparent bg-white text-slate-700 hover:border-slate-200 hover:bg-slate-50",
-                  ].join(" ")}
-                >
-                  <AppCheckbox
-                    size="small"
-                    checked={checked}
-                    onChange={() => toggleStaff(staff)}
-                    sx={{
-                      p: 0,
-                      color: "rgb(148 163 184)",
-                      "&.Mui-checked": {
-                        color: "rgb(5 150 105)",
-                      },
-                    }}
-                  />
-                  <span className="min-w-0 truncate">{label}</span>
-                </label>
+                  control={
+                    <AppCheckbox
+                      size="small"
+                      checked={checked}
+                      onChange={() => toggleStaff(staff)}
+                      sx={{
+                        p: 0,
+                        color: "rgb(148 163 184)",
+                        "&.Mui-checked": {
+                          color: "rgb(5 150 105)",
+                        },
+                      }}
+                    />
+                  }
+                  label={<span className="min-w-0 truncate">{label}</span>}
+                  sx={{
+                    m: 0,
+                    width: "100%",
+                    alignItems: "center",
+                    gap: "12px",
+                    borderRadius: "16px",
+                    border: checked
+                      ? "1px solid rgb(167 243 208)"
+                      : "1px solid transparent",
+                    backgroundColor: checked
+                      ? "rgb(236 253 245)"
+                      : "rgb(255 255 255)",
+                    color: checked ? "rgb(15 23 42)" : "rgb(51 65 85)",
+                    px: "16px",
+                    py: "12px",
+                    transition:
+                      "background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), border-color 150ms cubic-bezier(0.4, 0, 0.2, 1)",
+                    cursor: "pointer",
+                    "&:hover": checked
+                      ? undefined
+                      : {
+                          borderColor: "rgb(226 232 240)",
+                          backgroundColor: "rgb(248 250 252)",
+                        },
+                    "& .MuiFormControlLabel-label": {
+                      minWidth: 0,
+                      fontSize: "0.875rem",
+                      lineHeight: 1.25,
+                    },
+                  }}
+                />
               );
             })}
           </div>
