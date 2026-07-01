@@ -36,13 +36,6 @@
 
 .workflow-create-button {
   @apply inline-flex items-center justify-center gap-2 rounded-xl border px-7 py-3 text-base font-medium text-white transition;
-  border-color: rgba(4, 120, 87, 0.55);
-  background: #19b985;
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 12px 24px -18px rgba(5, 150, 105, 0.55);
-}
-
-.workflow-create-button:hover {
-  background: #17ab7b;
 }
 
 .workflow-create-button--compact {
@@ -51,10 +44,6 @@
 
 .workflow-create-button:not(.workflow-create-button--compact) {
   @apply w-auto whitespace-nowrap;
-}
-
-.workflow-create-button__icon {
-  @apply text-lg leading-none;
 }
 
 .workflow-no-staff-state {
@@ -164,17 +153,6 @@
 
 .workflow-filter-trigger-button {
   @apply inline-flex items-center justify-center gap-2 self-start rounded-xl border px-4 py-2.5 text-sm font-medium text-white transition;
-  border-color: rgba(4, 120, 87, 0.55);
-  background: #19b985;
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 12px 24px -18px rgba(5, 150, 105, 0.55);
-}
-
-.workflow-filter-trigger-button:hover {
-  background: #17ab7b;
-}
-
-.workflow-filter-trigger-button__icon {
-  @apply h-4 w-4;
 }
 
 .workflow-filter-trigger-button__badge {
