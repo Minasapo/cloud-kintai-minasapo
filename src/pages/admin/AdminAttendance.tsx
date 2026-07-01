@@ -56,12 +56,13 @@ export default function AdminAttendance() {
               tone="secondary"
               onClick={() => setIsSettingsDialogOpen(true)}
               className="self-start"
+              sx={{ whiteSpace: "nowrap" }}
               aria-label="勤怠設定を開く"
               startIcon={
                 <SettingsIcon name="settings" className="text-current" />
               }
             >
-              <span>設定</span>
+              設定
             </AppButton>
           </div>
         </section>
