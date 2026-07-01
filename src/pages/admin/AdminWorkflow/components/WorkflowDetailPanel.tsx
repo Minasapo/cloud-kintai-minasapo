@@ -33,7 +33,10 @@ import { useWorkflowDetailData } from "../hooks/useWorkflowDetailData";
 import { useWorkflowDetailViewModel } from "../hooks/useWorkflowDetailViewModel";
 import { useWorkflowRepair } from "../hooks/useWorkflowRepair";
 import { resolveWorkflowActionState } from "../services/approvalWorkflowHelpers";
-import { buildWorkflowRepairPlan, WorkflowRepairPlan } from "../services/workflowRepair";
+import {
+  buildWorkflowRepairPlan,
+  WorkflowRepairPlan,
+} from "../services/workflowRepair";
 import WorkflowCommentSection from "./WorkflowCommentSection";
 
 const PANEL_BACKGROUND = designTokenVar(
@@ -103,15 +106,21 @@ function WorkflowDetailHero({
       },
       ...(handleRepair && repairActionLabel
         ? [
-          {
-            key: "repair",
-            label: repairActionLabel,
-            disabled: isRepairDisabled,
-          },
-        ]
+            {
+              key: "repair",
+              label: repairActionLabel,
+              disabled: isRepairDisabled,
+            },
+          ]
         : []),
     ],
-    [handleRepair, repairActionLabel, isRepairDisabled, isApproveDisabled, isRejectDisabled],
+    [
+      handleRepair,
+      repairActionLabel,
+      isRepairDisabled,
+      isApproveDisabled,
+      isRejectDisabled,
+    ],
   );
 
   // 最初の enabled なアクションを初期値とする
@@ -387,7 +396,9 @@ function WorkflowRepairDialog({
                 />
               </svg>
             </div>
-            <p className="text-sm font-medium text-gray-700">修復が完了しました</p>
+            <p className="text-sm font-medium text-gray-700">
+              修復が完了しました
+            </p>
             <p className="text-xs text-gray-500 mt-1">
               {dialogRepairPlan?.successMessage}
             </p>
@@ -511,6 +522,7 @@ export default function WorkflowDetailPanel({
   const isApproveDisabled =
     !workflow?.id ||
     workflow.status === WorkflowStatus.APPROVED ||
+    workflow.status === WorkflowStatus.REJECTED ||
     workflow.status === WorkflowStatus.CANCELLED;
   const isRejectDisabled =
     !workflow?.id ||

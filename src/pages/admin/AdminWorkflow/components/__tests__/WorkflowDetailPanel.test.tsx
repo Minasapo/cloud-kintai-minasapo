@@ -65,13 +65,10 @@ jest.mock("../WorkflowCommentSection", () => ({
 }));
 
 // WorkflowMetadataPanelBase スタブ
-jest.mock(
-  "@features/workflow/detail-panel/ui/WorkflowMetadataPanel",
-  () => ({
-    WorkflowMetadataPanelBase: () =>
-      React.createElement("div", { "data-testid": "metadata-panel" }),
-  }),
-);
+jest.mock("@features/workflow/detail-panel/ui/WorkflowMetadataPanel", () => ({
+  WorkflowMetadataPanelBase: () =>
+    React.createElement("div", { "data-testid": "metadata-panel" }),
+}));
 
 jest.mock("@shared/lib/logger", () => ({
   createLogger: () => ({
@@ -138,9 +135,7 @@ const makeWorkflow = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const makeAuthContextValue = (
-  overrides: Record<string, unknown> = {},
-) => ({
+const makeAuthContextValue = (overrides: Record<string, unknown> = {}) => ({
   cognitoUser: { id: "cognito-1", familyName: "山田", givenName: "太郎" },
   authStatus: "authenticated" as const,
   signOut: jest.fn(),
@@ -392,6 +387,29 @@ describe("WorkflowDetailPanel", () => {
       expect(screen.getByRole("button", { name: "承認" })).toBeDisabled();
     });
 
+    it("ステータスが REJECTED の場合は承認アクションが実行できない", async () => {
+      const user = userEvent.setup();
+      mockUseWorkflowDetailData.mockReturnValue({
+        workflow: makeWorkflow({ status: WorkflowStatus.REJECTED }),
+        setWorkflow: mockSetWorkflow,
+        loading: false,
+        error: null,
+      });
+
+      renderPanel();
+      expect(
+        screen.queryByRole("button", { name: "承認" }),
+      ).not.toBeInTheDocument();
+
+      await user.click(
+        screen.getByRole("button", { name: "select preset action" }),
+      );
+      expect(screen.getByRole("menuitem", { name: "承認" })).toHaveAttribute(
+        "aria-disabled",
+        "true",
+      );
+    });
+
     it("ステータスが PENDING の場合は承認ボタンが有効", () => {
       renderPanel();
       expect(screen.getByRole("button", { name: "承認" })).not.toBeDisabled();
@@ -538,13 +556,14 @@ describe("WorkflowDetailPanel", () => {
 
       renderPanel();
 
-      await user.click(
-        screen.getByRole("button", { name: "修復して再判定" }),
-      );
+      await user.click(screen.getByRole("button", { name: "修復して再判定" }));
 
       expect(mockUpdateWorkflow).toHaveBeenCalledTimes(1);
       const payload = mockUpdateWorkflow.mock.calls[0][0] as {
-        approvalSteps?: Array<{ approverStaffId?: string; decisionStatus?: string }>;
+        approvalSteps?: Array<{
+          approverStaffId?: string;
+          decisionStatus?: string;
+        }>;
         status?: string;
         nextApprovalStepIndex?: number | null;
       };
