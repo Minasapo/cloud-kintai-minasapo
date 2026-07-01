@@ -10,6 +10,7 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { STANDARD_PADDING } from "@shared/config/uiDimensions";
 import { AppButton } from "@shared/ui/button";
+import { AppSelect, AppTextField } from "@shared/ui/form";
 import dayjs from "dayjs";
 import { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -46,6 +47,7 @@ export default function DownloadForm() {
   } = useCloseDates();
   const [startDate, setStartDate] = useState(formatInputDate(dayjs()));
   const [endDate, setEndDate] = useState(formatInputDate(dayjs()));
+  const closeMonthSelectLabelId = "attendance-download-close-month-select";
 
   const workDates = useMemo(() => {
     const start = dayjs(startDate);
@@ -138,25 +140,67 @@ export default function DownloadForm() {
                   <label className="mb-1 block text-sm font-medium text-slate-600">
                     開始日
                   </label>
-                  <input
+                  <AppTextField
                     type="date"
                     value={startDate}
                     onChange={(event) => setStartDate(event.target.value)}
-                    className="w-full rounded-[18px] border border-slate-300/70 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
+                    size="small"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "18px",
+                        backgroundColor: "rgb(255 255 255)",
+                        "& fieldset": {
+                          borderColor: "rgb(203 213 225 / 0.7)",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "rgb(148 163 184)",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "rgb(16 185 129)",
+                        },
+                      },
+                      "& .MuiOutlinedInput-input": {
+                        padding: "10px 16px",
+                        fontSize: "0.875rem",
+                        color: "rgb(15 23 42)",
+                      },
+                    }}
                   />
                 </div>
-                <div className="hidden self-center pb-[11px] text-slate-400 sm:block">
+                <div className="hidden h-11 items-center text-slate-400 sm:flex">
                   〜
                 </div>
                 <div className="flex-1">
                   <label className="mb-1 block text-sm font-medium text-slate-600">
                     終了日
                   </label>
-                  <input
+                  <AppTextField
                     type="date"
                     value={endDate}
                     onChange={(event) => setEndDate(event.target.value)}
-                    className="w-full rounded-[18px] border border-slate-300/70 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
+                    size="small"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "18px",
+                        backgroundColor: "rgb(255 255 255)",
+                        "& fieldset": {
+                          borderColor: "rgb(203 213 225 / 0.7)",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "rgb(148 163 184)",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "rgb(16 185 129)",
+                        },
+                      },
+                      "& .MuiOutlinedInput-input": {
+                        padding: "10px 16px",
+                        fontSize: "0.875rem",
+                        color: "rgb(15 23 42)",
+                      },
+                    }}
                   />
                 </div>
               </div>
@@ -167,11 +211,13 @@ export default function DownloadForm() {
                     集計対象月から:
                   </span>
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <select
+                    <AppSelect<string>
+                      label="対象月"
+                      labelId={closeMonthSelectLabelId}
                       value={selectedCloseDate}
-                      onChange={(event) => {
+                      onChange={(value) => {
                         const closeDate = closeDates.find(
-                          (item) => item.closeDate === event.target.value,
+                          (item) => item.closeDate === value,
                         );
                         if (!closeDate) return;
                         setStartDate(
@@ -179,27 +225,59 @@ export default function DownloadForm() {
                         );
                         setEndDate(formatInputDate(dayjs(closeDate.endDate)));
                       }}
-                      className="min-w-0 flex-1 rounded-[18px] border border-slate-300/70 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
-                    >
-                      <option value="">対象月を選択</option>
-                      {closeDates
-                        .toSorted((a, b) =>
-                          dayjs(b.closeDate).diff(dayjs(a.closeDate)),
-                        )
-                        .map((closeDate, index) => (
-                          <option key={index} value={closeDate.closeDate}>
-                            {dayjs(closeDate.closeDate).format("YYYY/MM")}
-                          </option>
-                        ))}
-                    </select>
-                    <button
-                      type="button"
+                      options={[
+                        { value: "", label: "対象月を選択" },
+                        ...closeDates
+                          .toSorted((a, b) =>
+                            dayjs(b.closeDate).diff(dayjs(a.closeDate)),
+                          )
+                          .map((closeDate) => ({
+                            value: closeDate.closeDate,
+                            label: dayjs(closeDate.closeDate).format("YYYY/MM"),
+                          })),
+                      ]}
+                      sx={{
+                        minWidth: 0,
+                        flex: 1,
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "18px",
+                          backgroundColor: "rgb(255 255 255)",
+                          "& fieldset": {
+                            borderColor: "rgb(203 213 225 / 0.7)",
+                          },
+                          "&:hover fieldset": {
+                            borderColor: "rgb(148 163 184)",
+                          },
+                          "&.Mui-focused fieldset": {
+                            borderColor: "rgb(16 185 129)",
+                          },
+                        },
+                        "& .MuiSelect-select": {
+                          padding: "10px 16px",
+                          fontSize: "0.875rem",
+                          color: "rgb(15 23 42)",
+                        },
+                      }}
+                    />
+                    <AppButton
+                      variant="outline"
+                      tone="secondary"
+                      size="sm"
                       onClick={() => navigate("/admin/master/job_term")}
-                      className="inline-flex items-center justify-center gap-1 rounded-full border border-slate-300/70 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-[0_8px_24px_-20px_rgba(15,23,42,0.18)] transition hover:bg-slate-50"
+                      className="rounded-full whitespace-nowrap"
+                      startIcon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
+                      sx={{
+                        boxShadow: "0 8px 24px -20px rgba(15, 23, 42, 0.18)",
+                        borderColor: "rgb(203 213 225 / 0.7)",
+                        color: "rgb(51 65 85)",
+                        backgroundColor: "rgb(255 255 255)",
+                        "&:hover": {
+                          backgroundColor: "rgb(248 250 252)",
+                        },
+                      }}
                     >
-                      <AddCircleOutlineOutlinedIcon fontSize="small" />
                       新規
-                    </button>
+                    </AppButton>
                   </div>
                 </div>
               </div>
