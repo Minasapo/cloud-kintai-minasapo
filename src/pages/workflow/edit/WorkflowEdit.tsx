@@ -18,7 +18,11 @@ import { sendWorkflowSubmissionNotification } from "@features/workflow/notificat
 import { WorkflowStatus } from "@shared/api/graphql/types";
 import { createLogger } from "@shared/lib/logger";
 import { useAppNotification } from "@shared/lib/useAppNotification";
-import { AppButton, AppSplitButton, type AppSplitButtonOption } from "@shared/ui/button";
+import {
+  AppBackButton,
+  AppSplitButton,
+  type AppSplitButtonOption,
+} from "@shared/ui/button";
 import ConfirmDialog from "@shared/ui/feedback/ConfirmDialog";
 import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
 import {
@@ -241,7 +245,7 @@ export default function WorkflowEdit() {
         >
           <div className="mb-4 flex flex-col items-start gap-2">
             <div>
-              <AppButton
+              <AppBackButton
                 variant="ghost"
                 tone="neutral"
                 size="sm"
@@ -249,7 +253,7 @@ export default function WorkflowEdit() {
                 onClick={() => navigate(id ? `/workflow/${id}` : "/workflow")}
               >
                 申請詳細へ戻る
-              </AppButton>
+              </AppBackButton>
               <SectionTitle className="m-0 text-2xl font-bold text-slate-900">
                 申請を編集
               </SectionTitle>

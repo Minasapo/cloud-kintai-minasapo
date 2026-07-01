@@ -69,6 +69,10 @@ export function createLazyRoute<TProps extends object>(
           return <>{options.hydrateFallback}</>;
         };
       }
+    } else {
+      result.HydrateFallback = function LazyRouteDefaultHydrateFallback() {
+        return null;
+      };
     }
 
     return result as Awaited<ReturnType<LazyRouteFunction<RouteObject>>>;

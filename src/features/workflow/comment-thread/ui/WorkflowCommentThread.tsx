@@ -1,7 +1,9 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { useWorkflowDetailContext } from "@features/workflow/detail-panel/model/WorkflowDetailContext";
 import { PANEL_HEIGHTS } from "@shared/config/uiDimensions";
+import { AppAvatar } from "@shared/ui/avatar";
 import { AppButton } from "@shared/ui/button";
+import { AppTextField } from "@shared/ui/form";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { shouldTruncateWorkflowMessage } from "../model/workflowCommentUtils";
@@ -131,7 +133,7 @@ export function WorkflowCommentThreadView({
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="min-w-0 overflow-auto rounded-[20px] border border-slate-300/30 bg-slate-50 p-5"
+        className="min-w-0 overflow-auto rounded-[14px] border border-slate-300/30 bg-slate-50 p-5"
         style={{
           maxHeight: isMobile ? 360 : PANEL_HEIGHTS.SCROLLABLE_MAX,
         }}
@@ -179,14 +181,15 @@ export function WorkflowCommentThreadView({
                     isMine ? "flex-row-reverse justify-end" : "justify-start",
                   ].join(" ")}
                 >
-                  <div
+                  <AppAvatar
+                    size="small"
                     className={[
-                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium text-white",
+                      "flex shrink-0 items-center justify-center rounded-full text-xs font-medium text-white",
                       avatarBackgroundClass,
                     ].join(" ")}
                   >
                     {avatarText}
-                  </div>
+                  </AppAvatar>
 
                   <div
                     className={[
@@ -207,7 +210,7 @@ export function WorkflowCommentThreadView({
 
                 <div
                   className={[
-                    "min-w-0 max-w-full rounded-xl border px-4 py-3 text-sm leading-6 shadow-[0_16px_30px_-28px_rgba(15,23,42,0.28)] sm:max-w-[90%]",
+                    "min-w-0 max-w-full rounded-[10px] border px-4 py-3 text-sm leading-6 shadow-[0_16px_30px_-28px_rgba(15,23,42,0.28)] sm:max-w-[90%]",
                     isMine
                       ? "border-emerald-800/30 bg-emerald-500 text-white"
                       : "border-slate-300/60 bg-white text-slate-900",
@@ -248,9 +251,9 @@ export function WorkflowCommentThreadView({
         </div>
       </div>
 
-      <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end">
+      <div className="mt-2 flex w-full flex-col gap-2 sm:flex-row sm:items-end">
         <div className="min-w-0 flex-1">
-          <textarea
+          <AppTextField
             value={input}
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={(event) => {
@@ -260,9 +263,40 @@ export function WorkflowCommentThreadView({
               }
             }}
             disabled={sending}
-            rows={2}
+            multiline
+            minRows={2}
             placeholder="メッセージを入力..."
-            className="w-full resize-y rounded-[18px] border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 disabled:cursor-not-allowed disabled:bg-slate-100"
+            className="w-full"
+            fullWidth
+            sx={{
+              width: "100%",
+              "& .MuiOutlinedInput-root": {
+                alignItems: "flex-start",
+                borderRadius: "12px",
+                backgroundColor: "#fff",
+                boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+                "& fieldset": {
+                  borderColor: "rgb(203 213 225)",
+                },
+                "&:hover fieldset": {
+                  borderColor: "rgb(148 163 184)",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "rgb(16 185 129)",
+                  borderWidth: "1px",
+                },
+                "&.Mui-disabled": {
+                  backgroundColor: "rgb(248 250 252)",
+                },
+              },
+              "& .MuiInputBase-inputMultiline": {
+                resize: "vertical",
+                padding: "8px 12px",
+                fontSize: "0.875rem",
+                lineHeight: "1.25rem",
+                color: "rgb(15 23 42)",
+              },
+            }}
           />
           <p className="ml-1 mt-1 text-xs text-slate-500">
             Cmd/Ctrl+Enterで送信

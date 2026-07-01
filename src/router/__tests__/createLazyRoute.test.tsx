@@ -74,6 +74,13 @@ describe("createLazyRoute", () => {
     expect(route.ErrorBoundary).toBeDefined();
   });
 
+  it("sets default HydrateFallback when no fallback option is provided", async () => {
+    const lazy = createLazyRoute(async () => ({ default: Component }));
+    const route = await lazy();
+
+    expect(route.HydrateFallback).toBeDefined();
+  });
+
   it("wraps component with feature error boundary", async () => {
     const ThrowingComponent: React.FC = () => {
       throw new Error("feature crash");

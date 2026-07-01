@@ -1,3 +1,4 @@
+import AppAvatar from "@shared/ui/avatar/AppAvatar";
 import WorkflowStatusChip from "@entities/workflow/ui/WorkflowStatusChip";
 import { SubsectionTitle } from "@shared/ui/typography";
 
@@ -13,7 +14,7 @@ export default function WorkflowApprovalTimeline({
   steps,
 }: Props) {
   return (
-    <section className="rounded-[20px] border border-slate-200/80 bg-slate-50/75 p-4">
+    <section className="rounded-[14px] border border-slate-200/80 bg-slate-50/75 p-4">
       <SubsectionTitle className="mb-3 text-slate-950">{title}</SubsectionTitle>
       <div className="flex flex-col gap-4">
         {steps.map((step, idx) => {
@@ -33,19 +34,19 @@ export default function WorkflowApprovalTimeline({
           return (
             <div
               key={step.id}
-              className="flex flex-wrap items-center gap-3 rounded-[18px] border border-slate-200/80 bg-white px-4 py-3 shadow-[0_16px_30px_-28px_rgba(15,23,42,0.35)] sm:flex-nowrap sm:gap-4"
+              className="flex flex-wrap items-center gap-3 rounded-[12px] border border-slate-200/80 bg-white px-4 py-3 shadow-[0_16px_30px_-28px_rgba(15,23,42,0.35)] sm:flex-nowrap sm:gap-4"
             >
               <div className="flex min-w-0 items-center gap-3">
-                <div
-                  className="flex h-10 w-10 shrink-0 items-center justify-center font-bold"
-                  style={{
-                    borderRadius: "10px",
+                <AppAvatar
+                  size="large"
+                  sx={{
                     backgroundColor: badgeBackground,
                     color: "rgb(255 255 255)",
+                    fontWeight: 700,
                   }}
                 >
                   {idx === 0 ? "申" : idx}
-                </div>
+                </AppAvatar>
                 <div className="min-w-0">
                   <div className="truncate font-bold">{step.name}</div>
                   <div className="text-xs text-slate-500">
