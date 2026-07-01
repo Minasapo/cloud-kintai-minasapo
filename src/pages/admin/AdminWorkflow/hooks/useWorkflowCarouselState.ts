@@ -8,10 +8,11 @@ import {
 } from "@entities/attendance/api/attendanceApi";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
-import { GetWorkflowQuery, WorkflowStatus } from "@shared/api/graphql/types";
+import { GetWorkflowQuery } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useContext, useMemo, useRef, useState } from "react";
 
+import { resolveWorkflowActionState } from "../services/approvalWorkflowHelpers";
 import { useWorkflowApprovalActions } from "./useWorkflowApprovalActions";
 import { useWorkflowDetailData } from "./useWorkflowDetailData";
 
@@ -81,14 +82,9 @@ export function useWorkflowCarouselState({
     createAttendance,
     updateAttendance,
   });
-  const isApproveDisabled =
-    !workflowDetail?.id ||
-    workflowDetail.status === WorkflowStatus.APPROVED ||
-    workflowDetail.status === WorkflowStatus.CANCELLED;
-  const isRejectDisabled =
-    !workflowDetail?.id ||
-    workflowDetail.status === WorkflowStatus.REJECTED ||
-    workflowDetail.status === WorkflowStatus.CANCELLED;
+  const workflowActionState = resolveWorkflowActionState(workflowDetail);
+  const isApproveDisabled = !workflowActionState.canApprove;
+  const isRejectDisabled = !workflowActionState.canReject;
 
   const handlePrev = () => {
     if (!canGoPrev) return;

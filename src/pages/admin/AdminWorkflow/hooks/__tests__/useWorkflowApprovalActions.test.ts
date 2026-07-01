@@ -184,6 +184,54 @@ describe("useWorkflowApprovalActions", () => {
     expect(succeeded).toBe(true);
   });
 
+  it("PENDING でも却下可能ステップがない場合は却下せずエラー通知する", async () => {
+    const workflow = createWorkflow({
+      status: WorkflowStatus.PENDING,
+      approvalSteps: [
+        {
+          __typename: "ApprovalStep",
+          id: "step-1",
+          approverStaffId: "approver-1",
+          decisionStatus: ApprovalStatus.APPROVED,
+          approverComment: null,
+          decisionTimestamp: "2026-02-01T10:00:00.000Z",
+          stepOrder: 0,
+        },
+      ],
+      nextApprovalStepIndex: 0,
+    });
+
+    const { result } = renderHook(() =>
+      useWorkflowApprovalActions({
+        workflow,
+        cognitoUser: { id: "cognito-approver-id" },
+        staffs,
+        updateWorkflow,
+        setWorkflow,
+        notifySuccess,
+        notifyError,
+        getStartTime: () => dayjs("2026-02-01T09:00:00"),
+        getEndTime: () => dayjs("2026-02-01T18:00:00"),
+        getLunchRestStartTime: () => dayjs("2026-02-01T12:00:00"),
+        getLunchRestEndTime: () => dayjs("2026-02-01T13:00:00"),
+        getAttendanceByStaffAndDate,
+        createAttendance,
+        updateAttendance,
+      })
+    );
+
+    let succeeded = true;
+    await act(async () => {
+      succeeded = await result.current.handleReject();
+    });
+
+    expect(succeeded).toBe(false);
+    expect(updateWorkflow).not.toHaveBeenCalled();
+    expect(notifyError).toHaveBeenCalledWith(
+      "却下可能なステップが見つかりませんでした。"
+    );
+  });
+
   it("キャンセル済み申請の承認は失敗として扱う", async () => {
     const workflow = createWorkflow({
       status: WorkflowStatus.CANCELLED,
@@ -339,5 +387,121 @@ describe("useWorkflowApprovalActions", () => {
       "有給申請を承認しました（勤怠情報の更新はスキップ）"
     );
     expect(notifySuccess).not.toHaveBeenCalledWith("承認しました");
+  });
+
+  it("承認済み申請の却下（差し戻し）は REJECTED に遷移して差し戻し通知を出す", async () => {
+    const workflow = createWorkflow({
+      status: WorkflowStatus.APPROVED,
+      approvedStaffIds: ["approver-staff-id"],
+      finalDecisionTimestamp: "2026-02-01T10:00:00.000Z",
+      approvalSteps: [
+        {
+          __typename: "ApprovalStep",
+          id: "step-1",
+          approverStaffId: "approver-1",
+          decisionStatus: ApprovalStatus.APPROVED,
+          approverComment: null,
+          decisionTimestamp: "2026-02-01T10:00:00.000Z",
+          stepOrder: 0,
+        },
+      ],
+    });
+    updateWorkflow.mockResolvedValue(
+      createWorkflow({ status: WorkflowStatus.REJECTED })
+    );
+
+    const { result } = renderHook(() =>
+      useWorkflowApprovalActions({
+        workflow,
+        cognitoUser: { id: "cognito-approver-id" },
+        staffs,
+        updateWorkflow,
+        setWorkflow,
+        notifySuccess,
+        notifyError,
+        getStartTime: () => dayjs("2026-02-01T09:00:00"),
+        getEndTime: () => dayjs("2026-02-01T18:00:00"),
+        getLunchRestStartTime: () => dayjs("2026-02-01T12:00:00"),
+        getLunchRestEndTime: () => dayjs("2026-02-01T13:00:00"),
+        getAttendanceByStaffAndDate,
+        createAttendance,
+        updateAttendance,
+      })
+    );
+
+    let succeeded = false;
+    await act(async () => {
+      succeeded = await result.current.handleReject();
+    });
+
+    expect(succeeded).toBe(true);
+    expect(updateWorkflow).toHaveBeenCalledTimes(1);
+    expect(setWorkflow).toHaveBeenCalledTimes(1);
+    expect(notifySuccess).toHaveBeenCalledWith("差し戻しました");
+    expect(notifyError).not.toHaveBeenCalled();
+
+    const updateInput = updateWorkflow.mock.calls[0][0] as UpdateWorkflowInput;
+    expect(updateInput.status).toBe(WorkflowStatus.REJECTED);
+    expect(
+      updateInput.comments?.some(
+        (c) =>
+          typeof c === "object" &&
+          c !== null &&
+          "text" in c &&
+          (c as { text?: string }).text === "承認済みの申請を差し戻しました"
+      )
+    ).toBe(true);
+  });
+
+  it("承認済み申請の差し戻し時に operationLog が workflow.revert として記録される", async () => {
+    const workflow = createWorkflow({
+      status: WorkflowStatus.APPROVED,
+      approvedStaffIds: ["approver-staff-id"],
+      finalDecisionTimestamp: "2026-02-01T10:00:00.000Z",
+      approvalSteps: [
+        {
+          __typename: "ApprovalStep",
+          id: "step-1",
+          approverStaffId: "approver-1",
+          decisionStatus: ApprovalStatus.APPROVED,
+          approverComment: null,
+          decisionTimestamp: "2026-02-01T10:00:00.000Z",
+          stepOrder: 0,
+        },
+      ],
+    });
+    updateWorkflow.mockResolvedValue(
+      createWorkflow({ status: WorkflowStatus.REJECTED })
+    );
+
+    const { result } = renderHook(() =>
+      useWorkflowApprovalActions({
+        workflow,
+        cognitoUser: { id: "cognito-approver-id" },
+        staffs,
+        updateWorkflow,
+        setWorkflow,
+        notifySuccess,
+        notifyError,
+        getStartTime: () => dayjs("2026-02-01T09:00:00"),
+        getEndTime: () => dayjs("2026-02-01T18:00:00"),
+        getLunchRestStartTime: () => dayjs("2026-02-01T12:00:00"),
+        getLunchRestEndTime: () => dayjs("2026-02-01T13:00:00"),
+        getAttendanceByStaffAndDate,
+        createAttendance,
+        updateAttendance,
+      })
+    );
+
+    await act(async () => {
+      await result.current.handleReject();
+    });
+
+    expect(logOperationEventMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "workflow.revert",
+        details: expect.objectContaining({ result: "reverted" }),
+      })
+    );
   });
 });

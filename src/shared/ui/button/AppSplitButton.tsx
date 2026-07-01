@@ -90,6 +90,7 @@ export default function AppSplitButton({
           onClick={onPrimaryClick}
           title={selected.title}
           disabled={disabled || selected.disabled}
+          sx={{ whiteSpace: "nowrap", flex: 1 }}
         >
           {selected.label}
         </Button>

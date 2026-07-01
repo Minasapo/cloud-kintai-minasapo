@@ -75,6 +75,7 @@ export function WorkflowMetadataPanelBase({
   const isAbsence = category === WorkflowCategory.ABSENCE;
   const isClockCorrection = category === WorkflowCategory.CLOCK_CORRECTION;
   const isCustom = category === WorkflowCategory.CUSTOM;
+  const isCompensatoryLeave = category === WorkflowCategory.COMPENSATORY_LEAVE;
 
   const overtimeDate = formatDateSlash(overTimeDetails?.date);
   const overtimeTimeRange = overTimeDetails?.startTime
@@ -173,6 +174,22 @@ export function WorkflowMetadataPanelBase({
                 value={customWorkflowContent || "-"}
                 preserveWhitespace
               />
+            </>
+          )}
+
+          {isCompensatoryLeave && (
+            <>
+              <MetadataRow
+                label="振替対象日"
+                value={formatDateSlash(overTimeDetails?.date) || "-"}
+              />
+              <MetadataRow
+                label="振替取得日"
+                value={formatDateSlash(overTimeDetails?.startTime) || "-"}
+              />
+              {overTimeDetails?.reason && (
+                <MetadataRow label="理由" value={overTimeDetails.reason} />
+              )}
             </>
           )}
         </div>

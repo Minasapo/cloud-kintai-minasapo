@@ -13,21 +13,32 @@ import {
 } from "@entities/workflow/lib/workflowLabels";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
 import { WorkflowMetadataPanelBase } from "@features/workflow/detail-panel/ui/WorkflowMetadataPanel";
+import { Box, Step, StepLabel, Stepper } from "@mui/material";
 import { GetWorkflowQuery, WorkflowStatus } from "@shared/api/graphql/types";
 import { designTokenVar } from "@shared/designSystem";
 import { createLogger } from "@shared/lib/logger";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useAppNotification } from "@shared/lib/useAppNotification";
-import { AppButton } from "@shared/ui/button";
+import {
+  AppButton,
+  AppSplitButton,
+  type AppSplitButtonOption,
+} from "@shared/ui/button";
+import { AppDialog } from "@shared/ui/feedback";
 import { SectionTitle, SubsectionTitle } from "@shared/ui/typography";
-import { useCallback, useContext, useMemo } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { useWorkflowApprovalActions } from "../hooks/useWorkflowApprovalActions";
 import { useWorkflowDetailData } from "../hooks/useWorkflowDetailData";
 import { useWorkflowDetailViewModel } from "../hooks/useWorkflowDetailViewModel";
+import { resolveWorkflowActionState } from "../services/approvalWorkflowHelpers";
+import { buildWorkflowRepairPlan } from "../services/workflowRepair";
 import WorkflowCommentSection from "./WorkflowCommentSection";
 
-const PANEL_BACKGROUND = designTokenVar("color.surface.primary", "rgb(255 255 255)");
+const PANEL_BACKGROUND = designTokenVar(
+  "color.surface.primary",
+  "rgb(255 255 255)",
+);
 const PANEL_BORDER = designTokenVar("color.border.subtle", "rgb(215 224 219)");
 const PANEL_RADIUS = designTokenVar("radius.lg", "12px");
 const HERO_BACKGROUND = designTokenVar(
@@ -42,7 +53,10 @@ const HERO_LABEL = designTokenVar("color.text.muted", "rgb(94 114 104)");
 const HERO_TITLE = designTokenVar("color.text.primary", "rgb(30 42 37)");
 const SECTION_TITLE = designTokenVar("color.text.primary", "rgb(30 42 37)");
 const LOADING_TEXT = designTokenVar("color.text.muted", "rgb(94 114 104)");
-const ERROR_TEXT = designTokenVar("color.feedback.danger.base", "rgb(215 68 62)");
+const ERROR_TEXT = designTokenVar(
+  "color.feedback.danger.base",
+  "rgb(215 68 62)",
+);
 const logger = createLogger("WorkflowDetailPanel");
 
 type WorkflowDetailHeroProps = {
@@ -55,6 +69,9 @@ type WorkflowDetailHeroProps = {
   isApproveDisabled: boolean;
   handleReject: () => void;
   isRejectDisabled: boolean;
+  handleRepair?: () => void;
+  isRepairDisabled?: boolean;
+  repairActionLabel?: string | null;
 };
 
 function WorkflowDetailHero({
@@ -67,7 +84,75 @@ function WorkflowDetailHero({
   isApproveDisabled,
   handleReject,
   isRejectDisabled,
+  handleRepair,
+  isRepairDisabled,
+  repairActionLabel,
 }: WorkflowDetailHeroProps) {
+  const splitButtonOptions: AppSplitButtonOption[] = useMemo(
+    () => [
+      {
+        key: "approve",
+        label: "承認",
+        disabled: isApproveDisabled,
+      },
+      {
+        key: "reject",
+        label: "却下",
+        disabled: isRejectDisabled,
+      },
+      ...(handleRepair && repairActionLabel
+        ? [
+            {
+              key: "repair",
+              label: repairActionLabel,
+              disabled: isRepairDisabled,
+            },
+          ]
+        : []),
+    ],
+    [handleRepair, repairActionLabel, isRepairDisabled, isApproveDisabled, isRejectDisabled],
+  );
+
+  // 最初の enabled なアクションを初期値とする
+  const getInitialAction = (): "approve" | "reject" | "repair" => {
+    const enabledOption = splitButtonOptions.find((opt) => !opt.disabled);
+    if (enabledOption) {
+      return enabledOption.key as "approve" | "reject" | "repair";
+    }
+    return "approve";
+  };
+
+  const [selectedAction, setSelectedAction] = useState<
+    "approve" | "reject" | "repair"
+  >(getInitialAction());
+
+  // selectedActionが無効になった場合、最初の有効なアクションに切り替える
+  useEffect(() => {
+    const selectedOption = splitButtonOptions.find(
+      (opt) => opt.key === selectedAction,
+    );
+    if (selectedOption?.disabled) {
+      const enabledOption = splitButtonOptions.find((opt) => !opt.disabled);
+      if (enabledOption) {
+        setSelectedAction(enabledOption.key as "approve" | "reject" | "repair");
+      }
+    }
+  }, [selectedAction, splitButtonOptions]);
+
+  const handleSplitButtonAction = () => {
+    if (selectedAction === "repair") {
+      handleRepair?.();
+    } else if (selectedAction === "approve") {
+      handleApprove();
+    } else if (selectedAction === "reject") {
+      handleReject();
+    }
+  };
+
+  const handleActionChange = (key: string) => {
+    setSelectedAction(key as "approve" | "reject" | "repair");
+  };
+
   return (
     <div
       className="mb-6 flex flex-col gap-4 rounded-2xl p-4 sm:p-5"
@@ -76,6 +161,21 @@ function WorkflowDetailHero({
         background: HERO_BACKGROUND,
       }}
     >
+      {showBackButton && onBack && (
+        <div>
+          <AppButton
+            variant="ghost"
+            tone="secondary"
+            size="sm"
+            onClick={onBack}
+            className="min-w-0"
+            startIcon={<BackArrowIcon />}
+          >
+            ワークフロー一覧へ戻る
+          </AppButton>
+        </div>
+      )}
+
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
@@ -89,38 +189,22 @@ function WorkflowDetailHero({
         </div>
 
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
-          {showBackButton && onBack && (
-            <AppButton
-              variant="outline"
-              tone="secondary"
-              size="sm"
-              onClick={onBack}
-              className="min-w-0"
-              style={{
-                backgroundColor: "rgba(255,255,255,0.72)",
-              }}
-              startIcon={<BackArrowIcon />}
-            >
-              ワークフロー一覧へ戻る
-            </AppButton>
-          )}
-
-          <AppButton
-            onClick={handleApprove}
-            disabled={isApproveDisabled}
-            className="min-w-24"
-          >
-            承認
-          </AppButton>
-
-          <AppButton
-            tone="danger"
-            onClick={handleReject}
-            disabled={isRejectDisabled}
-            className="min-w-24"
-          >
-            却下
-          </AppButton>
+          <AppSplitButton
+            options={splitButtonOptions}
+            selectedKey={selectedAction}
+            onSelectedKeyChange={handleActionChange}
+            onPrimaryClick={handleSplitButtonAction}
+            variant="solid"
+            tone={
+              selectedAction === "reject"
+                ? "danger"
+                : selectedAction === "repair"
+                  ? "secondary"
+                  : "primary"
+            }
+            size="sm"
+            className="w-40"
+          />
         </div>
       </div>
 
@@ -244,6 +328,11 @@ export default function WorkflowDetailPanel({
   const statusLabel = workflow?.status
     ? (STATUS_LABELS[workflow.status] ?? workflow.status)
     : "—";
+  const workflowActionState = resolveWorkflowActionState(workflow);
+  const workflowRepairPlan = buildWorkflowRepairPlan(
+    workflow,
+    workflowActionState.issue,
+  );
   const isApproveDisabled =
     !workflow?.id ||
     workflow.status === WorkflowStatus.APPROVED ||
@@ -292,6 +381,87 @@ export default function WorkflowDetailPanel({
     createAttendance,
     updateAttendance,
   });
+  const [isRepairConfirmOpen, setIsRepairConfirmOpen] = useState(false);
+  const [isRepairing, setIsRepairing] = useState(false);
+  const [repairStep, setRepairStep] = useState(0);
+  const [repairCompleted, setRepairCompleted] = useState(false);
+  const [isCheckingRepairNeed, setIsCheckingRepairNeed] = useState(false);
+  const [dialogRepairPlan, setDialogRepairPlan] = useState(workflowRepairPlan);
+
+  const handleRepairClick = useCallback(() => {
+    if (!workflow?.id) return;
+
+    setIsCheckingRepairNeed(true);
+    setDialogRepairPlan(null);
+    setRepairStep(0);
+    setRepairCompleted(false);
+    setIsRepairConfirmOpen(true);
+  }, [workflow?.id]);
+
+  useEffect(() => {
+    if (!isRepairConfirmOpen || !isCheckingRepairNeed) {
+      return;
+    }
+
+    const timerId = window.setTimeout(() => {
+      setDialogRepairPlan(workflowRepairPlan);
+      setRepairStep(workflowRepairPlan ? 1 : 0);
+      setIsCheckingRepairNeed(false);
+    }, 200);
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [isCheckingRepairNeed, isRepairConfirmOpen, workflowRepairPlan]);
+
+  const handleRepairConfirm = useCallback(async () => {
+    if (!workflow?.id || !dialogRepairPlan) return;
+
+    setIsRepairing(true);
+    setRepairStep(2);
+    try {
+      const repaired = await updateWorkflow(dialogRepairPlan.input);
+      setWorkflow(repaired);
+      setRepairStep(2);
+      setRepairCompleted(true);
+      notify({
+        title: "修復しました",
+        description: dialogRepairPlan.successMessage,
+        tone: "success",
+        dedupeKey: `workflow-repair-${workflow.id}`,
+      });
+      // ダイアログを自動的に閉じる（成功時）
+      setTimeout(() => {
+        setIsRepairConfirmOpen(false);
+        setIsRepairing(false);
+        setRepairStep(0);
+        setRepairCompleted(false);
+        setIsCheckingRepairNeed(false);
+        setDialogRepairPlan(null);
+      }, 1500);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error("Workflow repair failed:", message);
+      notify({
+        title: "修復に失敗しました",
+        description: message,
+        tone: "error",
+        dedupeKey: `workflow-repair-error-${workflow?.id ?? "unknown"}`,
+      });
+      setIsRepairing(false);
+      setRepairStep(1);
+    }
+  }, [dialogRepairPlan, notify, setWorkflow, updateWorkflow, workflow]);
+
+  const handleRepairDialogClose = useCallback(() => {
+    if (!isRepairing) {
+      setIsRepairConfirmOpen(false);
+      setRepairStep(0);
+      setRepairCompleted(false);
+      setIsCheckingRepairNeed(false);
+      setDialogRepairPlan(null);
+    }
+  }, [isRepairing]);
   return (
     <section
       className="w-full p-4 sm:p-6"
@@ -312,7 +482,176 @@ export default function WorkflowDetailPanel({
         isApproveDisabled={isApproveDisabled}
         handleReject={handleReject}
         isRejectDisabled={isRejectDisabled}
+        handleRepair={handleRepairClick}
+        isRepairDisabled={false}
+        repairActionLabel="データを自動修復"
       />
+
+      <AppDialog
+        open={isRepairConfirmOpen}
+        title="データの修復"
+        onClose={handleRepairDialogClose}
+        loading={false}
+        maxWidth="sm"
+      >
+        <div className="w-full">
+          <Stepper activeStep={repairStep} sx={{ mb: 3 }}>
+            <Step completed={!isCheckingRepairNeed}>
+              <StepLabel>修復要否の確認</StepLabel>
+            </Step>
+            <Step completed={repairStep > 1}>
+              <StepLabel>修復内容の確認</StepLabel>
+            </Step>
+            <Step completed={repairCompleted}>
+              <StepLabel>修復を実行</StepLabel>
+            </Step>
+          </Stepper>
+
+          {isCheckingRepairNeed && (
+            <div className="flex flex-col items-center justify-center py-6">
+              <div className="mb-4">
+                <div
+                  className="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"
+                  role="status"
+                  aria-label="修復要否を確認中..."
+                />
+              </div>
+              <p className="text-sm font-medium text-gray-700">
+                修復の必要性を確認中...
+              </p>
+            </div>
+          )}
+
+          {!isCheckingRepairNeed && !dialogRepairPlan && (
+            <div className="flex flex-col items-center justify-center py-6">
+              <div className="mb-4 flex items-center justify-center w-16 h-16 rounded-full bg-green-100">
+                <svg
+                  className="w-8 h-8 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-gray-700">
+                データの修復の必要はありませんでした
+              </p>
+            </div>
+          )}
+
+          {repairStep === 1 && dialogRepairPlan && (
+            <div className="space-y-4">
+              <div>
+                <p className="m-0 text-sm font-semibold mb-2">修復理由</p>
+                <p className="m-0 text-sm text-gray-700 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                  {dialogRepairPlan.repairReason}
+                </p>
+              </div>
+              <div>
+                <p className="m-0 text-sm font-semibold mb-2">修復内容</p>
+                <ul className="m-0 space-y-2">
+                  {dialogRepairPlan.repairDetails.map((detail, index) => (
+                    <li
+                      key={index}
+                      className="flex items-start gap-2 text-sm text-gray-700 bg-gray-50 p-2 rounded"
+                    >
+                      <span className="text-green-600 font-bold">✓</span>
+                      <span>{detail}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {repairStep === 1 && (
+            <div className="flex flex-col items-center justify-center py-6">
+              <div className="mb-4">
+                <div
+                  className="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"
+                  role="status"
+                  aria-label="修復中..."
+                />
+              </div>
+              <p className="text-sm font-medium text-gray-700">修復を実行中...</p>
+              <p className="text-xs text-gray-500 mt-1">
+                しばらくお待ちください
+              </p>
+            </div>
+          )}
+
+          {repairStep === 2 && repairCompleted && (
+            <div className="flex flex-col items-center justify-center py-6">
+              <div className="mb-4 flex items-center justify-center w-16 h-16 rounded-full bg-green-100">
+                <svg
+                  className="w-8 h-8 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-gray-700">修復が完了しました</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {dialogRepairPlan?.successMessage}
+              </p>
+            </div>
+          )}
+
+          <Box sx={{ display: "flex", gap: 1, mt: 4, justifyContent: "flex-end" }}>
+            {!isCheckingRepairNeed && !dialogRepairPlan && (
+              <AppButton
+                variant="solid"
+                tone="primary"
+                onClick={handleRepairDialogClose}
+              >
+                閉じる
+              </AppButton>
+            )}
+            {repairStep === 1 && dialogRepairPlan && (
+              <>
+                <AppButton
+                  variant="outline"
+                  tone="neutral"
+                  onClick={handleRepairDialogClose}
+                  disabled={isRepairing}
+                >
+                  キャンセル
+                </AppButton>
+                <AppButton
+                  variant="solid"
+                  tone="secondary"
+                  onClick={handleRepairConfirm}
+                  disabled={isRepairing}
+                >
+                  修復する
+                </AppButton>
+              </>
+            )}
+            {repairStep === 2 && (
+              <AppButton
+                variant="solid"
+                tone="primary"
+                onClick={handleRepairDialogClose}
+              >
+                閉じる
+              </AppButton>
+            )}
+          </Box>
+        </div>
+      </AppDialog>
 
       {loading && (
         <p className="m-0 text-sm" style={{ color: LOADING_TEXT }}>

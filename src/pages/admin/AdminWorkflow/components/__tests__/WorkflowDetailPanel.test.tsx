@@ -1,6 +1,10 @@
 import { AuthContext } from "@app/providers/auth/AuthContext";
 import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
-import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
+import {
+  ApprovalStatus,
+  WorkflowCategory,
+  WorkflowStatus,
+} from "@shared/api/graphql/types";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
@@ -12,6 +16,7 @@ import WorkflowDetailPanel from "../WorkflowDetailPanel";
 const mockHandleApprove = jest.fn();
 const mockHandleReject = jest.fn();
 const mockSetWorkflow = jest.fn();
+const mockUpdateWorkflow = jest.fn();
 const mockUseWorkflowDetailData = jest.fn();
 const mockUseWorkflowDetailViewModel = jest.fn();
 const mockDispatch = jest.fn();
@@ -32,7 +37,7 @@ jest.mock("@entities/staff/model/useStaffs/useStaffs", () => ({
 
 jest.mock("@entities/workflow/model/useWorkflows", () => ({
   __esModule: true,
-  default: () => ({ update: jest.fn() }),
+  default: () => ({ update: mockUpdateWorkflow }),
 }));
 
 jest.mock("../../hooks/useWorkflowApprovalActions", () => ({
@@ -180,6 +185,7 @@ function renderPanel(
 describe("WorkflowDetailPanel", () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    mockUpdateWorkflow.mockResolvedValue(makeWorkflow());
 
     // デフォルト: ロード完了・ワークフローあり
     mockUseWorkflowDetailData.mockReturnValue({
@@ -391,6 +397,32 @@ describe("WorkflowDetailPanel", () => {
       expect(screen.getByRole("button", { name: "承認" })).not.toBeDisabled();
     });
 
+    it("PENDING でも承認対象ステップがない場合は承認ボタンが無効", () => {
+      mockUseWorkflowDetailData.mockReturnValue({
+        workflow: makeWorkflow({
+          status: WorkflowStatus.PENDING,
+          approvalSteps: [
+            {
+              __typename: "ApprovalStep",
+              id: "step-1",
+              approverStaffId: "approver-1",
+              decisionStatus: ApprovalStatus.APPROVED,
+              approverComment: null,
+              decisionTimestamp: "2024-01-01T00:00:00.000Z",
+              stepOrder: 0,
+            },
+          ],
+          nextApprovalStepIndex: 0,
+        }),
+        setWorkflow: mockSetWorkflow,
+        loading: false,
+        error: null,
+      });
+
+      renderPanel();
+      expect(screen.getByRole("button", { name: "承認" })).toBeDisabled();
+    });
+
     it("承認ボタンをクリックすると handleApprove が呼ばれる", async () => {
       const user = userEvent.setup();
       renderPanel();
@@ -443,6 +475,93 @@ describe("WorkflowDetailPanel", () => {
     });
 
     it("ステータスが PENDING の場合は却下ボタンが有効", () => {
+      renderPanel();
+      expect(screen.getByRole("button", { name: "却下" })).not.toBeDisabled();
+    });
+
+    it("PENDING でも却下対象ステップがない場合は却下ボタンが無効", () => {
+      mockUseWorkflowDetailData.mockReturnValue({
+        workflow: makeWorkflow({
+          status: WorkflowStatus.PENDING,
+          approvalSteps: [
+            {
+              __typename: "ApprovalStep",
+              id: "step-1",
+              approverStaffId: "approver-1",
+              decisionStatus: ApprovalStatus.APPROVED,
+              approverComment: null,
+              decisionTimestamp: "2024-01-01T00:00:00.000Z",
+              stepOrder: 0,
+            },
+          ],
+          nextApprovalStepIndex: 0,
+        }),
+        setWorkflow: mockSetWorkflow,
+        loading: false,
+        error: null,
+      });
+
+      renderPanel();
+      expect(screen.getByRole("button", { name: "却下" })).toBeDisabled();
+    });
+
+    it("不整合データでは修復ボタンが表示される", () => {
+      mockUseWorkflowDetailData.mockReturnValue({
+        workflow: makeWorkflow({
+          status: WorkflowStatus.SUBMITTED,
+          approvalSteps: [],
+          assignedApproverStaffIds: [],
+        }),
+        setWorkflow: mockSetWorkflow,
+        loading: false,
+        error: null,
+      });
+
+      renderPanel();
+      expect(
+        screen.getByRole("button", { name: "修復して再判定" }),
+      ).toBeInTheDocument();
+    });
+
+    it("修復ボタンを押すと承認チェーンの修復更新が呼ばれる", async () => {
+      const user = userEvent.setup();
+      mockUseWorkflowDetailData.mockReturnValue({
+        workflow: makeWorkflow({
+          status: WorkflowStatus.SUBMITTED,
+          approvalSteps: [],
+          assignedApproverStaffIds: [],
+        }),
+        setWorkflow: mockSetWorkflow,
+        loading: false,
+        error: null,
+      });
+
+      renderPanel();
+
+      await user.click(
+        screen.getByRole("button", { name: "修復して再判定" }),
+      );
+
+      expect(mockUpdateWorkflow).toHaveBeenCalledTimes(1);
+      const payload = mockUpdateWorkflow.mock.calls[0][0] as {
+        approvalSteps?: Array<{ approverStaffId?: string; decisionStatus?: string }>;
+        status?: string;
+        nextApprovalStepIndex?: number | null;
+      };
+      expect(payload.status).toBe(WorkflowStatus.SUBMITTED);
+      expect(payload.nextApprovalStepIndex).toBe(0);
+      expect(payload.approvalSteps?.[0]?.approverStaffId).toBe("ADMINS");
+      expect(payload.approvalSteps?.[0]?.decisionStatus).toBe("PENDING");
+    });
+
+    it("ステータスが APPROVED の場合は差し戻しのため却下ボタンが有効", () => {
+      mockUseWorkflowDetailData.mockReturnValue({
+        workflow: makeWorkflow({ status: WorkflowStatus.APPROVED }),
+        setWorkflow: mockSetWorkflow,
+        loading: false,
+        error: null,
+      });
+
       renderPanel();
       expect(screen.getByRole("button", { name: "却下" })).not.toBeDisabled();
     });

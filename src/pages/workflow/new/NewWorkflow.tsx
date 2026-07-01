@@ -355,11 +355,26 @@ export default function NewWorkflow() {
       staff,
       staffs,
     );
-    if (approvalSteps.length > 0) {
-      input.approvalSteps = approvalSteps;
-      input.assignedApproverStaffIds = assignedApproverStaffIds;
-      input.nextApprovalStepIndex = 0;
-    }
+    // If no approval steps generated (no approver setting), fallback to ADMINS
+    const stepsToUse = approvalSteps.length > 0
+      ? approvalSteps
+      : [
+          {
+            id: `fallback-admin-${Date.now()}`,
+            approverStaffId: "ADMINS",
+            decisionStatus: ApprovalStatus.PENDING,
+            approverComment: null,
+            decisionTimestamp: null,
+            stepOrder: 0,
+          },
+        ];
+    const approversToUse = approvalSteps.length > 0
+      ? assignedApproverStaffIds
+      : ["ADMINS"];
+
+    input.approvalSteps = stepsToUse;
+    input.assignedApproverStaffIds = approversToUse;
+    input.nextApprovalStepIndex = 0;
 
     if (staff?.approverSetting) {
       input.submitterApproverSetting =
