@@ -7,10 +7,7 @@ import {
   useUpdateAttendanceMutation,
 } from "@entities/attendance/api/attendanceApi";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
-import {
-  getWorkflowCategoryLabel,
-  STATUS_LABELS,
-} from "@entities/workflow/lib/workflowLabels";
+import { getWorkflowCategoryLabel } from "@entities/workflow/lib/workflowLabels";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
 import { WorkflowMetadataPanelBase } from "@features/workflow/detail-panel/ui/WorkflowMetadataPanel";
 import { Box, Step, StepLabel, Stepper } from "@mui/material";
@@ -53,7 +50,6 @@ const HERO_BORDER = designTokenVar(
   "component.adminWorkflow.detail.hero.border",
   "rgba(15, 168, 94, 0.18)",
 );
-const HERO_LABEL = designTokenVar("color.text.muted", "rgb(94 114 104)");
 const HERO_TITLE = designTokenVar("color.text.primary", "rgb(30 42 37)");
 const SECTION_TITLE = designTokenVar("color.text.primary", "rgb(30 42 37)");
 const LOADING_TEXT = designTokenVar("color.text.muted", "rgb(94 114 104)");
@@ -64,9 +60,6 @@ const ERROR_TEXT = designTokenVar(
 const logger = createLogger("WorkflowDetailPanel");
 
 type WorkflowDetailHeroProps = {
-  statusLabel: string;
-  approvalStepsCount: number;
-  commentsCount: number;
   showBackButton: boolean;
   onBack?: () => void;
   handleApprove: () => void;
@@ -79,9 +72,6 @@ type WorkflowDetailHeroProps = {
 };
 
 function WorkflowDetailHero({
-  statusLabel,
-  approvalStepsCount,
-  commentsCount,
   showBackButton,
   onBack,
   handleApprove,
@@ -207,53 +197,6 @@ function WorkflowDetailHero({
             size="sm"
             className="w-40"
           />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div
-          className="rounded-xl p-4"
-          style={{ backgroundColor: "rgba(255,255,255,0.72)" }}
-        >
-          <p className="m-0 text-xs" style={{ color: HERO_LABEL }}>
-            現在ステータス
-          </p>
-          <p
-            className="m-0 mt-1 text-sm font-bold"
-            style={{ color: HERO_TITLE }}
-          >
-            {statusLabel}
-          </p>
-        </div>
-
-        <div
-          className="rounded-xl p-4"
-          style={{ backgroundColor: "rgba(255,255,255,0.72)" }}
-        >
-          <p className="m-0 text-xs" style={{ color: HERO_LABEL }}>
-            承認ステップ
-          </p>
-          <p
-            className="m-0 mt-1 text-sm font-bold"
-            style={{ color: HERO_TITLE }}
-          >
-            {approvalStepsCount} 件
-          </p>
-        </div>
-
-        <div
-          className="rounded-xl p-4"
-          style={{ backgroundColor: "rgba(255,255,255,0.72)" }}
-        >
-          <p className="m-0 text-xs" style={{ color: HERO_LABEL }}>
-            コメント件数
-          </p>
-          <p
-            className="m-0 mt-1 text-sm font-bold"
-            style={{ color: HERO_TITLE }}
-          >
-            {commentsCount} 件
-          </p>
         </div>
       </div>
     </div>
@@ -511,9 +454,6 @@ export default function WorkflowDetailPanel({
       staffs,
     });
   const categoryLabel = getWorkflowCategoryLabel(workflow);
-  const statusLabel = workflow?.status
-    ? (STATUS_LABELS[workflow.status] ?? workflow.status)
-    : "—";
   const workflowActionState = resolveWorkflowActionState(workflow);
   const workflowRepairPlan = buildWorkflowRepairPlan(
     workflow,
@@ -589,9 +529,6 @@ export default function WorkflowDetailPanel({
       }}
     >
       <WorkflowDetailHero
-        statusLabel={statusLabel}
-        approvalStepsCount={approvalSteps.length}
-        commentsCount={workflow?.comments?.filter(Boolean).length ?? 0}
         showBackButton={showBackButton}
         onBack={onBack}
         handleApprove={handleApprove}
