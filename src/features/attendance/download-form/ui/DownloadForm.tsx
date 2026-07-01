@@ -265,7 +265,9 @@ export default function DownloadForm() {
                       size="sm"
                       onClick={() => navigate("/admin/master/job_term")}
                       className="rounded-full whitespace-nowrap"
-                      startIcon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
+                      startIcon={
+                        <AddCircleOutlineOutlinedIcon fontSize="small" />
+                      }
                       sx={{
                         boxShadow: "0 8px 24px -20px rgba(15, 23, 42, 0.18)",
                         borderColor: "rgb(203 213 225 / 0.7)",
