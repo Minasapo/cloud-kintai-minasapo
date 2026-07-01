@@ -1,4 +1,5 @@
 import { useAppDispatchV2, useAppSelectorV2 } from "@app/hooks";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { designTokenVar } from "@shared/designSystem";
 import {
   dismissNotification,
@@ -6,6 +7,7 @@ import {
   type NotificationTone,
   selectNotifications,
 } from "@shared/lib/store/notificationSlice";
+import { AppIconButton } from "@shared/ui/button";
 import { APP_LAYER_Z_INDEX } from "@shared/ui/overlay/layers";
 import OverlayPortal from "@shared/ui/overlay/OverlayPortal";
 import { useEffect } from "react";
@@ -110,20 +112,6 @@ function ToneIcon({ tone }: { tone: NotificationTone }) {
   );
 }
 
-function CloseIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
-      <path
-        d="M5 5l10 10M15 5 5 15"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
 function NotificationCard({
   notification,
 }: {
@@ -173,21 +161,23 @@ function NotificationCard({
           ) : null}
         </div>
 
-        <button
-          type="button"
+        <AppIconButton
           onClick={() => dispatch(dismissNotification(notification.id))}
           aria-label="Close notification"
-          className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-current opacity-80 transition hover:opacity-100"
+          tone="neutral"
+          size="sm"
+          className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full p-0 text-current opacity-80 transition hover:opacity-100"
         >
-          <CloseIcon />
-        </button>
+          <CloseRoundedIcon className="h-4 w-4" />
+        </AppIconButton>
       </div>
     </div>
   );
 }
 
 export default function NotificationViewport() {
-  const notifications: NotificationItem[] = useAppSelectorV2(selectNotifications);
+  const notifications: NotificationItem[] =
+    useAppSelectorV2(selectNotifications);
 
   if (notifications.length === 0) {
     return null;
