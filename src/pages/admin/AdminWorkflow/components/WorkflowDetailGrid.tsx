@@ -43,24 +43,6 @@ export default function WorkflowDetailGrid({
             <WorkflowStatusChip status={currentWorkflow.status} />
           </div>
         </div>
-
-        <div>
-          <p className="m-0 text-xs text-slate-500">承認ステップ</p>
-          <p className="m-0 mt-1 text-sm font-medium text-slate-900">
-            {(currentWorkflow.approvalSteps?.length ?? 0) > 0
-              ? `${currentWorkflow.approvalSteps?.length} 件`
-              : "未設定"}
-          </p>
-        </div>
-
-        <div>
-          <p className="m-0 text-xs text-slate-500">コメント</p>
-          <p className="m-0 mt-1 text-sm font-medium text-slate-900">
-            {(currentWorkflow.comments?.length ?? 0) > 0
-              ? `${currentWorkflow.comments?.length} 件`
-              : "コメントなし"}
-          </p>
-        </div>
       </div>
     </>
   );
