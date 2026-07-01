@@ -154,5 +154,5 @@ export default function SettingsIcon({
     }
   })();
 
-  return <span className={[baseClassName, className].filter(Boolean).join(" ")}>{icon}</span>;
+  return <span className={["flex h-5 w-5 shrink-0 items-center justify-center", className].filter(Boolean).join(" ")}>{icon}</span>;
 }

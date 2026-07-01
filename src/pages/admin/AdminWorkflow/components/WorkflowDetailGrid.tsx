@@ -5,22 +5,14 @@ import { Workflow as WorkflowType } from "@shared/api/graphql/types";
 type WorkflowDetailGridProps = {
   currentWorkflow: WorkflowType;
   staffNamesById: Map<string, string>;
-  currentIndex: number;
-  totalCount: number;
 };
 
 export default function WorkflowDetailGrid({
   currentWorkflow,
   staffNamesById,
-  currentIndex,
-  totalCount,
 }: WorkflowDetailGridProps) {
   return (
     <>
-      <span className="inline-flex h-7 items-center rounded-full border border-slate-300 bg-slate-50 px-3 text-xs font-medium text-slate-700">
-        {currentIndex + 1} / {totalCount}
-      </span>
-
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <p className="m-0 text-xs text-slate-500">申請種別</p>
@@ -39,7 +31,9 @@ export default function WorkflowDetailGrid({
         <div>
           <p className="m-0 text-xs text-slate-500">申請日</p>
           <p className="m-0 mt-1 text-sm font-medium text-slate-900">
-            {currentWorkflow.createdAt ? currentWorkflow.createdAt.split("T")[0] : "-"}
+            {currentWorkflow.createdAt
+              ? currentWorkflow.createdAt.split("T")[0].replace(/-/g, "/")
+              : "-"}
           </p>
         </div>
 

@@ -369,10 +369,6 @@ export function WorkflowCommentThreadView({
 
   return (
     <div className="min-w-0">
-      <p className="mb-2 text-sm text-slate-500">
-        申請に関するやり取りをこの場で記録します。
-      </p>
-
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}

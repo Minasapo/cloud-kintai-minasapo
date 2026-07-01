@@ -85,9 +85,6 @@ export function WorkflowMetadataPanelBase({
   return (
     <section className="overflow-hidden rounded-[16px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)] md:p-5">
       <div className="flex flex-col gap-1.5 border-b border-slate-200/80 pb-4">
-        <p className="m-0 text-sm leading-6 text-slate-500">
-          申請内容と現在のステータスを確認できます。
-        </p>
       </div>
 
       <div className="mt-4 overflow-hidden rounded-[10px] border border-slate-200">

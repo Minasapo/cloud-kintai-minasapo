@@ -116,6 +116,16 @@ export function useWorkflowCarouselState({
     moveToNextStep();
   };
 
+  const handleApproveOnly = async () => {
+    if (!enableApprovalActions || isApproveDisabled || isCompleted) return;
+    await handleApprove();
+  };
+
+  const handleRejectOnly = async () => {
+    if (!enableApprovalActions || isRejectDisabled || isCompleted) return;
+    await handleReject();
+  };
+
   return {
     currentIndex,
     isCompleted,
@@ -132,5 +142,7 @@ export function useWorkflowCarouselState({
     handleNext,
     handleApproveAndNext,
     handleRejectAndNext,
+    handleApproveOnly,
+    handleRejectOnly,
   };
 }
