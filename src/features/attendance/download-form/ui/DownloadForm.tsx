@@ -9,14 +9,19 @@ import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOu
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { STANDARD_PADDING } from "@shared/config/uiDimensions";
-import { AppButton } from "@shared/ui/button";
+import { designTokenVar } from "@shared/designSystem";
+import {
+  AppButton,
+  AppSplitButton,
+  type AppSplitButtonOption,
+} from "@shared/ui/button";
 import { AppSelect, AppTextField } from "@shared/ui/form";
 import dayjs from "dayjs";
 import { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import AggregateExportButton from "./AggregateExportButton";
-import ExportButton from "./ExportButton";
+import { useAggregateExportAction } from "./AggregateExportButton";
+import { useExportAttendancesAction } from "./ExportButton";
 import StaffSelector from "./StaffSelector";
 
 export type Inputs = {
@@ -46,6 +51,15 @@ type ExpandedDownloadPanelProps = {
 };
 
 const formatInputDate = (value: dayjs.Dayjs) => value.format("YYYY-MM-DD");
+const MAIN_GREEN = designTokenVar(
+  "color.feedback.success.base",
+  "rgb(16 185 129)",
+);
+const MAIN_GREEN_DARK = "rgb(5 150 105)";
+const DOWNLOAD_OPTIONS: AppSplitButtonOption[] = [
+  { key: "aggregate", label: "集計ダウンロード" },
+  { key: "detail", label: "一括ダウンロード" },
+];
 
 function ExpandedDownloadPanel({
   closeDates,
@@ -61,6 +75,26 @@ function ExpandedDownloadPanel({
   setSelectedStaff,
   workDates,
 }: ExpandedDownloadPanelProps) {
+  const [selectedDownloadAction, setSelectedDownloadAction] =
+    useState<string>("aggregate");
+  const { onClick: onDetailDownload, disabled: detailDownloadDisabled } =
+    useExportAttendancesAction({
+      workDates,
+      selectedStaff,
+    });
+  const { onClick: onAggregateDownload, disabled: aggregateDownloadDisabled } =
+    useAggregateExportAction({
+      workDates,
+      selectedStaff,
+    });
+  const handleDownload = () => {
+    if (selectedDownloadAction === "detail") {
+      void onDetailDownload();
+      return;
+    }
+    void onAggregateDownload();
+  };
+
   return (
     <div id="attendance-download-panel" className="w-full">
       <div className="mx-auto flex w-full max-w-[880px] min-w-0 flex-col gap-6 px-1 sm:px-2 md:px-0">
@@ -225,16 +259,25 @@ function ExpandedDownloadPanel({
           setSelectedStaff={setSelectedStaff}
         />
 
-        <div className="flex w-full flex-col gap-2 sm:flex-row">
-          <ExportButton
-            workDates={workDates}
-            selectedStaff={selectedStaff}
-            fullWidth
-          />
-          <AggregateExportButton
-            workDates={workDates}
-            selectedStaff={selectedStaff}
-            fullWidth
+        <div className="w-full">
+          <AppSplitButton
+            options={DOWNLOAD_OPTIONS}
+            selectedKey={selectedDownloadAction}
+            onSelectedKeyChange={setSelectedDownloadAction}
+            onPrimaryClick={handleDownload}
+            variant="solid"
+            tone="primary"
+            size="md"
+            disabled={aggregateDownloadDisabled && detailDownloadDisabled}
+            className="w-full"
+            buttonGroupSx={{
+              "& .MuiButton-containedPrimary": {
+                "--variant-containedBg": MAIN_GREEN,
+                "&:hover": {
+                  "--variant-containedBg": MAIN_GREEN_DARK,
+                },
+              },
+            }}
           />
         </div>
       </div>
@@ -321,10 +364,19 @@ export default function DownloadForm() {
         <div className="self-end sm:self-center">
           <AppButton
             variant="outline"
-            tone="secondary"
+            tone="primary"
             size="sm"
             onClick={() => setIsExpanded((prev) => !prev)}
             className="min-w-0 rounded-full"
+            sx={{
+              "--variant-outlinedColor": MAIN_GREEN,
+              "--variant-outlinedBorder": "rgba(16, 185, 129, 0.5)",
+              "--variant-outlinedBg": "rgba(16, 185, 129, 0.04)",
+              "&:hover": {
+                "--variant-outlinedBorder": MAIN_GREEN_DARK,
+                "--variant-outlinedBg": "rgba(16, 185, 129, 0.1)",
+              },
+            }}
             aria-label={
               isExpanded
                 ? "ダウンロード要素を折りたたむ"
