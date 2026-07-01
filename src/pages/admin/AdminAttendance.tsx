@@ -1,7 +1,7 @@
-import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
 import AttendanceSettingsDialog from "@features/admin-config-attendance/AttendanceSettingsDialog";
 import AttendanceDailyList from "@features/attendance/daily-list/ui/AttendanceDailyList";
 import DownloadForm from "@features/attendance/download-form/ui/DownloadForm";
+import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import { Stack } from "@mui/material";
 import { designTokenVar } from "@shared/designSystem";
 import { AppButton } from "@shared/ui/button";
@@ -58,9 +58,7 @@ export default function AdminAttendance() {
               className="self-start"
               sx={{ whiteSpace: "nowrap" }}
               aria-label="勤怠設定を開く"
-              startIcon={
-                <SettingsIcon name="settings" className="text-current" />
-              }
+              startIcon={<SettingsRoundedIcon fontSize="small" />}
             >
               設定
             </AppButton>
