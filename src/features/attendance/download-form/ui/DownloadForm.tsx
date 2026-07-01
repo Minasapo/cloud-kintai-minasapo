@@ -67,16 +67,20 @@ function ExpandedDownloadPanel({
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
             <div className="flex-1">
-              <label className="mb-1 block text-sm font-medium text-slate-600">
-                開始日
-              </label>
               <AppTextField
+                label="開始日"
+                InputLabelProps={{ shrink: true }}
                 type="date"
                 value={startDate}
                 onChange={(event) => setStartDate(event.target.value)}
                 size="small"
                 fullWidth
                 sx={{
+                  "& .MuiInputLabel-root": {
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                    color: "rgb(71 85 105)",
+                  },
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "18px",
                     backgroundColor: "rgb(255 255 255)",
@@ -102,16 +106,20 @@ function ExpandedDownloadPanel({
               〜
             </div>
             <div className="flex-1">
-              <label className="mb-1 block text-sm font-medium text-slate-600">
-                終了日
-              </label>
               <AppTextField
+                label="終了日"
+                InputLabelProps={{ shrink: true }}
                 type="date"
                 value={endDate}
                 onChange={(event) => setEndDate(event.target.value)}
                 size="small"
                 fullWidth
                 sx={{
+                  "& .MuiInputLabel-root": {
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                    color: "rgb(71 85 105)",
+                  },
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "18px",
                     backgroundColor: "rgb(255 255 255)",
