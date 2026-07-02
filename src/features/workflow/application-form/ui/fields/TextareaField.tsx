@@ -1,4 +1,5 @@
 import type { WorkflowFieldConfig } from "@features/workflow/config/workflowTypeConfig";
+import { AppTextField } from "@shared/ui/form";
 
 import styles from "../WorkflowTypeFields.module.scss";
 
@@ -21,14 +22,15 @@ export function TextareaField({
     <div className={styles.formRow}>
       <div className={styles.formLabel}>{config.label}</div>
       <div className={styles.formField}>
-        <textarea
-          className={[styles.textarea, error ? styles.inputError : ""].join(
-            " ",
-          )}
+        <AppTextField
+          fullWidth
+          multiline
+          rows={6}
+          size="small"
+          error={Boolean(error)}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
-          rows={6}
         />
         {error && <p className={styles.errorText}>{error}</p>}
       </div>

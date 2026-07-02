@@ -20,6 +20,14 @@ export function DateRangeField({
   error,
   disabled,
 }: Props) {
+  const handleStartDateChange = (nextStart: string) => {
+    const shouldSyncEnd = value.end === "" || value.end === value.start;
+    onChange({
+      start: nextStart,
+      end: shouldSyncEnd ? nextStart : value.end,
+    });
+  };
+
   return (
     <div className={styles.formRow}>
       <div className={styles.formLabel}>{config.label}</div>
@@ -31,7 +39,7 @@ export function DateRangeField({
             error={Boolean(error)}
             sx={{ maxWidth: 200 }}
             value={value.start}
-            onChange={(e) => onChange({ ...value, start: e.target.value })}
+            onChange={(e) => handleStartDateChange(e.target.value)}
             disabled={disabled}
           />
           <span className={styles.dateSeparator}>-</span>
