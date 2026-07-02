@@ -133,6 +133,27 @@ describe("isWorkflowFilterActive", () => {
 describe("mapWorkflowsToListItems — sort edge cases", () => {
   const staffId = "staff-sort";
 
+  it("uses createdAt timestamp as tie-breaker when application dates are equal", () => {
+    const workflows = [
+      buildWorkflow({
+        id: "wf-morning",
+        staffId,
+        createdAt: "2024-06-01T09:00:00Z",
+        overTimeDetails: { date: "2024-06-15" },
+      }),
+      buildWorkflow({
+        id: "wf-evening",
+        staffId,
+        createdAt: "2024-06-01T18:00:00Z",
+        overTimeDetails: { date: "2024-06-15" },
+      }),
+    ];
+
+    const result = mapWorkflowsToListItems(workflows, staffId);
+
+    expect(result.map((it) => it.rawId)).toEqual(["wf-evening", "wf-morning"]);
+  });
+
   it("sorts workflows with no application date by createdAt descending", () => {
     const workflows = [
       buildWorkflow({
@@ -190,7 +211,9 @@ describe("applyWorkflowFilters — date range edge cases", () => {
   ];
 
   it("excludes item when applicationDate is before applicationFrom", () => {
-    const result = applyWorkflowFilters(items, { applicationFrom: "2024-05-01" });
+    const result = applyWorkflowFilters(items, {
+      applicationFrom: "2024-05-01",
+    });
     expect(result).toHaveLength(0);
   });
 

@@ -81,12 +81,12 @@ const SUBMIT_BUTTON_SX = {
 
 const logger = createLogger("NewWorkflow");
 
-const getTodayAsSlash = (): string => {
+const getTodayAsISO = (): string => {
   const d = new Date();
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
-  return `${y}/${m}/${day}`;
+  return `${y}-${m}-${day}`;
 };
 
 const generateApprovalSteps = (
@@ -213,7 +213,7 @@ type WorkflowFormContentProps = {
   category: string;
   enabledCategoryOptions: ReturnType<typeof getEnabledWorkflowCategories>;
   staff: StaffType | null | undefined;
-  applicationDate: string;
+  applicationDateISO: string;
   fields: ReturnType<typeof useDynamicWorkflowForm>["fields"];
   setFieldValue: ReturnType<typeof useDynamicWorkflowForm>["setFieldValue"];
   fieldErrors: Record<string, string>;
@@ -230,7 +230,7 @@ const WorkflowFormContent = ({
   category,
   enabledCategoryOptions,
   staff,
-  applicationDate,
+  applicationDateISO,
   fields,
   setFieldValue,
   fieldErrors,
@@ -261,9 +261,10 @@ const WorkflowFormContent = ({
 
       <FormRow label="申請日">
         <AppTextField
+          type="date"
           size="small"
-          value={applicationDate}
-          InputProps={{ readOnly: true }}
+          value={applicationDateISO}
+          disabled
           sx={{ width: "100%" }}
         />
       </FormRow>
@@ -317,7 +318,7 @@ export default function NewWorkflow() {
 
   const [draftMode, setDraftMode] = useState(false);
   const [category, setCategory] = useState("");
-  const applicationDate = getTodayAsSlash();
+  const applicationDateISO = getTodayAsISO();
 
   const {
     fields,
@@ -537,7 +538,7 @@ export default function NewWorkflow() {
             category={category}
             enabledCategoryOptions={enabledCategoryOptions}
             staff={staff}
-            applicationDate={applicationDate}
+            applicationDateISO={applicationDateISO}
             fields={fields}
             setFieldValue={setFieldValue}
             fieldErrors={fieldErrors}
