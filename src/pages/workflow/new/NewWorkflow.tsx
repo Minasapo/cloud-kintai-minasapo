@@ -28,7 +28,7 @@ import { designTokenVar } from "@shared/designSystem";
 import { createLogger } from "@shared/lib/logger";
 import { parseTimeToISO } from "@shared/lib/time";
 import { useAppNotification } from "@shared/lib/useAppNotification";
-import { AppButton } from "@shared/ui/button";
+import { AppBackButton, AppButton } from "@shared/ui/button";
 import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
 import {
   AppFormControlLabel,
@@ -51,22 +51,6 @@ import styles from "./NewWorkflow.module.scss";
 // ワークフロー種別ラベル定数（YAML 由来の値と合わせる）
 const CLOCK_CORRECTION_LABEL = "打刻修正(出勤忘れ)";
 const CLOCK_CORRECTION_CHECK_OUT_LABEL = "打刻修正(退勤忘れ)";
-
-const BACK_BUTTON_SX = {
-  borderRadius: "999px",
-  padding: "0.375rem 1.3rem",
-  fontSize: "0.875rem",
-  fontWeight: 500,
-  color: designTokenVar("color.neutral.700", "rgb(51 65 85)"),
-  borderColor: designTokenVar("color.neutral.300", "rgb(209 213 219)"),
-  backgroundColor: designTokenVar("color.neutral.0", "rgb(255 255 255)"),
-  boxShadow: "0 8px 20px -18px rgb(15 23 42 / 0.55)",
-  "&:hover": {
-    borderColor: designTokenVar("color.neutral.400", "rgb(148 163 184)"),
-    backgroundColor: designTokenVar("color.neutral.50", "rgb(248 250 252)"),
-    boxShadow: "0 10px 22px -18px rgb(15 23 42 / 0.6)",
-  },
-} as const;
 
 const SUBMIT_BUTTON_SX = {
   borderRadius: "999px",
@@ -529,16 +513,15 @@ export default function NewWorkflow() {
           sx={{ gap: 0 }}
         >
           <div style={{ marginBottom: "1rem" }}>
-            <AppButton
+            <AppBackButton
               type="button"
-              variant="outline"
+              variant="ghost"
               tone="neutral"
               size="sm"
               onClick={() => navigate("/workflow")}
-              sx={BACK_BUTTON_SX}
             >
               申請一覧へ戻る
-            </AppButton>
+            </AppBackButton>
           </div>
 
           <div className={styles.pageHeader}>
