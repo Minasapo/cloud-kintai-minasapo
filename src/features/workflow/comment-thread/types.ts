@@ -3,5 +3,6 @@ export type WorkflowCommentMessage = {
   sender: string;
   staffId?: string;
   text: string;
+  createdAt?: string;
   time: string;
 };

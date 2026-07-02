@@ -8,9 +8,9 @@ import { createDownloadTestStaff } from "./downloadFormTestUtils";
 // ─── Mock: useStaffs ─────────────────────────────────────────────────────────
 const mockUseStaffs = jest.fn();
 jest.mock("@entities/staff/model/useStaffs/useStaffs", () => ({
-  ...jest.requireActual<typeof import("@entities/staff/model/useStaffs/useStaffs")>(
-    "@entities/staff/model/useStaffs/useStaffs",
-  ),
+  ...jest.requireActual<
+    typeof import("@entities/staff/model/useStaffs/useStaffs")
+  >("@entities/staff/model/useStaffs/useStaffs"),
   useStaffs: (...args: unknown[]) => mockUseStaffs(...args),
 }));
 
@@ -38,28 +38,21 @@ jest.mock("@entities/attendance/lib/AttendanceDate", () => ({
 }));
 
 // ─── Mock: child components ───────────────────────────────────────────────────
+const mockUseAggregateExportAction = jest.fn();
+const mockUseExportAttendancesAction = jest.fn();
+
 jest.mock("../AggregateExportButton", () => ({
   __esModule: true,
-  default: ({ workDates, selectedStaff }: { workDates: string[]; selectedStaff: unknown[] }) => (
-    <button
-      data-testid="aggregate-export-button"
-      disabled={workDates.length === 0 || selectedStaff.length === 0}
-    >
-      集計ダウンロード
-    </button>
-  ),
+  useAggregateExportAction: (...args: unknown[]) =>
+    mockUseAggregateExportAction(...args),
+  default: () => null,
 }));
 
 jest.mock("../ExportButton", () => ({
   __esModule: true,
-  default: ({ workDates, selectedStaff }: { workDates: string[]; selectedStaff: unknown[] }) => (
-    <button
-      data-testid="export-button"
-      disabled={workDates.length === 0 || selectedStaff.length === 0}
-    >
-      一括ダウンロード
-    </button>
-  ),
+  useExportAttendancesAction: (...args: unknown[]) =>
+    mockUseExportAttendancesAction(...args),
+  default: () => null,
 }));
 
 jest.mock("../StaffSelector", () => ({
@@ -135,6 +128,14 @@ describe("DownloadForm", () => {
     jest.resetAllMocks();
     mockUseStaffs.mockReturnValue(defaultStaffsResult);
     mockUseCloseDates.mockReturnValue(defaultCloseDatesResult);
+    mockUseAggregateExportAction.mockReturnValue({
+      onClick: jest.fn().mockResolvedValue(undefined),
+      disabled: false,
+    });
+    mockUseExportAttendancesAction.mockReturnValue({
+      onClick: jest.fn().mockResolvedValue(undefined),
+      disabled: false,
+    });
   });
 
   describe("ローディング状態", () => {
@@ -145,7 +146,10 @@ describe("DownloadForm", () => {
     });
 
     it("closeDateLoading が true のとき「読み込み中...」を表示する", () => {
-      mockUseCloseDates.mockReturnValue({ ...defaultCloseDatesResult, loading: true });
+      mockUseCloseDates.mockReturnValue({
+        ...defaultCloseDatesResult,
+        loading: true,
+      });
       renderForm();
       expect(screen.getByText("読み込み中...")).toBeInTheDocument();
     });
@@ -268,12 +272,12 @@ describe("DownloadForm", () => {
   describe("展開後のフォーム", () => {
     it("開始日ラベルが表示される", async () => {
       await expandForm();
-      expect(screen.getByText("開始日")).toBeInTheDocument();
+      expect(screen.getByLabelText("開始日")).toBeInTheDocument();
     });
 
     it("終了日ラベルが表示される", async () => {
       await expandForm();
-      expect(screen.getByText("終了日")).toBeInTheDocument();
+      expect(screen.getByLabelText("終了日")).toBeInTheDocument();
     });
 
     it("date type の input が 2 つ表示される（開始日・終了日）", async () => {
@@ -296,14 +300,24 @@ describe("DownloadForm", () => {
       expect(screen.getByTestId("staff-selector")).toBeInTheDocument();
     });
 
-    it("ExportButton が表示される", async () => {
+    it("スプリットボタン（初期: 集計ダウンロード）が表示される", async () => {
       await expandForm();
-      expect(screen.getByTestId("export-button")).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "集計ダウンロード" }),
+      ).toBeInTheDocument();
     });
 
-    it("AggregateExportButton が表示される", async () => {
-      await expandForm();
-      expect(screen.getByTestId("aggregate-export-button")).toBeInTheDocument();
+    it("スプリットボタンのメニューで「一括ダウンロード」を選べる", async () => {
+      const user = await expandForm();
+      await user.click(
+        screen.getByRole("button", { name: "select preset action" }),
+      );
+      await user.click(
+        screen.getByRole("menuitem", { name: "一括ダウンロード" }),
+      );
+      expect(
+        screen.getByRole("button", { name: "一括ダウンロード" }),
+      ).toBeInTheDocument();
     });
 
     it("「新規」ボタンが表示される", async () => {

@@ -27,7 +27,7 @@ export default function WorkflowPageHeader({
           aria-label="ワークフロー設定を開く"
           startIcon={<SettingsIcon name="settings" className="text-current" />}
         >
-          <span>設定</span>
+          <span className="whitespace-nowrap">設定</span>
         </AppButton>
       </div>
     </section>

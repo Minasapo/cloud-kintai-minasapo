@@ -11,6 +11,8 @@ import dayjs from "dayjs";
 
 import {
   buildApprovalStepInputs,
+  canApproveWorkflow,
+  canRejectWorkflow,
   createSystemComment,
   mapCommentsToInputs,
   resolvePendingApprovalStepIndex,
@@ -289,6 +291,51 @@ async function performReject({
 }: RejectArgs): Promise<boolean> {
   try {
     const steps = buildApprovalStepInputs(workflow);
+
+    // 承認済みからの差し戻し
+    if (workflow.status === WorkflowStatus.APPROVED) {
+      const inputForRevert: UpdateWorkflowInput = {
+        id: workflow.id,
+        approvalSteps: steps,
+        status: WorkflowStatus.REJECTED,
+        finalDecisionTimestamp: new Date().toISOString(),
+        nextApprovalStepIndex: null,
+        comments: [
+          ...mapCommentsToInputs(workflow.comments),
+          createSystemComment("承認済みの申請を差し戻しました"),
+        ],
+      };
+
+      const reverted = await updateWorkflow(inputForRevert);
+      setWorkflow(reverted);
+      notifySuccess("差し戻しました");
+      const approverName = currentStaff
+        ? `${currentStaff.familyName} ${currentStaff.givenName}`
+        : undefined;
+      notifyInfo(
+        "申請が差し戻されました",
+        approverName
+          ? `${approverName} さんが申請を差し戻しました`
+          : "申請が差し戻されました",
+      );
+
+      await logOperationEvent({
+        action: "workflow.revert",
+        resource: "workflow",
+        resourceId: reverted.id,
+        targetStaffId: reverted.staffId ?? undefined,
+        before: workflow,
+        after: reverted,
+        details: {
+          workflowId: reverted.id,
+          category: reverted.category ?? null,
+          applicantStaffId: reverted.staffId ?? null,
+          result: "reverted",
+        },
+      });
+      return true;
+    }
+
     const idxToUpdate = resolvePendingApprovalStepIndex(
       steps,
       workflow.nextApprovalStepIndex,
@@ -384,6 +431,10 @@ export const useWorkflowApprovalActions = ({
       notifyError("キャンセル済みの申請には操作できません");
       return false;
     }
+    if (!canApproveWorkflow(workflow)) {
+      notifyError("承認可能なステップが見つかりませんでした。");
+      return false;
+    }
     const currentStaffLocal = resolveCurrentStaff(cognitoUser, staffs);
     if (!currentStaffLocal?.id) {
       notifyError("承認を実行するユーザー情報が取得できませんでした。");
@@ -412,6 +463,10 @@ export const useWorkflowApprovalActions = ({
     if (!workflow?.id) return false;
     if (workflow.status === WorkflowStatus.CANCELLED) {
       notifyError("キャンセル済みの申請には操作できません");
+      return false;
+    }
+    if (!canRejectWorkflow(workflow)) {
+      notifyError("却下可能なステップが見つかりませんでした。");
       return false;
     }
     const currentStaffLocal = resolveCurrentStaff(cognitoUser, staffs);

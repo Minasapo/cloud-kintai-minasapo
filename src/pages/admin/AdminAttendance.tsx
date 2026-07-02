@@ -1,7 +1,7 @@
-import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
 import AttendanceSettingsDialog from "@features/admin-config-attendance/AttendanceSettingsDialog";
 import AttendanceDailyList from "@features/attendance/daily-list/ui/AttendanceDailyList";
 import DownloadForm from "@features/attendance/download-form/ui/DownloadForm";
+import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import { Stack } from "@mui/material";
 import { designTokenVar } from "@shared/designSystem";
 import { AppButton } from "@shared/ui/button";
@@ -19,6 +19,11 @@ const PAGE_PADDING_Y = {
 };
 
 const PAGE_SECTION_GAP = designTokenVar("spacing.lg", "16px");
+const MAIN_GREEN = designTokenVar(
+  "color.feedback.success.base",
+  "rgb(16 185 129)",
+);
+const MAIN_GREEN_DARK = "rgb(5 150 105)";
 
 export default function AdminAttendance() {
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
@@ -53,15 +58,23 @@ export default function AdminAttendance() {
 
             <AppButton
               variant="outline"
-              tone="secondary"
+              tone="primary"
               onClick={() => setIsSettingsDialogOpen(true)}
               className="self-start"
+              sx={{
+                whiteSpace: "nowrap",
+                "--variant-outlinedColor": MAIN_GREEN,
+                "--variant-outlinedBorder": "rgba(16, 185, 129, 0.5)",
+                "--variant-outlinedBg": "rgba(16, 185, 129, 0.04)",
+                "&:hover": {
+                  "--variant-outlinedBorder": MAIN_GREEN_DARK,
+                  "--variant-outlinedBg": "rgba(16, 185, 129, 0.1)",
+                },
+              }}
               aria-label="勤怠設定を開く"
-              startIcon={
-                <SettingsIcon name="settings" className="text-current" />
-              }
+              startIcon={<SettingsRoundedIcon fontSize="small" />}
             >
-              <span>設定</span>
+              設定
             </AppButton>
           </div>
         </section>

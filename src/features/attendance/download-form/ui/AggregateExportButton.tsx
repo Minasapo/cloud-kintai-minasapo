@@ -4,6 +4,7 @@ import { calcTotalRestTime } from "@entities/attendance/lib/time";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
 import { Attendance } from "@shared/api/graphql/types";
+import { designTokenVar } from "@shared/designSystem";
 import { AppButton } from "@shared/ui/button";
 import dayjs from "dayjs";
 import { useContext } from "react";
@@ -16,19 +17,64 @@ type Props = {
   fullWidth?: boolean;
 };
 
+type UseAggregateExportActionArgs = Pick<Props, "workDates" | "selectedStaff">;
+
+type AggregateExportAction = {
+  onClick: () => Promise<void>;
+  disabled: boolean;
+};
+
+const MAIN_GREEN = designTokenVar(
+  "color.feedback.success.base",
+  "rgb(16 185 129)",
+);
+const MAIN_GREEN_DARK = "rgb(5 150 105)";
+
 export default function AggregateExportButton({
   workDates,
   selectedStaff,
   fullWidth = false,
 }: Props) {
+  const { onClick, disabled } = useAggregateExportAction({
+    workDates,
+    selectedStaff,
+  });
+
+  return (
+    <AppButton
+      variant="solid"
+      tone="primary"
+      size="md"
+      onClick={onClick}
+      startIcon={<CloudDownloadOutlinedIcon />}
+      fullWidth={fullWidth}
+      sx={{
+        "--variant-containedBg": MAIN_GREEN,
+        "&:hover": {
+          "--variant-containedBg": MAIN_GREEN_DARK,
+        },
+      }}
+      disabled={disabled}
+    >
+      集計ダウンロード
+    </AppButton>
+  );
+}
+
+export function useAggregateExportAction({
+  workDates,
+  selectedStaff,
+}: UseAggregateExportActionArgs): AggregateExportAction {
   const { getHourlyPaidHolidayEnabled, getSpecialHolidayEnabled } =
     useContext(AppConfigContext);
 
+  const disabled = workDates.length === 0 || selectedStaff.length === 0;
+
   const onClick = async () => {
-    if (workDates.length === 0 || selectedStaff.length === 0) return;
+    if (disabled) return;
 
     const res: Attendance[] = await downloadAttendances(
-      workDates.map((workDate) => ({ workDate: { eq: workDate } }))
+      workDates.map((workDate) => ({ workDate: { eq: workDate } })),
     );
 
     const hourlyPaidHolidayEnabled = getHourlyPaidHolidayEnabled();
@@ -56,7 +102,7 @@ export default function AggregateExportButton({
       .map((staff) => {
         const attendances = res.filter(
           (a) =>
-            a.staffId === staff.cognitoUserId && workDates.includes(a.workDate)
+            a.staffId === staff.cognitoUserId && workDates.includes(a.workDate),
         );
 
         const attendanceDates = new Set(attendances.map((a) => a.workDate));
@@ -91,7 +137,7 @@ export default function AggregateExportButton({
             const duration = dayjs(att.endTime).diff(
               dayjs(att.startTime),
               "hour",
-              true
+              true,
             );
             totalWork += Math.max(0, duration - restForDay);
           }
@@ -126,7 +172,7 @@ export default function AggregateExportButton({
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.download = `attendance_aggregate_${dayjs().format(
-      AttendanceDate.QueryParamFormat
+      AttendanceDate.QueryParamFormat,
     )}.csv`;
     a.href = url;
     a.click();
@@ -134,17 +180,5 @@ export default function AggregateExportButton({
     window.URL.revokeObjectURL(url);
   };
 
-  return (
-    <AppButton
-      variant="solid"
-      tone="secondary"
-      size="md"
-      onClick={onClick}
-      startIcon={<CloudDownloadOutlinedIcon />}
-      fullWidth={fullWidth}
-      disabled={workDates.length === 0 || selectedStaff.length === 0}
-    >
-      集計ダウンロード
-    </AppButton>
-  );
+  return { onClick, disabled };
 }

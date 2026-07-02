@@ -1,6 +1,4 @@
 import { hasUnapprovedChangeRequest } from "@entities/attendance/lib/ChangeRequest";
-import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
-import useWorkflows from "@entities/workflow/model/useWorkflows";
 import { graphqlClient } from "@shared/api/amplify/graphqlClient";
 import { listAttendances } from "@shared/api/graphql/documents/queries";
 import {
@@ -8,58 +6,21 @@ import {
   onDeleteAttendance,
   onUpdateAttendance,
 } from "@shared/api/graphql/documents/subscriptions";
-import {
-  ListAttendancesQuery,
-  WorkflowStatus,
-} from "@shared/api/graphql/types";
+import { ListAttendancesQuery } from "@shared/api/graphql/types";
 import { createLogger } from "@shared/lib/logger";
-import { useAuthSessionSummary } from "@shared/lib/useAuthSessionSummary";
 import { GraphQLResult } from "aws-amplify/api";
 import dayjs from "dayjs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-import AdminSummaryCard from "./AdminSummaryCard";
-
-const logger = createLogger("AdminPendingApprovalSummary");
+const logger = createLogger("usePendingAttendanceCount");
 const ATTENDANCE_LOOKBACK_DAYS = 30;
-const PENDING_WORKFLOW_STATUSES = new Set<WorkflowStatus>([
-  WorkflowStatus.SUBMITTED,
-  WorkflowStatus.PENDING,
-]);
 
-type AdminPendingApprovalSummaryProps = {
-  layoutMode?: "default" | "inline-cards" | "two-columns";
-  showAdminOnlyTag?: boolean;
-  visualVariant?: "default" | "dashboard";
-};
-
-export default function AdminPendingApprovalSummary({
-  layoutMode = "default",
-  showAdminOnlyTag = true,
-  visualVariant = "default",
-}: AdminPendingApprovalSummaryProps) {
-  const { isAuthenticated, isCognitoUserRole } = useAuthSessionSummary();
-
-  const isAdminUser = useMemo(
-    () =>
-      isCognitoUserRole(StaffRole.ADMIN) ||
-      isCognitoUserRole(StaffRole.STAFF_ADMIN) ||
-      isCognitoUserRole(StaffRole.OWNER),
-    [isCognitoUserRole],
-  );
-  const { workflows, loading: workflowLoading = false } = useWorkflows({
-    isAuthenticated: isAuthenticated && isAdminUser,
-  });
-
+export function usePendingAttendanceCount(
+  isAuthenticated: boolean,
+  isAdminUser: boolean,
+) {
   const [pendingAttendanceCount, setPendingAttendanceCount] = useState(0);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
-  const pendingWorkflowCount = useMemo(
-    () =>
-      (workflows ?? []).filter((workflow) =>
-        workflow.status ? PENDING_WORKFLOW_STATUSES.has(workflow.status) : false,
-      ).length,
-    [workflows],
-  );
 
   const fetchPendingAttendanceCount = useCallback(async () => {
     if (!isAuthenticated || !isAdminUser) {
@@ -219,50 +180,8 @@ export default function AdminPendingApprovalSummary({
     };
   }, [isAdminUser, isAuthenticated, recalculatePendingAttendanceCount]);
 
-  if (!isAuthenticated || !isAdminUser) {
-    return null;
-  }
-
-  const attendanceCountLabel = attendanceLoading
-    ? "集計中"
-    : `${pendingAttendanceCount}件`;
-  const workflowCountLabel = workflowLoading ? "集計中" : `${pendingWorkflowCount}件`;
-  const compact = layoutMode === "inline-cards";
-  const containerClassName =
-    layoutMode === "inline-cards"
-      ? "contents"
-      : layoutMode === "two-columns"
-        ? "grid grid-cols-2 gap-3"
-        : "grid grid-cols-1 gap-3";
-  const cardClassName = layoutMode === "inline-cards" ? "" : "";
-
-  return (
-    <div
-      data-testid="admin-pending-approval-summary"
-      className={containerClassName}
-    >
-      <AdminSummaryCard
-        testId="admin-pending-attendance-card"
-        title="勤怠修正申請"
-        description="未承認の勤怠修正申請"
-        countLabel={attendanceCountLabel}
-        to="/admin/attendances"
-        className={cardClassName}
-        showAdminOnlyTag={showAdminOnlyTag}
-        compact={compact}
-        visualVariant={visualVariant}
-      />
-      <AdminSummaryCard
-        testId="admin-pending-workflow-card"
-        title="ワークフロー申請"
-        description="未承認のワークフロー申請"
-        countLabel={workflowCountLabel}
-        to="/admin/workflow"
-        className={cardClassName}
-        showAdminOnlyTag={showAdminOnlyTag}
-        compact={compact}
-        visualVariant={visualVariant}
-      />
-    </div>
-  );
+  return {
+    pendingAttendanceCount,
+    attendanceLoading,
+  };
 }

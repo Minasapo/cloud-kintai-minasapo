@@ -1,8 +1,9 @@
-import { OperationLogDetailDialog } from "@entities/operation-log/ui/OperationLogDetailDialog";
 import { Box, Stack, Typography } from "@mui/material";
 import { useIsMobile } from "@shared/lib/hooks/useIsMobile";
 import { CenteredSpinner } from "@shared/ui/feedback";
 import { PageContent } from "@shared/ui/layout";
+
+import { OperationLogDetailDialog } from "@/entities/operation-log/ui/OperationLogDetailDialog";
 
 import AdminLogsDesktopTable from "./AdminLogsDesktopTable";
 import AdminLogsFilterBar from "./AdminLogsFilterBar";

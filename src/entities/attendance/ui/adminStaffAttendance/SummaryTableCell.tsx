@@ -2,6 +2,24 @@ import { Box, Chip, Stack, TableCell, Tooltip } from "@mui/material";
 import { Attendance } from "@shared/api/graphql/types";
 import dayjs from "dayjs";
 
+const styles = {
+  tableCell: {
+    maxWidth: 300,
+    whiteSpace: "nowrap" as const,
+    overflow: "hidden" as const,
+    textOverflow: "ellipsis" as const,
+  },
+  tooltipBox: {
+    display: "inline-block" as const,
+    verticalAlign: "middle" as const,
+    cursor: "help" as const,
+    ml: 0.5,
+  },
+  textContainer: {
+    ml: 0.5,
+  },
+} as const;
+
 export function SummaryTableCell({
   substituteHolidayDate,
   specialHolidayFlag,
@@ -17,22 +35,15 @@ export function SummaryTableCell({
     substituteHolidayDate,
     specialHolidayFlag,
     paidHolidayFlag,
-    absentFlag
+    absentFlag,
   );
 
-  const MAX = 32; // 表示する最大文字数（必要に応じて変更）
+  const MAX = 32; // 表示する最大文字数
   const needTruncate = full && full.length > MAX;
   const visible = needTruncate ? `${full.slice(0, MAX)}...` : full;
 
   return (
-    <TableCell
-      sx={{
-        maxWidth: 300,
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-      }}
-    >
+    <TableCell sx={styles.tableCell}>
       {/* チップ表示 + 備考 */}
       <Box component="span">
         <Stack direction="row" spacing={0.5} alignItems="center">
@@ -48,20 +59,12 @@ export function SummaryTableCell({
           {/* 備考部分 */}
           {needTruncate ? (
             <Tooltip title={full} arrow placement="top">
-              <Box
-                component="span"
-                sx={{
-                  display: "inline-block",
-                  verticalAlign: "middle",
-                  cursor: "help",
-                  ml: 0.5,
-                }}
-              >
+              <Box component="span" sx={styles.tooltipBox}>
                 {visible}
               </Box>
             </Tooltip>
           ) : (
-            <Box component="span" sx={{ ml: 0.5 }}>
+            <Box component="span" sx={styles.textContainer}>
               {visible}
             </Box>
           )}
@@ -75,7 +78,7 @@ function getSummaryText(
   substituteHolidayDate: Attendance["substituteHolidayDate"],
   _specialHolidayFlag?: Attendance["specialHolidayFlag"],
   _paidHolidayFlag?: Attendance["paidHolidayFlag"],
-  _absentFlag?: Attendance["absentFlag"]
+  _absentFlag?: Attendance["absentFlag"],
 ) {
   const isSubstituteHoliday = substituteHolidayDate
     ? dayjs(substituteHolidayDate).isValid()

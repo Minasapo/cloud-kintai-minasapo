@@ -70,6 +70,7 @@ amplifytools.xcconfig
 playwright-logs/
 playwright-report/
 /.playwright-mcp/
+scripts/output/
 
 #amplify-do-not-edit-begin
 amplify/\#current-cloud-backend
@@ -98,3 +99,4 @@ amplifytools.xcconfig
 .agents/
 .clinerules/
 .github/agents/
+.playwright-cli/

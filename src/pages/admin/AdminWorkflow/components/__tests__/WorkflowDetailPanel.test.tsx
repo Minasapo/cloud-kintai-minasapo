@@ -1,6 +1,10 @@
 import { AuthContext } from "@app/providers/auth/AuthContext";
 import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
-import { WorkflowCategory, WorkflowStatus } from "@shared/api/graphql/types";
+import {
+  ApprovalStatus,
+  WorkflowCategory,
+  WorkflowStatus,
+} from "@shared/api/graphql/types";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
@@ -12,6 +16,7 @@ import WorkflowDetailPanel from "../WorkflowDetailPanel";
 const mockHandleApprove = jest.fn();
 const mockHandleReject = jest.fn();
 const mockSetWorkflow = jest.fn();
+const mockUpdateWorkflow = jest.fn();
 const mockUseWorkflowDetailData = jest.fn();
 const mockUseWorkflowDetailViewModel = jest.fn();
 const mockDispatch = jest.fn();
@@ -32,7 +37,7 @@ jest.mock("@entities/staff/model/useStaffs/useStaffs", () => ({
 
 jest.mock("@entities/workflow/model/useWorkflows", () => ({
   __esModule: true,
-  default: () => ({ update: jest.fn() }),
+  default: () => ({ update: mockUpdateWorkflow }),
 }));
 
 jest.mock("../../hooks/useWorkflowApprovalActions", () => ({
@@ -60,13 +65,10 @@ jest.mock("../WorkflowCommentSection", () => ({
 }));
 
 // WorkflowMetadataPanelBase スタブ
-jest.mock(
-  "@features/workflow/detail-panel/ui/WorkflowMetadataPanel",
-  () => ({
-    WorkflowMetadataPanelBase: () =>
-      React.createElement("div", { "data-testid": "metadata-panel" }),
-  }),
-);
+jest.mock("@features/workflow/detail-panel/ui/WorkflowMetadataPanel", () => ({
+  WorkflowMetadataPanelBase: () =>
+    React.createElement("div", { "data-testid": "metadata-panel" }),
+}));
 
 jest.mock("@shared/lib/logger", () => ({
   createLogger: () => ({
@@ -133,9 +135,7 @@ const makeWorkflow = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const makeAuthContextValue = (
-  overrides: Record<string, unknown> = {},
-) => ({
+const makeAuthContextValue = (overrides: Record<string, unknown> = {}) => ({
   cognitoUser: { id: "cognito-1", familyName: "山田", givenName: "太郎" },
   authStatus: "authenticated" as const,
   signOut: jest.fn(),
@@ -180,6 +180,7 @@ function renderPanel(
 describe("WorkflowDetailPanel", () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    mockUpdateWorkflow.mockResolvedValue(makeWorkflow());
 
     // デフォルト: ロード完了・ワークフローあり
     mockUseWorkflowDetailData.mockReturnValue({
@@ -275,49 +276,11 @@ describe("WorkflowDetailPanel", () => {
       expect(screen.getByTestId("comment-section")).toBeInTheDocument();
     });
 
-    it("ステータスラベルが表示される", () => {
+    it("サマリーカード見出しは表示されない", () => {
       renderPanel();
-      expect(screen.getByText("承認待ち")).toBeInTheDocument();
-    });
-
-    it("承認ステップ数が表示される", () => {
-      renderPanel();
-      // approvalSteps.length = 1
-      expect(screen.getByText("1 件")).toBeInTheDocument();
-    });
-
-    it("コメント件数が表示される", () => {
-      renderPanel();
-      expect(screen.getByText("0 件")).toBeInTheDocument();
-    });
-
-    it("コメントがある場合は件数が正しく表示される", () => {
-      mockUseWorkflowDetailData.mockReturnValue({
-        workflow: makeWorkflow({
-          comments: [
-            {
-              __typename: "WorkflowComment",
-              id: "c-1",
-              staffId: "s-1",
-              text: "test",
-              createdAt: "2024-01-01T00:00:00.000Z",
-            },
-            {
-              __typename: "WorkflowComment",
-              id: "c-2",
-              staffId: "s-2",
-              text: "test2",
-              createdAt: "2024-01-01T00:00:00.000Z",
-            },
-          ],
-        }),
-        setWorkflow: mockSetWorkflow,
-        loading: false,
-        error: null,
-      });
-
-      renderPanel();
-      expect(screen.getByText("2 件")).toBeInTheDocument();
+      expect(screen.queryByText("現在ステータス")).not.toBeInTheDocument();
+      expect(screen.queryByText("承認ステップ")).not.toBeInTheDocument();
+      expect(screen.queryByText("コメント件数")).not.toBeInTheDocument();
     });
   });
 
@@ -386,9 +349,58 @@ describe("WorkflowDetailPanel", () => {
       expect(screen.getByRole("button", { name: "承認" })).toBeDisabled();
     });
 
+    it("ステータスが REJECTED の場合は承認アクションが実行できない", async () => {
+      const user = userEvent.setup();
+      mockUseWorkflowDetailData.mockReturnValue({
+        workflow: makeWorkflow({ status: WorkflowStatus.REJECTED }),
+        setWorkflow: mockSetWorkflow,
+        loading: false,
+        error: null,
+      });
+
+      renderPanel();
+      expect(
+        screen.queryByRole("button", { name: "承認" }),
+      ).not.toBeInTheDocument();
+
+      await user.click(
+        screen.getByRole("button", { name: "select preset action" }),
+      );
+      expect(screen.getByRole("menuitem", { name: "承認" })).toHaveAttribute(
+        "aria-disabled",
+        "true",
+      );
+    });
+
     it("ステータスが PENDING の場合は承認ボタンが有効", () => {
       renderPanel();
       expect(screen.getByRole("button", { name: "承認" })).not.toBeDisabled();
+    });
+
+    it("PENDING でも承認対象ステップがない場合は承認ボタンが無効", () => {
+      mockUseWorkflowDetailData.mockReturnValue({
+        workflow: makeWorkflow({
+          status: WorkflowStatus.PENDING,
+          approvalSteps: [
+            {
+              __typename: "ApprovalStep",
+              id: "step-1",
+              approverStaffId: "approver-1",
+              decisionStatus: ApprovalStatus.APPROVED,
+              approverComment: null,
+              decisionTimestamp: "2024-01-01T00:00:00.000Z",
+              stepOrder: 0,
+            },
+          ],
+          nextApprovalStepIndex: 0,
+        }),
+        setWorkflow: mockSetWorkflow,
+        loading: false,
+        error: null,
+      });
+
+      renderPanel();
+      expect(screen.getByRole("button", { name: "承認" })).toBeDisabled();
     });
 
     it("承認ボタンをクリックすると handleApprove が呼ばれる", async () => {
@@ -413,12 +425,19 @@ describe("WorkflowDetailPanel", () => {
   });
 
   describe("却下ボタン", () => {
-    it("却下ボタンが表示される", () => {
+    it("却下アクションがメニューに表示される", async () => {
+      const user = userEvent.setup();
       renderPanel();
-      expect(screen.getByRole("button", { name: "却下" })).toBeInTheDocument();
+      await user.click(
+        screen.getByRole("button", { name: "select preset action" }),
+      );
+      expect(
+        screen.getByRole("menuitem", { name: "却下" }),
+      ).toBeInTheDocument();
     });
 
-    it("ステータスが REJECTED の場合は却下ボタンが無効化される", () => {
+    it("ステータスが REJECTED の場合は却下アクションが無効化される", async () => {
+      const user = userEvent.setup();
       mockUseWorkflowDetailData.mockReturnValue({
         workflow: makeWorkflow({ status: WorkflowStatus.REJECTED }),
         setWorkflow: mockSetWorkflow,
@@ -427,10 +446,17 @@ describe("WorkflowDetailPanel", () => {
       });
 
       renderPanel();
-      expect(screen.getByRole("button", { name: "却下" })).toBeDisabled();
+      await user.click(
+        screen.getByRole("button", { name: "select preset action" }),
+      );
+      expect(screen.getByRole("menuitem", { name: "却下" })).toHaveAttribute(
+        "aria-disabled",
+        "true",
+      );
     });
 
-    it("ステータスが CANCELLED の場合は却下ボタンが無効化される", () => {
+    it("ステータスが CANCELLED の場合は却下アクションが無効化される", async () => {
+      const user = userEvent.setup();
       mockUseWorkflowDetailData.mockReturnValue({
         workflow: makeWorkflow({ status: WorkflowStatus.CANCELLED }),
         setWorkflow: mockSetWorkflow,
@@ -439,46 +465,178 @@ describe("WorkflowDetailPanel", () => {
       });
 
       renderPanel();
-      expect(screen.getByRole("button", { name: "却下" })).toBeDisabled();
+      await user.click(
+        screen.getByRole("button", { name: "select preset action" }),
+      );
+      expect(screen.getByRole("menuitem", { name: "却下" })).toHaveAttribute(
+        "aria-disabled",
+        "true",
+      );
     });
 
-    it("ステータスが PENDING の場合は却下ボタンが有効", () => {
+    it("ステータスが PENDING の場合は却下アクションが有効", async () => {
+      const user = userEvent.setup();
       renderPanel();
-      expect(screen.getByRole("button", { name: "却下" })).not.toBeDisabled();
+      await user.click(
+        screen.getByRole("button", { name: "select preset action" }),
+      );
+      expect(
+        screen.getByRole("menuitem", { name: "却下" }),
+      ).not.toHaveAttribute("aria-disabled", "true");
+    });
+
+    it("PENDING でも却下対象ステップがない場合は却下アクションが無効", async () => {
+      const user = userEvent.setup();
+      mockUseWorkflowDetailData.mockReturnValue({
+        workflow: makeWorkflow({
+          status: WorkflowStatus.PENDING,
+          approvalSteps: [
+            {
+              __typename: "ApprovalStep",
+              id: "step-1",
+              approverStaffId: "approver-1",
+              decisionStatus: ApprovalStatus.APPROVED,
+              approverComment: null,
+              decisionTimestamp: "2024-01-01T00:00:00.000Z",
+              stepOrder: 0,
+            },
+          ],
+          nextApprovalStepIndex: 0,
+        }),
+        setWorkflow: mockSetWorkflow,
+        loading: false,
+        error: null,
+      });
+
+      renderPanel();
+      await user.click(
+        screen.getByRole("button", { name: "select preset action" }),
+      );
+      expect(screen.getByRole("menuitem", { name: "却下" })).toHaveAttribute(
+        "aria-disabled",
+        "true",
+      );
+    });
+
+    it("不整合データでは修復アクションが表示される", async () => {
+      const user = userEvent.setup();
+      mockUseWorkflowDetailData.mockReturnValue({
+        workflow: makeWorkflow({
+          status: WorkflowStatus.SUBMITTED,
+          approvalSteps: [],
+          assignedApproverStaffIds: [],
+        }),
+        setWorkflow: mockSetWorkflow,
+        loading: false,
+        error: null,
+      });
+
+      renderPanel();
+      await user.click(
+        screen.getByRole("button", { name: "select preset action" }),
+      );
+      expect(
+        screen.getByRole("menuitem", { name: "データを自動修復" }),
+      ).toBeInTheDocument();
+    });
+
+    it("不整合データでも初期表示で修復アクションは自動選択されない", async () => {
+      const user = userEvent.setup();
+      mockUseWorkflowDetailData.mockReturnValue({
+        workflow: makeWorkflow({
+          status: WorkflowStatus.SUBMITTED,
+          approvalSteps: [],
+          assignedApproverStaffIds: [],
+        }),
+        setWorkflow: mockSetWorkflow,
+        loading: false,
+        error: null,
+      });
+
+      renderPanel();
+
+      expect(
+        screen.queryByRole("button", { name: "データを自動修復" }),
+      ).not.toBeInTheDocument();
+
+      await user.click(
+        screen.getByRole("button", { name: "select preset action" }),
+      );
+      expect(
+        screen.getByRole("menuitem", { name: "データを自動修復" }),
+      ).toBeInTheDocument();
+    });
+
+    it("修復ボタンを押すと承認チェーンの修復更新が呼ばれる", async () => {
+      const user = userEvent.setup();
+      mockUseWorkflowDetailData.mockReturnValue({
+        workflow: makeWorkflow({
+          status: WorkflowStatus.SUBMITTED,
+          approvalSteps: [],
+          assignedApproverStaffIds: [],
+        }),
+        setWorkflow: mockSetWorkflow,
+        loading: false,
+        error: null,
+      });
+
+      renderPanel();
+
+      await user.click(
+        screen.getByRole("button", { name: "select preset action" }),
+      );
+      await user.click(
+        screen.getByRole("menuitem", { name: "データを自動修復" }),
+      );
+
+      await user.click(
+        screen.getByRole("button", { name: "データを自動修復" }),
+      );
+
+      expect(mockUpdateWorkflow).toHaveBeenCalledTimes(1);
+      const payload = mockUpdateWorkflow.mock.calls[0][0] as {
+        approvalSteps?: Array<{
+          approverStaffId?: string;
+          decisionStatus?: string;
+        }>;
+        status?: string;
+        nextApprovalStepIndex?: number | null;
+      };
+      expect(payload.status).toBe(WorkflowStatus.SUBMITTED);
+      expect(payload.nextApprovalStepIndex).toBe(0);
+      expect(payload.approvalSteps?.[0]?.approverStaffId).toBe("ADMINS");
+      expect(payload.approvalSteps?.[0]?.decisionStatus).toBe("PENDING");
+    });
+
+    it("ステータスが APPROVED の場合は差し戻しのため却下ボタンが有効", async () => {
+      const user = userEvent.setup();
+      mockUseWorkflowDetailData.mockReturnValue({
+        workflow: makeWorkflow({ status: WorkflowStatus.APPROVED }),
+        setWorkflow: mockSetWorkflow,
+        loading: false,
+        error: null,
+      });
+
+      renderPanel();
+
+      await user.click(
+        screen.getByRole("button", { name: "select preset action" }),
+      );
+      expect(
+        screen.getByRole("menuitem", { name: "却下" }),
+      ).not.toHaveAttribute("aria-disabled", "true");
     });
 
     it("却下ボタンをクリックすると handleReject が呼ばれる", async () => {
       const user = userEvent.setup();
       renderPanel();
 
+      await user.click(
+        screen.getByRole("button", { name: "select preset action" }),
+      );
+      await user.click(screen.getByRole("menuitem", { name: "却下" }));
       await user.click(screen.getByRole("button", { name: "却下" }));
       expect(mockHandleReject).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe("ステータス表示", () => {
-    it("workflow が null の場合はステータスに「—」が表示される", () => {
-      mockUseWorkflowDetailData.mockReturnValue({
-        workflow: null,
-        setWorkflow: mockSetWorkflow,
-        loading: false,
-        error: null,
-      });
-
-      renderPanel();
-      expect(screen.getByText("—")).toBeInTheDocument();
-    });
-
-    it("STATUS_LABELS にないステータスはそのまま表示される", () => {
-      mockUseWorkflowDetailData.mockReturnValue({
-        workflow: makeWorkflow({ status: "UNKNOWN_STATUS" }),
-        setWorkflow: mockSetWorkflow,
-        loading: false,
-        error: null,
-      });
-
-      renderPanel();
-      expect(screen.getByText("UNKNOWN_STATUS")).toBeInTheDocument();
     });
   });
 

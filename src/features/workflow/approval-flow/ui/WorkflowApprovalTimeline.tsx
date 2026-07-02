@@ -1,4 +1,5 @@
 import WorkflowStatusChip from "@entities/workflow/ui/WorkflowStatusChip";
+import { Step, StepContent, StepLabel, Stepper } from "@mui/material";
 import { SubsectionTitle } from "@shared/ui/typography";
 
 import type { WorkflowApprovalStepView } from "../types";
@@ -13,55 +14,45 @@ export default function WorkflowApprovalTimeline({
   steps,
 }: Props) {
   return (
-    <section className="rounded-[20px] border border-slate-200/80 bg-slate-50/75 p-4">
+    <section className="rounded-[14px] border border-slate-200/80 bg-slate-50/75 p-4">
       <SubsectionTitle className="mb-3 text-slate-950">{title}</SubsectionTitle>
-      <div className="flex flex-col gap-4">
-        {steps.map((step, idx) => {
+      <Stepper orientation="vertical" nonLinear>
+        {steps.map((step) => {
           const isApplicant = step.role === "申請者";
-          const active =
-            step.state === "承認済み"
-              ? "done"
-              : step.state === "未承認"
-                ? "pending"
-                : "";
-          const badgeBackground = isApplicant
-            ? "rgb(165 179 172)"
-            : active === "done"
-              ? "rgb(30 170 106)"
-              : "rgb(15 168 94)";
+          const isDone = step.state === "承認済み";
+          const isRejected = step.state === "却下" || step.state === "REJECTED";
 
           return (
-            <div
+            <Step
               key={step.id}
-              className="flex flex-wrap items-center gap-3 rounded-[18px] border border-slate-200/80 bg-white px-4 py-3 shadow-[0_16px_30px_-28px_rgba(15,23,42,0.35)] sm:flex-nowrap sm:gap-4"
+              expanded
+              completed={isDone}
+              active={!isDone && !isRejected}
             >
-              <div className="flex min-w-0 items-center gap-3">
-                <div
-                  className="flex h-10 w-10 shrink-0 items-center justify-center font-bold"
-                  style={{
-                    borderRadius: "10px",
-                    backgroundColor: badgeBackground,
-                    color: "rgb(255 255 255)",
-                  }}
-                >
-                  {idx === 0 ? "申" : idx}
-                </div>
-                <div className="min-w-0">
-                  <div className="truncate font-bold">{step.name}</div>
-                  <div className="text-xs text-slate-500">
-                    {step.role} {step.date ? `・${step.date}` : ""}
+              <StepLabel
+                error={isRejected}
+                optional={
+                  <span className="text-xs text-slate-500">
+                    {step.role}
+                    {step.date ? `・${step.date}` : ""}
+                  </span>
+                }
+              >
+                <span className="text-base font-bold text-slate-900">
+                  {step.name}
+                </span>
+              </StepLabel>
+              {!isApplicant && !isRejected && (
+                <StepContent>
+                  <div className="inline-flex">
+                    <WorkflowStatusChip status={step.state} />
                   </div>
-                </div>
-              </div>
-              {!isApplicant && (
-                <div className="sm:ml-auto">
-                  <WorkflowStatusChip status={step.state} />
-                </div>
+                </StepContent>
               )}
-            </div>
+            </Step>
           );
         })}
-      </div>
+      </Stepper>
     </section>
   );
 }

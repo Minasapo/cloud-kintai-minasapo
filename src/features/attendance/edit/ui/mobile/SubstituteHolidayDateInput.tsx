@@ -2,6 +2,7 @@ import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
 import { AttendanceEditContext } from "@features/attendance/edit/model/AttendanceEditProvider";
 import { Label } from "@features/attendance/edit/ui/mobile/Label";
 import { DatePicker } from "@mui/x-date-pickers";
+import { designTokenVar } from "@shared/designSystem";
 import dayjs from "dayjs";
 import { useContext, useState } from "react";
 import { Controller } from "react-hook-form";
@@ -65,7 +66,7 @@ export function SubstituteHolidayDateInput({
                           height: "34px",
                           borderRadius: "10px",
                           fontSize: "0.8125rem",
-                          backgroundColor: "#fff",
+                          backgroundColor: designTokenVar("component.pageSection.background"),
                           boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.72)",
                         },
                         "& .MuiOutlinedInput-input": {

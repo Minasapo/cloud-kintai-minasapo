@@ -1,5 +1,6 @@
 import { getWorkflowCategoryLabel } from "@entities/workflow/lib/workflowLabels";
 import WorkflowStatusChip from "@entities/workflow/ui/WorkflowStatusChip";
+import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import { Workflow as WorkflowType } from "@shared/api/graphql/types";
 import { AppIconButton } from "@shared/ui/button";
 import { SubsectionTitle } from "@shared/ui/typography";
@@ -26,29 +27,6 @@ type WorkflowListBodyProps = {
   navigate: NavigateFunction;
   onOpenInRightPanel: (workflowId: string) => void;
 };
-
-function OpenInPanelIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
-      <path
-        d="M7 5h8v8m0-8-8 8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M13 11v4H5V7h4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 function formatStaffName(staff?: StaffItem, staffId?: string | null) {
   if (!staff) return staffId || "不明";
@@ -90,7 +68,7 @@ export default function WorkflowListBody({
                   tone="neutral"
                   size="sm"
                 >
-                  <OpenInPanelIcon />
+                  <OpenInNewRoundedIcon sx={{ fontSize: 16 }} />
                 </AppIconButton>
               </div>
 
@@ -144,7 +122,7 @@ export default function WorkflowListBody({
                     tone="neutral"
                     size="sm"
                   >
-                    <OpenInPanelIcon />
+                    <OpenInNewRoundedIcon sx={{ fontSize: 16 }} />
                   </AppIconButton>
                 </td>
                 <td className="px-2 py-2 text-slate-900">{categoryLabel}</td>

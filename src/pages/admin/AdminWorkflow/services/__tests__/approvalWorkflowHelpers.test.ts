@@ -1,11 +1,15 @@
 import type { GetWorkflowQuery, WorkflowComment } from "@shared/api/graphql/types";
-import { ApprovalStatus } from "@shared/api/graphql/types";
+import { ApprovalStatus, WorkflowStatus } from "@shared/api/graphql/types";
 
 import {
   buildApprovalStepInputs,
+  canApproveWorkflow,
+  canRejectWorkflow,
   createSystemComment,
+  hasPendingApprovalStep,
   mapCommentsToInputs,
   resolvePendingApprovalStepIndex,
+  resolveWorkflowActionState,
 } from "../approvalWorkflowHelpers";
 
 type WorkflowData = NonNullable<GetWorkflowQuery["getWorkflow"]>;
@@ -95,6 +99,218 @@ describe("resolvePendingApprovalStepIndex", () => {
   it("PENDING ステップがない場合は -1 を返す", () => {
     const allApproved = steps.map((s) => ({ ...s, decisionStatus: ApprovalStatus.APPROVED }));
     expect(resolvePendingApprovalStepIndex(allApproved, null)).toBe(-1);
+  });
+});
+
+describe("hasPendingApprovalStep", () => {
+  it("PENDING ステップがある場合は true", () => {
+    const workflow = makeWorkflow({
+      approvalSteps: [
+        {
+          __typename: "ApprovalStep" as const,
+          id: "step-1",
+          approverStaffId: "approver-1",
+          decisionStatus: ApprovalStatus.PENDING,
+          approverComment: null,
+          decisionTimestamp: null,
+          stepOrder: 0,
+        },
+      ],
+      nextApprovalStepIndex: 0,
+    });
+
+    expect(hasPendingApprovalStep(workflow)).toBe(true);
+  });
+
+  it("PENDING ステップがない場合は false", () => {
+    const workflow = makeWorkflow({
+      approvalSteps: [
+        {
+          __typename: "ApprovalStep" as const,
+          id: "step-1",
+          approverStaffId: "approver-1",
+          decisionStatus: ApprovalStatus.APPROVED,
+          approverComment: null,
+          decisionTimestamp: "2024-01-01T00:00:00.000Z",
+          stepOrder: 0,
+        },
+      ],
+      nextApprovalStepIndex: 0,
+    });
+
+    expect(hasPendingApprovalStep(workflow)).toBe(false);
+  });
+
+  it("PENDING ステップなくても assignedApproverStaffIds があれば true（応急フォールバック）", () => {
+    const workflow = makeWorkflow({
+      status: WorkflowStatus.SUBMITTED,
+      approvalSteps: [],
+      assignedApproverStaffIds: ["staff-1"],
+      nextApprovalStepIndex: null,
+    });
+
+    expect(hasPendingApprovalStep(workflow)).toBe(true);
+  });
+
+  it("approvalSteps も assignedApproverStaffIds もない場合は ADMINS フォールバックで true", () => {
+    const workflow = makeWorkflow({
+      status: WorkflowStatus.SUBMITTED,
+      approvalSteps: [],
+      assignedApproverStaffIds: [],
+      nextApprovalStepIndex: null,
+    });
+
+    // buildApprovalStepInputs が ADMINS へフォールバックするので、hasPendingApprovalStep は true
+    expect(hasPendingApprovalStep(workflow)).toBe(true);
+  });
+});
+
+describe("canApproveWorkflow", () => {
+  it("PENDING かつ PENDING ステップありなら true", () => {
+    const workflow = makeWorkflow({
+      status: WorkflowStatus.PENDING,
+      approvalSteps: [
+        {
+          __typename: "ApprovalStep" as const,
+          id: "step-1",
+          approverStaffId: "approver-1",
+          decisionStatus: ApprovalStatus.PENDING,
+          approverComment: null,
+          decisionTimestamp: null,
+          stepOrder: 0,
+        },
+      ],
+      nextApprovalStepIndex: 0,
+    });
+
+    expect(canApproveWorkflow(workflow)).toBe(true);
+  });
+
+  it("PENDING でも PENDING ステップなしなら false", () => {
+    const workflow = makeWorkflow({
+      status: WorkflowStatus.PENDING,
+      approvalSteps: [
+        {
+          __typename: "ApprovalStep" as const,
+          id: "step-1",
+          approverStaffId: "approver-1",
+          decisionStatus: ApprovalStatus.APPROVED,
+          approverComment: null,
+          decisionTimestamp: "2024-01-01T00:00:00.000Z",
+          stepOrder: 0,
+        },
+      ],
+      nextApprovalStepIndex: 0,
+    });
+
+    expect(canApproveWorkflow(workflow)).toBe(false);
+  });
+
+  it("SUBMITTED で assignedApproverStaffIds があれば true（応急フォールバック）", () => {
+    const workflow = makeWorkflow({
+      status: WorkflowStatus.SUBMITTED,
+      approvalSteps: [],
+      assignedApproverStaffIds: ["staff-1"],
+      nextApprovalStepIndex: null,
+    });
+
+    expect(canApproveWorkflow(workflow)).toBe(true);
+  });
+});
+
+describe("canRejectWorkflow", () => {
+  it("APPROVED は差し戻し可能なので true", () => {
+    const workflow = makeWorkflow({
+      status: WorkflowStatus.APPROVED,
+      approvalSteps: [
+        {
+          __typename: "ApprovalStep" as const,
+          id: "step-1",
+          approverStaffId: "approver-1",
+          decisionStatus: ApprovalStatus.APPROVED,
+          approverComment: null,
+          decisionTimestamp: "2024-01-01T00:00:00.000Z",
+          stepOrder: 0,
+        },
+      ],
+      nextApprovalStepIndex: null,
+    });
+
+    expect(canRejectWorkflow(workflow)).toBe(true);
+  });
+
+  it("PENDING でも PENDING ステップなしなら false", () => {
+    const workflow = makeWorkflow({
+      status: WorkflowStatus.PENDING,
+      approvalSteps: [
+        {
+          __typename: "ApprovalStep" as const,
+          id: "step-1",
+          approverStaffId: "approver-1",
+          decisionStatus: ApprovalStatus.APPROVED,
+          approverComment: null,
+          decisionTimestamp: "2024-01-01T00:00:00.000Z",
+          stepOrder: 0,
+        },
+      ],
+      nextApprovalStepIndex: 0,
+    });
+
+    expect(canRejectWorkflow(workflow)).toBe(false);
+  });
+
+  it("SUBMITTED で assignedApproverStaffIds があれば true（応急フォールバック）", () => {
+    const workflow = makeWorkflow({
+      status: WorkflowStatus.SUBMITTED,
+      approvalSteps: [],
+      assignedApproverStaffIds: ["staff-1"],
+      nextApprovalStepIndex: null,
+    });
+
+    expect(canRejectWorkflow(workflow)).toBe(true);
+  });
+});
+
+describe("resolveWorkflowActionState", () => {
+  it("SUBMITTED で承認者情報がない場合は ADMINS フォールバックで操作可能になる", () => {
+    const workflow = makeWorkflow({
+      status: WorkflowStatus.SUBMITTED,
+      approvalSteps: [],
+      assignedApproverStaffIds: [],
+      nextApprovalStepIndex: null,
+    });
+
+    const result = resolveWorkflowActionState(workflow);
+
+    expect(result.canApprove).toBe(true);
+    expect(result.canReject).toBe(true);
+    expect(result.warningMessage).toContain("承認者情報が設定されていません");
+    expect(result.warningTone).toBe("error");
+  });
+
+  it("PENDING だが承認ステップがすべて決裁済みなら操作不可になる", () => {
+    const workflow = makeWorkflow({
+      status: WorkflowStatus.PENDING,
+      approvalSteps: [
+        {
+          __typename: "ApprovalStep" as const,
+          id: "step-1",
+          approverStaffId: "approver-1",
+          decisionStatus: ApprovalStatus.APPROVED,
+          approverComment: null,
+          decisionTimestamp: "2024-01-01T00:00:00.000Z",
+          stepOrder: 0,
+        },
+      ],
+      nextApprovalStepIndex: 0,
+    });
+
+    const result = resolveWorkflowActionState(workflow);
+
+    expect(result.canApprove).toBe(false);
+    expect(result.canReject).toBe(false);
+    expect(result.warningMessage).toContain("すべての承認ステップが既に処理されています。");
+    expect(result.warningTone).toBe("warning");
   });
 });
 

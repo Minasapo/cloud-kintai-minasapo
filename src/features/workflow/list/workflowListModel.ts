@@ -26,6 +26,7 @@ export type WorkflowListItem = {
   rawId?: string;
   rawStaffId?: string;
   createdAt: string;
+  createdAtSortKey?: string;
   applicationDate?: string;
 };
 
@@ -46,6 +47,19 @@ export const DEFAULT_STATUS_FILTERS: WorkflowStatus[] = [
   WorkflowStatus.REJECTED,
 ];
 
+const resolveCreatedAtSortKey = (value?: string | null): string => {
+  if (!value) {
+    return "";
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+
+  return parsed.toISOString();
+};
+
 export function mapWorkflowsToListItems<T extends WorkflowLike>(
   workflows: T[] | null | undefined,
   currentStaffId?: string,
@@ -61,6 +75,7 @@ export function mapWorkflowsToListItems<T extends WorkflowLike>(
       const category = workflow.category ?? undefined;
       const categoryLabel = category ? getWorkflowCategoryLabel(workflow) : "";
       const createdDate = isoDateFromTimestamp(workflow.createdAt);
+      const createdAtSortKey = resolveCreatedAtSortKey(workflow.createdAt);
       return {
         name: workflow.id ?? "",
         rawStaffId: workflow.staffId ?? undefined,
@@ -70,6 +85,7 @@ export function mapWorkflowsToListItems<T extends WorkflowLike>(
         rawCategory: category,
         category: categoryLabel,
         createdAt: createdDate,
+        createdAtSortKey,
         applicationDate: workflow.overTimeDetails?.date ?? createdDate,
       } satisfies WorkflowListItem;
     });
@@ -77,10 +93,18 @@ export function mapWorkflowsToListItems<T extends WorkflowLike>(
   return mapped.toSorted((a, b) => {
     const aApp = a.applicationDate ?? "";
     const bApp = b.applicationDate ?? "";
-    if (aApp && bApp) return bApp.localeCompare(aApp);
+    if (aApp && bApp) {
+      const byApplicationDate = bApp.localeCompare(aApp);
+      if (byApplicationDate !== 0) {
+        return byApplicationDate;
+      }
+    }
     if (aApp && !bApp) return -1;
     if (!aApp && bApp) return 1;
-    return (b.createdAt ?? "").localeCompare(a.createdAt ?? "");
+
+    const aCreated = a.createdAtSortKey ?? a.createdAt ?? "";
+    const bCreated = b.createdAtSortKey ?? b.createdAt ?? "";
+    return bCreated.localeCompare(aCreated);
   });
 }
 

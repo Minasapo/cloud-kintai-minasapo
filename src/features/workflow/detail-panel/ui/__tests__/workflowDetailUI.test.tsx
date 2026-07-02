@@ -1,3 +1,4 @@
+import { WorkflowCategory } from "@shared/api/graphql/types";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 import { WorkflowDetailContext } from "../../model/WorkflowDetailContext";
@@ -261,5 +262,44 @@ describe("WorkflowMetadataPanelBase", () => {
       />,
     );
     expect(screen.getByTestId("status-chip")).toBeInTheDocument();
+  });
+
+  it("COMPENSATORY_LEAVE: 振替対象日と振替取得日を表示する", () => {
+    render(
+      <WorkflowMetadataPanelBase
+        {...baseProps}
+        category={WorkflowCategory.COMPENSATORY_LEAVE}
+        categoryLabel="振替休暇申請"
+        overTimeDetails={{
+          date: "2024-01-20",
+          startTime: "2024-01-25",
+          endTime: "2024-01-25",
+          reason: "振替休暇の取得",
+        }}
+      />,
+    );
+    expect(screen.getByText("振替対象日")).toBeInTheDocument();
+    expect(screen.getByText("2024-01-20")).toBeInTheDocument();
+    expect(screen.getByText("振替取得日")).toBeInTheDocument();
+    expect(screen.getByText("2024-01-25")).toBeInTheDocument();
+    expect(screen.getByText("振替休暇の取得")).toBeInTheDocument();
+  });
+
+  it("COMPENSATORY_LEAVE: 振替対象日や振替取得日が未設定の場合は - を表示する", () => {
+    render(
+      <WorkflowMetadataPanelBase
+        {...baseProps}
+        category={WorkflowCategory.COMPENSATORY_LEAVE}
+        categoryLabel="振替休暇申請"
+        overTimeDetails={{
+          date: null,
+          startTime: null,
+          endTime: null,
+          reason: null,
+        }}
+      />,
+    );
+    expect(screen.getByText("振替対象日")).toBeInTheDocument();
+    expect(screen.getAllByText("-").length).toBeGreaterThanOrEqual(2);
   });
 });

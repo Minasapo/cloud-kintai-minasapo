@@ -1,3 +1,5 @@
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
 import { AppButton, AppIconButton } from "@shared/ui/button";
 import { SectionTitle } from "@shared/ui/typography";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
@@ -9,25 +11,6 @@ import {
 } from "../context/WorkflowListPageContext";
 import WorkflowClearFiltersAction from "./WorkflowClearFiltersAction";
 import WorkflowListFiltersPanel from "./WorkflowListFiltersPanel";
-
-function FilterIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 20 20"
-      className="workflow-filter-trigger-button__icon"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3.5 5h13" />
-      <path d="M6.5 10h7" />
-      <path d="M8.5 15h3" />
-    </svg>
-  );
-}
 
 export default function WorkflowFiltersArea() {
   const { anyFilterActive, filters } = useWorkflowListData();
@@ -166,11 +149,19 @@ export default function WorkflowFiltersArea() {
           <AppButton
             size="sm"
             onClick={handleOpenDialog}
-            className="workflow-filter-trigger-button"
             aria-haspopup="dialog"
             aria-expanded={dialogOpen}
             aria-controls={dialogOpen ? titleId : undefined}
-            startIcon={<FilterIcon />}
+            sx={{
+              "--variant-containedColor": "#fff",
+              "--variant-containedBg": "#19b985",
+              backgroundColor: "#19b985",
+              "&:hover": {
+                "--variant-containedBg": "#17ab7b",
+                backgroundColor: "#17ab7b",
+              },
+            }}
+            startIcon={<FilterListRoundedIcon sx={{ fontSize: 18 }} />}
           >
             <span>フィルター</span>
             {anyFilterActive ? (
@@ -214,7 +205,7 @@ export default function WorkflowFiltersArea() {
                 aria-label="フィルターダイアログを閉じる"
                 tone="neutral"
               >
-                ×
+                <CloseRoundedIcon fontSize="inherit" />
               </AppIconButton>
             </div>
 
@@ -235,7 +226,16 @@ export default function WorkflowFiltersArea() {
               <AppButton
                 size="sm"
                 onClick={closeDialog}
-                className="workflow-filter-dialog__submit"
+                sx={{
+                  alignSelf: { xs: "flex-end", sm: "auto" },
+                  "--variant-containedColor": "#fff",
+                  "--variant-containedBg": "#19b985",
+                  backgroundColor: "#19b985",
+                  "&:hover": {
+                    "--variant-containedBg": "#17ab7b",
+                    backgroundColor: "#17ab7b",
+                  },
+                }}
               >
                 一覧に反映
               </AppButton>

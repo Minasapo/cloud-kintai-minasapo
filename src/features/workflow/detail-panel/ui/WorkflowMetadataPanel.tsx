@@ -75,6 +75,7 @@ export function WorkflowMetadataPanelBase({
   const isAbsence = category === WorkflowCategory.ABSENCE;
   const isClockCorrection = category === WorkflowCategory.CLOCK_CORRECTION;
   const isCustom = category === WorkflowCategory.CUSTOM;
+  const isCompensatoryLeave = category === WorkflowCategory.COMPENSATORY_LEAVE;
 
   const overtimeDate = formatDateSlash(overTimeDetails?.date);
   const overtimeTimeRange = overTimeDetails?.startTime
@@ -82,14 +83,10 @@ export function WorkflowMetadataPanelBase({
     : "-";
 
   return (
-    <section className="overflow-hidden ro vunded-[24px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)] md:p-5">
-      <div className="flex flex-col gap-1.5 border-b border-slate-200/80 pb-4">
-        <p className="m-0 text-sm leading-6 text-slate-500">
-          申請内容と現在のステータスを確認できます。
-        </p>
-      </div>
+    <section className="overflow-hidden rounded-[16px] border border-slate-200/80 bg-white p-4 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.35)] md:p-5">
+      <div className="flex flex-col gap-1.5 border-b border-slate-200/80 pb-4"></div>
 
-      <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
+      <div className="mt-4 overflow-hidden rounded-[10px] border border-slate-200">
         <div className="grid grid-cols-1 items-start md:grid-cols-[minmax(7rem,9.5rem)_minmax(0,1fr)] lg:grid-cols-[minmax(8rem,11rem)_minmax(0,1fr)]">
           <MetadataRow label="ID" value={displayId} />
           <MetadataRow label="種別" value={categoryLabel} />
@@ -173,6 +170,22 @@ export function WorkflowMetadataPanelBase({
                 value={customWorkflowContent || "-"}
                 preserveWhitespace
               />
+            </>
+          )}
+
+          {isCompensatoryLeave && (
+            <>
+              <MetadataRow
+                label="振替対象日"
+                value={formatDateSlash(overTimeDetails?.date) || "-"}
+              />
+              <MetadataRow
+                label="振替取得日"
+                value={formatDateSlash(overTimeDetails?.startTime) || "-"}
+              />
+              {overTimeDetails?.reason && (
+                <MetadataRow label="理由" value={overTimeDetails.reason} />
+              )}
             </>
           )}
         </div>

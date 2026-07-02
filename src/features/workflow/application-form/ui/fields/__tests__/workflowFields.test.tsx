@@ -44,19 +44,20 @@ jest.mock("@shared/ui/TimeInput", () => ({
   ),
 }));
 
-jest.mock(
-  "@entities/workflow-template/api/workflowTemplateApi",
-  () => ({
-    useGetWorkflowTemplatesQuery: jest.fn(() => ({
-      data: [
-        { id: "t1", name: "テンプレート1", title: "タイトル1", content: "内容1" },
-        { id: "t2", name: "テンプレート2", title: "タイトル2", content: "内容2" },
-      ],
-    })),
-  }),
-);
+jest.mock("@entities/workflow-template/api/workflowTemplateApi", () => ({
+  useGetWorkflowTemplatesQuery: jest.fn(() => ({
+    data: [
+      { id: "t1", name: "テンプレート1", title: "タイトル1", content: "内容1" },
+      { id: "t2", name: "テンプレート2", title: "タイトル2", content: "内容2" },
+    ],
+  })),
+}));
 
-const baseConfig = { key: "field1", type: "text" as const, label: "フィールド" };
+const baseConfig = {
+  key: "field1",
+  type: "text" as const,
+  label: "フィールド",
+};
 
 // ─────────────────────────────────────────────
 // TextField
@@ -73,7 +74,9 @@ describe("TextField", () => {
   it("入力変更時に onChange を呼ぶ", () => {
     const onChange = jest.fn();
     render(<TextField config={baseConfig} value="" onChange={onChange} />);
-    fireEvent.change(screen.getByRole("textbox"), { target: { value: "新値" } });
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "新値" },
+    });
     expect(onChange).toHaveBeenCalledWith("新値");
   });
 
@@ -105,11 +108,7 @@ describe("DateField", () => {
 
   it("ラベルと日付入力を表示する", () => {
     render(
-      <DateField
-        config={dateConfig}
-        value="2024-01-15"
-        onChange={jest.fn()}
-      />,
+      <DateField config={dateConfig} value="2024-01-15" onChange={jest.fn()} />,
     );
     expect(screen.getByText("日付")).toBeInTheDocument();
     expect(screen.getByDisplayValue("2024-01-15")).toBeInTheDocument();
@@ -118,7 +117,9 @@ describe("DateField", () => {
   it("日付変更時に onChange を呼ぶ", () => {
     const onChange = jest.fn();
     render(<DateField config={dateConfig} value="" onChange={onChange} />);
-    const input = document.querySelector('input[type="date"]') as HTMLInputElement;
+    const input = document.querySelector(
+      'input[type="date"]',
+    ) as HTMLInputElement;
     fireEvent.change(input, { target: { value: "2024-02-01" } });
     expect(onChange).toHaveBeenCalledWith("2024-02-01");
   });
@@ -148,11 +149,7 @@ describe("TextareaField", () => {
 
   it("ラベルと textarea を表示する", () => {
     render(
-      <TextareaField
-        config={taConfig}
-        value="メモ内容"
-        onChange={jest.fn()}
-      />,
+      <TextareaField config={taConfig} value="メモ内容" onChange={jest.fn()} />,
     );
     expect(screen.getByText("メモ")).toBeInTheDocument();
     expect(screen.getByDisplayValue("メモ内容")).toBeInTheDocument();
@@ -208,9 +205,7 @@ describe("TimeField", () => {
   });
 
   it("value が null でもクラッシュしない", () => {
-    render(
-      <TimeField config={timeConfig} value={null} onChange={jest.fn()} />,
-    );
+    render(<TimeField config={timeConfig} value={null} onChange={jest.fn()} />);
     expect(screen.getByTestId("time-input")).toHaveValue("");
   });
 });
@@ -314,7 +309,24 @@ describe("DateRangeField", () => {
     expect(dateInputs).toHaveLength(2);
   });
 
-  it("start 変更時に onChange を呼ぶ", () => {
+  it("start 変更時に end が同値なら同日に自動追従する", () => {
+    const onChange = jest.fn();
+    render(
+      <DateRangeField
+        config={drConfig}
+        value={{ start: "2024-01-01", end: "2024-01-01" }}
+        onChange={onChange}
+      />,
+    );
+    const [startInput] = document.querySelectorAll('input[type="date"]');
+    fireEvent.change(startInput, { target: { value: "2024-02-01" } });
+    expect(onChange).toHaveBeenCalledWith({
+      start: "2024-02-01",
+      end: "2024-02-01",
+    });
+  });
+
+  it("start 変更時に end が別日なら維持する", () => {
     const onChange = jest.fn();
     render(
       <DateRangeField
@@ -373,14 +385,15 @@ describe("TemplateSelectField", () => {
 
   it("テンプレート選択肢を表示する", () => {
     render(
-      <TemplateSelectField
-        config={tsConfig}
-        value=""
-        onChange={jest.fn()}
-      />,
+      <TemplateSelectField config={tsConfig} value="" onChange={jest.fn()} />,
     );
-    expect(screen.getByText("テンプレート1")).toBeInTheDocument();
-    expect(screen.getByText("テンプレート2")).toBeInTheDocument();
+    fireEvent.mouseDown(screen.getByRole("combobox"));
+    expect(
+      screen.getByRole("option", { name: "テンプレート1" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: "テンプレート2" }),
+    ).toBeInTheDocument();
   });
 
   it("テンプレート選択変更時に onChange を呼ぶ", () => {

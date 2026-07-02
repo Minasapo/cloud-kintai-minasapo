@@ -1,3 +1,6 @@
+export { AppCheckbox } from "./AppCheckbox";
+export { AppFormControlLabel } from "./AppFormControlLabel";
+export { AppMultiSelect } from "./AppMultiSelect";
 export { AppSelect } from "./AppSelect";
 export { AppSwitch } from "./AppSwitch";
 export { AppTextField } from "./AppTextField";

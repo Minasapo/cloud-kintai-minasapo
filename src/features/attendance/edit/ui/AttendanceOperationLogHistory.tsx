@@ -1,11 +1,12 @@
 import { getOperationLogLabel } from "@entities/operation-log/lib/operationLogLabels";
 import fetchOperationLogs from "@entities/operation-log/model/fetchOperationLogs";
-import { OperationLogDetailDialog } from "@entities/operation-log/ui/OperationLogDetailDialog";
 import fetchStaff from "@entities/staff/model/useStaff/fetchStaff";
 import { Attendance, OperationLog, Staff } from "@shared/api/graphql/types";
 import { AppButton } from "@shared/ui/button";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
+
+import { OperationLogDetailDialog } from "@/entities/operation-log/ui/OperationLogDetailDialog";
 
 import { AttendanceHistoryRow } from "./EditAttendanceHistoryList/AttendanceHistoryRow";
 
@@ -67,21 +68,26 @@ export default function AttendanceOperationLogHistory({
 }: {
   attendance: Attendance | null | undefined;
 }) {
-  const [canonicalLogsState, setCanonicalLogsState] = useState<CanonicalLogsState>({
-    logs: EMPTY_LOGS,
-    error: null,
-  });
+  const [canonicalLogsState, setCanonicalLogsState] =
+    useState<CanonicalLogsState>({
+      logs: EMPTY_LOGS,
+      error: null,
+    });
   const [staffMap, setStaffMap] = useState<Record<string, Staff | null>>({});
   const [selectedLog, setSelectedLog] = useState<OperationLog | null>(null);
   const activeAttendanceId = attendance?.id;
   const isCanonicalLogsCurrent =
-    Boolean(activeAttendanceId) && canonicalLogsState.attendanceId === activeAttendanceId;
+    Boolean(activeAttendanceId) &&
+    canonicalLogsState.attendanceId === activeAttendanceId;
   const canonicalLogs = useMemo(
     () => (isCanonicalLogsCurrent ? canonicalLogsState.logs : EMPTY_LOGS),
     [canonicalLogsState.logs, isCanonicalLogsCurrent],
   );
-  const canonicalLogsLoading = Boolean(activeAttendanceId) && !isCanonicalLogsCurrent;
-  const canonicalLogsError = isCanonicalLogsCurrent ? canonicalLogsState.error : null;
+  const canonicalLogsLoading =
+    Boolean(activeAttendanceId) && !isCanonicalLogsCurrent;
+  const canonicalLogsError = isCanonicalLogsCurrent
+    ? canonicalLogsState.error
+    : null;
 
   useEffect(() => {
     if (!activeAttendanceId) {
@@ -139,7 +145,7 @@ export default function AttendanceOperationLogHistory({
       const next: Record<string, Staff | null> = {};
       results.forEach((result, index) => {
         next[missing[index]] =
-          result.status === "fulfilled" ? result.value ?? null : null;
+          result.status === "fulfilled" ? (result.value ?? null) : null;
       });
       setStaffMap((current) => ({ ...current, ...next }));
     });
@@ -162,7 +168,9 @@ export default function AttendanceOperationLogHistory({
   );
 
   if (canonicalLogsLoading) {
-    return <div className="text-sm text-slate-500">履歴を読み込み中です...</div>;
+    return (
+      <div className="text-sm text-slate-500">履歴を読み込み中です...</div>
+    );
   }
 
   if (canonicalLogsError) {
@@ -183,7 +191,9 @@ export default function AttendanceOperationLogHistory({
                 {getOperationLogLabel(log.action)}
               </span>
               <span className="shrink-0 text-xs text-slate-500">
-                {dayjs(log.timestamp ?? log.createdAt).format("YYYY/MM/DD HH:mm:ss")}
+                {dayjs(log.timestamp ?? log.createdAt).format(
+                  "YYYY/MM/DD HH:mm:ss",
+                )}
               </span>
               <span className="min-w-0 flex-1 truncate text-xs text-slate-600">
                 {resolveStaffLabel(staffMap, log.staffId)}
@@ -220,16 +230,36 @@ export default function AttendanceOperationLogHistory({
           <thead className="bg-slate-50">
             <tr>
               <th className="w-14 border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500" />
-              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">勤務日</th>
-              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">勤務時間</th>
-              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">直行</th>
-              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">直帰</th>
-              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">有給休暇</th>
-              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">特別休暇</th>
-              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">振替休日</th>
-              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">備考</th>
-              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">作成日時</th>
-              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">スタッフID</th>
+              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">
+                勤務日
+              </th>
+              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">
+                勤務時間
+              </th>
+              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">
+                直行
+              </th>
+              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">
+                直帰
+              </th>
+              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">
+                有給休暇
+              </th>
+              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">
+                特別休暇
+              </th>
+              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">
+                振替休日
+              </th>
+              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">
+                備考
+              </th>
+              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">
+                作成日時
+              </th>
+              <th className="whitespace-nowrap border-b border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-500">
+                スタッフID
+              </th>
             </tr>
           </thead>
           <tbody>
