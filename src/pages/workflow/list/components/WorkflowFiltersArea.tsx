@@ -149,7 +149,6 @@ export default function WorkflowFiltersArea() {
           <AppButton
             size="sm"
             onClick={handleOpenDialog}
-            className="workflow-filter-trigger-button"
             aria-haspopup="dialog"
             aria-expanded={dialogOpen}
             aria-controls={dialogOpen ? titleId : undefined}
@@ -157,9 +156,6 @@ export default function WorkflowFiltersArea() {
               "--variant-containedColor": "#fff",
               "--variant-containedBg": "#19b985",
               backgroundColor: "#19b985",
-              borderColor: "rgba(4, 120, 87, 0.55)",
-              boxShadow:
-                "inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 12px 24px -18px rgba(5, 150, 105, 0.55)",
               "&:hover": {
                 "--variant-containedBg": "#17ab7b",
                 backgroundColor: "#17ab7b",
@@ -230,14 +226,11 @@ export default function WorkflowFiltersArea() {
               <AppButton
                 size="sm"
                 onClick={closeDialog}
-                className="workflow-filter-dialog__submit"
                 sx={{
+                  alignSelf: { xs: "flex-end", sm: "auto" },
                   "--variant-containedColor": "#fff",
                   "--variant-containedBg": "#19b985",
                   backgroundColor: "#19b985",
-                  borderColor: "rgba(4, 120, 87, 0.55)",
-                  boxShadow:
-                    "inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 12px 24px -18px rgba(5, 150, 105, 0.55)",
                   "&:hover": {
                     "--variant-containedBg": "#17ab7b",
                     backgroundColor: "#17ab7b",

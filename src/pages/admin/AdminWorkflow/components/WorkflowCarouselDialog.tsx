@@ -1,4 +1,5 @@
 import CloseIcon from "@mui/icons-material/Close";
+import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import { Workflow as WorkflowType } from "@shared/api/graphql/types";
 import { AppButton, AppIconButton } from "@shared/ui/button";
 import { AppMobileStepper } from "@shared/ui/stepper";
@@ -8,29 +9,6 @@ import { useWorkflowCarouselKeyboard } from "../hooks/useWorkflowCarouselKeyboar
 import { useWorkflowCarouselState } from "../hooks/useWorkflowCarouselState";
 import WorkflowCarouselActionButtons from "./WorkflowCarouselActionButtons";
 import WorkflowDetailGrid from "./WorkflowDetailGrid";
-
-function OpenInPanelIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
-      <path
-        d="M7 5h8v8m0-8-8 8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M13 11v4H5V7h4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 interface WorkflowCarouselDialogProps {
   open: boolean;
@@ -126,7 +104,7 @@ export default function WorkflowCarouselDialog({
                 currentWorkflowId && onOpenInRightPanel(currentWorkflowId)
               }
               disabled={!currentWorkflowId}
-              startIcon={<OpenInPanelIcon />}
+              startIcon={<OpenInNewRoundedIcon sx={{ fontSize: 16 }} />}
               className="min-w-0"
             >
               右側で開く

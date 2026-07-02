@@ -3,12 +3,12 @@ import { useState } from "react";
 
 const APPROVE_OPTIONS: AppSplitButtonOption[] = [
   { key: "approve-and-next", label: "承認して次へ" },
-  { key: "approve-only", label: "承認のみ" },
+  { key: "approve-only", label: "承認" },
 ];
 
 const REJECT_OPTIONS: AppSplitButtonOption[] = [
   { key: "reject-and-next", label: "却下して次へ" },
-  { key: "reject-only", label: "却下のみ" },
+  { key: "reject-only", label: "却下" },
 ];
 
 type WorkflowCarouselActionButtonsProps = {
@@ -28,8 +28,8 @@ export default function WorkflowCarouselActionButtons({
   isApproveDisabled,
   isRejectDisabled,
 }: WorkflowCarouselActionButtonsProps) {
-  const [approveKey, setApproveKey] = useState("approve-and-next");
-  const [rejectKey, setRejectKey] = useState("reject-and-next");
+  const [approveKey, setApproveKey] = useState("approve-only");
+  const [rejectKey, setRejectKey] = useState("reject-only");
 
   const handleApprovePrimary = () => {
     if (approveKey === "approve-only") {

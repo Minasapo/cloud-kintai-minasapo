@@ -10,6 +10,7 @@ import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import { getWorkflowCategoryLabel } from "@entities/workflow/lib/workflowLabels";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
 import { WorkflowMetadataPanelBase } from "@features/workflow/detail-panel/ui/WorkflowMetadataPanel";
+import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import { Box, Step, StepLabel, Stepper } from "@mui/material";
 import { GetWorkflowQuery, WorkflowStatus } from "@shared/api/graphql/types";
 import { designTokenVar } from "@shared/designSystem";
@@ -167,7 +168,7 @@ function WorkflowDetailHero({
             size="sm"
             onClick={onBack}
             className="min-w-0"
-            startIcon={<BackArrowIcon />}
+            startIcon={<ChevronLeftRoundedIcon sx={{ fontSize: 18 }} />}
           >
             ワークフロー一覧へ戻る
           </AppButton>
@@ -398,20 +399,7 @@ interface WorkflowDetailPanelProps {
   onBack?: () => void;
   showBackButton?: boolean;
 }
-function BackArrowIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
-      <path
-        d="M12.5 4.5 7 10l5.5 5.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
+
 export default function WorkflowDetailPanel({
   workflowId,
   onBack,
