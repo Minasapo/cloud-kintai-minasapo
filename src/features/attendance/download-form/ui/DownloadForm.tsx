@@ -284,12 +284,16 @@ function ExpandedDownloadPanel({
     </div>
   );
 }
-export default function DownloadForm() {
+type DownloadFormProps = {
+  mode?: "inline" | "dialog";
+};
+
+export default function DownloadForm({ mode = "inline" }: DownloadFormProps) {
   const navigate = useNavigate();
   const [selectedStaff, setSelectedStaff] = useState<StaffType[]>([]);
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(mode === "dialog");
   const {
     staffs,
     loading: staffLoading,
@@ -343,6 +347,30 @@ export default function DownloadForm() {
     return (
       <div className="rounded-[18px] border border-rose-200 bg-rose-50/90 px-4 py-3 text-sm text-rose-900">
         エラーが発生しました
+      </div>
+    );
+  }
+
+  if (mode === "dialog") {
+    return (
+      <div
+        className="w-full min-w-0"
+        style={{ paddingBottom: STANDARD_PADDING.CARD }}
+      >
+        <ExpandedDownloadPanel
+          closeDates={closeDates}
+          closeMonthSelectLabelId={closeMonthSelectLabelId}
+          selectedCloseDate={selectedCloseDate}
+          startDate={startDate}
+          endDate={endDate}
+          setStartDate={setStartDate}
+          setEndDate={setEndDate}
+          navigate={navigate}
+          staffs={staffs}
+          selectedStaff={selectedStaff}
+          setSelectedStaff={setSelectedStaff}
+          workDates={workDates}
+        />
       </div>
     );
   }

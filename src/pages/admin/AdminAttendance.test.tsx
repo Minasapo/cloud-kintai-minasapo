@@ -19,10 +19,23 @@ jest.mock("@features/admin-config-attendance/AttendanceSettingsDialog", () => ({
 }));
 
 describe("AdminAttendance", () => {
+  it("ダウンロードボタンからダウンロードダイアログを開ける", () => {
+    render(<AdminAttendance />);
+
+    expect(screen.queryByText("download-form")).not.toBeInTheDocument();
+    expect(screen.getByText("attendance-daily-list")).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "勤怠ダウンロードを開く" }),
+    );
+
+    expect(screen.getByText("download-form")).toBeInTheDocument();
+  });
+
   it("設定ボタンから勤怠設定ダイアログを開ける", () => {
     render(<AdminAttendance />);
 
-    expect(screen.getByText("download-form")).toBeInTheDocument();
+    expect(screen.queryByText("download-form")).not.toBeInTheDocument();
     expect(screen.getByText("attendance-daily-list")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "勤怠設定を開く" }));

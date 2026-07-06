@@ -1,5 +1,5 @@
 import { renderWithProviders } from "@shared/test-utils";
-import { screen, waitFor, within } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import DownloadForm from "../DownloadForm";
@@ -212,7 +212,7 @@ describe("DownloadForm", () => {
 
     it("初期状態ではフォーム本体（開始日ラベルなど）が表示されない", () => {
       renderForm();
-      expect(screen.queryByText("開始日")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("開始日")).not.toBeInTheDocument();
     });
   });
 
@@ -223,7 +223,7 @@ describe("DownloadForm", () => {
       await user.click(
         screen.getByRole("button", { name: "ダウンロード要素を展開する" }),
       );
-      expect(screen.getByText("開始日")).toBeInTheDocument();
+      expect(screen.getByLabelText("開始日")).toBeInTheDocument();
     });
 
     it("展開後は「折りたたむ」ボタンが表示される", async () => {
@@ -243,11 +243,11 @@ describe("DownloadForm", () => {
       await user.click(
         screen.getByRole("button", { name: "ダウンロード要素を展開する" }),
       );
-      expect(screen.getByText("開始日")).toBeInTheDocument();
+      expect(screen.getByLabelText("開始日")).toBeInTheDocument();
       await user.click(
         screen.getByRole("button", { name: "ダウンロード要素を折りたたむ" }),
       );
-      expect(screen.queryByText("開始日")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("開始日")).not.toBeInTheDocument();
     });
 
     it("展開ボタンの aria-expanded が初期状態で false", () => {
@@ -380,10 +380,10 @@ describe("DownloadForm", () => {
 
   describe("集計対象月セレクト", () => {
     it("closeDates が空のとき選択肢は「対象月を選択」のみ", async () => {
-      await expandForm();
+      const user = await expandForm();
       const select = screen.getByRole("combobox");
-      expect(select).toHaveValue("");
-      const options = within(select).queryAllByRole("option");
+      await user.click(select);
+      const options = screen.getAllByRole("option");
       expect(options).toHaveLength(1);
       expect(options[0]).toHaveTextContent("対象月を選択");
     });
@@ -400,8 +400,11 @@ describe("DownloadForm", () => {
           },
         ],
       });
-      await expandForm();
-      expect(screen.getByText("2024/01")).toBeInTheDocument();
+      const user = await expandForm();
+      await user.click(screen.getByRole("combobox"));
+      expect(
+        screen.getByRole("option", { name: "2024/01" }),
+      ).toBeInTheDocument();
     });
 
     it("closeDates を選択すると開始日・終了日が更新される", async () => {
@@ -420,8 +423,8 @@ describe("DownloadForm", () => {
       await user.click(
         screen.getByRole("button", { name: "ダウンロード要素を展開する" }),
       );
-      const select = screen.getByRole("combobox");
-      await user.selectOptions(select, "2024-01-31");
+      await user.click(screen.getByRole("combobox"));
+      await user.click(screen.getByRole("option", { name: "2024/01" }));
       await waitFor(() => {
         const dateInputs = container.querySelectorAll('input[type="date"]');
         expect((dateInputs[0] as HTMLInputElement).value).toBe("2024-01-01");
