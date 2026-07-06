@@ -20,11 +20,17 @@ import React from "react";
 import { useParams } from "react-router-dom";
 
 import { useAttendanceDailyFetch } from "../../model/useAttendanceDailyFetch";
+import { usePendingAttendanceMap } from "../../model/usePendingAttendanceMap";
 import AttendanceDailyList from "../AttendanceDailyList";
 
 // ─── Mock: sub-components ─────────────────────────────────────────────────────
 jest.mock("../ActionsTableCell", () => ({
-  ActionsTableCell: (_props: unknown) => <td data-testid="actions-cell" />,
+  ActionsTableCell: (props: { attendances?: Array<{ id?: string }> }) => (
+    <td
+      data-testid="actions-cell"
+      data-attendance-count={props.attendances?.length ?? 0}
+    />
+  ),
 }));
 
 jest.mock("../StartTimeTableCell", () => ({
@@ -136,6 +142,10 @@ jest.mock("../../model/useAttendanceDailyFetch", () => ({
   useAttendanceDailyFetch: jest.fn(),
 }));
 
+jest.mock("../../model/usePendingAttendanceMap", () => ({
+  usePendingAttendanceMap: jest.fn(),
+}));
+
 // ─── Mock: @/errors ──────────────────────────────────────────────────────────
 jest.mock("@/errors", () => ({
   E00001: { code: "E00001", message: "データ取得中に問題が発生しました" },
@@ -151,6 +161,7 @@ const useAttendanceDailyFn = useAttendanceDailyMock as jest.Mock;
 const useCalendarsFn = useCalendars as jest.Mock;
 const useStaffsFn = useStaffs as jest.Mock;
 const useAttendanceDailyFetchFn = useAttendanceDailyFetch as jest.Mock;
+const usePendingAttendanceMapFn = usePendingAttendanceMap as jest.Mock;
 const useLazyGetAttendanceByIdQueryFn =
   useLazyGetAttendanceByIdQuery as jest.Mock;
 const useDeleteAttendanceMutationFn = useDeleteAttendanceMutation as jest.Mock;
@@ -259,6 +270,8 @@ beforeEach(() => {
     getAttendanceForDisplayDate: jest.fn(() => null),
     getOvertimeMinutes: jest.fn(() => 90),
   });
+
+  usePendingAttendanceMapFn.mockReturnValue({});
 
   useLazyGetAttendanceByIdQueryFn.mockReturnValue([
     jest.fn().mockResolvedValue({ data: null }),
@@ -540,14 +553,12 @@ describe("AttendanceDailyList", () => {
       });
 
       const mockTrigger = jest.fn().mockReturnValue({
-        unwrap: jest
-          .fn()
-          .mockResolvedValue({
-            id: "id-1",
-            workDate: "2024-01-15",
-            startTime: null,
-            endTime: null,
-          }),
+        unwrap: jest.fn().mockResolvedValue({
+          id: "id-1",
+          workDate: "2024-01-15",
+          startTime: null,
+          endTime: null,
+        }),
       });
       useLazyGetAttendanceByIdQueryFn.mockReturnValue([mockTrigger]);
     });
@@ -601,8 +612,8 @@ describe("AttendanceDailyList", () => {
     });
   });
 
-  describe("申請中スタッフセクション", () => {
-    it("承認待ちスタッフがいる場合、申請中セクションが表示される", () => {
+  describe("承認待ち一覧セクション", () => {
+    it("承認待ちスタッフがいる場合、承認待ち一覧が表示される", () => {
       const pendingAttendance = {
         id: "att-1",
         workDate: "2024-01-15",
@@ -626,16 +637,26 @@ describe("AttendanceDailyList", () => {
 
       useAttendanceDailyFetchFn.mockReturnValue({
         ...DEFAULT_FETCH_RESULT,
-        attendanceMap: { s1: [pendingAttendance] },
+        attendanceMap: {},
         getAttendanceForDisplayDate: jest.fn(() => pendingAttendance),
         getOvertimeMinutes: jest.fn(() => 0),
       });
+      usePendingAttendanceMapFn.mockReturnValue({ s1: [pendingAttendance] });
 
       renderComponent();
-      expect(screen.getAllByText(/申請中のスタッフ/).length).toBeGreaterThan(0);
+      expect(screen.getByText("承認待ち一覧 (1)")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "未承認の変更リクエストがあるスタッフを表示しています。",
+        ),
+      ).toBeInTheDocument();
+      expect(screen.getAllByTestId("actions-cell")[0]).toHaveAttribute(
+        "data-attendance-count",
+        "1",
+      );
     });
 
-    it("承認待ちスタッフがいない場合、申請中セクションが表示されない", () => {
+    it("承認待ちスタッフがいない場合、承認待ち一覧が表示されない", () => {
       useAttendanceDailyFn.mockReturnValue({
         attendanceDailyList: [makeAttendanceDaily()],
         error: null,
@@ -648,8 +669,9 @@ describe("AttendanceDailyList", () => {
         getAttendanceForDisplayDate: jest.fn(() => null),
         getOvertimeMinutes: jest.fn(() => 0),
       });
+      usePendingAttendanceMapFn.mockReturnValue({ s1: [] });
       renderComponent();
-      expect(screen.queryByText(/申請中のスタッフ/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/承認待ち一覧/)).not.toBeInTheDocument();
     });
   });
 
