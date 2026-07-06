@@ -1,4 +1,5 @@
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { hasUnapprovedChangeRequest } from "@entities/attendance/lib/ChangeRequest";
 import useAttendanceDaily, {
   AttendanceDaily,
 } from "@entities/attendance/model/useAttendanceDaily";
@@ -25,14 +26,28 @@ type UseAttendanceDailyListDataResult = {
   pendingList: AttendanceDaily[];
   staffNameMap: Record<string, string>;
   attendanceMap: ReturnType<typeof useAttendanceDailyFetch>["attendanceMap"];
-  attendanceLoadingMap: ReturnType<typeof useAttendanceDailyFetch>["attendanceLoadingMap"];
-  attendanceErrorMap: ReturnType<typeof useAttendanceDailyFetch>["attendanceErrorMap"];
-  getAttendanceForDisplayDate: ReturnType<typeof useAttendanceDailyFetch>["getAttendanceForDisplayDate"];
-  getOvertimeMinutes: ReturnType<typeof useAttendanceDailyFetch>["getOvertimeMinutes"];
-  mergedDuplicateAttendances: ReturnType<typeof useAttendanceDailyFetch>["mergedDuplicateAttendances"];
-  duplicateInfoByStaff: ReturnType<typeof useAttendanceDailyFetch>["duplicateInfoByStaff"];
+  attendanceLoadingMap: ReturnType<
+    typeof useAttendanceDailyFetch
+  >["attendanceLoadingMap"];
+  attendanceErrorMap: ReturnType<
+    typeof useAttendanceDailyFetch
+  >["attendanceErrorMap"];
+  getAttendanceForDisplayDate: ReturnType<
+    typeof useAttendanceDailyFetch
+  >["getAttendanceForDisplayDate"];
+  getOvertimeMinutes: ReturnType<
+    typeof useAttendanceDailyFetch
+  >["getOvertimeMinutes"];
+  mergedDuplicateAttendances: ReturnType<
+    typeof useAttendanceDailyFetch
+  >["mergedDuplicateAttendances"];
+  duplicateInfoByStaff: ReturnType<
+    typeof useAttendanceDailyFetch
+  >["duplicateInfoByStaff"];
   holidayCalendars: ReturnType<typeof useCalendars>["holidayCalendars"];
-  companyHolidayCalendars: ReturnType<typeof useCalendars>["companyHolidayCalendars"];
+  companyHolidayCalendars: ReturnType<
+    typeof useCalendars
+  >["companyHolidayCalendars"];
   calendarsLoading: boolean;
 };
 
@@ -55,7 +70,11 @@ export function useAttendanceDailyListData({
       )
     : undefined;
 
-  const { staffs, loading: staffLoading, error: staffError } = useStaffs({
+  const {
+    staffs,
+    loading: staffLoading,
+    error: staffError,
+  } = useStaffs({
     isAuthenticated,
   });
   const {
@@ -157,14 +176,12 @@ export function useAttendanceDailyListData({
 
   const isRequesting = useCallback(
     (row: AttendanceDaily) => {
-      const targetAttendance = getAttendanceForDisplayDate(row);
-      if (!targetAttendance?.changeRequests) {
-        return false;
-      }
-      const changeRequests = targetAttendance.changeRequests || [];
-      return changeRequests.filter((item) => item && !item.completed).length > 0;
+      const attendances = attendanceMap[row.sub] ?? [];
+      return attendances.some((attendance) =>
+        hasUnapprovedChangeRequest(attendance.changeRequests),
+      );
     },
-    [getAttendanceForDisplayDate],
+    [attendanceMap],
   );
 
   const pendingList = useMemo(() => {
