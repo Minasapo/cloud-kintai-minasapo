@@ -1,9 +1,15 @@
 import { AuthContext } from "@app/providers/auth/AuthContext";
 import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
 // ─── Re-import mocked modules to allow per-test overrides ────────────────────
-import { useDeleteAttendanceMutation,useLazyGetAttendanceByIdQuery } from "@entities/attendance/api/attendanceApi";
+import {
+  useDeleteAttendanceMutation,
+  useLazyGetAttendanceByIdQuery,
+} from "@entities/attendance/api/attendanceApi";
 // ─── Type helpers ─────────────────────────────────────────────────────────────
-import type { AttendanceDaily, DuplicateAttendanceDaily } from "@entities/attendance/model/useAttendanceDaily";
+import type {
+  AttendanceDaily,
+  DuplicateAttendanceDaily,
+} from "@entities/attendance/model/useAttendanceDaily";
 import useAttendanceDailyMock from "@entities/attendance/model/useAttendanceDaily";
 import { useCalendars } from "@entities/calendar/model/useCalendars";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
@@ -14,19 +20,29 @@ import React from "react";
 import { useParams } from "react-router-dom";
 
 import { useAttendanceDailyFetch } from "../../model/useAttendanceDailyFetch";
+import { usePendingAttendanceMap } from "../../model/usePendingAttendanceMap";
 import AttendanceDailyList from "../AttendanceDailyList";
 
 // ─── Mock: sub-components ─────────────────────────────────────────────────────
 jest.mock("../ActionsTableCell", () => ({
-  ActionsTableCell: (_props: unknown) => <td data-testid="actions-cell" />,
+  ActionsTableCell: (props: { attendances?: Array<{ id?: string }> }) => (
+    <td
+      data-testid="actions-cell"
+      data-attendance-count={props.attendances?.length ?? 0}
+    />
+  ),
 }));
 
 jest.mock("../StartTimeTableCell", () => ({
-  StartTimeTableCell: (_props: unknown) => <td data-testid="start-time-cell">09:00</td>,
+  StartTimeTableCell: (_props: unknown) => (
+    <td data-testid="start-time-cell">09:00</td>
+  ),
 }));
 
 jest.mock("../EndTimeTableCell", () => ({
-  EndTimeTableCell: (_props: unknown) => <td data-testid="end-time-cell">18:00</td>,
+  EndTimeTableCell: (_props: unknown) => (
+    <td data-testid="end-time-cell">18:00</td>
+  ),
 }));
 
 jest.mock("../MoveDateItem", () => {
@@ -69,17 +85,34 @@ jest.mock("@entities/staff/model/useStaffs/useStaffs", () => ({
 
 // ─── Mock: shared/lib/store ──────────────────────────────────────────────────
 jest.mock("@shared/lib/store/notificationSlice", () => ({
-  pushNotification: jest.fn((payload) => ({ type: "notification/push", payload })),
+  pushNotification: jest.fn((payload) => ({
+    type: "notification/push",
+    payload,
+  })),
 }));
 
 // ─── Mock: shared/ui/button ──────────────────────────────────────────────────
 jest.mock("@shared/ui/button", () => ({
-  AppButton: ({ children, onClick, ...rest }: React.PropsWithChildren<{ onClick?: React.MouseEventHandler; type?: "button" | "submit" | "reset" }>) => (
+  AppButton: ({
+    children,
+    onClick,
+    ...rest
+  }: React.PropsWithChildren<{
+    onClick?: React.MouseEventHandler;
+    type?: "button" | "submit" | "reset";
+  }>) => (
     <button type="button" onClick={onClick} {...rest}>
       {children}
     </button>
   ),
-  AppIconButton: ({ children, onClick, ...rest }: React.PropsWithChildren<{ onClick?: React.MouseEventHandler; "aria-label"?: string }>) => (
+  AppIconButton: ({
+    children,
+    onClick,
+    ...rest
+  }: React.PropsWithChildren<{
+    onClick?: React.MouseEventHandler;
+    "aria-label"?: string;
+  }>) => (
     <button type="button" onClick={onClick} {...rest}>
       {children}
     </button>
@@ -109,6 +142,10 @@ jest.mock("../../model/useAttendanceDailyFetch", () => ({
   useAttendanceDailyFetch: jest.fn(),
 }));
 
+jest.mock("../../model/usePendingAttendanceMap", () => ({
+  usePendingAttendanceMap: jest.fn(),
+}));
+
 // ─── Mock: @/errors ──────────────────────────────────────────────────────────
 jest.mock("@/errors", () => ({
   E00001: { code: "E00001", message: "データ取得中に問題が発生しました" },
@@ -124,12 +161,16 @@ const useAttendanceDailyFn = useAttendanceDailyMock as jest.Mock;
 const useCalendarsFn = useCalendars as jest.Mock;
 const useStaffsFn = useStaffs as jest.Mock;
 const useAttendanceDailyFetchFn = useAttendanceDailyFetch as jest.Mock;
-const useLazyGetAttendanceByIdQueryFn = useLazyGetAttendanceByIdQuery as jest.Mock;
+const usePendingAttendanceMapFn = usePendingAttendanceMap as jest.Mock;
+const useLazyGetAttendanceByIdQueryFn =
+  useLazyGetAttendanceByIdQuery as jest.Mock;
 const useDeleteAttendanceMutationFn = useDeleteAttendanceMutation as jest.Mock;
 const useParamsFn = useParams as jest.Mock;
 
 // ─── Factories ────────────────────────────────────────────────────────────────
-function makeAttendanceDaily(overrides: Partial<AttendanceDaily> = {}): AttendanceDaily {
+function makeAttendanceDaily(
+  overrides: Partial<AttendanceDaily> = {},
+): AttendanceDaily {
   return {
     sub: "staff-001",
     givenName: "太郎",
@@ -140,7 +181,9 @@ function makeAttendanceDaily(overrides: Partial<AttendanceDaily> = {}): Attendan
   };
 }
 
-function makeDuplicate(overrides: Partial<DuplicateAttendanceDaily> = {}): DuplicateAttendanceDaily {
+function makeDuplicate(
+  overrides: Partial<DuplicateAttendanceDaily> = {},
+): DuplicateAttendanceDaily {
   return {
     staffId: "staff-001",
     staffName: "山田 太郎",
@@ -228,8 +271,14 @@ beforeEach(() => {
     getOvertimeMinutes: jest.fn(() => 90),
   });
 
-  useLazyGetAttendanceByIdQueryFn.mockReturnValue([jest.fn().mockResolvedValue({ data: null })]);
-  useDeleteAttendanceMutationFn.mockReturnValue([jest.fn().mockResolvedValue({})]);
+  usePendingAttendanceMapFn.mockReturnValue({});
+
+  useLazyGetAttendanceByIdQueryFn.mockReturnValue([
+    jest.fn().mockResolvedValue({ data: null }),
+  ]);
+  useDeleteAttendanceMutationFn.mockReturnValue([
+    jest.fn().mockResolvedValue({}),
+  ]);
 });
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
@@ -248,7 +297,9 @@ describe("AttendanceDailyList", () => {
 
     it("スタッフ名検索ボタンが表示される", () => {
       renderComponent();
-      expect(screen.getByRole("button", { name: "スタッフ名検索を表示" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "スタッフ名検索を表示" }),
+      ).toBeInTheDocument();
     });
 
     it("勤怠テーブルのヘッダーが表示される", () => {
@@ -293,8 +344,18 @@ describe("AttendanceDailyList", () => {
     it("複数スタッフのデータが全て表示される", () => {
       useAttendanceDailyFn.mockReturnValue({
         attendanceDailyList: [
-          makeAttendanceDaily({ sub: "s1", familyName: "田中", givenName: "花子", sortKey: "tanaka" }),
-          makeAttendanceDaily({ sub: "s2", familyName: "佐藤", givenName: "次郎", sortKey: "sato" }),
+          makeAttendanceDaily({
+            sub: "s1",
+            familyName: "田中",
+            givenName: "花子",
+            sortKey: "tanaka",
+          }),
+          makeAttendanceDaily({
+            sub: "s2",
+            familyName: "佐藤",
+            givenName: "次郎",
+            sortKey: "sato",
+          }),
         ],
         error: null,
         loading: false,
@@ -341,8 +402,18 @@ describe("AttendanceDailyList", () => {
     beforeEach(() => {
       useAttendanceDailyFn.mockReturnValue({
         attendanceDailyList: [
-          makeAttendanceDaily({ sub: "s1", familyName: "田中", givenName: "花子", sortKey: "tanaka" }),
-          makeAttendanceDaily({ sub: "s2", familyName: "佐藤", givenName: "次郎", sortKey: "sato" }),
+          makeAttendanceDaily({
+            sub: "s1",
+            familyName: "田中",
+            givenName: "花子",
+            sortKey: "tanaka",
+          }),
+          makeAttendanceDaily({
+            sub: "s2",
+            familyName: "佐藤",
+            givenName: "次郎",
+            sortKey: "sato",
+          }),
         ],
         error: null,
         loading: false,
@@ -355,14 +426,18 @@ describe("AttendanceDailyList", () => {
       const user = userEvent.setup();
       renderComponent();
       expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
-      await user.click(screen.getByRole("button", { name: "スタッフ名検索を表示" }));
+      await user.click(
+        screen.getByRole("button", { name: "スタッフ名検索を表示" }),
+      );
       expect(screen.getByRole("textbox")).toBeInTheDocument();
     });
 
     it("検索ボタンを再度クリックするとテキストフィールドが非表示になる", async () => {
       const user = userEvent.setup();
       renderComponent();
-      const toggleBtn = screen.getByRole("button", { name: "スタッフ名検索を表示" });
+      const toggleBtn = screen.getByRole("button", {
+        name: "スタッフ名検索を表示",
+      });
       await user.click(toggleBtn);
       expect(screen.getByRole("textbox")).toBeInTheDocument();
       await user.click(toggleBtn);
@@ -372,7 +447,9 @@ describe("AttendanceDailyList", () => {
     it("スタッフ名で入力すると一致するスタッフのみ表示される", async () => {
       const user = userEvent.setup();
       renderComponent();
-      await user.click(screen.getByRole("button", { name: "スタッフ名検索を表示" }));
+      await user.click(
+        screen.getByRole("button", { name: "スタッフ名検索を表示" }),
+      );
       const input = screen.getByRole("textbox");
       await user.type(input, "田中");
       expect(screen.getByText("田中 花子")).toBeInTheDocument();
@@ -382,12 +459,16 @@ describe("AttendanceDailyList", () => {
     it("検索をクリアすると全スタッフが表示される", async () => {
       const user = userEvent.setup();
       renderComponent();
-      await user.click(screen.getByRole("button", { name: "スタッフ名検索を表示" }));
+      await user.click(
+        screen.getByRole("button", { name: "スタッフ名検索を表示" }),
+      );
       const input = screen.getByRole("textbox");
       await user.type(input, "田中");
       expect(screen.queryByText("佐藤 次郎")).not.toBeInTheDocument();
       // 検索バーを閉じると searchName がクリアされて全員表示
-      await user.click(screen.getByRole("button", { name: "スタッフ名検索を表示" }));
+      await user.click(
+        screen.getByRole("button", { name: "スタッフ名検索を表示" }),
+      );
       expect(screen.getByText("田中 花子")).toBeInTheDocument();
       expect(screen.getByText("佐藤 次郎")).toBeInTheDocument();
     });
@@ -395,14 +476,19 @@ describe("AttendanceDailyList", () => {
 
   describe("重複データセクション", () => {
     const duplicates: DuplicateAttendanceDaily[] = [
-      makeDuplicate({ staffId: "s1", staffName: "山田 太郎", workDate: "2024-01-15", ids: ["id-1", "id-2"] }),
+      makeDuplicate({
+        staffId: "s1",
+        staffName: "山田 太郎",
+        workDate: "2024-01-15",
+        ids: ["id-1", "id-2"],
+      }),
     ];
 
     beforeEach(() => {
       useAttendanceDailyFetchFn.mockReturnValue({
         ...DEFAULT_FETCH_RESULT,
         mergedDuplicateAttendances: duplicates,
-        duplicateInfoByStaff: { "s1": duplicates },
+        duplicateInfoByStaff: { s1: duplicates },
         getAttendanceForDisplayDate: jest.fn(() => null),
         getOvertimeMinutes: jest.fn(() => 0),
       });
@@ -410,7 +496,9 @@ describe("AttendanceDailyList", () => {
 
     it("重複データがある場合、重複セクションのタイトルが表示される", () => {
       renderComponent();
-      expect(screen.getByText(/重複データが検出されたスタッフ/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/重複データが検出されたスタッフ/),
+      ).toBeInTheDocument();
     });
 
     it("重複データのスタッフ名が表示される", () => {
@@ -432,31 +520,45 @@ describe("AttendanceDailyList", () => {
         getOvertimeMinutes: jest.fn(() => 0),
       });
       renderComponent();
-      expect(screen.queryByText(/重複データが検出されたスタッフ/)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/重複データが検出されたスタッフ/),
+      ).not.toBeInTheDocument();
     });
 
     it("重複エラーアラートが表示される", () => {
       renderComponent();
-      expect(screen.getByText(/同一日付に重複した勤怠データがあります/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/同一日付に重複した勤怠データがあります/),
+      ).toBeInTheDocument();
     });
   });
 
   describe("重複データ確認ダイアログ", () => {
     const duplicates: DuplicateAttendanceDaily[] = [
-      makeDuplicate({ staffId: "s1", staffName: "山田 太郎", workDate: "2024-01-15", ids: ["id-1", "id-2"] }),
+      makeDuplicate({
+        staffId: "s1",
+        staffName: "山田 太郎",
+        workDate: "2024-01-15",
+        ids: ["id-1", "id-2"],
+      }),
     ];
 
     beforeEach(() => {
       useAttendanceDailyFetchFn.mockReturnValue({
         ...DEFAULT_FETCH_RESULT,
         mergedDuplicateAttendances: duplicates,
-        duplicateInfoByStaff: { "s1": duplicates },
+        duplicateInfoByStaff: { s1: duplicates },
         getAttendanceForDisplayDate: jest.fn(() => null),
         getOvertimeMinutes: jest.fn(() => 0),
       });
 
       const mockTrigger = jest.fn().mockReturnValue({
-        unwrap: jest.fn().mockResolvedValue({ id: "id-1", workDate: "2024-01-15", startTime: null, endTime: null }),
+        unwrap: jest.fn().mockResolvedValue({
+          id: "id-1",
+          workDate: "2024-01-15",
+          startTime: null,
+          endTime: null,
+        }),
       });
       useLazyGetAttendanceByIdQueryFn.mockReturnValue([mockTrigger]);
     });
@@ -495,8 +597,12 @@ describe("AttendanceDailyList", () => {
 
     it("読み込み中はローディングメッセージが表示される", async () => {
       // triggerGetAttendanceById が resolve しない Promise を返す（永続的にローディング）
-      const neverResolve = new Promise<never>(() => { /* never resolves */ });
-      const mockTrigger = jest.fn().mockReturnValue({ unwrap: () => neverResolve });
+      const neverResolve = new Promise<never>(() => {
+        /* never resolves */
+      });
+      const mockTrigger = jest
+        .fn()
+        .mockReturnValue({ unwrap: () => neverResolve });
       useLazyGetAttendanceByIdQueryFn.mockReturnValue([mockTrigger]);
 
       const user = userEvent.setup();
@@ -506,8 +612,8 @@ describe("AttendanceDailyList", () => {
     });
   });
 
-  describe("申請中スタッフセクション", () => {
-    it("承認待ちスタッフがいる場合、申請中セクションが表示される", () => {
+  describe("承認待ち一覧セクション", () => {
+    it("承認待ちスタッフがいる場合、承認待ち一覧が表示される", () => {
       const pendingAttendance = {
         id: "att-1",
         workDate: "2024-01-15",
@@ -531,15 +637,26 @@ describe("AttendanceDailyList", () => {
 
       useAttendanceDailyFetchFn.mockReturnValue({
         ...DEFAULT_FETCH_RESULT,
+        attendanceMap: {},
         getAttendanceForDisplayDate: jest.fn(() => pendingAttendance),
         getOvertimeMinutes: jest.fn(() => 0),
       });
+      usePendingAttendanceMapFn.mockReturnValue({ s1: [pendingAttendance] });
 
       renderComponent();
-      expect(screen.getAllByText(/申請中のスタッフ/).length).toBeGreaterThan(0);
+      expect(screen.getByText("承認待ち一覧 (1)")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "未承認の変更リクエストがあるスタッフを表示しています。",
+        ),
+      ).toBeInTheDocument();
+      expect(screen.getAllByTestId("actions-cell")[0]).toHaveAttribute(
+        "data-attendance-count",
+        "1",
+      );
     });
 
-    it("承認待ちスタッフがいない場合、申請中セクションが表示されない", () => {
+    it("承認待ちスタッフがいない場合、承認待ち一覧が表示されない", () => {
       useAttendanceDailyFn.mockReturnValue({
         attendanceDailyList: [makeAttendanceDaily()],
         error: null,
@@ -552,8 +669,9 @@ describe("AttendanceDailyList", () => {
         getAttendanceForDisplayDate: jest.fn(() => null),
         getOvertimeMinutes: jest.fn(() => 0),
       });
+      usePendingAttendanceMapFn.mockReturnValue({ s1: [] });
       renderComponent();
-      expect(screen.queryByText(/申請中のスタッフ/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/承認待ち一覧/)).not.toBeInTheDocument();
     });
   });
 
@@ -616,8 +734,18 @@ describe("AttendanceDailyList", () => {
     it("sortKeyに従ってスタッフリストがソートされる", () => {
       useAttendanceDailyFn.mockReturnValue({
         attendanceDailyList: [
-          makeAttendanceDaily({ sub: "s1", familyName: "山田", givenName: "太郎", sortKey: "yamada" }),
-          makeAttendanceDaily({ sub: "s2", familyName: "阿部", givenName: "誠", sortKey: "abe" }),
+          makeAttendanceDaily({
+            sub: "s1",
+            familyName: "山田",
+            givenName: "太郎",
+            sortKey: "yamada",
+          }),
+          makeAttendanceDaily({
+            sub: "s2",
+            familyName: "阿部",
+            givenName: "誠",
+            sortKey: "abe",
+          }),
         ],
         error: null,
         loading: false,
@@ -722,7 +850,12 @@ describe("AttendanceDailyList", () => {
     it("重複データを持つスタッフ行に「重複」チップが表示される", () => {
       const staffRow = makeAttendanceDaily({ sub: "s1" });
       const duplicateInfo: DuplicateAttendanceDaily[] = [
-        { staffId: "s1", staffName: "山田 太郎", workDate: "2024-01-15", ids: ["id-1", "id-2"] },
+        {
+          staffId: "s1",
+          staffName: "山田 太郎",
+          workDate: "2024-01-15",
+          ids: ["id-1", "id-2"],
+        },
       ];
 
       useAttendanceDailyFn.mockReturnValue({
@@ -736,7 +869,7 @@ describe("AttendanceDailyList", () => {
       useAttendanceDailyFetchFn.mockReturnValue({
         ...DEFAULT_FETCH_RESULT,
         mergedDuplicateAttendances: [],
-        duplicateInfoByStaff: { "s1": duplicateInfo },
+        duplicateInfoByStaff: { s1: duplicateInfo },
         getAttendanceForDisplayDate: jest.fn(() => null),
         getOvertimeMinutes: jest.fn(() => 0),
       });
@@ -755,14 +888,25 @@ describe("AttendanceDailyList", () => {
       useAttendanceDailyFetchFn.mockReturnValue({
         ...DEFAULT_FETCH_RESULT,
         mergedDuplicateAttendances: duplicates,
-        duplicateInfoByStaff: { "s1": duplicates },
+        duplicateInfoByStaff: { s1: duplicates },
         getAttendanceForDisplayDate: jest.fn(() => null),
         getOvertimeMinutes: jest.fn(() => 0),
       });
 
-      const record1 = { id: "id-1", workDate: "2024-01-15", startTime: "2024-01-15T09:00:00", endTime: null };
-      const record2 = { id: "id-2", workDate: "2024-01-15", startTime: "2024-01-15T10:00:00", endTime: null };
-      const mockTrigger = jest.fn()
+      const record1 = {
+        id: "id-1",
+        workDate: "2024-01-15",
+        startTime: "2024-01-15T09:00:00",
+        endTime: null,
+      };
+      const record2 = {
+        id: "id-2",
+        workDate: "2024-01-15",
+        startTime: "2024-01-15T10:00:00",
+        endTime: null,
+      };
+      const mockTrigger = jest
+        .fn()
         .mockReturnValueOnce({ unwrap: jest.fn().mockResolvedValue(record1) })
         .mockReturnValueOnce({ unwrap: jest.fn().mockResolvedValue(record2) });
       useLazyGetAttendanceByIdQueryFn.mockReturnValue([mockTrigger]);

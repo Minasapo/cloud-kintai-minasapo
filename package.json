@@ -54,6 +54,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@docusaurus/tsconfig": "^3.10.1",
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.2",
     "@modyfi/vite-plugin-yaml": "^1.1.1",

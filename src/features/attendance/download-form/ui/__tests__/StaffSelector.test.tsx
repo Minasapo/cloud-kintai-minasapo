@@ -40,9 +40,9 @@ describe("StaffSelector", () => {
   });
 
   describe("レンダリング（閉じた状態）", () => {
-    it("「対象者リスト」ラベルを表示する", () => {
+    it("「対象者リスト」ラベルを表示しない", () => {
       renderSelector({});
-      expect(screen.getByText("対象者リスト")).toBeInTheDocument();
+      expect(screen.queryByText("対象者リスト")).not.toBeInTheDocument();
     });
 
     it("スタッフ未選択のとき「対象者を選択」プレースホルダーを表示する", () => {
@@ -51,7 +51,10 @@ describe("StaffSelector", () => {
     });
 
     it("スタッフが 1 名選択されているとき、トリガーボタンにその名前が表示される", () => {
-      const staff = createDownloadTestStaff({ familyName: "田中", givenName: "花子" });
+      const staff = createDownloadTestStaff({
+        familyName: "田中",
+        givenName: "花子",
+      });
       renderSelector({ selectedStaff: [staff] });
       // The name appears in both the trigger span and the chip; check at least one exists
       const allOccurrences = screen.getAllByText("田中 花子");
@@ -80,7 +83,7 @@ describe("StaffSelector", () => {
       expect(screen.queryByText("0名を選択中")).not.toBeInTheDocument();
     });
 
-    it("選択済みスタッフのチップが表示される（複数名）", () => {
+    it("複数名選択時は件数表示になる", () => {
       const staffA = createDownloadTestStaff({
         id: "s1",
         familyName: "鈴木",
@@ -93,9 +96,9 @@ describe("StaffSelector", () => {
         givenName: "二郎",
       });
       renderSelector({ selectedStaff: [staffA, staffB] });
-      // 複数選択時は "N名を選択中" が trigger に表示され、chip は両者分表示される
-      expect(screen.getByText("鈴木 一郎")).toBeInTheDocument();
-      expect(screen.getByText("佐藤 二郎")).toBeInTheDocument();
+      expect(screen.getByText("2名を選択中")).toBeInTheDocument();
+      expect(screen.queryByText("鈴木 一郎")).not.toBeInTheDocument();
+      expect(screen.queryByText("佐藤 二郎")).not.toBeInTheDocument();
     });
   });
 
@@ -103,7 +106,11 @@ describe("StaffSelector", () => {
     it("トリガーボタンをクリックするとドロップダウンが開く", async () => {
       const user = userEvent.setup();
       const staffs = [
-        createDownloadTestStaff({ id: "s1", familyName: "田中", givenName: "花子" }),
+        createDownloadTestStaff({
+          id: "s1",
+          familyName: "田中",
+          givenName: "花子",
+        }),
       ];
       renderSelector({ staffs });
       const trigger = screen.getAllByRole("button")[0];
@@ -113,41 +120,35 @@ describe("StaffSelector", () => {
       });
     });
 
-    it("ドロップダウンが開いているとき再クリックで閉じる", async () => {
+    it("ドロップダウンが開いているとき Escape キーで閉じる", async () => {
       const user = userEvent.setup();
       const staffs = [
-        createDownloadTestStaff({ id: "s1", familyName: "田中", givenName: "花子" }),
+        createDownloadTestStaff({
+          id: "s1",
+          familyName: "田中",
+          givenName: "花子",
+        }),
       ];
       renderSelector({ staffs });
       const trigger = screen.getAllByRole("button")[0];
       await user.click(trigger);
       await waitFor(() => {
-        expect(screen.getByText("全選択")).toBeInTheDocument();
+        expect(screen.getByRole("listbox")).toBeInTheDocument();
       });
-      await user.click(trigger);
+      await user.keyboard("{Escape}");
       await waitFor(() => {
-        expect(screen.queryByText("全選択")).not.toBeInTheDocument();
-      });
-    });
-
-    it("ドロップダウンが開くとスタッフ件数が表示される", async () => {
-      const user = userEvent.setup();
-      const staffs = [
-        createDownloadTestStaff({ id: "s1", cognitoUserId: "s1" }),
-        createDownloadTestStaff({ id: "s2", cognitoUserId: "s2" }),
-      ];
-      renderSelector({ staffs });
-      const trigger = screen.getAllByRole("button")[0];
-      await user.click(trigger);
-      await waitFor(() => {
-        expect(screen.getByText("2件")).toBeInTheDocument();
+        expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
       });
     });
 
     it("ドロップダウンが開くとスタッフ一覧が表示される", async () => {
       const user = userEvent.setup();
       const staffs = [
-        createDownloadTestStaff({ id: "s1", familyName: "田中", givenName: "花子" }),
+        createDownloadTestStaff({
+          id: "s1",
+          familyName: "田中",
+          givenName: "花子",
+        }),
         createDownloadTestStaff({
           id: "s2",
           cognitoUserId: "s2",
@@ -160,8 +161,12 @@ describe("StaffSelector", () => {
       await user.click(trigger);
       await waitFor(() => {
         // Checkboxes with aria-labels are accessible via the wrapping label
-        expect(screen.getAllByText("田中 花子").length).toBeGreaterThanOrEqual(1);
-        expect(screen.getAllByText("鈴木 一郎").length).toBeGreaterThanOrEqual(1);
+        expect(screen.getAllByText("田中 花子").length).toBeGreaterThanOrEqual(
+          1,
+        );
+        expect(screen.getAllByText("鈴木 一郎").length).toBeGreaterThanOrEqual(
+          1,
+        );
       });
     });
 
@@ -171,7 +176,9 @@ describe("StaffSelector", () => {
       const trigger = screen.getAllByRole("button")[0];
       await user.click(trigger);
       await waitFor(() => {
-        expect(screen.getByText("該当するスタッフが見つかりません。")).toBeInTheDocument();
+        expect(
+          screen.getByText("該当するスタッフが見つかりません。"),
+        ).toBeInTheDocument();
       });
     });
   });
@@ -206,7 +213,11 @@ describe("StaffSelector", () => {
         givenName: "花子",
       });
       const setSelectedStaff = jest.fn();
-      renderSelector({ staffs: [staff], selectedStaff: [staff], setSelectedStaff });
+      renderSelector({
+        staffs: [staff],
+        selectedStaff: [staff],
+        setSelectedStaff,
+      });
 
       const trigger = screen.getAllByRole("button")[0];
       await user.click(trigger);
@@ -256,7 +267,11 @@ describe("StaffSelector", () => {
     it("複数スタッフがある場合、各スタッフのチェックボックスが表示される", async () => {
       const user = userEvent.setup();
       const staffs = [
-        createDownloadTestStaff({ id: "s1", familyName: "田中", givenName: "花子" }),
+        createDownloadTestStaff({
+          id: "s1",
+          familyName: "田中",
+          givenName: "花子",
+        }),
         createDownloadTestStaff({
           id: "s2",
           cognitoUserId: "s2",
@@ -278,7 +293,11 @@ describe("StaffSelector", () => {
     it("「全選択」ボタンをクリックすると全スタッフが渡される", async () => {
       const user = userEvent.setup();
       const staffs = [
-        createDownloadTestStaff({ id: "s1", familyName: "田中", givenName: "花子" }),
+        createDownloadTestStaff({
+          id: "s1",
+          familyName: "田中",
+          givenName: "花子",
+        }),
         createDownloadTestStaff({
           id: "s2",
           cognitoUserId: "s2",
@@ -302,7 +321,11 @@ describe("StaffSelector", () => {
     it("「全解除」ボタンをクリックすると空配列が渡される", async () => {
       const user = userEvent.setup();
       const staffs = [
-        createDownloadTestStaff({ id: "s1", familyName: "田中", givenName: "花子" }),
+        createDownloadTestStaff({
+          id: "s1",
+          familyName: "田中",
+          givenName: "花子",
+        }),
       ];
       const setSelectedStaff = jest.fn();
       renderSelector({ staffs, selectedStaff: staffs, setSelectedStaff });
@@ -374,30 +397,37 @@ describe("StaffSelector", () => {
     });
   });
 
-  describe("ドロップダウン外クリックで閉じる", () => {
-    it("コンポーネント外をクリックするとドロップダウンが閉じる", async () => {
+  describe("ドロップダウン外操作で閉じる", () => {
+    it("Escape キーを押すとドロップダウンが閉じる", async () => {
       const user = userEvent.setup();
       const staffs = [
-        createDownloadTestStaff({ id: "s1", familyName: "田中", givenName: "花子" }),
+        createDownloadTestStaff({
+          id: "s1",
+          familyName: "田中",
+          givenName: "花子",
+        }),
       ];
       renderSelector({ staffs });
 
       const trigger = screen.getAllByRole("button")[0];
       await user.click(trigger);
       await waitFor(() => {
-        expect(screen.getByText("全選択")).toBeInTheDocument();
+        expect(screen.getByRole("listbox")).toBeInTheDocument();
       });
 
-      await user.click(document.body);
+      await user.keyboard("{Escape}");
       await waitFor(() => {
-        expect(screen.queryByText("全選択")).not.toBeInTheDocument();
+        expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
       });
     });
   });
 
   describe("スタッフ名の表示", () => {
     it("familyName のみ設定されている場合、名前部分が表示される（trim）", () => {
-      const staff = createDownloadTestStaff({ familyName: "田中", givenName: "" });
+      const staff = createDownloadTestStaff({
+        familyName: "田中",
+        givenName: "",
+      });
       renderSelector({ selectedStaff: [staff] });
       // Both trigger label and chip show the name; at least one occurrence expected
       const occurrences = screen.getAllByText("田中");
@@ -405,7 +435,10 @@ describe("StaffSelector", () => {
     });
 
     it("givenName のみ設定されている場合、名前部分が表示される（trim）", () => {
-      const staff = createDownloadTestStaff({ familyName: "", givenName: "花子" });
+      const staff = createDownloadTestStaff({
+        familyName: "",
+        givenName: "花子",
+      });
       renderSelector({ selectedStaff: [staff] });
       const occurrences = screen.getAllByText("花子");
       expect(occurrences.length).toBeGreaterThanOrEqual(1);

@@ -6,7 +6,7 @@ import {
 import { designTokenVar } from "@shared/designSystem";
 import { AppButton } from "@shared/ui/button";
 import { AppMultiSelect } from "@shared/ui/form";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 type Props = {
   staffs: StaffType[];
@@ -33,7 +33,6 @@ function StaffSelectArea({
   setSelectedStaff,
   selectedLabel,
 }: StaffSelectAreaProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const selectedIds = useMemo(
     () => selectedStaff.map((staff) => staff.id),
     [selectedStaff],
@@ -51,13 +50,11 @@ function StaffSelectArea({
   return (
     <div className="flex flex-col gap-2">
       <AppMultiSelect<string>
-        label="対象者リスト"
+        label=""
         labelId={selectLabelId}
         value={selectedIds}
         options={options}
         emptyText="該当するスタッフが見つかりません。"
-        onOpen={() => setIsMenuOpen(true)}
-        onClose={() => setIsMenuOpen(false)}
         onChange={(nextIds) => {
           const idSet = new Set(nextIds);
           setSelectedStaff(staffs.filter((staff) => idSet.has(staff.id)));
@@ -75,57 +72,52 @@ function StaffSelectArea({
         }}
       />
 
-      {isMenuOpen && (
-        <div
-          className="flex items-center gap-2"
-          style={{ maxWidth: SELECTOR_MAX_WIDTH, minWidth: SELECTOR_MIN_WIDTH }}
+      <div
+        className="flex items-center gap-2"
+        style={{ maxWidth: SELECTOR_MAX_WIDTH, minWidth: SELECTOR_MIN_WIDTH }}
+      >
+        <AppButton
+          variant="outline"
+          tone="primary"
+          size="sm"
+          onClick={() => setSelectedStaff(staffs)}
+          disabled={
+            staffs.length === 0 ||
+            staffs.every((staff) => selectedIds.includes(staff.id))
+          }
+          className="whitespace-nowrap"
+          sx={{
+            "--variant-outlinedColor": MAIN_GREEN,
+            "--variant-outlinedBorder": "rgba(16, 185, 129, 0.5)",
+            "--variant-outlinedBg": "rgba(16, 185, 129, 0.04)",
+            "&:hover": {
+              "--variant-outlinedBorder": MAIN_GREEN_DARK,
+              "--variant-outlinedBg": "rgba(16, 185, 129, 0.1)",
+            },
+          }}
         >
-          <div className="text-xs font-medium text-slate-500">
-            {staffs.length}件
-          </div>
-          <AppButton
-            variant="outline"
-            tone="primary"
-            size="sm"
-            onClick={() => setSelectedStaff(staffs)}
-            disabled={
-              staffs.length === 0 ||
-              staffs.every((staff) => selectedIds.includes(staff.id))
-            }
-            className="whitespace-nowrap"
-            sx={{
-              "--variant-outlinedColor": MAIN_GREEN,
-              "--variant-outlinedBorder": "rgba(16, 185, 129, 0.5)",
-              "--variant-outlinedBg": "rgba(16, 185, 129, 0.04)",
-              "&:hover": {
-                "--variant-outlinedBorder": MAIN_GREEN_DARK,
-                "--variant-outlinedBg": "rgba(16, 185, 129, 0.1)",
-              },
-            }}
-          >
-            全選択
-          </AppButton>
-          <AppButton
-            variant="outline"
-            tone="primary"
-            size="sm"
-            onClick={() => setSelectedStaff([])}
-            disabled={selectedStaff.length === 0}
-            className="whitespace-nowrap"
-            sx={{
-              "--variant-outlinedColor": MAIN_GREEN,
-              "--variant-outlinedBorder": "rgba(16, 185, 129, 0.5)",
-              "--variant-outlinedBg": "rgba(16, 185, 129, 0.04)",
-              "&:hover": {
-                "--variant-outlinedBorder": MAIN_GREEN_DARK,
-                "--variant-outlinedBg": "rgba(16, 185, 129, 0.1)",
-              },
-            }}
-          >
-            全解除
-          </AppButton>
-        </div>
-      )}
+          全選択
+        </AppButton>
+        <AppButton
+          variant="outline"
+          tone="primary"
+          size="sm"
+          onClick={() => setSelectedStaff([])}
+          disabled={selectedStaff.length === 0}
+          className="whitespace-nowrap"
+          sx={{
+            "--variant-outlinedColor": MAIN_GREEN,
+            "--variant-outlinedBorder": "rgba(16, 185, 129, 0.5)",
+            "--variant-outlinedBg": "rgba(16, 185, 129, 0.04)",
+            "&:hover": {
+              "--variant-outlinedBorder": MAIN_GREEN_DARK,
+              "--variant-outlinedBg": "rgba(16, 185, 129, 0.1)",
+            },
+          }}
+        >
+          全解除
+        </AppButton>
+      </div>
     </div>
   );
 }

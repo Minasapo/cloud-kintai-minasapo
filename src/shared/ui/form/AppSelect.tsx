@@ -23,6 +23,7 @@ type AppSelectProps<TValue extends SelectValue> = {
   onChange: (value: TValue | "") => void;
   parseValue?: (rawValue: string) => TValue;
   placeholder?: ReactNode;
+  disabled?: boolean;
   size?: "small" | "medium";
   sx?: SxProps<Theme>;
 };
@@ -35,11 +36,12 @@ export function AppSelect<TValue extends SelectValue>({
   onChange,
   parseValue,
   placeholder,
+  disabled = false,
   size = "small",
   sx,
 }: AppSelectProps<TValue>) {
   return (
-    <FormControl size={size} sx={sx}>
+    <FormControl size={size} sx={sx} disabled={disabled}>
       <InputLabel id={labelId} shrink={placeholder ? true : undefined}>
         {label}
       </InputLabel>
@@ -47,6 +49,7 @@ export function AppSelect<TValue extends SelectValue>({
         labelId={labelId}
         value={value}
         label={label}
+        disabled={disabled}
         displayEmpty={Boolean(placeholder)}
         onChange={(event) => {
           const rawValue = event.target.value;
