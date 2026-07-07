@@ -50,7 +50,7 @@ function StaffSelectArea({
   return (
     <div className="flex flex-col gap-2">
       <AppMultiSelect<string>
-        label="対象者リスト"
+        label=""
         labelId={selectLabelId}
         value={selectedIds}
         options={options}

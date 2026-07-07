@@ -1,3 +1,4 @@
+import { type SxProps, type Theme } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
 import { type ReactNode } from "react";
 
@@ -14,6 +15,7 @@ type SettingsDialogProps = {
   maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
   children: ReactNode;
   renderActions?: (requestClose: () => void) => ReactNode;
+  PaperSx?: SxProps<Theme>;
 };
 
 export default function SettingsDialog({
@@ -26,6 +28,7 @@ export default function SettingsDialog({
   maxWidth,
   children,
   renderActions,
+  PaperSx,
 }: SettingsDialogProps) {
   const { dialog, requestClose } = useDialogCloseGuard({
     isDirty,
@@ -42,6 +45,7 @@ export default function SettingsDialog({
         title={title}
         description={description}
         maxWidth={maxWidth}
+        PaperSx={PaperSx}
         actions={
           renderActions ? (
             renderActions(requestClose)

@@ -40,9 +40,9 @@ describe("StaffSelector", () => {
   });
 
   describe("レンダリング（閉じた状態）", () => {
-    it("「対象者リスト」ラベルを表示する", () => {
+    it("「対象者リスト」ラベルを表示しない", () => {
       renderSelector({});
-      expect(screen.getByText("対象者リスト")).toBeInTheDocument();
+      expect(screen.queryByText("対象者リスト")).not.toBeInTheDocument();
     });
 
     it("スタッフ未選択のとき「対象者を選択」プレースホルダーを表示する", () => {
@@ -83,7 +83,7 @@ describe("StaffSelector", () => {
       expect(screen.queryByText("0名を選択中")).not.toBeInTheDocument();
     });
 
-    it("選択済みスタッフのチップが表示される（複数名）", () => {
+    it("複数名選択時は件数表示になる", () => {
       const staffA = createDownloadTestStaff({
         id: "s1",
         familyName: "鈴木",
@@ -96,9 +96,9 @@ describe("StaffSelector", () => {
         givenName: "二郎",
       });
       renderSelector({ selectedStaff: [staffA, staffB] });
-      // 複数選択時は "N名を選択中" が trigger に表示され、chip は両者分表示される
-      expect(screen.getByText("鈴木 一郎")).toBeInTheDocument();
-      expect(screen.getByText("佐藤 二郎")).toBeInTheDocument();
+      expect(screen.getByText("2名を選択中")).toBeInTheDocument();
+      expect(screen.queryByText("鈴木 一郎")).not.toBeInTheDocument();
+      expect(screen.queryByText("佐藤 二郎")).not.toBeInTheDocument();
     });
   });
 
@@ -120,7 +120,7 @@ describe("StaffSelector", () => {
       });
     });
 
-    it("ドロップダウンが開いているとき再クリックで閉じる", async () => {
+    it("ドロップダウンが開いているとき Escape キーで閉じる", async () => {
       const user = userEvent.setup();
       const staffs = [
         createDownloadTestStaff({
@@ -133,11 +133,11 @@ describe("StaffSelector", () => {
       const trigger = screen.getAllByRole("button")[0];
       await user.click(trigger);
       await waitFor(() => {
-        expect(screen.getByText("全選択")).toBeInTheDocument();
+        expect(screen.getByRole("listbox")).toBeInTheDocument();
       });
-      await user.click(trigger);
+      await user.keyboard("{Escape}");
       await waitFor(() => {
-        expect(screen.queryByText("全選択")).not.toBeInTheDocument();
+        expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
       });
     });
 
@@ -397,8 +397,8 @@ describe("StaffSelector", () => {
     });
   });
 
-  describe("ドロップダウン外クリックで閉じる", () => {
-    it("コンポーネント外をクリックするとドロップダウンが閉じる", async () => {
+  describe("ドロップダウン外操作で閉じる", () => {
+    it("Escape キーを押すとドロップダウンが閉じる", async () => {
       const user = userEvent.setup();
       const staffs = [
         createDownloadTestStaff({
@@ -412,12 +412,12 @@ describe("StaffSelector", () => {
       const trigger = screen.getAllByRole("button")[0];
       await user.click(trigger);
       await waitFor(() => {
-        expect(screen.getByText("全選択")).toBeInTheDocument();
+        expect(screen.getByRole("listbox")).toBeInTheDocument();
       });
 
-      await user.click(document.body);
+      await user.keyboard("{Escape}");
       await waitFor(() => {
-        expect(screen.queryByText("全選択")).not.toBeInTheDocument();
+        expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
       });
     });
   });

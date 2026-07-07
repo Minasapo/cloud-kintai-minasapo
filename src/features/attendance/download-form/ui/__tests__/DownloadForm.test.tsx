@@ -116,11 +116,20 @@ async function expandForm() {
 }
 
 async function moveToStaffStep(user: ReturnType<typeof userEvent.setup>) {
+  const startDateInput = screen.getByLabelText("開始日") as HTMLInputElement;
+  const endDateInput = screen.getByLabelText("終了日") as HTMLInputElement;
+  if (!startDateInput.value) {
+    await user.type(startDateInput, "2024-01-01");
+  }
+  if (!endDateInput.value) {
+    await user.type(endDateInput, "2024-01-31");
+  }
   await user.click(screen.getByRole("button", { name: "次へ" }));
 }
 
 async function moveToExecuteStep(user: ReturnType<typeof userEvent.setup>) {
   await moveToStaffStep(user);
+  await user.click(screen.getByTestId("select-all-staff"));
   await user.click(screen.getByRole("button", { name: "次へ" }));
 }
 
@@ -303,26 +312,43 @@ describe("DownloadForm", () => {
       expect(screen.getByTestId("staff-selector")).toBeInTheDocument();
     });
 
-    it("スプリットボタン（初期: 一括ダウンロード）が表示される", async () => {
+    it("実行ステップで個別ダウンロードボタンが2つ表示される", async () => {
       const user = await expandForm();
       await moveToExecuteStep(user);
       expect(
         screen.getByRole("button", { name: "一括ダウンロード" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "集計ダウンロード" }),
       ).toBeInTheDocument();
     });
 
-    it("スプリットボタンのメニューで「一括ダウンロード」を選べる", async () => {
+    it("「一括ダウンロード」ボタン押下で一括ダウンロード処理を実行する", async () => {
+      const onDetailDownload = jest.fn().mockResolvedValue(undefined);
+      mockUseExportAttendancesAction.mockReturnValue({
+        onClick: onDetailDownload,
+        disabled: false,
+      });
       const user = await expandForm();
       await moveToExecuteStep(user);
       await user.click(
-        screen.getByRole("button", { name: "select preset action" }),
-      );
-      await user.click(
-        screen.getByRole("menuitem", { name: "一括ダウンロード" }),
-      );
-      expect(
         screen.getByRole("button", { name: "一括ダウンロード" }),
-      ).toBeInTheDocument();
+      );
+      expect(onDetailDownload).toHaveBeenCalledTimes(1);
+    });
+
+    it("「集計ダウンロード」ボタン押下で集計ダウンロード処理を実行する", async () => {
+      const onAggregateDownload = jest.fn().mockResolvedValue(undefined);
+      mockUseAggregateExportAction.mockReturnValue({
+        onClick: onAggregateDownload,
+        disabled: false,
+      });
+      const user = await expandForm();
+      await moveToExecuteStep(user);
+      await user.click(
+        screen.getByRole("button", { name: "集計ダウンロード" }),
+      );
+      expect(onAggregateDownload).toHaveBeenCalledTimes(1);
     });
 
     it("設定画面への案内文とリンクが表示される", async () => {
@@ -351,16 +377,17 @@ describe("DownloadForm", () => {
   });
 
   describe("日付入力", () => {
-    it("開始日 input の初期値が今日の日付", async () => {
+    it("開始日・終了日 input の初期値が未入力", async () => {
       const user = userEvent.setup();
       const { container } = renderForm();
       await user.click(
         screen.getByRole("button", { name: "ダウンロード要素を展開する" }),
       );
       const dateInputs = container.querySelectorAll('input[type="date"]');
-      // Both start and end date default to today
       expect(dateInputs[0]).toBeInTheDocument();
       expect(dateInputs[1]).toBeInTheDocument();
+      expect((dateInputs[0] as HTMLInputElement).value).toBe("");
+      expect((dateInputs[1] as HTMLInputElement).value).toBe("");
     });
 
     it("開始日 input の値を変更できる", async () => {
@@ -393,6 +420,7 @@ describe("DownloadForm", () => {
   describe("集計対象月セレクト", () => {
     it("closeDates が空のとき選択肢は「対象月を選択」のみ", async () => {
       const user = await expandForm();
+      await user.click(screen.getByRole("radio", { name: /集計対象月から/u }));
       const select = screen.getByRole("combobox");
       await user.click(select);
       const options = screen.getAllByRole("option");
@@ -413,6 +441,7 @@ describe("DownloadForm", () => {
         ],
       });
       const user = await expandForm();
+      await user.click(screen.getByRole("radio", { name: /集計対象月から/u }));
       await user.click(screen.getByRole("combobox"));
       expect(
         screen.getByRole("option", { name: "2024/01" }),
@@ -435,6 +464,7 @@ describe("DownloadForm", () => {
       await user.click(
         screen.getByRole("button", { name: "ダウンロード要素を展開する" }),
       );
+      await user.click(screen.getByRole("radio", { name: /集計対象月から/u }));
       await user.click(screen.getByRole("combobox"));
       await user.click(screen.getByRole("option", { name: "2024/01" }));
       await waitFor(() => {
