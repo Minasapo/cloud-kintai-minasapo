@@ -1,79 +1,14 @@
+import CloseIcon from "@mui/icons-material/Close";
+import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import { Workflow as WorkflowType } from "@shared/api/graphql/types";
-import { AppButton } from "@shared/ui/button";
+import { AppButton, AppIconButton } from "@shared/ui/button";
+import { AppMobileStepper } from "@shared/ui/stepper";
 import { SectionTitle } from "@shared/ui/typography";
 
 import { useWorkflowCarouselKeyboard } from "../hooks/useWorkflowCarouselKeyboard";
 import { useWorkflowCarouselState } from "../hooks/useWorkflowCarouselState";
 import WorkflowCarouselActionButtons from "./WorkflowCarouselActionButtons";
 import WorkflowDetailGrid from "./WorkflowDetailGrid";
-
-function ChevronLeftIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
-      <path
-        d="M12.5 4.5 7 10l5.5 5.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ChevronRightIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
-      <path
-        d="M7.5 4.5 13 10l-5.5 5.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-5 w-5">
-      <path
-        d="M5 5l10 10M15 5 5 15"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function OpenInPanelIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
-      <path
-        d="M7 5h8v8m0-8-8 8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M13 11v4H5V7h4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 
 interface WorkflowCarouselDialogProps {
   open: boolean;
@@ -111,6 +46,8 @@ export default function WorkflowCarouselDialog({
     handleNext,
     handleApproveAndNext,
     handleRejectAndNext,
+    handleApproveOnly,
+    handleRejectOnly,
   } = useWorkflowCarouselState({
     selectedWorkflowId,
     filteredWorkflowIds,
@@ -151,22 +88,37 @@ export default function WorkflowCarouselDialog({
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label="ワークフローをまとめて確認"
+        aria-label="まとめて確認"
         className="w-full max-w-3xl overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_24px_60px_-36px_rgba(15,23,42,0.55)]"
       >
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 sm:px-5">
           <SectionTitle className="m-0 text-base font-semibold text-slate-900 sm:text-lg">
-            ワークフローをまとめて確認
+            まとめて確認
           </SectionTitle>
-          <button
-            ref={closeButtonRef}
-            type="button"
-            onClick={onClose}
-            aria-label="閉じる"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 text-slate-600 transition hover:border-slate-400 hover:text-slate-900"
-          >
-            <CloseIcon />
-          </button>
+          <div className="flex items-center gap-2">
+            <AppButton
+              variant="ghost"
+              tone="secondary"
+              size="sm"
+              onClick={() =>
+                currentWorkflowId && onOpenInRightPanel(currentWorkflowId)
+              }
+              disabled={!currentWorkflowId}
+              startIcon={<OpenInNewRoundedIcon sx={{ fontSize: 16 }} />}
+              className="min-w-0"
+            >
+              右側で開く
+            </AppButton>
+            <AppIconButton
+              ref={closeButtonRef}
+              onClick={onClose}
+              aria-label="閉じる"
+              size="sm"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 text-slate-600 transition hover:border-slate-400 hover:text-slate-900"
+            >
+              <CloseIcon fontSize="small" />
+            </AppIconButton>
+          </div>
         </div>
 
         <div className="max-h-[75vh] overflow-auto px-4 py-4 sm:px-5">
@@ -198,61 +150,31 @@ export default function WorkflowCarouselDialog({
             </div>
           ) : currentWorkflow ? (
             <div className="space-y-4">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <WorkflowDetailGrid
-                  currentWorkflow={currentWorkflow}
-                  staffNamesById={staffNamesById}
-                  currentIndex={currentIndex}
-                  totalCount={filteredWorkflowIds.length}
-                />
-
-                <AppButton
-                  variant="outline"
-                  tone="secondary"
-                  size="sm"
-                  onClick={() =>
-                    currentWorkflowId && onOpenInRightPanel(currentWorkflowId)
-                  }
-                  disabled={!currentWorkflowId}
-                  startIcon={<OpenInPanelIcon />}
-                  className="min-w-0"
-                >
-                  右側で開く
-                </AppButton>
-              </div>
+              <WorkflowDetailGrid
+                currentWorkflow={currentWorkflow}
+                staffNamesById={staffNamesById}
+              />
 
               {enableApprovalActions && currentWorkflowId && (
                 <WorkflowCarouselActionButtons
                   onApproveAndNext={handleApproveAndNext}
+                  onApproveOnly={handleApproveOnly}
                   onRejectAndNext={handleRejectAndNext}
+                  onRejectOnly={handleRejectOnly}
                   isApproveDisabled={isApproveDisabled}
                   isRejectDisabled={isRejectDisabled}
                 />
               )}
 
-              <div className="flex items-center justify-between border-t border-slate-200 pt-3">
-                <AppButton
-                  variant="outline"
-                  tone="secondary"
-                  size="sm"
-                  onClick={handlePrev}
-                  disabled={!canGoPrev}
-                  startIcon={<ChevronLeftIcon />}
-                  className="min-w-0"
-                >
-                  前へ
-                </AppButton>
-                <AppButton
-                  variant="outline"
-                  tone="secondary"
-                  size="sm"
-                  onClick={handleNext}
-                  disabled={!canGoNext}
-                  endIcon={<ChevronRightIcon />}
-                  className="min-w-0"
-                >
-                  次へ
-                </AppButton>
+              <div className="border-t border-slate-200 pt-3">
+                <AppMobileStepper
+                  steps={filteredWorkflowIds.length}
+                  activeStep={currentIndex}
+                  onBack={handlePrev}
+                  onNext={handleNext}
+                  backDisabled={!canGoPrev}
+                  nextDisabled={!canGoNext}
+                />
               </div>
             </div>
           ) : (

@@ -1,4 +1,5 @@
 import { STATUS_LABELS } from "@entities/workflow/lib/workflowLabels";
+import { AppButton } from "@shared/ui/button";
 
 import FilterTrigger from "./FilterTrigger";
 import FloatingPanel from "./FloatingPanel";
@@ -85,13 +86,15 @@ export default function StatusField({
             ))}
           </div>
           <div className={styles.actions}>
-            <button
-              type="button"
+            <AppButton
               onClick={onClose}
+              variant="outline"
+              tone="neutral"
+              size="sm"
               className={styles.closeButton}
             >
               閉じる
-            </button>
+            </AppButton>
           </div>
         </div>
       </FloatingPanel>

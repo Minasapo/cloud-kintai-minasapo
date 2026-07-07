@@ -7,6 +7,7 @@ import MenuItem from "@mui/material/MenuItem";
 import MenuList from "@mui/material/MenuList";
 import Paper from "@mui/material/Paper";
 import Popper from "@mui/material/Popper";
+import { SxProps, Theme } from "@mui/material/styles";
 import { MouseEvent, useMemo, useState } from "react";
 
 import type { ButtonSize, ButtonTone, ButtonVariant } from "./types";
@@ -28,6 +29,7 @@ type AppSplitButtonProps = {
   size?: ButtonSize;
   disabled?: boolean;
   className?: string;
+  buttonGroupSx?: SxProps<Theme>;
 };
 
 const variantMap: Record<ButtonVariant, "contained" | "outlined" | "text"> = {
@@ -62,6 +64,7 @@ export default function AppSplitButton({
   size = "sm",
   disabled = false,
   className,
+  buttonGroupSx,
 }: AppSplitButtonProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [open, setOpen] = useState(false);
@@ -84,12 +87,14 @@ export default function AppSplitButton({
         size={sizeMap[size]}
         disabled={disabled}
         className={className}
+        sx={buttonGroupSx}
         aria-label="split-button"
       >
         <Button
           onClick={onPrimaryClick}
           title={selected.title}
           disabled={disabled || selected.disabled}
+          sx={{ whiteSpace: "nowrap", flex: 1 }}
         >
           {selected.label}
         </Button>

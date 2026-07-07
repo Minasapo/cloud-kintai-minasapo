@@ -1,5 +1,4 @@
-import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
-import { AppButton } from "@shared/ui/button";
+import { AppBackButton, AppButton } from "@shared/ui/button";
 
 import { useWorkflowDetailContext } from "../model/WorkflowDetailContext";
 import styles from "./WorkflowDetailActions.module.scss";
@@ -12,15 +11,14 @@ export default function WorkflowDetailActions() {
   return (
     <div className={styles.actions}>
       <div>
-        <AppButton
-          variant="outline"
+        <AppBackButton
+          variant="ghost"
           tone="secondary"
           size="sm"
           onClick={onBack}
-          startIcon={<ArrowBackRoundedIcon sx={{ fontSize: 18 }} />}
         >
           一覧に戻る
-        </AppButton>
+        </AppBackButton>
       </div>
       <div className={styles.actionsRight}>
         <AppButton

@@ -1,7 +1,11 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { useWorkflowDetailContext } from "@features/workflow/detail-panel/model/WorkflowDetailContext";
+import SendRoundedIcon from "@mui/icons-material/SendRounded";
+import { Box, InputBase } from "@mui/material";
 import { PANEL_HEIGHTS } from "@shared/config/uiDimensions";
-import { AppButton } from "@shared/ui/button";
+import { AppAvatar } from "@shared/ui/avatar";
+import { AppIconButton } from "@shared/ui/button";
+import dayjs from "dayjs";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { shouldTruncateWorkflowMessage } from "../model/workflowCommentUtils";
@@ -57,6 +61,249 @@ const useIsMobile = () => {
 
   return isMobile;
 };
+
+type CommentMessageItemProps = {
+  message: WorkflowCommentMessage;
+  displayName: string;
+  staff?: StaffType;
+  isMine: boolean;
+  expanded: boolean;
+  onToggle: (id: string) => void;
+};
+
+function formatMessageTimeLabel(message: WorkflowCommentMessage) {
+  const source = message.createdAt ?? message.time;
+  if (!source) return "";
+
+  const parsed = dayjs(source);
+  if (!parsed.isValid()) return message.time;
+
+  const now = dayjs();
+  const elapsedSeconds = now.diff(parsed, "second");
+
+  if (elapsedSeconds <= 0) return "今";
+  if (elapsedSeconds < 60) return `${elapsedSeconds}秒前`;
+
+  const elapsedMinutes = now.diff(parsed, "minute");
+  if (elapsedMinutes < 60) return `${elapsedMinutes}分前`;
+
+  const elapsedHours = now.diff(parsed, "hour");
+  if (elapsedHours < 24) return `${elapsedHours}時間前`;
+
+  const elapsedDays = now.startOf("day").diff(parsed.startOf("day"), "day");
+  if (elapsedDays < 7) return `${elapsedDays}日前`;
+
+  return parsed.format("M/D");
+}
+
+function CommentMessageItem({
+  message,
+  displayName,
+  staff,
+  isMine,
+  expanded,
+  onToggle,
+}: CommentMessageItemProps) {
+  const isSystem = message.staffId === "system";
+  const isTruncated = shouldTruncateWorkflowMessage(message.text, expanded);
+  const timeLabel = formatMessageTimeLabel(message);
+
+  if (isSystem) {
+    return (
+      <div className="flex w-full flex-col items-center py-1">
+        <p className="m-0 max-w-[90%] text-center text-xs font-medium text-slate-500">
+          {message.text}
+        </p>
+        {timeLabel && (
+          <span className="mt-0.5 text-[11px] text-slate-400">{timeLabel}</span>
+        )}
+      </div>
+    );
+  }
+
+  const avatarText = (() => {
+    const familyName = staff?.familyName?.trim();
+    if (familyName) return familyName.slice(0, 1);
+
+    const [surname] = displayName.trim().split(/\s+/);
+    return surname?.slice(0, 1) || displayName.slice(0, 1);
+  })();
+
+  return (
+    <div
+      className={[
+        "flex min-w-0 flex-col",
+        isMine ? "items-end" : "items-start",
+      ].join(" ")}
+    >
+      <div
+        className={[
+          "mb-1 flex min-w-0 items-center gap-3",
+          isMine
+            ? "ml-auto w-auto flex-row-reverse justify-end"
+            : "w-full justify-start",
+        ].join(" ")}
+      >
+        <AppAvatar
+          size="small"
+          sx={{
+            flexShrink: 0,
+            fontWeight: 600,
+            bgcolor: isSystem
+              ? "grey.500"
+              : isMine
+                ? "success.main"
+                : "success.dark",
+          }}
+        >
+          {avatarText}
+        </AppAvatar>
+
+        <div
+          className={[
+            "flex min-w-0 gap-1",
+            isMine
+              ? "flex-col items-end sm:flex-row-reverse sm:items-center"
+              : "flex-col items-start sm:flex-row sm:items-center",
+          ].join(" ")}
+        >
+          <span className="truncate text-sm font-semibold text-slate-900">
+            {displayName}
+          </span>
+        </div>
+      </div>
+
+      <div
+        className={[
+          "min-w-0 max-w-full rounded-[10px] border px-4 py-3 text-sm leading-6 shadow-[0_16px_30px_-28px_rgba(15,23,42,0.28)] sm:max-w-[90%]",
+          isMine
+            ? "border-emerald-800/30 bg-emerald-500 text-white"
+            : "border-slate-300/60 bg-white text-slate-900",
+        ].join(" ")}
+      >
+        <div
+          className="whitespace-pre-wrap break-words"
+          style={
+            isTruncated
+              ? {
+                  display: "-webkit-box",
+                  WebkitLineClamp: 5,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }
+              : undefined
+          }
+        >
+          {message.text}
+        </div>
+
+        {isTruncated && (
+          <button
+            type="button"
+            onClick={() => onToggle(message.id)}
+            className={[
+              "mt-1 text-xs font-medium underline decoration-transparent transition hover:decoration-current",
+              isMine ? "text-white" : "text-emerald-700",
+            ].join(" ")}
+          >
+            {expanded ? "折りたたむ" : "もっと見る"}
+          </button>
+        )}
+      </div>
+
+      {timeLabel && (
+        <span
+          className={[
+            "mt-1 text-xs text-slate-500",
+            isMine ? "self-end text-right" : "self-start",
+          ].join(" ")}
+        >
+          {timeLabel}
+        </span>
+      )}
+    </div>
+  );
+}
+
+type CommentInputAreaProps = {
+  input: string;
+  setInput: (value: string) => void;
+  onSend: () => void;
+  sending: boolean;
+};
+
+function CommentInputArea({
+  input,
+  setInput,
+  onSend,
+  sending,
+}: CommentInputAreaProps) {
+  const sendDisabled = sending || !input.trim();
+  const isMultiline = input.includes("\n");
+
+  return (
+    <div className="mt-2 flex w-full flex-col gap-2 sm:flex-row sm:items-end">
+      <div className="min-w-0 flex-1">
+        <div className="relative">
+          <Box
+            sx={{
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: 1,
+              px: 1.75,
+              py: 1.25,
+              pr: 5.5,
+              backgroundColor: sending
+                ? "action.disabledBackground"
+                : "background.paper",
+            }}
+          >
+            <InputBase
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+                  event.preventDefault();
+                  onSend();
+                }
+              }}
+              disabled={sending}
+              multiline
+              minRows={1}
+              maxRows={6}
+              placeholder="メッセージを入力..."
+              fullWidth
+              sx={{
+                alignItems: "flex-start",
+                "& .MuiInputBase-input": {
+                  p: 0,
+                  lineHeight: 1.5,
+                },
+              }}
+            />
+          </Box>
+
+          <div
+            className={`absolute inset-y-0 right-1.5 z-10 flex ${
+              isMultiline ? "items-end pb-1.5" : "items-center"
+            }`}
+          >
+            <AppIconButton
+              aria-label="送信"
+              onClick={onSend}
+              disabled={sendDisabled}
+              size="sm"
+              tone="primary"
+              tooltip="Cmd/Ctrl+Enterで送信"
+            >
+              <SendRoundedIcon fontSize="small" />
+            </AppIconButton>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function WorkflowCommentThreadView({
   messages,
@@ -120,18 +367,12 @@ export function WorkflowCommentThreadView({
     }
   };
 
-  const sendDisabled = sending || !input.trim();
-
   return (
     <div className="min-w-0">
-      <p className="mb-2 text-sm text-slate-500">
-        申請に関するやり取りをこの場で記録します。
-      </p>
-
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="min-w-0 overflow-auto rounded-[20px] border border-slate-300/30 bg-slate-50 p-5"
+        className="min-w-0 overflow-auto rounded-[14px] border border-slate-300/30 bg-slate-50 p-5"
         style={{
           maxHeight: isMobile ? 360 : PANEL_HEIGHTS.SCROLLABLE_MAX,
         }}
@@ -142,142 +383,32 @@ export function WorkflowCommentThreadView({
             const staff = message.staffId
               ? staffs.find((item) => item.id === message.staffId)
               : undefined;
-
-            const avatarText = staff
-              ? `${(staff.familyName || "").slice(0, 1)}${(
-                  staff.givenName || ""
-                ).slice(0, 1)}` || displayName.slice(0, 1)
-              : displayName.slice(0, 1);
-
-            const isSystem = message.staffId === "system";
             const isMine = Boolean(
               currentStaff && message.staffId === currentStaff.id,
             );
             const expanded = Boolean(expandedMessages[message.id]);
-            const isTruncated = shouldTruncateWorkflowMessage(
-              message.text,
-              expanded,
-            );
-
-            const avatarBackgroundClass = isSystem
-              ? "bg-slate-500"
-              : isMine
-                ? "bg-emerald-600"
-                : "bg-emerald-900";
 
             return (
-              <div
+              <CommentMessageItem
                 key={message.id}
-                className={[
-                  "flex min-w-0 flex-col",
-                  isMine ? "items-end" : "items-start",
-                ].join(" ")}
-              >
-                <div
-                  className={[
-                    "mb-1 flex w-full min-w-0 items-center gap-3",
-                    isMine ? "flex-row-reverse justify-end" : "justify-start",
-                  ].join(" ")}
-                >
-                  <div
-                    className={[
-                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium text-white",
-                      avatarBackgroundClass,
-                    ].join(" ")}
-                  >
-                    {avatarText}
-                  </div>
-
-                  <div
-                    className={[
-                      "flex min-w-0 gap-1",
-                      isMine
-                        ? "flex-col items-end sm:flex-row-reverse sm:items-center"
-                        : "flex-col items-start sm:flex-row sm:items-center",
-                    ].join(" ")}
-                  >
-                    <span className="truncate text-sm font-semibold text-slate-900">
-                      {displayName}
-                    </span>
-                    <span className="text-xs text-slate-500">
-                      {message.time}
-                    </span>
-                  </div>
-                </div>
-
-                <div
-                  className={[
-                    "min-w-0 max-w-full rounded-xl border px-4 py-3 text-sm leading-6 shadow-[0_16px_30px_-28px_rgba(15,23,42,0.28)] sm:max-w-[90%]",
-                    isMine
-                      ? "border-emerald-800/30 bg-emerald-500 text-white"
-                      : "border-slate-300/60 bg-white text-slate-900",
-                  ].join(" ")}
-                >
-                  <div
-                    className="whitespace-pre-wrap break-words"
-                    style={
-                      isTruncated
-                        ? {
-                            display: "-webkit-box",
-                            WebkitLineClamp: 5,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                          }
-                        : undefined
-                    }
-                  >
-                    {message.text}
-                  </div>
-
-                  {isTruncated && (
-                    <button
-                      type="button"
-                      onClick={() => onToggle(message.id)}
-                      className={[
-                        "mt-1 text-xs font-medium underline decoration-transparent transition hover:decoration-current",
-                        isMine ? "text-white" : "text-emerald-700",
-                      ].join(" ")}
-                    >
-                      {expanded ? "折りたたむ" : "もっと見る"}
-                    </button>
-                  )}
-                </div>
-              </div>
+                message={message}
+                displayName={displayName}
+                staff={staff}
+                isMine={isMine}
+                expanded={expanded}
+                onToggle={onToggle}
+              />
             );
           })}
         </div>
       </div>
 
-      <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end">
-        <div className="min-w-0 flex-1">
-          <textarea
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
-                event.preventDefault();
-                onSend();
-              }
-            }}
-            disabled={sending}
-            rows={2}
-            placeholder="メッセージを入力..."
-            className="w-full resize-y rounded-[18px] border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 disabled:cursor-not-allowed disabled:bg-slate-100"
-          />
-          <p className="ml-1 mt-1 text-xs text-slate-500">
-            Cmd/Ctrl+Enterで送信
-          </p>
-        </div>
-
-        <AppButton
-          onClick={onSend}
-          disabled={sendDisabled}
-          size="sm"
-          className="w-full shrink-0 sm:w-auto"
-        >
-          送信
-        </AppButton>
-      </div>
+      <CommentInputArea
+        input={input}
+        setInput={setInput}
+        onSend={onSend}
+        sending={sending}
+      />
     </div>
   );
 }

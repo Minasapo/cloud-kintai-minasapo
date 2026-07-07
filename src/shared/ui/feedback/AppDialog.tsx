@@ -4,6 +4,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  type SxProps,
+  type Theme,
 } from "@mui/material";
 import { type ReactNode } from "react";
 
@@ -19,6 +21,7 @@ type AppDialogProps = {
   maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
   fullWidth?: boolean;
   loading?: boolean;
+  PaperSx?: SxProps<Theme>;
 };
 
 export default function AppDialog({
@@ -31,6 +34,7 @@ export default function AppDialog({
   maxWidth = "sm",
   fullWidth = true,
   loading = false,
+  PaperSx,
 }: AppDialogProps) {
   if (!open) {
     return null;
@@ -43,6 +47,9 @@ export default function AppDialog({
       maxWidth={maxWidth}
       fullWidth={fullWidth}
       keepMounted={false}
+      PaperProps={{
+        sx: PaperSx,
+      }}
     >
       {title && <DialogTitle>{title}</DialogTitle>}
       {loading && <ProgressBar />}

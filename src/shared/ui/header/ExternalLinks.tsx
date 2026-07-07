@@ -1,8 +1,10 @@
+import AppsRoundedIcon from "@mui/icons-material/AppsRounded";
 import {
   predefinedIcons,
   type PredefinedIconValue,
 } from "@shared/config/icons";
 import { designTokenVar } from "@shared/designSystem";
+import { AppIconButton } from "@shared/ui/button";
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -131,28 +133,6 @@ const INTERACTION_TRANSITION_EASING = designTokenVar(
   "component.headerActions.interaction.transitionEasing",
   "ease",
 );
-
-function AppsGlyph({ color }: { color: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      className="h-[22px] w-[22px] sm:h-7 sm:w-7"
-      fill="currentColor"
-      style={{ color }}
-    >
-      <circle cx="6" cy="6" r="2" />
-      <circle cx="12" cy="6" r="2" />
-      <circle cx="18" cy="6" r="2" />
-      <circle cx="6" cy="12" r="2" />
-      <circle cx="12" cy="12" r="2" />
-      <circle cx="18" cy="12" r="2" />
-      <circle cx="6" cy="18" r="2" />
-      <circle cx="12" cy="18" r="2" />
-      <circle cx="18" cy="18" r="2" />
-    </svg>
-  );
-}
 
 const iconMap = new Map<PredefinedIconValue, JSX.Element>(
   predefinedIcons.map((icon) => [icon.value, icon.component]),
@@ -338,18 +318,19 @@ const ExternalLinks = ({
 
   return (
     <div ref={rootRef} className="relative" style={buttonVars}>
-      <button
-        type="button"
+      <AppIconButton
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         aria-controls={open ? "external-links-popup" : undefined}
         aria-label="external links"
+        tone="neutral"
         className="inline-flex h-[var(--external-links-button-size-sm)] min-w-[var(--external-links-button-size-sm)] items-center justify-center gap-2 rounded-full border px-2 py-0 text-[color:var(--external-links-button-text)] shadow-none transition sm:h-[var(--external-links-button-size)] sm:min-w-[var(--external-links-button-size)] sm:px-3"
         style={
           {
             "--external-links-button-text": ACTION_BUTTON_TEXT,
             borderColor: ACTION_BUTTON_BORDER,
             backgroundColor: open ? ACTION_ICON_HOVER_BG : ACTION_BUTTON_BG,
+            padding: 0,
           } as CSSProperties & Record<`--${string}`, string>
         }
         onMouseEnter={(event) => {
@@ -363,8 +344,11 @@ const ExternalLinks = ({
           event.currentTarget.style.borderColor = ACTION_BUTTON_BORDER;
         }}
       >
-        <AppsGlyph color={ACTION_ICON_COLOR} />
-      </button>
+        <AppsRoundedIcon
+          className="h-[22px] w-[22px] sm:h-7 sm:w-7"
+          sx={{ color: ACTION_ICON_COLOR }}
+        />
+      </AppIconButton>
 
       {open ? (
         <div

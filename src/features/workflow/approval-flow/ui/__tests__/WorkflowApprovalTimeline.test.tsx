@@ -42,7 +42,10 @@ describe("WorkflowApprovalTimeline", () => {
 
     it("カスタムタイトルを表示する", () => {
       render(
-        <WorkflowApprovalTimeline title="カスタムフロー" steps={[makeStep()]} />,
+        <WorkflowApprovalTimeline
+          title="カスタムフロー"
+          steps={[makeStep()]}
+        />,
       );
       expect(screen.getByTestId("subsection-title")).toHaveTextContent(
         "カスタムフロー",
@@ -50,7 +53,9 @@ describe("WorkflowApprovalTimeline", () => {
     });
 
     it("ステップ名を表示する", () => {
-      render(<WorkflowApprovalTimeline steps={[makeStep({ name: "鈴木 花子" })]} />);
+      render(
+        <WorkflowApprovalTimeline steps={[makeStep({ name: "鈴木 花子" })]} />,
+      );
       expect(screen.getByText("鈴木 花子")).toBeInTheDocument();
     });
 
@@ -75,16 +80,16 @@ describe("WorkflowApprovalTimeline", () => {
   describe("申請者ステップ", () => {
     it("role が「申請者」のとき StatusChip を表示しない", () => {
       render(
-        <WorkflowApprovalTimeline
-          steps={[makeStep({ role: "申請者" })]}
-        />,
+        <WorkflowApprovalTimeline steps={[makeStep({ role: "申請者" })]} />,
       );
       expect(screen.queryByTestId("status-chip")).not.toBeInTheDocument();
     });
 
-    it("最初のステップに「申」バッジを表示する", () => {
-      render(<WorkflowApprovalTimeline steps={[makeStep({ role: "申請者" })]} />);
-      expect(screen.getByText("申")).toBeInTheDocument();
+    it("最初のステップでデフォルトのステップ番号を表示する", () => {
+      render(
+        <WorkflowApprovalTimeline steps={[makeStep({ role: "申請者" })]} />,
+      );
+      expect(screen.getByText("1")).toBeInTheDocument();
     });
   });
 
@@ -107,31 +112,38 @@ describe("WorkflowApprovalTimeline", () => {
       expect(screen.getByTestId("status-chip")).toHaveTextContent("承認済み");
     });
 
-    it("2番目のステップに数字バッジ「1」を表示する", () => {
+    it("2番目のステップでデフォルトのステップ番号「2」を表示する", () => {
       const steps = [
         makeStep({ id: "s1", role: "申請者" }),
         makeStep({ id: "s2", role: "承認者" }),
       ];
       render(<WorkflowApprovalTimeline steps={steps} />);
-      expect(screen.getByText("1")).toBeInTheDocument();
+      expect(screen.getByText("2")).toBeInTheDocument();
+    });
+
+    it("却下状態では追加ステータス表示を出さない", () => {
+      render(
+        <WorkflowApprovalTimeline
+          steps={[makeStep({ role: "承認者", state: "却下" })]}
+        />,
+      );
+
+      expect(screen.queryByText("却下")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("status-chip")).not.toBeInTheDocument();
     });
   });
 
   describe("日付表示", () => {
     it("date が設定されているとき表示する", () => {
       render(
-        <WorkflowApprovalTimeline
-          steps={[makeStep({ date: "2024-01-15" })]}
-        />,
+        <WorkflowApprovalTimeline steps={[makeStep({ date: "2024-01-15" })]} />,
       );
       expect(screen.getByText(/2024-01-15/)).toBeInTheDocument();
     });
 
     it("date が未設定のとき日付部分を表示しない", () => {
       render(
-        <WorkflowApprovalTimeline
-          steps={[makeStep({ date: undefined })]}
-        />,
+        <WorkflowApprovalTimeline steps={[makeStep({ date: undefined })]} />,
       );
       expect(screen.queryByText(/・/)).not.toBeInTheDocument();
     });

@@ -1,3 +1,5 @@
+import { type SxProps, type Theme } from "@mui/material";
+import { AppButton } from "@shared/ui/button";
 import { type ReactNode } from "react";
 
 import AppDialog from "./AppDialog";
@@ -12,6 +14,8 @@ type SettingsDialogProps = {
   isBusy?: boolean;
   maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
   children: ReactNode;
+  renderActions?: (requestClose: () => void) => ReactNode;
+  PaperSx?: SxProps<Theme>;
 };
 
 export default function SettingsDialog({
@@ -23,8 +27,14 @@ export default function SettingsDialog({
   isBusy,
   maxWidth,
   children,
+  renderActions,
+  PaperSx,
 }: SettingsDialogProps) {
-  const { dialog, requestClose } = useDialogCloseGuard({ isDirty, isBusy, onClose });
+  const { dialog, requestClose } = useDialogCloseGuard({
+    isDirty,
+    isBusy,
+    onClose,
+  });
 
   return (
     <>
@@ -35,14 +45,20 @@ export default function SettingsDialog({
         title={title}
         description={description}
         maxWidth={maxWidth}
+        PaperSx={PaperSx}
         actions={
-          <button
-            type="button"
-            onClick={requestClose}
-            className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-300 hover:bg-white"
-          >
-            閉じる
-          </button>
+          renderActions ? (
+            renderActions(requestClose)
+          ) : (
+            <AppButton
+              variant="outline"
+              tone="neutral"
+              size="sm"
+              onClick={requestClose}
+            >
+              閉じる
+            </AppButton>
+          )
         }
       >
         <div className="max-h-[70vh] overflow-y-auto pr-1">{children}</div>

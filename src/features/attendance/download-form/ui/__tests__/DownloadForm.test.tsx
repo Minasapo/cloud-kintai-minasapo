@@ -1,5 +1,5 @@
 import { renderWithProviders } from "@shared/test-utils";
-import { screen, waitFor, within } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import DownloadForm from "../DownloadForm";
@@ -8,9 +8,9 @@ import { createDownloadTestStaff } from "./downloadFormTestUtils";
 // ─── Mock: useStaffs ─────────────────────────────────────────────────────────
 const mockUseStaffs = jest.fn();
 jest.mock("@entities/staff/model/useStaffs/useStaffs", () => ({
-  ...jest.requireActual<typeof import("@entities/staff/model/useStaffs/useStaffs")>(
-    "@entities/staff/model/useStaffs/useStaffs",
-  ),
+  ...jest.requireActual<
+    typeof import("@entities/staff/model/useStaffs/useStaffs")
+  >("@entities/staff/model/useStaffs/useStaffs"),
   useStaffs: (...args: unknown[]) => mockUseStaffs(...args),
 }));
 
@@ -19,13 +19,6 @@ const mockUseCloseDates = jest.fn();
 jest.mock("@entities/attendance/model/useCloseDates", () => ({
   __esModule: true,
   default: (...args: unknown[]) => mockUseCloseDates(...args),
-}));
-
-// ─── Mock: react-router-dom (useNavigate) ───────────────────────────────────
-const mockNavigate = jest.fn();
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual<typeof import("react-router-dom")>("react-router-dom"),
-  useNavigate: () => mockNavigate,
 }));
 
 // ─── Mock: AttendanceDate ────────────────────────────────────────────────────
@@ -38,28 +31,21 @@ jest.mock("@entities/attendance/lib/AttendanceDate", () => ({
 }));
 
 // ─── Mock: child components ───────────────────────────────────────────────────
+const mockUseAggregateExportAction = jest.fn();
+const mockUseExportAttendancesAction = jest.fn();
+
 jest.mock("../AggregateExportButton", () => ({
   __esModule: true,
-  default: ({ workDates, selectedStaff }: { workDates: string[]; selectedStaff: unknown[] }) => (
-    <button
-      data-testid="aggregate-export-button"
-      disabled={workDates.length === 0 || selectedStaff.length === 0}
-    >
-      集計ダウンロード
-    </button>
-  ),
+  useAggregateExportAction: (...args: unknown[]) =>
+    mockUseAggregateExportAction(...args),
+  default: () => null,
 }));
 
 jest.mock("../ExportButton", () => ({
   __esModule: true,
-  default: ({ workDates, selectedStaff }: { workDates: string[]; selectedStaff: unknown[] }) => (
-    <button
-      data-testid="export-button"
-      disabled={workDates.length === 0 || selectedStaff.length === 0}
-    >
-      一括ダウンロード
-    </button>
-  ),
+  useExportAttendancesAction: (...args: unknown[]) =>
+    mockUseExportAttendancesAction(...args),
+  default: () => null,
 }));
 
 jest.mock("../StaffSelector", () => ({
@@ -129,12 +115,38 @@ async function expandForm() {
   return user;
 }
 
+async function moveToStaffStep(user: ReturnType<typeof userEvent.setup>) {
+  const startDateInput = screen.getByLabelText("開始日") as HTMLInputElement;
+  const endDateInput = screen.getByLabelText("終了日") as HTMLInputElement;
+  if (!startDateInput.value) {
+    await user.type(startDateInput, "2024-01-01");
+  }
+  if (!endDateInput.value) {
+    await user.type(endDateInput, "2024-01-31");
+  }
+  await user.click(screen.getByRole("button", { name: "次へ" }));
+}
+
+async function moveToExecuteStep(user: ReturnType<typeof userEvent.setup>) {
+  await moveToStaffStep(user);
+  await user.click(screen.getByTestId("select-all-staff"));
+  await user.click(screen.getByRole("button", { name: "次へ" }));
+}
+
 // ─── Tests ────────────────────────────────────────────────────────────────────
 describe("DownloadForm", () => {
   beforeEach(() => {
     jest.resetAllMocks();
     mockUseStaffs.mockReturnValue(defaultStaffsResult);
     mockUseCloseDates.mockReturnValue(defaultCloseDatesResult);
+    mockUseAggregateExportAction.mockReturnValue({
+      onClick: jest.fn().mockResolvedValue(undefined),
+      disabled: false,
+    });
+    mockUseExportAttendancesAction.mockReturnValue({
+      onClick: jest.fn().mockResolvedValue(undefined),
+      disabled: false,
+    });
   });
 
   describe("ローディング状態", () => {
@@ -145,7 +157,10 @@ describe("DownloadForm", () => {
     });
 
     it("closeDateLoading が true のとき「読み込み中...」を表示する", () => {
-      mockUseCloseDates.mockReturnValue({ ...defaultCloseDatesResult, loading: true });
+      mockUseCloseDates.mockReturnValue({
+        ...defaultCloseDatesResult,
+        loading: true,
+      });
       renderForm();
       expect(screen.getByText("読み込み中...")).toBeInTheDocument();
     });
@@ -208,7 +223,7 @@ describe("DownloadForm", () => {
 
     it("初期状態ではフォーム本体（開始日ラベルなど）が表示されない", () => {
       renderForm();
-      expect(screen.queryByText("開始日")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("開始日")).not.toBeInTheDocument();
     });
   });
 
@@ -219,7 +234,7 @@ describe("DownloadForm", () => {
       await user.click(
         screen.getByRole("button", { name: "ダウンロード要素を展開する" }),
       );
-      expect(screen.getByText("開始日")).toBeInTheDocument();
+      expect(screen.getByLabelText("開始日")).toBeInTheDocument();
     });
 
     it("展開後は「折りたたむ」ボタンが表示される", async () => {
@@ -239,11 +254,11 @@ describe("DownloadForm", () => {
       await user.click(
         screen.getByRole("button", { name: "ダウンロード要素を展開する" }),
       );
-      expect(screen.getByText("開始日")).toBeInTheDocument();
+      expect(screen.getByLabelText("開始日")).toBeInTheDocument();
       await user.click(
         screen.getByRole("button", { name: "ダウンロード要素を折りたたむ" }),
       );
-      expect(screen.queryByText("開始日")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("開始日")).not.toBeInTheDocument();
     });
 
     it("展開ボタンの aria-expanded が初期状態で false", () => {
@@ -268,12 +283,12 @@ describe("DownloadForm", () => {
   describe("展開後のフォーム", () => {
     it("開始日ラベルが表示される", async () => {
       await expandForm();
-      expect(screen.getByText("開始日")).toBeInTheDocument();
+      expect(screen.getByLabelText("開始日")).toBeInTheDocument();
     });
 
     it("終了日ラベルが表示される", async () => {
       await expandForm();
-      expect(screen.getByText("終了日")).toBeInTheDocument();
+      expect(screen.getByLabelText("終了日")).toBeInTheDocument();
     });
 
     it("date type の input が 2 つ表示される（開始日・終了日）", async () => {
@@ -292,23 +307,59 @@ describe("DownloadForm", () => {
     });
 
     it("StaffSelector が表示される", async () => {
-      await expandForm();
+      const user = await expandForm();
+      await moveToStaffStep(user);
       expect(screen.getByTestId("staff-selector")).toBeInTheDocument();
     });
 
-    it("ExportButton が表示される", async () => {
-      await expandForm();
-      expect(screen.getByTestId("export-button")).toBeInTheDocument();
+    it("実行ステップで個別ダウンロードボタンが2つ表示される", async () => {
+      const user = await expandForm();
+      await moveToExecuteStep(user);
+      expect(
+        screen.getByRole("button", { name: "一括ダウンロード" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "集計ダウンロード" }),
+      ).toBeInTheDocument();
     });
 
-    it("AggregateExportButton が表示される", async () => {
-      await expandForm();
-      expect(screen.getByTestId("aggregate-export-button")).toBeInTheDocument();
+    it("「一括ダウンロード」ボタン押下で一括ダウンロード処理を実行する", async () => {
+      const onDetailDownload = jest.fn().mockResolvedValue(undefined);
+      mockUseExportAttendancesAction.mockReturnValue({
+        onClick: onDetailDownload,
+        disabled: false,
+      });
+      const user = await expandForm();
+      await moveToExecuteStep(user);
+      await user.click(
+        screen.getByRole("button", { name: "一括ダウンロード" }),
+      );
+      expect(onDetailDownload).toHaveBeenCalledTimes(1);
     });
 
-    it("「新規」ボタンが表示される", async () => {
+    it("「集計ダウンロード」ボタン押下で集計ダウンロード処理を実行する", async () => {
+      const onAggregateDownload = jest.fn().mockResolvedValue(undefined);
+      mockUseAggregateExportAction.mockReturnValue({
+        onClick: onAggregateDownload,
+        disabled: false,
+      });
+      const user = await expandForm();
+      await moveToExecuteStep(user);
+      await user.click(
+        screen.getByRole("button", { name: "集計ダウンロード" }),
+      );
+      expect(onAggregateDownload).toHaveBeenCalledTimes(1);
+    });
+
+    it("設定画面への案内文とリンクが表示される", async () => {
       await expandForm();
-      expect(screen.getByRole("button", { name: /新規/ })).toBeInTheDocument();
+      expect(
+        screen.getByText("集計対象月は", { exact: false }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "設定画面" })).toHaveAttribute(
+        "href",
+        "/admin/master/job_term",
+      );
     });
 
     it("staffs が StaffSelector に渡される", async () => {
@@ -319,22 +370,24 @@ describe("DownloadForm", () => {
           createDownloadTestStaff({ id: "s2", cognitoUserId: "s2" }),
         ],
       });
-      await expandForm();
+      const user = await expandForm();
+      await moveToStaffStep(user);
       expect(screen.getByTestId("staffs-count")).toHaveTextContent("2");
     });
   });
 
   describe("日付入力", () => {
-    it("開始日 input の初期値が今日の日付", async () => {
+    it("開始日・終了日 input の初期値が未入力", async () => {
       const user = userEvent.setup();
       const { container } = renderForm();
       await user.click(
         screen.getByRole("button", { name: "ダウンロード要素を展開する" }),
       );
       const dateInputs = container.querySelectorAll('input[type="date"]');
-      // Both start and end date default to today
       expect(dateInputs[0]).toBeInTheDocument();
       expect(dateInputs[1]).toBeInTheDocument();
+      expect((dateInputs[0] as HTMLInputElement).value).toBe("");
+      expect((dateInputs[1] as HTMLInputElement).value).toBe("");
     });
 
     it("開始日 input の値を変更できる", async () => {
@@ -366,10 +419,11 @@ describe("DownloadForm", () => {
 
   describe("集計対象月セレクト", () => {
     it("closeDates が空のとき選択肢は「対象月を選択」のみ", async () => {
-      await expandForm();
+      const user = await expandForm();
+      await user.click(screen.getByRole("radio", { name: /集計対象月から/u }));
       const select = screen.getByRole("combobox");
-      expect(select).toHaveValue("");
-      const options = within(select).queryAllByRole("option");
+      await user.click(select);
+      const options = screen.getAllByRole("option");
       expect(options).toHaveLength(1);
       expect(options[0]).toHaveTextContent("対象月を選択");
     });
@@ -386,8 +440,12 @@ describe("DownloadForm", () => {
           },
         ],
       });
-      await expandForm();
-      expect(screen.getByText("2024/01")).toBeInTheDocument();
+      const user = await expandForm();
+      await user.click(screen.getByRole("radio", { name: /集計対象月から/u }));
+      await user.click(screen.getByRole("combobox"));
+      expect(
+        screen.getByRole("option", { name: "2024/01" }),
+      ).toBeInTheDocument();
     });
 
     it("closeDates を選択すると開始日・終了日が更新される", async () => {
@@ -406,8 +464,9 @@ describe("DownloadForm", () => {
       await user.click(
         screen.getByRole("button", { name: "ダウンロード要素を展開する" }),
       );
-      const select = screen.getByRole("combobox");
-      await user.selectOptions(select, "2024-01-31");
+      await user.click(screen.getByRole("radio", { name: /集計対象月から/u }));
+      await user.click(screen.getByRole("combobox"));
+      await user.click(screen.getByRole("option", { name: "2024/01" }));
       await waitFor(() => {
         const dateInputs = container.querySelectorAll('input[type="date"]');
         expect((dateInputs[0] as HTMLInputElement).value).toBe("2024-01-01");
@@ -416,15 +475,13 @@ describe("DownloadForm", () => {
     });
   });
 
-  describe("新規ボタン（ナビゲーション）", () => {
-    it("「新規」ボタンをクリックすると /admin/master/job_term に遷移する", async () => {
-      const user = userEvent.setup();
-      renderForm();
-      await user.click(
-        screen.getByRole("button", { name: "ダウンロード要素を展開する" }),
+  describe("設定画面への案内", () => {
+    it("設定画面リンクが /admin/master/job_term を指す", async () => {
+      await expandForm();
+      expect(screen.getByRole("link", { name: "設定画面" })).toHaveAttribute(
+        "href",
+        "/admin/master/job_term",
       );
-      await user.click(screen.getByRole("button", { name: /新規/ }));
-      expect(mockNavigate).toHaveBeenCalledWith("/admin/master/job_term");
     });
   });
 

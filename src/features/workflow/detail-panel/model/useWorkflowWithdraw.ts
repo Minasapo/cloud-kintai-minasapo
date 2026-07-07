@@ -1,6 +1,6 @@
-import { buildWorkflowCommentsUpdateInput } from "@features/workflow/comment-thread/model/workflowCommentBuilder";
 import type { WorkflowEntity } from "@features/workflow/hooks/useWorkflowLoaderWorkflow";
-import { UpdateWorkflowInput, WorkflowStatus } from "@shared/api/graphql/types";
+import { executeWorkflowWithdraw } from "@features/workflow/lib/workflowWithdraw";
+import { UpdateWorkflowInput } from "@shared/api/graphql/types";
 import { createLogger } from "@shared/lib/logger";
 import type { AppNotificationInput } from "@shared/lib/useAppNotification";
 import { useCallback } from "react";
@@ -27,19 +27,11 @@ export function useWorkflowWithdraw({
     if (!workflow?.id) return;
 
     try {
-      const statusInput: UpdateWorkflowInput = {
-        id: workflow.id,
-        status: WorkflowStatus.CANCELLED,
-      };
-      const afterStatus = await updateWorkflow(statusInput);
-      setWorkflow(afterStatus as WorkflowEntity);
-
-      const commentUpdate = buildWorkflowCommentsUpdateInput(
-        afterStatus as WorkflowEntity,
-        "申請が取り下げされました",
-      );
-      const afterComments = await updateWorkflow(commentUpdate);
-      setWorkflow(afterComments as WorkflowEntity);
+      await executeWorkflowWithdraw({
+        workflow,
+        updateWorkflow,
+        onWorkflowChange: setWorkflow,
+      });
 
       notify({ title: "取り下げしました", tone: "success" });
       setTimeout(() => navigate("/workflow"), 1000);

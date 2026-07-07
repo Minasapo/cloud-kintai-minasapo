@@ -45,10 +45,18 @@ describe("WorkflowResults", () => {
     render(<WorkflowResults />);
 
     expect(screen.getAllByRole("columnheader")).toHaveLength(4);
-    expect(screen.getByRole("columnheader", { name: "種別" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "申請日" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "ステータス" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "作成日" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "種別" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "申請日" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "ステータス" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "作成日" }),
+    ).toBeInTheDocument();
   });
 
   it("opens workflow detail when desktop row is clicked", async () => {

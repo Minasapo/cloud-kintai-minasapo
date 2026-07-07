@@ -1,4 +1,5 @@
 import type { WorkflowFieldConfig } from "@features/workflow/config/workflowTypeConfig";
+import { AppTextField } from "@shared/ui/form";
 
 import styles from "../WorkflowTypeFields.module.scss";
 
@@ -15,11 +16,11 @@ export function DateField({ config, value, onChange, error, disabled }: Props) {
     <div className={styles.formRow}>
       <div className={styles.formLabel}>{config.label}</div>
       <div className={styles.formField}>
-        <input
+        <AppTextField
           type="date"
-          className={[styles.dateInput, error ? styles.inputError : ""].join(
-            " ",
-          )}
+          size="small"
+          error={Boolean(error)}
+          sx={{ maxWidth: 200 }}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}

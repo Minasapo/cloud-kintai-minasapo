@@ -1,4 +1,5 @@
 import type { WorkflowFieldConfig } from "@features/workflow/config/workflowTypeConfig";
+import { AppTextField } from "@shared/ui/form";
 
 import styles from "../WorkflowTypeFields.module.scss";
 
@@ -15,8 +16,10 @@ export function TextField({ config, value, onChange, error, disabled }: Props) {
     <div className={styles.formRow}>
       <div className={styles.formLabel}>{config.label}</div>
       <div className={styles.formField}>
-        <input
-          className={[styles.input, error ? styles.inputError : ""].join(" ")}
+        <AppTextField
+          fullWidth
+          size="small"
+          error={Boolean(error)}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}

@@ -12,30 +12,38 @@ import AdminPendingApprovalSummary from "@/widgets/layout/header/AdminPendingApp
 
 const PAGE_SECTION_GAP = designTokenVar("spacing.lg", "16px");
 
-const CurrentWorkingStaffCardContainer = memo(function CurrentWorkingStaffCardContainer() {
-  const { countLabel, infoLabel } = useAdminCurrentWorkingStaffCard();
+const CurrentWorkingStaffCardContainer = memo(
+  function CurrentWorkingStaffCardContainer() {
+    const { countLabel, infoLabel } = useAdminCurrentWorkingStaffCard();
 
-  return <CurrentWorkingStaffCard countLabel={countLabel} infoLabel={infoLabel} />;
-});
+    return (
+      <CurrentWorkingStaffCard countLabel={countLabel} infoLabel={infoLabel} />
+    );
+  },
+);
 
-const DailyReportStatusCardContainer = memo(function DailyReportStatusCardContainer() {
-  const { submittedCountLabel, approvedCountLabel, isLoading } =
-    useAdminDailyReportStatusCard();
+const DailyReportStatusCardContainer = memo(
+  function DailyReportStatusCardContainer() {
+    const { submittedCountLabel, approvedCountLabel, isLoading } =
+      useAdminDailyReportStatusCard();
 
-  return (
-    <DailyReportStatusCard
-      submittedCountLabel={submittedCountLabel}
-      approvedCountLabel={approvedCountLabel}
-      isLoading={isLoading}
-    />
-  );
-});
+    return (
+      <DailyReportStatusCard
+        submittedCountLabel={submittedCountLabel}
+        approvedCountLabel={approvedCountLabel}
+        isLoading={isLoading}
+      />
+    );
+  },
+);
 
-const StaffWorkStatusChartCardContainer = memo(function StaffWorkStatusChartCardContainer() {
-  const viewModel = useAdminStaffWorkStatusChart();
+const StaffWorkStatusChartCardContainer = memo(
+  function StaffWorkStatusChartCardContainer() {
+    const viewModel = useAdminStaffWorkStatusChart();
 
-  return <StaffWorkStatusChartCard {...viewModel} />;
-});
+    return <StaffWorkStatusChartCard {...viewModel} />;
+  },
+);
 
 export default function AdminDashboard() {
   return (

@@ -1,3 +1,5 @@
+import { AppButton } from "@shared/ui/button";
+
 export default function FilterTrigger({
   label,
   isOpen,
@@ -8,18 +10,31 @@ export default function FilterTrigger({
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
+    <AppButton
+      variant="outline"
+      tone="neutral"
+      size="md"
       onClick={onClick}
-      className={[
-        "flex w-full items-center justify-between rounded-[10px] border px-6 py-4 text-left text-[0.95rem] transition",
-        isOpen
-          ? "border-emerald-500/45 bg-white ring-2 ring-emerald-100"
-          : "border-slate-300 bg-white hover:border-slate-400",
-      ].join(" ")}
+      sx={{
+        width: "100%",
+        justifyContent: "space-between",
+        borderRadius: "10px",
+        textTransform: "none",
+        padding: "16px 24px",
+        fontSize: "0.95rem",
+        lineHeight: 1.5,
+        color: "rgb(15, 23, 42)",
+        backgroundColor: "rgb(255, 255, 255)",
+        borderColor: isOpen ? "rgb(16, 185, 129 / 0.45)" : "rgb(203, 213, 225)",
+        boxShadow: isOpen ? "0 0 0 2px rgb(209 250 229)" : "none",
+        "&:hover": {
+          backgroundColor: "rgb(255, 255, 255)",
+          borderColor: isOpen ? "rgb(16, 185, 129 / 0.45)" : "rgb(148, 163, 184)",
+        },
+      }}
     >
       <span className="truncate text-slate-900">{label}</span>
       <span className="ml-3 text-slate-500">{isOpen ? "▲" : "▼"}</span>
-    </button>
+    </AppButton>
   );
 }

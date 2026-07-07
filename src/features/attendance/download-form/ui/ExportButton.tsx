@@ -5,6 +5,7 @@ import { calcTotalRestTime } from "@entities/attendance/lib/time";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
 import { Attendance } from "@shared/api/graphql/types";
+import { designTokenVar } from "@shared/designSystem";
 import { AppButton } from "@shared/ui/button";
 import dayjs from "dayjs";
 import { useContext } from "react";
@@ -22,11 +23,57 @@ interface Props {
   fullWidth?: boolean;
 }
 
+type UseExportAttendancesActionArgs = Pick<
+  Props,
+  "workDates" | "selectedStaff"
+>;
+
+type ExportAttendancesAction = {
+  onClick: () => Promise<void>;
+  disabled: boolean;
+};
+
+const MAIN_GREEN = designTokenVar(
+  "color.feedback.success.base",
+  "rgb(16 185 129)",
+);
+const MAIN_GREEN_DARK = "rgb(5 150 105)";
+
 export default function ExportButton({
   workDates,
   selectedStaff,
   fullWidth = false,
 }: Props) {
+  const { onClick, disabled } = useExportAttendancesAction({
+    workDates,
+    selectedStaff,
+  });
+
+  return (
+    <AppButton
+      onClick={onClick}
+      variant="solid"
+      tone="primary"
+      size="md"
+      fullWidth={fullWidth}
+      startIcon={<CloudDownloadOutlinedIcon />}
+      disabled={disabled}
+      sx={{
+        "--variant-containedBg": MAIN_GREEN,
+        "&:hover": {
+          "--variant-containedBg": MAIN_GREEN_DARK,
+        },
+      }}
+    >
+      一括ダウンロード
+    </AppButton>
+  );
+}
+
+export function useExportAttendancesAction({
+  workDates,
+  selectedStaff,
+}: UseExportAttendancesActionArgs): ExportAttendancesAction {
   const { getHourlyPaidHolidayEnabled, getSpecialHolidayEnabled } =
     useContext(AppConfigContext);
 
@@ -38,7 +85,7 @@ export default function ExportButton({
         workDate: {
           eq: workDate,
         },
-      }))
+      })),
     ).then((res: Attendance[]) => {
       const hourlyPaidHolidayEnabled: boolean = getHourlyPaidHolidayEnabled();
       const includeSpecialHoliday = getSpecialHolidayEnabled
@@ -70,14 +117,15 @@ export default function ExportButton({
           .map((staff: StaffType) => {
             const attendances: Attendance[] = res.filter(
               (attendance: Attendance) =>
-                attendance.staffId === staff.cognitoUserId
+                attendance.staffId === staff.cognitoUserId,
             );
 
             return [
               ...workDates.map((workDate: string) => {
                 const matchAttendance: Attendance | undefined =
                   attendances.find(
-                    (attendance: Attendance) => attendance.workDate === workDate
+                    (attendance: Attendance) =>
+                      attendance.workDate === workDate,
                   );
 
                 if (matchAttendance) {
@@ -104,7 +152,7 @@ export default function ExportButton({
 
                       const diff: number = calcTotalRestTime(
                         rest.startTime,
-                        rest.endTime
+                        rest.endTime,
                       );
                       return acc + diff;
                     }, 0) ?? 0;
@@ -113,7 +161,7 @@ export default function ExportButton({
                     const textList: string[] = [];
                     if (substituteHolidayDate) {
                       const formattedSubstituteHolidayDate = dayjs(
-                        substituteHolidayDate
+                        substituteHolidayDate,
                       ).format("M/D");
                       textList.push(`${formattedSubstituteHolidayDate}分振替`);
                     }
@@ -176,7 +224,7 @@ export default function ExportButton({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.download = `attendances_${dayjs().format(
-        AttendanceDate.QueryParamFormat
+        AttendanceDate.QueryParamFormat,
       )}.csv`;
       a.href = url;
       a.click();
@@ -185,17 +233,5 @@ export default function ExportButton({
     });
   };
 
-  return (
-    <AppButton
-      onClick={onClick}
-      variant="solid"
-      tone="primary"
-      size="md"
-      fullWidth={fullWidth}
-      startIcon={<CloudDownloadOutlinedIcon />}
-      disabled={disabled}
-    >
-      一括ダウンロード
-    </AppButton>
-  );
+  return { onClick, disabled };
 }

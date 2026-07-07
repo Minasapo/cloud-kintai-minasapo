@@ -9,9 +9,7 @@ import {
   getEnabledWorkflowCategories,
 } from "@entities/workflow/lib/workflowLabels";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
-import {
-  DynamicWorkflowFormProvider,
-} from "@features/workflow/application-form/model/DynamicWorkflowFormContext";
+import { DynamicWorkflowFormProvider } from "@features/workflow/application-form/model/DynamicWorkflowFormContext";
 import {
   buildDynamicCreateWorkflowInput,
   validateDynamicWorkflowForm,
@@ -26,10 +24,18 @@ import {
   ApproverSettingMode,
   WorkflowCategory,
 } from "@shared/api/graphql/types";
+import { designTokenVar } from "@shared/designSystem";
 import { createLogger } from "@shared/lib/logger";
 import { parseTimeToISO } from "@shared/lib/time";
 import { useAppNotification } from "@shared/lib/useAppNotification";
+import { AppBackButton, AppButton } from "@shared/ui/button";
 import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
+import {
+  AppFormControlLabel,
+  AppSelect,
+  AppSwitch,
+  AppTextField,
+} from "@shared/ui/form";
 import {
   DashboardInnerSurface,
   PageContent,
@@ -46,14 +52,41 @@ import styles from "./NewWorkflow.module.scss";
 const CLOCK_CORRECTION_LABEL = "打刻修正(出勤忘れ)";
 const CLOCK_CORRECTION_CHECK_OUT_LABEL = "打刻修正(退勤忘れ)";
 
+const SUBMIT_BUTTON_SX = {
+  borderRadius: "999px",
+  padding: "0.375rem 1.4rem",
+  fontSize: "0.875rem",
+  fontWeight: 500,
+  color: designTokenVar("color.neutral.0", "rgb(255 255 255)"),
+  backgroundColor: designTokenVar(
+    "color.feedback.success.base",
+    "rgb(25 185 133)",
+  ),
+  boxShadow:
+    "inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 12px 24px -18px rgba(5, 150, 105, 0.55)",
+  "&:hover": {
+    backgroundColor: designTokenVar(
+      "color.feedback.success.base",
+      "rgb(23 171 123)",
+    ),
+    boxShadow:
+      "inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 14px 28px -18px rgba(5, 150, 105, 0.6)",
+  },
+  "&.Mui-disabled": {
+    backgroundColor: designTokenVar("color.neutral.200", "rgb(226 232 240)"),
+    color: designTokenVar("color.neutral.500", "rgb(100 116 139)"),
+    boxShadow: "none",
+  },
+} as const;
+
 const logger = createLogger("NewWorkflow");
 
-const getTodayAsSlash = (): string => {
+const getTodayAsISO = (): string => {
   const d = new Date();
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
-  return `${y}/${m}/${day}`;
+  return `${y}-${m}-${day}`;
 };
 
 const generateApprovalSteps = (
@@ -152,20 +185,15 @@ const buildCategoryOptions = (
   options.flatMap((item) => {
     if (item.category === WorkflowCategory.CLOCK_CORRECTION) {
       return [
-        <option key={`${item.category}-clock-in`} value={CLOCK_CORRECTION_LABEL}>
-          {CLOCK_CORRECTION_LABEL}
-        </option>,
-        <option key={`${item.category}-clock-out`} value={CLOCK_CORRECTION_CHECK_OUT_LABEL}>
-          {CLOCK_CORRECTION_CHECK_OUT_LABEL}
-        </option>,
+        { value: CLOCK_CORRECTION_LABEL, label: CLOCK_CORRECTION_LABEL },
+        {
+          value: CLOCK_CORRECTION_CHECK_OUT_LABEL,
+          label: CLOCK_CORRECTION_CHECK_OUT_LABEL,
+        },
       ];
     }
     const label = CATEGORY_LABELS[item.category] ?? item.label;
-    return [
-      <option key={item.category} value={label}>
-        {label}
-      </option>,
-    ];
+    return [{ value: label, label }];
   });
 
 const FormRow = ({
@@ -185,39 +213,44 @@ type WorkflowFormContentProps = {
   category: string;
   enabledCategoryOptions: ReturnType<typeof getEnabledWorkflowCategories>;
   staff: StaffType | null | undefined;
-  applicationDate: string;
+  applicationDateISO: string;
   fields: ReturnType<typeof useDynamicWorkflowForm>["fields"];
   setFieldValue: ReturnType<typeof useDynamicWorkflowForm>["setFieldValue"];
   fieldErrors: Record<string, string>;
   draftMode: boolean;
   isSaving: boolean;
-  onCategoryChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  onDraftToggle: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onCategoryChange: (value: string | "") => void;
+  onDraftToggle: (
+    event: React.ChangeEvent<HTMLInputElement>,
+    checked: boolean,
+  ) => void;
 };
 
 const WorkflowFormContent = ({
-  category, enabledCategoryOptions, staff, applicationDate,
-  fields, setFieldValue, fieldErrors, draftMode, isSaving,
-  onCategoryChange, onDraftToggle,
+  category,
+  enabledCategoryOptions,
+  staff,
+  applicationDateISO,
+  fields,
+  setFieldValue,
+  fieldErrors,
+  draftMode,
+  isSaving,
+  onCategoryChange,
+  onDraftToggle,
 }: WorkflowFormContentProps) => (
   <DashboardInnerSurface>
     <div className={styles.formRows}>
       <FormRow label="種別">
-        <div>
-          <div className={styles.selectWrap}>
-            <select
-              className={styles.select}
-              value={category}
-              onChange={onCategoryChange}
-            >
-              <option value="">種別を選択</option>
-              {buildCategoryOptions(enabledCategoryOptions)}
-            </select>
-            <span className={styles.selectIcon} aria-hidden="true">
-              ▼
-            </span>
-          </div>
-        </div>
+        <AppSelect
+          label="種別"
+          labelId="workflow-category-label"
+          value={category}
+          options={buildCategoryOptions(enabledCategoryOptions)}
+          onChange={onCategoryChange}
+          placeholder="種別を選択"
+          sx={{ width: "100%" }}
+        />
       </FormRow>
 
       <FormRow label="申請者">
@@ -227,13 +260,13 @@ const WorkflowFormContent = ({
       </FormRow>
 
       <FormRow label="申請日">
-        <div>
-          <input
-            className={styles.readonlyInput}
-            value={applicationDate}
-            readOnly
-          />
-        </div>
+        <AppTextField
+          type="date"
+          size="small"
+          value={applicationDateISO}
+          disabled
+          sx={{ width: "100%" }}
+        />
       </FormRow>
 
       <DynamicWorkflowFormProvider
@@ -249,34 +282,23 @@ const WorkflowFormContent = ({
       </DynamicWorkflowFormProvider>
 
       <FormRow label="下書き">
-        <div>
-          <label className={styles.toggleWrap}>
-            <input
-              type="checkbox"
-              className={styles.toggleInput}
-              checked={draftMode}
-              onChange={onDraftToggle}
-            />
-            <span className={styles.toggleTrack} />
-            {draftMode && (
-              <span className={styles.toggleLabelText}>
-                下書きとして保存
-              </span>
-            )}
-          </label>
-        </div>
+        <AppFormControlLabel
+          control={<AppSwitch checked={draftMode} onChange={onDraftToggle} />}
+          label="下書きとして保存"
+        />
       </FormRow>
 
       <FormRow>
         <div className={styles.formActions}>
           <div className={styles.actionsGroup}>
-            <button
+            <AppButton
               type="submit"
-              className={styles.submitButton}
               disabled={category === "" || isSaving}
+              loading={isSaving}
+              sx={SUBMIT_BUTTON_SX}
             >
               {isSaving ? "処理中..." : "作成"}
-            </button>
+            </AppButton>
           </div>
         </div>
       </FormRow>
@@ -296,10 +318,14 @@ export default function NewWorkflow() {
 
   const [draftMode, setDraftMode] = useState(false);
   const [category, setCategory] = useState("");
-  const applicationDate = getTodayAsSlash();
+  const applicationDateISO = getTodayAsISO();
 
-  const { fields, setFieldValue, resetFields, isDirty: isFieldsDirty } =
-    useDynamicWorkflowForm();
+  const {
+    fields,
+    setFieldValue,
+    resetFields,
+    isDirty: isFieldsDirty,
+  } = useDynamicWorkflowForm();
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -355,11 +381,26 @@ export default function NewWorkflow() {
       staff,
       staffs,
     );
-    if (approvalSteps.length > 0) {
-      input.approvalSteps = approvalSteps;
-      input.assignedApproverStaffIds = assignedApproverStaffIds;
-      input.nextApprovalStepIndex = 0;
-    }
+    // If no approval steps generated (no approver setting), fallback to ADMINS
+    const stepsToUse =
+      approvalSteps.length > 0
+        ? approvalSteps
+        : [
+            {
+              id: `fallback-admin-${Date.now()}`,
+              approverStaffId: "ADMINS",
+              decisionStatus: ApprovalStatus.PENDING,
+              approverComment: null,
+              decisionTimestamp: null,
+              stepOrder: 0,
+            },
+          ];
+    const approversToUse =
+      approvalSteps.length > 0 ? assignedApproverStaffIds : ["ADMINS"];
+
+    input.approvalSteps = stepsToUse;
+    input.assignedApproverStaffIds = approversToUse;
+    input.nextApprovalStepIndex = 0;
 
     if (staff?.approverSetting) {
       input.submitterApproverSetting =
@@ -417,8 +458,7 @@ export default function NewWorkflow() {
     }
   };
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const v = e.target.value;
+  const handleCategoryChange = (v: string | "") => {
     setCategory(v);
     setFieldErrors({});
 
@@ -456,8 +496,11 @@ export default function NewWorkflow() {
     }
   };
 
-  const handleDraftToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDraftMode(e.target.checked);
+  const handleDraftToggle = (
+    _event: React.ChangeEvent<HTMLInputElement>,
+    checked: boolean,
+  ) => {
+    setDraftMode(checked);
   };
 
   return (
@@ -471,13 +514,15 @@ export default function NewWorkflow() {
           sx={{ gap: 0 }}
         >
           <div style={{ marginBottom: "1rem" }}>
-            <button
+            <AppBackButton
               type="button"
-              className={styles.backButton}
+              variant="ghost"
+              tone="neutral"
+              size="sm"
               onClick={() => navigate("/workflow")}
             >
               申請一覧へ戻る
-            </button>
+            </AppBackButton>
           </div>
 
           <div className={styles.pageHeader}>
@@ -493,7 +538,7 @@ export default function NewWorkflow() {
             category={category}
             enabledCategoryOptions={enabledCategoryOptions}
             staff={staff}
-            applicationDate={applicationDate}
+            applicationDateISO={applicationDateISO}
             fields={fields}
             setFieldValue={setFieldValue}
             fieldErrors={fieldErrors}

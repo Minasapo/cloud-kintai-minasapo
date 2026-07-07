@@ -8,10 +8,11 @@ import {
 } from "@entities/attendance/api/attendanceApi";
 import { useStaffs } from "@entities/staff/model/useStaffs/useStaffs";
 import useWorkflows from "@entities/workflow/model/useWorkflows";
-import { GetWorkflowQuery, WorkflowStatus } from "@shared/api/graphql/types";
+import { GetWorkflowQuery } from "@shared/api/graphql/types";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { useContext, useMemo, useRef, useState } from "react";
 
+import { resolveWorkflowActionState } from "../services/approvalWorkflowHelpers";
 import { useWorkflowApprovalActions } from "./useWorkflowApprovalActions";
 import { useWorkflowDetailData } from "./useWorkflowDetailData";
 
@@ -45,11 +46,16 @@ export function useWorkflowCarouselState({
   const { authStatus, cognitoUser } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
   const { staffs } = useStaffs({ isAuthenticated });
-  const { getStartTime, getEndTime, getLunchRestStartTime, getLunchRestEndTime } =
-    useContext(AppConfigContext);
+  const {
+    getStartTime,
+    getEndTime,
+    getLunchRestStartTime,
+    getLunchRestEndTime,
+  } = useContext(AppConfigContext);
   const { update: updateWorkflow } = useWorkflows({ isAuthenticated });
   const [createAttendance] = useCreateAttendanceMutation();
-  const [getAttendanceByStaffAndDate] = useLazyGetAttendanceByStaffAndDateQuery();
+  const [getAttendanceByStaffAndDate] =
+    useLazyGetAttendanceByStaffAndDateQuery();
   const [updateAttendance] = useUpdateAttendanceMutation();
   const dispatch = useAppDispatchV2();
 
@@ -67,12 +73,23 @@ export function useWorkflowCarouselState({
     cognitoUser,
     staffs,
     updateWorkflow: (input) =>
-      updateWorkflow(input) as Promise<NonNullable<GetWorkflowQuery["getWorkflow"]>>,
+      updateWorkflow(input) as Promise<
+        NonNullable<GetWorkflowQuery["getWorkflow"]>
+      >,
     setWorkflow,
-    notifySuccess: (message) => dispatch(pushNotification({ tone: "success", message })),
-    notifyError: (message) => dispatch(pushNotification({ tone: "error", message })),
+    notifySuccess: (message) =>
+      dispatch(pushNotification({ tone: "success", message })),
+    notifyError: (message) =>
+      dispatch(pushNotification({ tone: "error", message })),
     notifyInfo: (title, description) =>
-      dispatch(pushNotification({ tone: "info", message: title, description, autoHideMs: null })),
+      dispatch(
+        pushNotification({
+          tone: "info",
+          message: title,
+          description,
+          autoHideMs: null,
+        }),
+      ),
     getStartTime,
     getEndTime,
     getLunchRestStartTime,
@@ -81,14 +98,9 @@ export function useWorkflowCarouselState({
     createAttendance,
     updateAttendance,
   });
-  const isApproveDisabled =
-    !workflowDetail?.id ||
-    workflowDetail.status === WorkflowStatus.APPROVED ||
-    workflowDetail.status === WorkflowStatus.CANCELLED;
-  const isRejectDisabled =
-    !workflowDetail?.id ||
-    workflowDetail.status === WorkflowStatus.REJECTED ||
-    workflowDetail.status === WorkflowStatus.CANCELLED;
+  const workflowActionState = resolveWorkflowActionState(workflowDetail);
+  const isApproveDisabled = !workflowActionState.canApprove;
+  const isRejectDisabled = !workflowActionState.canReject;
 
   const handlePrev = () => {
     if (!canGoPrev) return;
@@ -120,6 +132,16 @@ export function useWorkflowCarouselState({
     moveToNextStep();
   };
 
+  const handleApproveOnly = async () => {
+    if (!enableApprovalActions || isApproveDisabled || isCompleted) return;
+    await handleApprove();
+  };
+
+  const handleRejectOnly = async () => {
+    if (!enableApprovalActions || isRejectDisabled || isCompleted) return;
+    await handleReject();
+  };
+
   return {
     currentIndex,
     isCompleted,
@@ -136,5 +158,7 @@ export function useWorkflowCarouselState({
     handleNext,
     handleApproveAndNext,
     handleRejectAndNext,
+    handleApproveOnly,
+    handleRejectOnly,
   };
 }

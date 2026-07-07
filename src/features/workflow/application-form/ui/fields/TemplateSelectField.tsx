@@ -1,6 +1,8 @@
 import { useGetWorkflowTemplatesQuery } from "@entities/workflow-template/api/workflowTemplateApi";
 import type { WorkflowFieldConfig } from "@features/workflow/config/workflowTypeConfig";
+import { AppButton } from "@shared/ui/button";
 import ConfirmDialog from "@shared/ui/feedback/ConfirmDialog";
+import { AppSelect } from "@shared/ui/form";
 import { useMemo, useState } from "react";
 
 import styles from "../WorkflowTypeFields.module.scss";
@@ -36,7 +38,9 @@ export function TemplateSelectField({
     organizationId: ORGANIZATION_ID,
   });
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(null);
+  const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(
+    null,
+  );
 
   const handleApply = () => {
     if (!value) return;
@@ -48,7 +52,8 @@ export function TemplateSelectField({
   };
 
   const pendingTemplate = useMemo(
-    () => templates.find((template) => template.id === pendingTemplateId) ?? null,
+    () =>
+      templates.find((template) => template.id === pendingTemplateId) ?? null,
     [templates, pendingTemplateId],
   );
 
@@ -77,32 +82,28 @@ export function TemplateSelectField({
         <div className={styles.formLabel}>{config.label}</div>
         <div className={styles.formField}>
           <div className={styles.inlineGroup}>
-            <div className={styles.selectWrap}>
-              <select
-                className={styles.select}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                disabled={disabled}
-              >
-                <option value="">テンプレートを選択</option>
-                {templates.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-              <span className={styles.selectIcon} aria-hidden="true">
-                ▼
-              </span>
-            </div>
-            <button
+            <AppSelect
+              label={config.label}
+              labelId="workflow-template-select-label"
+              value={value}
+              options={templates.map((template) => ({
+                value: template.id,
+                label: template.name,
+              }))}
+              onChange={onChange}
+              placeholder="テンプレートを選択"
+              size="small"
+              sx={{ flex: 1, minWidth: 0 }}
+            />
+            <AppButton
               type="button"
-              className={styles.applyButton}
-              onClick={handleApply}
+              size="sm"
               disabled={disabled || !value}
+              onClick={handleApply}
+              sx={{ flexShrink: 0 }}
             >
               適用
-            </button>
+            </AppButton>
           </div>
         </div>
       </div>

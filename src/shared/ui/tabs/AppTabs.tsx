@@ -9,13 +9,7 @@ export type AppTabItem<T extends AppTabValue> = {
   disabled?: boolean;
 };
 
-export type AppTabAppearance =
-  | "underline"
-  | "bordered"
-  | "chip"
-  // legacy aliases kept for backward compatibility
-  | "pill"
-  | "mui-standard";
+export type AppTabAppearance = "underline" | "bordered" | "chip";
 
 export type AppTabsProps<T extends AppTabValue> = {
   value: T;
@@ -30,23 +24,16 @@ export type AppTabsProps<T extends AppTabValue> = {
   panelPadding?: number;
 };
 
-const resolveAppearance = (
-  raw: AppTabAppearance,
-): "underline" | "bordered" | "chip" => {
-  if (raw === "pill") return "chip";
-  if (raw === "mui-standard") return "underline";
-  return raw;
-};
+
 
 export function AppTabs<T extends AppTabValue>({
   value,
   onChange,
   items,
-  appearance: appearanceProp = "underline",
+  appearance = "underline",
   tabsProps,
   panelPadding = 2,
 }: AppTabsProps<T>) {
-  const appearance = resolveAppearance(appearanceProp);
   const isFullWidth = tabsProps?.variant === "fullWidth";
   const idBase = useId().replace(/:/g, "");
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);

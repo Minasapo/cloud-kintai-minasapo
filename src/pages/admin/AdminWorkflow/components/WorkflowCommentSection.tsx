@@ -47,6 +47,7 @@ export default function WorkflowCommentSection({
       sender: string;
       staffId?: string;
       text: string;
+      createdAt?: string;
       time: string;
     }[],
   );
@@ -83,6 +84,7 @@ export default function WorkflowCommentSection({
         sender: string;
         staffId?: string;
         text: string;
+        createdAt?: string;
         time: string;
       }[];
     }
@@ -103,6 +105,7 @@ export default function WorkflowCommentSection({
           sender,
           staffId: comment.staffId,
           text: comment.text,
+          createdAt: comment.createdAt,
           time,
         };
       });
@@ -137,6 +140,7 @@ export default function WorkflowCommentSection({
       sender: senderDisplay,
       staffId: newComment.staffId,
       text: newComment.text,
+      createdAt: newComment.createdAt,
       time: new Date(newComment.createdAt).toLocaleString(),
     };
 
