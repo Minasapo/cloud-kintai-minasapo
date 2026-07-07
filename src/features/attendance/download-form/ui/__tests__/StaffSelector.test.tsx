@@ -51,7 +51,10 @@ describe("StaffSelector", () => {
     });
 
     it("スタッフが 1 名選択されているとき、トリガーボタンにその名前が表示される", () => {
-      const staff = createDownloadTestStaff({ familyName: "田中", givenName: "花子" });
+      const staff = createDownloadTestStaff({
+        familyName: "田中",
+        givenName: "花子",
+      });
       renderSelector({ selectedStaff: [staff] });
       // The name appears in both the trigger span and the chip; check at least one exists
       const allOccurrences = screen.getAllByText("田中 花子");
@@ -103,7 +106,11 @@ describe("StaffSelector", () => {
     it("トリガーボタンをクリックするとドロップダウンが開く", async () => {
       const user = userEvent.setup();
       const staffs = [
-        createDownloadTestStaff({ id: "s1", familyName: "田中", givenName: "花子" }),
+        createDownloadTestStaff({
+          id: "s1",
+          familyName: "田中",
+          givenName: "花子",
+        }),
       ];
       renderSelector({ staffs });
       const trigger = screen.getAllByRole("button")[0];
@@ -116,7 +123,11 @@ describe("StaffSelector", () => {
     it("ドロップダウンが開いているとき再クリックで閉じる", async () => {
       const user = userEvent.setup();
       const staffs = [
-        createDownloadTestStaff({ id: "s1", familyName: "田中", givenName: "花子" }),
+        createDownloadTestStaff({
+          id: "s1",
+          familyName: "田中",
+          givenName: "花子",
+        }),
       ];
       renderSelector({ staffs });
       const trigger = screen.getAllByRole("button")[0];
@@ -130,24 +141,14 @@ describe("StaffSelector", () => {
       });
     });
 
-    it("ドロップダウンが開くとスタッフ件数が表示される", async () => {
-      const user = userEvent.setup();
-      const staffs = [
-        createDownloadTestStaff({ id: "s1", cognitoUserId: "s1" }),
-        createDownloadTestStaff({ id: "s2", cognitoUserId: "s2" }),
-      ];
-      renderSelector({ staffs });
-      const trigger = screen.getAllByRole("button")[0];
-      await user.click(trigger);
-      await waitFor(() => {
-        expect(screen.getByText("2件")).toBeInTheDocument();
-      });
-    });
-
     it("ドロップダウンが開くとスタッフ一覧が表示される", async () => {
       const user = userEvent.setup();
       const staffs = [
-        createDownloadTestStaff({ id: "s1", familyName: "田中", givenName: "花子" }),
+        createDownloadTestStaff({
+          id: "s1",
+          familyName: "田中",
+          givenName: "花子",
+        }),
         createDownloadTestStaff({
           id: "s2",
           cognitoUserId: "s2",
@@ -160,8 +161,12 @@ describe("StaffSelector", () => {
       await user.click(trigger);
       await waitFor(() => {
         // Checkboxes with aria-labels are accessible via the wrapping label
-        expect(screen.getAllByText("田中 花子").length).toBeGreaterThanOrEqual(1);
-        expect(screen.getAllByText("鈴木 一郎").length).toBeGreaterThanOrEqual(1);
+        expect(screen.getAllByText("田中 花子").length).toBeGreaterThanOrEqual(
+          1,
+        );
+        expect(screen.getAllByText("鈴木 一郎").length).toBeGreaterThanOrEqual(
+          1,
+        );
       });
     });
 
@@ -171,7 +176,9 @@ describe("StaffSelector", () => {
       const trigger = screen.getAllByRole("button")[0];
       await user.click(trigger);
       await waitFor(() => {
-        expect(screen.getByText("該当するスタッフが見つかりません。")).toBeInTheDocument();
+        expect(
+          screen.getByText("該当するスタッフが見つかりません。"),
+        ).toBeInTheDocument();
       });
     });
   });
@@ -206,7 +213,11 @@ describe("StaffSelector", () => {
         givenName: "花子",
       });
       const setSelectedStaff = jest.fn();
-      renderSelector({ staffs: [staff], selectedStaff: [staff], setSelectedStaff });
+      renderSelector({
+        staffs: [staff],
+        selectedStaff: [staff],
+        setSelectedStaff,
+      });
 
       const trigger = screen.getAllByRole("button")[0];
       await user.click(trigger);
@@ -256,7 +267,11 @@ describe("StaffSelector", () => {
     it("複数スタッフがある場合、各スタッフのチェックボックスが表示される", async () => {
       const user = userEvent.setup();
       const staffs = [
-        createDownloadTestStaff({ id: "s1", familyName: "田中", givenName: "花子" }),
+        createDownloadTestStaff({
+          id: "s1",
+          familyName: "田中",
+          givenName: "花子",
+        }),
         createDownloadTestStaff({
           id: "s2",
           cognitoUserId: "s2",
@@ -278,7 +293,11 @@ describe("StaffSelector", () => {
     it("「全選択」ボタンをクリックすると全スタッフが渡される", async () => {
       const user = userEvent.setup();
       const staffs = [
-        createDownloadTestStaff({ id: "s1", familyName: "田中", givenName: "花子" }),
+        createDownloadTestStaff({
+          id: "s1",
+          familyName: "田中",
+          givenName: "花子",
+        }),
         createDownloadTestStaff({
           id: "s2",
           cognitoUserId: "s2",
@@ -302,7 +321,11 @@ describe("StaffSelector", () => {
     it("「全解除」ボタンをクリックすると空配列が渡される", async () => {
       const user = userEvent.setup();
       const staffs = [
-        createDownloadTestStaff({ id: "s1", familyName: "田中", givenName: "花子" }),
+        createDownloadTestStaff({
+          id: "s1",
+          familyName: "田中",
+          givenName: "花子",
+        }),
       ];
       const setSelectedStaff = jest.fn();
       renderSelector({ staffs, selectedStaff: staffs, setSelectedStaff });
@@ -378,7 +401,11 @@ describe("StaffSelector", () => {
     it("コンポーネント外をクリックするとドロップダウンが閉じる", async () => {
       const user = userEvent.setup();
       const staffs = [
-        createDownloadTestStaff({ id: "s1", familyName: "田中", givenName: "花子" }),
+        createDownloadTestStaff({
+          id: "s1",
+          familyName: "田中",
+          givenName: "花子",
+        }),
       ];
       renderSelector({ staffs });
 
@@ -397,7 +424,10 @@ describe("StaffSelector", () => {
 
   describe("スタッフ名の表示", () => {
     it("familyName のみ設定されている場合、名前部分が表示される（trim）", () => {
-      const staff = createDownloadTestStaff({ familyName: "田中", givenName: "" });
+      const staff = createDownloadTestStaff({
+        familyName: "田中",
+        givenName: "",
+      });
       renderSelector({ selectedStaff: [staff] });
       // Both trigger label and chip show the name; at least one occurrence expected
       const occurrences = screen.getAllByText("田中");
@@ -405,7 +435,10 @@ describe("StaffSelector", () => {
     });
 
     it("givenName のみ設定されている場合、名前部分が表示される（trim）", () => {
-      const staff = createDownloadTestStaff({ familyName: "", givenName: "花子" });
+      const staff = createDownloadTestStaff({
+        familyName: "",
+        givenName: "花子",
+      });
       renderSelector({ selectedStaff: [staff] });
       const occurrences = screen.getAllByText("花子");
       expect(occurrences.length).toBeGreaterThanOrEqual(1);

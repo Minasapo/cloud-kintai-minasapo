@@ -21,13 +21,6 @@ jest.mock("@entities/attendance/model/useCloseDates", () => ({
   default: (...args: unknown[]) => mockUseCloseDates(...args),
 }));
 
-// ─── Mock: react-router-dom (useNavigate) ───────────────────────────────────
-const mockNavigate = jest.fn();
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual<typeof import("react-router-dom")>("react-router-dom"),
-  useNavigate: () => mockNavigate,
-}));
-
 // ─── Mock: AttendanceDate ────────────────────────────────────────────────────
 jest.mock("@entities/attendance/lib/AttendanceDate", () => ({
   AttendanceDate: {
@@ -120,6 +113,15 @@ async function expandForm() {
     screen.getByRole("button", { name: "ダウンロード要素を展開する" }),
   );
   return user;
+}
+
+async function moveToStaffStep(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: "次へ" }));
+}
+
+async function moveToExecuteStep(user: ReturnType<typeof userEvent.setup>) {
+  await moveToStaffStep(user);
+  await user.click(screen.getByRole("button", { name: "次へ" }));
 }
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
@@ -296,19 +298,22 @@ describe("DownloadForm", () => {
     });
 
     it("StaffSelector が表示される", async () => {
-      await expandForm();
+      const user = await expandForm();
+      await moveToStaffStep(user);
       expect(screen.getByTestId("staff-selector")).toBeInTheDocument();
     });
 
-    it("スプリットボタン（初期: 集計ダウンロード）が表示される", async () => {
-      await expandForm();
+    it("スプリットボタン（初期: 一括ダウンロード）が表示される", async () => {
+      const user = await expandForm();
+      await moveToExecuteStep(user);
       expect(
-        screen.getByRole("button", { name: "集計ダウンロード" }),
+        screen.getByRole("button", { name: "一括ダウンロード" }),
       ).toBeInTheDocument();
     });
 
     it("スプリットボタンのメニューで「一括ダウンロード」を選べる", async () => {
       const user = await expandForm();
+      await moveToExecuteStep(user);
       await user.click(
         screen.getByRole("button", { name: "select preset action" }),
       );
@@ -320,9 +325,15 @@ describe("DownloadForm", () => {
       ).toBeInTheDocument();
     });
 
-    it("「新規」ボタンが表示される", async () => {
+    it("設定画面への案内文とリンクが表示される", async () => {
       await expandForm();
-      expect(screen.getByRole("button", { name: /新規/ })).toBeInTheDocument();
+      expect(
+        screen.getByText("集計対象月は", { exact: false }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "設定画面" })).toHaveAttribute(
+        "href",
+        "/admin/master/job_term",
+      );
     });
 
     it("staffs が StaffSelector に渡される", async () => {
@@ -333,7 +344,8 @@ describe("DownloadForm", () => {
           createDownloadTestStaff({ id: "s2", cognitoUserId: "s2" }),
         ],
       });
-      await expandForm();
+      const user = await expandForm();
+      await moveToStaffStep(user);
       expect(screen.getByTestId("staffs-count")).toHaveTextContent("2");
     });
   });
@@ -433,15 +445,13 @@ describe("DownloadForm", () => {
     });
   });
 
-  describe("新規ボタン（ナビゲーション）", () => {
-    it("「新規」ボタンをクリックすると /admin/master/job_term に遷移する", async () => {
-      const user = userEvent.setup();
-      renderForm();
-      await user.click(
-        screen.getByRole("button", { name: "ダウンロード要素を展開する" }),
+  describe("設定画面への案内", () => {
+    it("設定画面リンクが /admin/master/job_term を指す", async () => {
+      await expandForm();
+      expect(screen.getByRole("link", { name: "設定画面" })).toHaveAttribute(
+        "href",
+        "/admin/master/job_term",
       );
-      await user.click(screen.getByRole("button", { name: /新規/ }));
-      expect(mockNavigate).toHaveBeenCalledWith("/admin/master/job_term");
     });
   });
 

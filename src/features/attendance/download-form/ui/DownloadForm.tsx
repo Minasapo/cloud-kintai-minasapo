@@ -5,7 +5,6 @@ import {
   StaffType,
   useStaffs,
 } from "@entities/staff/model/useStaffs/useStaffs";
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { STANDARD_PADDING } from "@shared/config/uiDimensions";
@@ -16,9 +15,17 @@ import {
   type AppSplitButtonOption,
 } from "@shared/ui/button";
 import { AppSelect, AppTextField } from "@shared/ui/form";
+import { AppStepper } from "@shared/ui/stepper";
 import dayjs from "dayjs";
-import { useContext, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Link as RouterLink } from "react-router-dom";
 
 import { useAggregateExportAction } from "./AggregateExportButton";
 import { useExportAttendancesAction } from "./ExportButton";
@@ -43,11 +50,21 @@ type ExpandedDownloadPanelProps = {
   endDate: string;
   setStartDate: (value: string) => void;
   setEndDate: (value: string) => void;
-  navigate: ReturnType<typeof useNavigate>;
   staffs: StaffType[];
   selectedStaff: StaffType[];
   setSelectedStaff: (value: StaffType[]) => void;
-  workDates: string[];
+  selectedDownloadAction: string;
+  setSelectedDownloadAction: (value: string) => void;
+  onDownload: () => void;
+  isDownloadDisabled: boolean;
+  showDownloadButton?: boolean;
+};
+
+export type DownloadFormDialogActionState = {
+  selectedDownloadAction: string;
+  setSelectedDownloadAction: (value: string) => void;
+  onDownload: () => void;
+  isDownloadDisabled: boolean;
 };
 
 const formatInputDate = (value: dayjs.Dayjs) => value.format("YYYY-MM-DD");
@@ -60,6 +77,11 @@ const DOWNLOAD_OPTIONS: AppSplitButtonOption[] = [
   { key: "aggregate", label: "集計ダウンロード" },
   { key: "detail", label: "一括ダウンロード" },
 ];
+const DOWNLOAD_FLOW_STEPS = [
+  { key: "period", label: "期間を選択" },
+  { key: "staff", label: "対象者を選択" },
+  { key: "execute", label: "ダウンロード実行" },
+] as const;
 
 function ExpandedDownloadPanel({
   closeDates,
@@ -69,118 +91,107 @@ function ExpandedDownloadPanel({
   endDate,
   setStartDate,
   setEndDate,
-  navigate,
   staffs,
   selectedStaff,
   setSelectedStaff,
-  workDates,
+  selectedDownloadAction,
+  setSelectedDownloadAction,
+  onDownload,
+  isDownloadDisabled,
+  showDownloadButton = true,
 }: ExpandedDownloadPanelProps) {
-  const [selectedDownloadAction, setSelectedDownloadAction] =
-    useState<string>("aggregate");
-  const { onClick: onDetailDownload, disabled: detailDownloadDisabled } =
-    useExportAttendancesAction({
-      workDates,
-      selectedStaff,
-    });
-  const { onClick: onAggregateDownload, disabled: aggregateDownloadDisabled } =
-    useAggregateExportAction({
-      workDates,
-      selectedStaff,
-    });
-  const handleDownload = () => {
-    if (selectedDownloadAction === "detail") {
-      void onDetailDownload();
+  const [displayStep, setDisplayStep] = useState(0);
+  const hasValidRange =
+    dayjs(startDate).isValid() &&
+    dayjs(endDate).isValid() &&
+    !dayjs(startDate).isAfter(dayjs(endDate));
+  const hasSelectedStaff = selectedStaff.length > 0;
+  const completedSteps = [
+    ...(hasValidRange ? [0] : []),
+    ...(hasSelectedStaff ? [1] : []),
+    ...(!isDownloadDisabled ? [2] : []),
+  ];
+  const canGoNext =
+    (displayStep === 0 && hasValidRange) ||
+    (displayStep === 1 && hasSelectedStaff);
+  const isFirstStep = displayStep === 0;
+  const isLastStep = displayStep === DOWNLOAD_FLOW_STEPS.length - 1;
+
+  const handlePrevStep = () => {
+    setDisplayStep((prev) => Math.max(prev - 1, 0));
+  };
+
+  const handleNextStep = () => {
+    if (!canGoNext) {
       return;
     }
-    void onAggregateDownload();
+    setDisplayStep((prev) =>
+      Math.min(prev + 1, DOWNLOAD_FLOW_STEPS.length - 1),
+    );
   };
 
   return (
     <div id="attendance-download-panel" className="w-full">
       <div className="mx-auto flex w-full max-w-[880px] min-w-0 flex-col gap-6 px-1 sm:px-2 md:px-0">
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-            <div className="flex-1">
-              <AppTextField
-                label="開始日"
-                InputLabelProps={{ shrink: true }}
-                type="date"
-                value={startDate}
-                onChange={(event) => setStartDate(event.target.value)}
-                size="small"
-                fullWidth
-                sx={{
-                  "& .MuiInputLabel-root": {
-                    fontSize: "0.875rem",
-                    fontWeight: 500,
-                    color: "rgb(71 85 105)",
-                  },
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "18px",
-                    backgroundColor: "rgb(255 255 255)",
-                    "& fieldset": {
-                      borderColor: "rgb(203 213 225 / 0.7)",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "rgb(148 163 184)",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "rgb(16 185 129)",
-                    },
-                  },
-                  "& .MuiOutlinedInput-input": {
-                    padding: "10px 16px",
-                    fontSize: "0.875rem",
-                    color: "rgb(15 23 42)",
-                  },
-                }}
-              />
-            </div>
-            <div className="hidden h-11 items-center text-slate-400 sm:flex">
-              〜
-            </div>
-            <div className="flex-1">
-              <AppTextField
-                label="終了日"
-                InputLabelProps={{ shrink: true }}
-                type="date"
-                value={endDate}
-                onChange={(event) => setEndDate(event.target.value)}
-                size="small"
-                fullWidth
-                sx={{
-                  "& .MuiInputLabel-root": {
-                    fontSize: "0.875rem",
-                    fontWeight: 500,
-                    color: "rgb(71 85 105)",
-                  },
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "18px",
-                    backgroundColor: "rgb(255 255 255)",
-                    "& fieldset": {
-                      borderColor: "rgb(203 213 225 / 0.7)",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "rgb(148 163 184)",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "rgb(16 185 129)",
-                    },
-                  },
-                  "& .MuiOutlinedInput-input": {
-                    padding: "10px 16px",
-                    fontSize: "0.875rem",
-                    color: "rgb(15 23 42)",
-                  },
-                }}
-              />
-            </div>
-          </div>
+        <div className="rounded-2xl border border-slate-200/80 bg-white/70 px-3 py-4 shadow-sm sm:px-4">
+          <AppStepper
+            steps={DOWNLOAD_FLOW_STEPS}
+            activeStep={displayStep}
+            completedSteps={completedSteps}
+            sx={{
+              "& .MuiStepLabel-label": {
+                fontSize: "0.85rem",
+              },
+            }}
+          />
+        </div>
 
-          <div className="flex max-w-[560px] flex-col gap-2">
-            <div className="flex flex-col gap-2">
-              <span className="whitespace-nowrap text-sm text-slate-600">
-                集計対象月から:
+        {displayStep === 0 && (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
+            <div className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 shadow-sm">
+              <span className="whitespace-nowrap text-sm font-medium text-slate-700">
+                指定した期間から
+              </span>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div className="flex-1">
+                  <AppTextField
+                    type="date"
+                    value={startDate}
+                    onChange={(event) => setStartDate(event.target.value)}
+                    size="small"
+                    fullWidth
+                    inputProps={{ "aria-label": "開始日" }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        backgroundColor: "#fff",
+                      },
+                    }}
+                  />
+                </div>
+                <div className="hidden h-11 items-center text-slate-400 sm:flex">
+                  〜
+                </div>
+                <div className="flex-1">
+                  <AppTextField
+                    type="date"
+                    value={endDate}
+                    onChange={(event) => setEndDate(event.target.value)}
+                    size="small"
+                    fullWidth
+                    inputProps={{ "aria-label": "終了日" }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        backgroundColor: "#fff",
+                      },
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-4 shadow-sm">
+              <span className="whitespace-nowrap text-sm font-medium text-slate-700">
+                集計対象月から
               </span>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <AppSelect<string>
@@ -210,75 +221,88 @@ function ExpandedDownloadPanel({
                     minWidth: 0,
                     flex: 1,
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: "18px",
-                      backgroundColor: "rgb(255 255 255)",
-                      "& fieldset": {
-                        borderColor: "rgb(203 213 225 / 0.7)",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "rgb(148 163 184)",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "rgb(16 185 129)",
-                      },
-                    },
-                    "& .MuiSelect-select": {
-                      padding: "10px 16px",
-                      fontSize: "0.875rem",
-                      color: "rgb(15 23 42)",
+                      backgroundColor: "#fff",
                     },
                   }}
                 />
-                <AppButton
-                  variant="outline"
-                  tone="secondary"
-                  size="sm"
-                  onClick={() => navigate("/admin/master/job_term")}
-                  className="rounded-full whitespace-nowrap"
-                  startIcon={<AddCircleOutlineOutlinedIcon fontSize="small" />}
-                  sx={{
-                    boxShadow: "0 8px 24px -20px rgba(15, 23, 42, 0.18)",
-                    borderColor: "rgb(203 213 225 / 0.7)",
-                    color: "rgb(51 65 85)",
-                    backgroundColor: "rgb(255 255 255)",
-                    "&:hover": {
-                      backgroundColor: "rgb(248 250 252)",
-                    },
-                  }}
-                >
-                  新規
-                </AppButton>
               </div>
+              <p className="text-sm leading-6 text-slate-600">
+                集計対象月は
+                <RouterLink
+                  to="/admin/master/job_term"
+                  className="font-medium text-emerald-700 underline decoration-emerald-300 underline-offset-4 transition hover:text-emerald-600"
+                >
+                  設定画面
+                </RouterLink>
+                より編集可能です
+              </p>
             </div>
           </div>
-        </div>
+        )}
 
-        <StaffSelector
-          staffs={staffs}
-          selectedStaff={selectedStaff}
-          setSelectedStaff={setSelectedStaff}
-        />
-
-        <div className="w-full">
-          <AppSplitButton
-            options={DOWNLOAD_OPTIONS}
-            selectedKey={selectedDownloadAction}
-            onSelectedKeyChange={setSelectedDownloadAction}
-            onPrimaryClick={handleDownload}
-            variant="solid"
-            tone="primary"
-            size="md"
-            disabled={aggregateDownloadDisabled && detailDownloadDisabled}
-            className="w-full"
-            buttonGroupSx={{
-              "& .MuiButton-containedPrimary": {
-                "--variant-containedBg": MAIN_GREEN,
-                "&:hover": {
-                  "--variant-containedBg": MAIN_GREEN_DARK,
-                },
-              },
-            }}
+        {displayStep === 1 && (
+          <StaffSelector
+            staffs={staffs}
+            selectedStaff={selectedStaff}
+            setSelectedStaff={setSelectedStaff}
           />
+        )}
+
+        {displayStep === 2 && (
+          <>
+            {showDownloadButton ? (
+              <div className="w-full">
+                <AppSplitButton
+                  options={DOWNLOAD_OPTIONS}
+                  selectedKey={selectedDownloadAction}
+                  onSelectedKeyChange={setSelectedDownloadAction}
+                  onPrimaryClick={onDownload}
+                  variant="solid"
+                  tone="primary"
+                  size="md"
+                  disabled={isDownloadDisabled}
+                  className="w-full"
+                  buttonGroupSx={{
+                    "& .MuiButton-containedPrimary": {
+                      "--variant-containedBg": MAIN_GREEN,
+                      "&:hover": {
+                        "--variant-containedBg": MAIN_GREEN_DARK,
+                      },
+                    },
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-3 text-sm text-slate-700">
+                ダウンロード種別を選択後、ダイアログ下部の実行ボタンで出力してください。
+              </div>
+            )}
+          </>
+        )}
+
+        <div className="flex items-center justify-between gap-2">
+          <AppButton
+            variant="outline"
+            tone="secondary"
+            size="sm"
+            onClick={handlePrevStep}
+            disabled={isFirstStep}
+            className="min-w-0"
+          >
+            戻る
+          </AppButton>
+          {!isLastStep && (
+            <AppButton
+              variant="solid"
+              tone="primary"
+              size="sm"
+              onClick={handleNextStep}
+              disabled={!canGoNext}
+              className="min-w-0"
+            >
+              次へ
+            </AppButton>
+          )}
         </div>
       </div>
     </div>
@@ -286,11 +310,18 @@ function ExpandedDownloadPanel({
 }
 type DownloadFormProps = {
   mode?: "inline" | "dialog";
+  onDialogActionStateChange?: (
+    state: DownloadFormDialogActionState | null,
+  ) => void;
 };
 
-export default function DownloadForm({ mode = "inline" }: DownloadFormProps) {
-  const navigate = useNavigate();
+export default function DownloadForm({
+  mode = "inline",
+  onDialogActionStateChange,
+}: DownloadFormProps) {
   const [selectedStaff, setSelectedStaff] = useState<StaffType[]>([]);
+  const [selectedDownloadAction, setSelectedDownloadAction] =
+    useState<string>("detail");
   const { authStatus } = useContext(AuthContext);
   const isAuthenticated = authStatus === "authenticated";
   const [isExpanded, setIsExpanded] = useState(mode === "dialog");
@@ -309,6 +340,13 @@ export default function DownloadForm({ mode = "inline" }: DownloadFormProps) {
   const [startDate, setStartDate] = useState(formatInputDate(dayjs()));
   const [endDate, setEndDate] = useState(formatInputDate(dayjs()));
   const closeMonthSelectLabelId = "attendance-download-close-month-select";
+
+  // デフォルトで全員を選択状態に設定
+  useEffect(() => {
+    if (staffs.length > 0 && selectedStaff.length === 0) {
+      setSelectedStaff(staffs);
+    }
+  }, [staffs, selectedStaff.length]);
 
   const workDates = useMemo(() => {
     const start = dayjs(startDate);
@@ -334,6 +372,60 @@ export default function DownloadForm({ mode = "inline" }: DownloadFormProps) {
     );
     return matched?.closeDate ?? "";
   }, [closeDates, endDate, startDate]);
+
+  const { onClick: onDetailDownload, disabled: detailDownloadDisabled } =
+    useExportAttendancesAction({
+      workDates,
+      selectedStaff,
+    });
+  const { onClick: onAggregateDownload, disabled: aggregateDownloadDisabled } =
+    useAggregateExportAction({
+      workDates,
+      selectedStaff,
+    });
+  const isDownloadDisabled =
+    aggregateDownloadDisabled && detailDownloadDisabled;
+
+  const handleDownload = useCallback(() => {
+    if (selectedDownloadAction === "detail") {
+      void onDetailDownload();
+      return;
+    }
+    void onAggregateDownload();
+  }, [onAggregateDownload, onDetailDownload, selectedDownloadAction]);
+  const handleDownloadRef = useRef(handleDownload);
+
+  useEffect(() => {
+    handleDownloadRef.current = handleDownload;
+  }, [handleDownload]);
+
+  const handleDownloadFromDialogActions = useCallback(() => {
+    handleDownloadRef.current();
+  }, []);
+
+  useEffect(() => {
+    if (mode !== "dialog") {
+      return;
+    }
+    onDialogActionStateChange?.({
+      selectedDownloadAction,
+      setSelectedDownloadAction,
+      onDownload: handleDownloadFromDialogActions,
+      isDownloadDisabled,
+    });
+  }, [
+    handleDownloadFromDialogActions,
+    isDownloadDisabled,
+    mode,
+    onDialogActionStateChange,
+    selectedDownloadAction,
+  ]);
+
+  useEffect(() => {
+    return () => {
+      onDialogActionStateChange?.(null);
+    };
+  }, [onDialogActionStateChange]);
 
   if (staffLoading || closeDateLoading) {
     return (
@@ -365,11 +457,14 @@ export default function DownloadForm({ mode = "inline" }: DownloadFormProps) {
           endDate={endDate}
           setStartDate={setStartDate}
           setEndDate={setEndDate}
-          navigate={navigate}
           staffs={staffs}
           selectedStaff={selectedStaff}
           setSelectedStaff={setSelectedStaff}
-          workDates={workDates}
+          selectedDownloadAction={selectedDownloadAction}
+          setSelectedDownloadAction={setSelectedDownloadAction}
+          onDownload={handleDownload}
+          isDownloadDisabled={isDownloadDisabled}
+          showDownloadButton={false}
         />
       </div>
     );
@@ -434,11 +529,13 @@ export default function DownloadForm({ mode = "inline" }: DownloadFormProps) {
           endDate={endDate}
           setStartDate={setStartDate}
           setEndDate={setEndDate}
-          navigate={navigate}
           staffs={staffs}
           selectedStaff={selectedStaff}
           setSelectedStaff={setSelectedStaff}
-          workDates={workDates}
+          selectedDownloadAction={selectedDownloadAction}
+          setSelectedDownloadAction={setSelectedDownloadAction}
+          onDownload={handleDownload}
+          isDownloadDisabled={isDownloadDisabled}
         />
       )}
     </div>

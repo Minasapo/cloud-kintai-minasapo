@@ -1,11 +1,13 @@
 import AttendanceSettingsDialog from "@features/admin-config-attendance/AttendanceSettingsDialog";
 import AttendanceDailyList from "@features/attendance/daily-list/ui/AttendanceDailyList";
-import DownloadForm from "@features/attendance/download-form/ui/DownloadForm";
+import DownloadForm, {
+  type DownloadFormDialogActionState,
+} from "@features/attendance/download-form/ui/DownloadForm";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import { Stack } from "@mui/material";
 import { designTokenVar } from "@shared/designSystem";
-import { AppButton } from "@shared/ui/button";
+import { AppButton, AppSplitButton } from "@shared/ui/button";
 import SettingsDialog from "@shared/ui/feedback/SettingsDialog";
 import { PageSection } from "@shared/ui/layout";
 import { useState } from "react";
@@ -30,6 +32,8 @@ const MAIN_GREEN_DARK = "rgb(5 150 105)";
 export default function AdminAttendance() {
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
   const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
+  const [downloadDialogActionState, setDownloadDialogActionState] =
+    useState<DownloadFormDialogActionState | null>(null);
 
   return (
     <>
@@ -43,8 +47,48 @@ export default function AdminAttendance() {
         title="ダウンロード"
         description="期間と対象スタッフを選択して、勤怠データを出力できます。"
         maxWidth="lg"
+        renderActions={(requestClose) => (
+          <div className="flex w-full items-center justify-end gap-2">
+            {downloadDialogActionState ? (
+              <AppSplitButton
+                options={[
+                  { key: "aggregate", label: "集計ダウンロード" },
+                  { key: "detail", label: "一括ダウンロード" },
+                ]}
+                selectedKey={downloadDialogActionState.selectedDownloadAction}
+                onSelectedKeyChange={
+                  downloadDialogActionState.setSelectedDownloadAction
+                }
+                onPrimaryClick={downloadDialogActionState.onDownload}
+                variant="solid"
+                tone="primary"
+                size="sm"
+                disabled={downloadDialogActionState.isDownloadDisabled}
+                buttonGroupSx={{
+                  "& .MuiButton-containedPrimary": {
+                    "--variant-containedBg": MAIN_GREEN,
+                    "&:hover": {
+                      "--variant-containedBg": MAIN_GREEN_DARK,
+                    },
+                  },
+                }}
+              />
+            ) : null}
+            <AppButton
+              variant="outline"
+              tone="neutral"
+              size="sm"
+              onClick={requestClose}
+            >
+              閉じる
+            </AppButton>
+          </div>
+        )}
       >
-        <DownloadForm mode="dialog" />
+        <DownloadForm
+          mode="dialog"
+          onDialogActionStateChange={setDownloadDialogActionState}
+        />
       </SettingsDialog>
       <Stack
         component="section"
