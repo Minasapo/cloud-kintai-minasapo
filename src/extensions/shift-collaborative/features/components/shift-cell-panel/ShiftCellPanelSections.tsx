@@ -86,8 +86,9 @@ export const CellEditLockSection = ({
           size="sm"
           onClick={onAcquireEditLock}
           disabled={isUpdating}
+          loading={isUpdating}
         >
-          編集開始（ロック取得）
+          {isUpdating ? "処理中..." : "編集開始（ロック取得）"}
         </AppButton>
       )}
       {hasEditLockForSelected && (
@@ -96,8 +97,9 @@ export const CellEditLockSection = ({
           size="sm"
           onClick={onReleaseEditLock}
           disabled={isUpdating}
+          loading={isUpdating}
         >
-          編集終了（ロック解除）
+          {isUpdating ? "処理中..." : "編集終了（ロック解除）"}
         </AppButton>
       )}
       {(hasEditLockForSelected || isOthersEditingSelected) && canUnlock && (
@@ -107,8 +109,9 @@ export const CellEditLockSection = ({
           size="sm"
           onClick={onForceReleaseLock}
           disabled={isUpdating}
+          loading={isUpdating}
         >
-          編集ロックを強制剥奪
+          {isUpdating ? "処理中..." : "編集ロックを強制剥奪"}
         </AppButton>
       )}
       {isOthersEditingSelected && !canUnlock && (
