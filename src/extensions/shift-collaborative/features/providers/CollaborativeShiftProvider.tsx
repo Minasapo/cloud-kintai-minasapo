@@ -66,6 +66,7 @@ export const CollaborativeShiftProvider: React.FC<
   );
 
   const {
+    commentsMap,
     addComment,
     updateComment,
     deleteComment,
@@ -279,6 +280,7 @@ export const CollaborativeShiftProvider: React.FC<
       getCellHistory,
       getAllCellHistory,
       getStaffCellHistory,
+      commentsMap,
       ...operationHandlers,
       ...commentHandlers,
     }),
@@ -295,6 +297,7 @@ export const CollaborativeShiftProvider: React.FC<
       getCellHistory,
       getAllCellHistory,
       getStaffCellHistory,
+      commentsMap,
       operationHandlers,
       commentHandlers,
     ],

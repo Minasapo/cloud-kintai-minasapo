@@ -96,7 +96,7 @@ export const ShiftCollaborativePageInner =
         days,
         staffIds,
         isBatchUpdating,
-        getCommentsByCell,
+        commentsMap,
         hasEditLockForSelected,
         isOthersEditingSelected,
         editLockError,
@@ -163,8 +163,6 @@ export const ShiftCollaborativePageInner =
             <ShiftConnectionAlerts
               isOnline={state.isOnline}
               connectionState={state.connectionState}
-              editLockError={editLockError}
-              clearEditLockError={clearEditLockError}
             />
 
             <ProgressPanel progress={progress} totalDays={days.length} />
@@ -214,11 +212,16 @@ export const ShiftCollaborativePageInner =
                     : []
               }
               comments={
-                focusedCell
-                  ? getCommentsByCell(
-                      `${focusedCell.staffId}#${focusedCell.date}`,
+                selectedCells.length > 0
+                  ? selectedCells.flatMap(
+                      (cell) =>
+                        commentsMap.get(`${cell.staffId}#${cell.date}`) || [],
                     )
-                  : []
+                  : focusedCell
+                    ? commentsMap.get(
+                        `${focusedCell.staffId}#${focusedCell.date}`,
+                      ) || []
+                    : []
               }
               onClear={clearSelection}
               onChangeState={handleChangeState}
@@ -231,6 +234,8 @@ export const ShiftCollaborativePageInner =
               isUpdating={isBatchUpdating}
               hasEditLockForSelected={hasEditLockForSelected}
               isOthersEditingSelected={isOthersEditingSelected}
+              editLockError={editLockError}
+              onClearEditLockError={clearEditLockError}
               onAcquireEditLock={handleAcquireEditLock}
               onReleaseEditLock={handleReleaseEditLock}
               onForceReleaseLock={handleForceReleaseLock}

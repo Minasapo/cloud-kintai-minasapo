@@ -3,7 +3,7 @@ import { useCalendars } from "@entities/calendar/model/useCalendars";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import { useAuthSessionSummary } from "@shared/lib/useAuthSessionSummary";
 import dayjs from "dayjs";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useCollaborativeShift } from "../context/CollaborativeShiftContext";
 import { buildShiftStateChangedSystemMessage } from "../lib/chatSystemMessages";
@@ -104,6 +104,7 @@ export const useCollaborativePageState = (
     updateUserActivity,
     getCellHistory,
     getAllCellHistory,
+    commentsMap,
     addComment,
     updateComment,
     deleteComment,
@@ -282,7 +283,16 @@ export const useCollaborativePageState = (
     [changeCellState],
   );
 
-  const handleSync = triggerSync;
+  const handleSync = useCallback(async () => {
+    await triggerSync();
+    setEditLockError(null);
+  }, [triggerSync]);
+
+  useEffect(() => {
+    if (selectionCount === 0) {
+      setEditLockError(null);
+    }
+  }, [selectionCount]);
 
   const { calculateDailyCount, progress } = useShiftMetrics(
     days,
@@ -332,6 +342,7 @@ export const useCollaborativePageState = (
     isBatchUpdating,
     getCellHistory,
     getAllCellHistory,
+    commentsMap,
     addComment,
     updateComment,
     deleteComment,

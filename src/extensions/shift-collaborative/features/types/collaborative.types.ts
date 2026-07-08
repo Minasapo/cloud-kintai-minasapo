@@ -52,6 +52,7 @@ export interface EditLockAcquireResult {
   acquired: boolean;
   lock?: ShiftEditLockData;
   conflict?: ShiftEditLockData;
+  reason?: string;
 }
 
 /**
@@ -136,7 +137,11 @@ export interface ShiftRequestCommentData {
 
 export interface ShiftRequestHistoryEntry {
   version: number;
-  entries?: Array<{ date: string; status: ShiftRequestStatus; isLocked?: boolean }>;
+  entries?: Array<{
+    date: string;
+    status: ShiftRequestStatus;
+    isLocked?: boolean;
+  }>;
   recordedAt: string; // ISO文字列
   recordedByStaffId?: string;
 }
@@ -190,11 +195,11 @@ export interface ShiftCellUpdate {
  * セル変更の発生源
  */
 export type CellChangeSource =
-  | "manual"        // ユーザーによる手動変更
-  | "batch"         // 一括変更
+  | "manual" // ユーザーによる手動変更
+  | "batch" // 一括変更
   | "conflict-resolution" // 競合解決
-  | "remote"        // Subscription 経由の他ユーザー変更（リアルタイム）
-  | "db-history";   // DB のスナップショット履歴から復元した記録
+  | "remote" // Subscription 経由の他ユーザー変更（リアルタイム）
+  | "db-history"; // DB のスナップショット履歴から復元した記録
 
 /**
  * セル単位の変更履歴レコード

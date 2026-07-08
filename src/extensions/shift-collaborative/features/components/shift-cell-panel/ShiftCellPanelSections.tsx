@@ -13,6 +13,7 @@ import { AppButton, AppIconButton } from "@shared/ui/button";
 import { AppTextField } from "@shared/ui/form";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { useEffect, useRef } from "react";
 
 import { CHAT_SYSTEM_MESSAGE_PREFIX } from "../../lib/chatSystemMessages";
 import {
@@ -61,8 +62,8 @@ interface CellEditLockSectionProps {
   isOthersEditingSelected: boolean;
   canUnlock: boolean;
   isUpdating: boolean;
-  onAcquireEditLock: () => void;
-  onReleaseEditLock: () => void;
+  onAcquireEditLock: () => Promise<void>;
+  onReleaseEditLock: () => Promise<void>;
   onForceReleaseLock: () => void;
 }
 
@@ -99,7 +100,7 @@ export const CellEditLockSection = ({
           {isUpdating ? "処理中..." : "編集終了（ロック解除）"}
         </AppButton>
       )}
-      {(hasEditLockForSelected || isOthersEditingSelected) && canUnlock && (
+      {canUnlock && (
         <AppButton
           variant="solid"
           tone="danger"
@@ -207,9 +208,7 @@ export const CellCommentsSection = ({
   onAddComment,
   isAddingComment,
 }: CellCommentsSectionProps) => {
-  if (!onAddComments || selectedCells.length === 0) {
-    return null;
-  }
+  const timelineContainerRef = useRef<HTMLDivElement | null>(null);
 
   const timelineItems = comments
     .map((comment, index) => ({
@@ -225,16 +224,34 @@ export const CellCommentsSection = ({
       return a.key.localeCompare(b.key);
     });
 
+  useEffect(() => {
+    const container = timelineContainerRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    container.scrollTop = container.scrollHeight;
+  }, [selectedCells, timelineItems]);
+
+  if (!onAddComments || selectedCells.length === 0) {
+    return null;
+  }
+
   return (
     <Box
       sx={{
         display: "flex",
         flexDirection: "column",
-        height: "100%",
+        height: {
+          xs: 420,
+          md: 560,
+        },
         minHeight: 0,
       }}
     >
       <Box
+        ref={timelineContainerRef}
         sx={{
           ml: "auto",
           width: "100%",
@@ -245,6 +262,7 @@ export const CellCommentsSection = ({
           flex: 1,
           minHeight: 0,
           overflowY: "auto",
+          overscrollBehavior: "contain",
           border: "1px solid",
           borderColor: "divider",
           mb: 1,

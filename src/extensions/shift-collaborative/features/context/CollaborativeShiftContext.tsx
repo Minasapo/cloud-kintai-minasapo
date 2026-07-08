@@ -5,6 +5,7 @@ import {
   CellComment,
   CollaborativeShiftState,
   CollaborativeUser,
+  CommentsMap,
   EditLockAcquireResult,
   Mention,
   ShiftCellUpdate,
@@ -49,6 +50,7 @@ export interface CollaborativeShiftContextType {
   getAllCellHistory: () => readonly CellChangeRecord[];
   getStaffCellHistory: (staffId: string) => readonly CellChangeRecord[];
   // コメント機能
+  commentsMap: CommentsMap;
   addComment: (
     cellKey: string,
     content: string,

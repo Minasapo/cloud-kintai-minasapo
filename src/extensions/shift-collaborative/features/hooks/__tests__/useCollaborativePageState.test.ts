@@ -7,6 +7,7 @@ const mockUseShiftCalendar = jest.fn();
 const mockUseSelectionState = jest.fn();
 const mockUseShiftSuggestions = jest.fn();
 const mockUseShiftMetrics = jest.fn();
+const mockUseAuthSessionSummary = jest.fn();
 const mockGraphql = jest.fn();
 
 jest.mock("../../context/CollaborativeShiftContext", () => ({
@@ -27,6 +28,11 @@ jest.mock("../useShiftSuggestions", () => ({
 
 jest.mock("../useShiftMetrics", () => ({
   useShiftMetrics: (...args: unknown[]) => mockUseShiftMetrics(...args),
+}));
+
+jest.mock("@shared/lib/useAuthSessionSummary", () => ({
+  useAuthSessionSummary: (...args: unknown[]) =>
+    mockUseAuthSessionSummary(...args),
 }));
 
 jest.mock("@entities/calendar/api/calendarApi", () => ({
@@ -117,6 +123,10 @@ describe("useCollaborativePageState", () => {
       violations: [],
       isAnalyzing: false,
       analyzeShifts: jest.fn(),
+    });
+
+    mockUseAuthSessionSummary.mockReturnValue({
+      isCognitoUserRole: jest.fn(() => false),
     });
 
     mockUseShiftMetrics.mockReturnValue({
@@ -337,5 +347,207 @@ describe("useCollaborativePageState", () => {
     });
 
     expect(result.current.editLockError).toBe("lock failed");
+  });
+
+  it("管理者はロック取得失敗時に詳細メッセージを表示する", async () => {
+    mockUseAuthSessionSummary.mockReturnValue({
+      isCognitoUserRole: jest.fn((role) => role === "Admin"),
+    });
+    mockStartEditingCell.mockResolvedValue({ acquired: false });
+    mockUseCollaborativeShift.mockReturnValue(
+      buildState({ hasEditLock: false }),
+    );
+    mockUseSelectionState.mockReturnValue({
+      focusedCell: { staffId: "staff-1", date: "01" },
+      registerCell: jest.fn(),
+      focusCell: jest.fn(),
+      navigate: jest.fn(),
+      clearFocus: jest.fn(),
+      selectedCells: [{ staffId: "staff-1", date: "01" }],
+      selectionCount: 1,
+      isCellSelected: jest.fn(() => true),
+      selectCell: jest.fn(),
+      toggleCell: jest.fn(),
+      selectRange: jest.fn(),
+      startDragSelect: jest.fn(),
+      updateDragSelect: jest.fn(),
+      endDragSelect: jest.fn(),
+      selectAll: jest.fn(),
+      clearSelection: jest.fn(),
+      isDragging: false,
+    });
+
+    const { result } = renderHook(() => useCollaborativePageState("2026-02"));
+
+    await act(async () => {
+      await result.current.handleAcquireEditLock();
+    });
+
+    expect(result.current.editLockError).toContain(
+      "対象: スタッフID=staff-1, 日付=2026-02-01",
+    );
+    expect(result.current.editLockError).toContain(
+      "競合ロック情報を取得できませんでした",
+    );
+  });
+
+  it("競合情報なし失敗でも再取得で他ユーザーロックが見つかればロック状態を表示する", async () => {
+    const refreshLocks = jest.fn().mockResolvedValue([
+      {
+        id: "2026-02#staff-1#01",
+        targetMonth: "2026-02",
+        staffId: "staff-1",
+        date: "01",
+        holderUserId: "other-user",
+        holderUserName: "田中",
+        acquiredAt: "2026-02-01T09:00:00.000Z",
+        expiresAt: "2099-02-01T09:01:30.000Z",
+        version: 1,
+      },
+    ]);
+
+    mockStartEditingCell.mockResolvedValue({ acquired: false });
+    mockUseCollaborativeShift.mockReturnValue({
+      ...buildState({ hasEditLock: false }),
+      refreshLocks,
+    });
+    mockUseSelectionState.mockReturnValue({
+      focusedCell: { staffId: "staff-1", date: "01" },
+      registerCell: jest.fn(),
+      focusCell: jest.fn(),
+      navigate: jest.fn(),
+      clearFocus: jest.fn(),
+      selectedCells: [{ staffId: "staff-1", date: "01" }],
+      selectionCount: 1,
+      isCellSelected: jest.fn(() => true),
+      selectCell: jest.fn(),
+      toggleCell: jest.fn(),
+      selectRange: jest.fn(),
+      startDragSelect: jest.fn(),
+      updateDragSelect: jest.fn(),
+      endDragSelect: jest.fn(),
+      selectAll: jest.fn(),
+      clearSelection: jest.fn(),
+      isDragging: false,
+    });
+
+    const { result } = renderHook(() => useCollaborativePageState("2026-02"));
+
+    await act(async () => {
+      await result.current.handleAcquireEditLock();
+    });
+
+    expect(result.current.editLockError).toBe(
+      "田中 が 01 日セルを編集中です。",
+    );
+  });
+
+  it("同期実行時にロックエラーをクリアする", async () => {
+    const mockTriggerSync = jest.fn().mockResolvedValue(undefined);
+    mockStartEditingCell.mockResolvedValue({ acquired: false });
+    mockUseCollaborativeShift.mockReturnValue({
+      ...buildState({ hasEditLock: false }),
+      triggerSync: mockTriggerSync,
+    });
+    mockUseSelectionState.mockReturnValue({
+      focusedCell: { staffId: "staff-1", date: "01" },
+      registerCell: jest.fn(),
+      focusCell: jest.fn(),
+      navigate: jest.fn(),
+      clearFocus: jest.fn(),
+      selectedCells: [{ staffId: "staff-1", date: "01" }],
+      selectionCount: 1,
+      isCellSelected: jest.fn(() => true),
+      selectCell: jest.fn(),
+      toggleCell: jest.fn(),
+      selectRange: jest.fn(),
+      startDragSelect: jest.fn(),
+      updateDragSelect: jest.fn(),
+      endDragSelect: jest.fn(),
+      selectAll: jest.fn(),
+      clearSelection: jest.fn(),
+      isDragging: false,
+    });
+
+    const { result } = renderHook(() => useCollaborativePageState("2026-02"));
+
+    await act(async () => {
+      await result.current.handleAcquireEditLock();
+    });
+
+    expect(result.current.editLockError).toBe(
+      "編集ロックの取得に失敗しました。最新状態を確認してから再度お試しください。",
+    );
+
+    await act(async () => {
+      await result.current.handleSync();
+    });
+
+    expect(mockTriggerSync).toHaveBeenCalledTimes(1);
+    expect(result.current.editLockError).toBeNull();
+  });
+
+  it("選択セルがなくなったらロックエラーをクリアする", async () => {
+    mockStartEditingCell.mockResolvedValue({ acquired: false });
+    mockUseCollaborativeShift.mockReturnValue(
+      buildState({ hasEditLock: false }),
+    );
+    mockUseSelectionState.mockReturnValue({
+      focusedCell: { staffId: "staff-1", date: "01" },
+      registerCell: jest.fn(),
+      focusCell: jest.fn(),
+      navigate: jest.fn(),
+      clearFocus: jest.fn(),
+      selectedCells: [{ staffId: "staff-1", date: "01" }],
+      selectionCount: 1,
+      isCellSelected: jest.fn(() => true),
+      selectCell: jest.fn(),
+      toggleCell: jest.fn(),
+      selectRange: jest.fn(),
+      startDragSelect: jest.fn(),
+      updateDragSelect: jest.fn(),
+      endDragSelect: jest.fn(),
+      selectAll: jest.fn(),
+      clearSelection: jest.fn(),
+      isDragging: false,
+    });
+
+    const { result, rerender } = renderHook(() =>
+      useCollaborativePageState("2026-02"),
+    );
+
+    await act(async () => {
+      await result.current.handleAcquireEditLock();
+    });
+
+    expect(result.current.editLockError).toBe(
+      "編集ロックの取得に失敗しました。最新状態を確認してから再度お試しください。",
+    );
+
+    mockUseSelectionState.mockReturnValue({
+      focusedCell: null,
+      registerCell: jest.fn(),
+      focusCell: jest.fn(),
+      navigate: jest.fn(),
+      clearFocus: jest.fn(),
+      selectedCells: [],
+      selectionCount: 0,
+      isCellSelected: jest.fn(() => false),
+      selectCell: jest.fn(),
+      toggleCell: jest.fn(),
+      selectRange: jest.fn(),
+      startDragSelect: jest.fn(),
+      updateDragSelect: jest.fn(),
+      endDragSelect: jest.fn(),
+      selectAll: jest.fn(),
+      clearSelection: jest.fn(),
+      isDragging: false,
+    });
+
+    act(() => {
+      rerender();
+    });
+
+    expect(result.current.editLockError).toBeNull();
   });
 });

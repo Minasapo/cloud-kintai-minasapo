@@ -1,11 +1,11 @@
 import CheckIcon from "@mui/icons-material/Check";
-import DeleteIcon from "@mui/icons-material/Delete";
+import CloseIcon from "@mui/icons-material/Close";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import { Box, Divider, Stack, Typography } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
 import AppDialog from "@shared/ui/feedback/AppDialog";
-import { memo } from "react";
+import { memo, useState } from "react";
 
 import { useShiftCellPanelState } from "../hooks/useShiftCellPanelState";
 import { CHAT_SYSTEM_MESSAGE_PREFIX } from "../lib/chatSystemMessages";
@@ -15,6 +15,8 @@ import {
   CellEditLockSection,
   CellStateButtons,
 } from "./shift-cell-panel/ShiftCellPanelSections";
+import { InfoBadge } from "./ui/Badges";
+import { InlineAlert } from "./ui/InlineAlert";
 
 interface ShiftCellPanelProps {
   currentUserId: string;
@@ -33,8 +35,10 @@ interface ShiftCellPanelProps {
   isUpdating?: boolean;
   hasEditLockForSelected: boolean;
   isOthersEditingSelected: boolean;
-  onAcquireEditLock: () => void;
-  onReleaseEditLock: () => void;
+  editLockError: string | null;
+  onClearEditLockError: () => void;
+  onAcquireEditLock: () => Promise<boolean>;
+  onReleaseEditLock: () => Promise<boolean>;
   onForceReleaseLock: () => void;
 }
 
@@ -55,39 +59,62 @@ const ShiftCellPanelBase = ({
   isUpdating = false,
   hasEditLockForSelected,
   isOthersEditingSelected,
+  editLockError,
+  onClearEditLockError,
   onAcquireEditLock,
   onReleaseEditLock,
   onForceReleaseLock,
 }: ShiftCellPanelProps) => {
   const showCommentsPanel = Boolean(onAddComments) && selectedCells.length > 0;
+  const [isLockActionPending, setIsLockActionPending] = useState(false);
+  const isBusy = isUpdating || isLockActionPending;
 
   const { commentText, isAddingComment, setCommentText, handleAddComment } =
     useShiftCellPanelState({
       onAddComments,
     });
 
-  const handleAcquireEditLock = () => {
-    onAcquireEditLock();
-    if (!onAddComments) {
-      return;
+  const runLockAction = async (action: () => Promise<void>) => {
+    setIsLockActionPending(true);
+    try {
+      await action();
+    } finally {
+      setIsLockActionPending(false);
     }
-
-    void onAddComments(
-      `${CHAT_SYSTEM_MESSAGE_PREFIX}${currentUserName}が編集ロックを取得しました`,
-      [],
-    );
   };
 
-  const handleReleaseEditLock = () => {
-    onReleaseEditLock();
-    if (!onAddComments) {
-      return;
-    }
+  const handleAcquireEditLock = async () => {
+    await runLockAction(async () => {
+      const acquired = await onAcquireEditLock();
+      if (!acquired || !onAddComments) {
+        return;
+      }
 
-    void onAddComments(
-      `${CHAT_SYSTEM_MESSAGE_PREFIX}${currentUserName}が編集ロックを解除しました`,
-      [],
-    );
+      await onAddComments(
+        `${CHAT_SYSTEM_MESSAGE_PREFIX}${currentUserName}が編集ロックを取得しました`,
+        [],
+      );
+    });
+  };
+
+  const handleReleaseEditLock = async () => {
+    await runLockAction(async () => {
+      const released = await onReleaseEditLock();
+      if (!released || !onAddComments) {
+        return;
+      }
+
+      await onAddComments(
+        `${CHAT_SYSTEM_MESSAGE_PREFIX}${currentUserName}が編集ロックを解除しました`,
+        [],
+      );
+    });
+  };
+
+  const handleForceReleaseLock = async () => {
+    await runLockAction(async () => {
+      await onForceReleaseLock();
+    });
   };
 
   if (selectionCount === 0) return null;
@@ -98,7 +125,7 @@ const ShiftCellPanelBase = ({
       onClose={onClear}
       maxWidth="lg"
       fullWidth
-      loading={isUpdating}
+      loading={isBusy}
       title={
         <Stack direction="row" spacing={1} alignItems="center">
           <CheckIcon color="primary" />
@@ -113,10 +140,10 @@ const ShiftCellPanelBase = ({
           tone="neutral"
           size="sm"
           onClick={onClear}
-          startIcon={<DeleteIcon />}
+          startIcon={<CloseIcon />}
           disabled={isUpdating}
         >
-          選択解除
+          閉じる
         </AppButton>
       }
     >
@@ -126,20 +153,30 @@ const ShiftCellPanelBase = ({
         alignItems="stretch"
       >
         <Stack spacing={2} sx={{ flex: 1, minWidth: 0 }}>
+          {editLockError && (
+            <InlineAlert
+              tone="warning"
+              icon={<InfoBadge />}
+              onClose={onClearEditLockError}
+            >
+              {editLockError}
+            </InlineAlert>
+          )}
+
           <CellEditLockSection
             hasEditLockForSelected={hasEditLockForSelected}
             isOthersEditingSelected={isOthersEditingSelected}
             canUnlock={canUnlock}
-            isUpdating={isUpdating}
+            isUpdating={isBusy}
             onAcquireEditLock={handleAcquireEditLock}
             onReleaseEditLock={handleReleaseEditLock}
-            onForceReleaseLock={onForceReleaseLock}
+            onForceReleaseLock={handleForceReleaseLock}
           />
 
           <Divider />
 
           <CellStateButtons
-            isUpdating={isUpdating}
+            isUpdating={isBusy}
             hasEditLockForSelected={hasEditLockForSelected}
             onChangeState={onChangeState}
           />

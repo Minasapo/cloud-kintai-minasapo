@@ -1,6 +1,9 @@
 import { useCallback, useMemo } from "react";
 
-import { normalizeErrorMessage } from "../../lib/lockUtils";
+import {
+  normalizeErrorMessage,
+  normalizeLockDateKey,
+} from "../../lib/lockUtils";
 import { buildEditLockConflictMessage } from "../useShiftEditLocks";
 
 type CellPosition = {
@@ -21,6 +24,19 @@ type EditLockAcquireResult = {
     expiresAt: string;
     version: number;
   };
+  reason?: string;
+};
+
+type RefreshLockSnapshot = {
+  id: string;
+  targetMonth: string;
+  staffId: string;
+  date: string;
+  holderUserId: string;
+  holderUserName: string;
+  acquiredAt: string;
+  expiresAt: string;
+  version: number;
 };
 
 type UseEditLockSelectionActionsParams = {
@@ -43,6 +59,25 @@ type UseEditLockSelectionActionsParams = {
   forceReleaseCell: (staffId: string, date: string) => Promise<void>;
   networkEditDisabledMessage: string;
   setEditLockError: (error: string | null) => void;
+};
+
+const buildAdminLockFailureDetails = ({
+  targetMonth,
+  staffId,
+  date,
+  reason,
+}: {
+  targetMonth: string;
+  staffId: string;
+  date: string;
+  reason: string;
+}) => {
+  return [
+    "編集ロックの取得に失敗しました。",
+    `対象: スタッフID=${staffId}, 日付=${targetMonth}-${date}`,
+    `詳細: ${reason}`,
+    "対処: 最新状態を同期し、既存ロックの有無を確認してから再実行してください。",
+  ].join(" ");
 };
 
 export const useEditLockSelectionActions = ({
@@ -77,11 +112,11 @@ export const useEditLockSelectionActions = ({
       try {
         if (isEditingDisabled) {
           setEditLockError(networkEditDisabledMessage);
-          return;
+          return false;
         }
 
         if (selectionTargets.length === 0) {
-          return;
+          return false;
         }
 
         if (acquire) {
@@ -89,6 +124,11 @@ export const useEditLockSelectionActions = ({
         }
 
         const conflicts: string[] = [];
+        const unresolvedTargets: Array<{
+          staffId: string;
+          date: string;
+          fallbackMessage: string;
+        }> = [];
         for (const { staffId, date } of selectionTargets) {
           if (acquire) {
             if (isCellBeingEdited(staffId, date)) {
@@ -115,16 +155,78 @@ export const useEditLockSelectionActions = ({
 
             const result = await startEditingCell(staffId, date);
             if (!result.acquired) {
-              conflicts.push(buildEditLockConflictMessage(result.conflict));
+              if (result.conflict) {
+                const baseMessage = buildEditLockConflictMessage(
+                  result.conflict,
+                );
+                if (!isAdmin) {
+                  conflicts.push(baseMessage);
+                } else {
+                  conflicts.push(
+                    `${baseMessage} (lockId=${result.conflict.id}, holderUserId=${result.conflict.holderUserId}, expiresAt=${result.conflict.expiresAt})`,
+                  );
+                }
+              } else if (isAdmin) {
+                unresolvedTargets.push({
+                  staffId,
+                  date,
+                  fallbackMessage: buildAdminLockFailureDetails({
+                    targetMonth,
+                    staffId,
+                    date,
+                    reason:
+                      result.reason ??
+                      "競合ロック情報を取得できませんでした（競合データなしで取得失敗）。",
+                  }),
+                });
+              } else {
+                unresolvedTargets.push({
+                  staffId,
+                  date,
+                  fallbackMessage: buildEditLockConflictMessage(undefined),
+                });
+              }
             }
           } else if (hasEditLock(staffId, date)) {
             await stopEditingCell(staffId, date);
           }
         }
 
+        // サブスクリプション遅延があっても、ボタン表示判定を即時に更新する。
+        const refreshedLocksResult = await refreshLocks();
+        const refreshedLocks = Array.isArray(refreshedLocksResult)
+          ? (refreshedLocksResult as RefreshLockSnapshot[])
+          : [];
+
+        if (unresolvedTargets.length > 0) {
+          unresolvedTargets.forEach(({ staffId, date, fallbackMessage }) => {
+            const conflictLock = refreshedLocks.find(
+              (lock) =>
+                lock.staffId === staffId &&
+                normalizeLockDateKey(lock.date) ===
+                  normalizeLockDateKey(date) &&
+                lock.holderUserId !== "",
+            );
+
+            if (!conflictLock) {
+              conflicts.push(fallbackMessage);
+              return;
+            }
+
+            const conflictMessage = buildEditLockConflictMessage(conflictLock);
+            conflicts.push(
+              isAdmin
+                ? `${conflictMessage} (lockId=${conflictLock.id}, holderUserId=${conflictLock.holderUserId}, expiresAt=${conflictLock.expiresAt})`
+                : conflictMessage,
+            );
+          });
+        }
+
         setEditLockError(conflicts.length > 0 ? conflicts[0] : null);
+        return conflicts.length === 0;
       } catch (error) {
         setEditLockError(normalizeErrorMessage(error));
+        return false;
       }
     },
     [
@@ -139,15 +241,16 @@ export const useEditLockSelectionActions = ({
       startEditingCell,
       stopEditingCell,
       targetMonth,
+      isAdmin,
     ],
   );
 
   const handleAcquireEditLock = useCallback(async () => {
-    await applyEditLock(true);
+    return applyEditLock(true);
   }, [applyEditLock]);
 
   const handleReleaseEditLock = useCallback(async () => {
-    await applyEditLock(false);
+    return applyEditLock(false);
   }, [applyEditLock]);
 
   const handleForceReleaseLock = useCallback(async () => {

@@ -59,7 +59,7 @@ interface UseCommentOperationsProps {
   deleteCommentReply: (
     parentCommentId: string,
     replyCommentId: string,
-  ) => boolean;
+  ) => { deleted: boolean; cellKey?: string };
   callbacks?: CommentOperationCallbacks;
 }
 
@@ -339,13 +339,13 @@ export const useCommentOperations = ({
 
   const deleteCommentReplyHandler = useCallback(
     async (parentCommentId: string, replyCommentId: string): Promise<void> => {
-      deleteCommentReplyLocal(parentCommentId, replyCommentId);
-      // 親コメントのセルキーを取得するために、ローカルコメント取得関数を使用
-      const allComments = getCommentsByCellLocal("all-cells");
-      const parentComment = allComments.find((c) => c.id === parentCommentId);
-      if (parentComment) {
+      const { cellKey } = deleteCommentReplyLocal(
+        parentCommentId,
+        replyCommentId,
+      );
+      if (cellKey) {
         try {
-          await persistCommentsByCellKey(parentComment.cellKey);
+          await persistCommentsByCellKey(cellKey);
         } catch (err) {
           logger.error(
             "Failed to persist comment reply deletion, but local change is retained:",
@@ -354,7 +354,7 @@ export const useCommentOperations = ({
         }
       }
     },
-    [deleteCommentReplyLocal, persistCommentsByCellKey, getCommentsByCellLocal],
+    [deleteCommentReplyLocal, persistCommentsByCellKey],
   );
 
   return useMemo(
