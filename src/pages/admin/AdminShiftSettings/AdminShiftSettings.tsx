@@ -1,9 +1,10 @@
 import { useAppDispatchV2 } from "@app/hooks";
 import AdminSettingsLayout from "@features/admin/layout/ui/AdminSettingsLayout";
 import { useAdminShiftSettings } from "@features/admin-config-shift/useAdminShiftSettings";
+import { Tab, Tabs } from "@mui/material";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { usePageLeaveGuard } from "@shared/ui/feedback/usePageLeaveGuard";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { S14001, S14002 } from "@/errors";
 
@@ -27,10 +28,6 @@ const getPanelId = (tab: ShiftSettingsTab) =>
 export default function AdminShiftSettings() {
   const dispatch = useAppDispatchV2();
   const [activeTab, setActiveTab] = useState<ShiftSettingsTab>("shift-group");
-  const tabRefs = useRef<Record<ShiftSettingsTab, HTMLButtonElement | null>>({
-    "shift-group": null,
-    "shift-display": null,
-  });
 
   const handleSaveSuccess = useCallback(
     (isUpdate: boolean) => {
@@ -69,89 +66,28 @@ export default function AdminShiftSettings() {
     isBusy,
   });
 
-  const handleTabKeyDown = (
-    event: React.KeyboardEvent<HTMLButtonElement>,
-    currentTab: ShiftSettingsTab,
-  ) => {
-    const currentIndex = SHIFT_SETTINGS_TABS.findIndex(
-      (tab) => tab.value === currentTab,
-    );
-
-    if (currentIndex < 0) {
-      return;
-    }
-
-    const moveFocusTo = (nextIndex: number) => {
-      const nextTab = SHIFT_SETTINGS_TABS[nextIndex];
-      if (!nextTab) {
-        return;
-      }
-      setActiveTab(nextTab.value);
-      tabRefs.current[nextTab.value]?.focus();
-    };
-
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-      event.preventDefault();
-      moveFocusTo((currentIndex + 1) % SHIFT_SETTINGS_TABS.length);
-      return;
-    }
-
-    if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-      event.preventDefault();
-      moveFocusTo(
-        (currentIndex - 1 + SHIFT_SETTINGS_TABS.length) %
-          SHIFT_SETTINGS_TABS.length,
-      );
-      return;
-    }
-
-    if (event.key === "Home") {
-      event.preventDefault();
-      moveFocusTo(0);
-      return;
-    }
-
-    if (event.key === "End") {
-      event.preventDefault();
-      moveFocusTo(SHIFT_SETTINGS_TABS.length - 1);
-    }
-  };
-
   return (
     <AdminSettingsLayout>
       {dialog}
       <div className="flex flex-col gap-6">
-        <div className="rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
-          <div
-            className="grid grid-cols-2 gap-2"
-            role="tablist"
+        <div className="rounded-lg border border-slate-200 bg-white px-2 pt-2 shadow-sm">
+          <Tabs
+            value={activeTab}
+            onChange={(_, newValue: ShiftSettingsTab) => setActiveTab(newValue)}
             aria-label="シフト設定タブ"
+            variant="fullWidth"
+            selectionFollowsFocus
           >
             {SHIFT_SETTINGS_TABS.map((tab) => (
-              <button
+              <Tab
                 key={tab.value}
-                type="button"
-                role="tab"
+                value={tab.value}
+                label={tab.label}
                 id={getTabId(tab.value)}
-                aria-selected={activeTab === tab.value}
                 aria-controls={getPanelId(tab.value)}
-                tabIndex={activeTab === tab.value ? 0 : -1}
-                onClick={() => setActiveTab(tab.value)}
-                onKeyDown={(event) => handleTabKeyDown(event, tab.value)}
-                ref={(element) => {
-                  tabRefs.current[tab.value] = element;
-                }}
-                className={[
-                  "rounded-xl px-4 py-3 text-sm font-medium transition",
-                  activeTab === tab.value
-                    ? "bg-emerald-600 text-white"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200",
-                ].join(" ")}
-              >
-                {tab.label}
-              </button>
+              />
             ))}
-          </div>
+          </Tabs>
         </div>
 
         <div

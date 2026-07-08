@@ -1,7 +1,5 @@
 import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
-import {
-  SettingsAlert,
-} from "@features/admin/layout/ui/SettingsPrimitives";
+import { SettingsAlert } from "@features/admin/layout/ui/SettingsPrimitives";
 import { AppButton } from "@shared/ui/button";
 import { AppTabs } from "@shared/ui/tabs";
 import { SubsectionTitle } from "@shared/ui/typography";
@@ -12,6 +10,7 @@ import {
   ShiftGroupRow,
 } from "@/pages/admin/AdminShiftSettings";
 
+import ShiftDisplayModeButtonGroup from "./ShiftDisplayModeButtonGroup";
 import type { useAdminShiftSettings } from "./useAdminShiftSettings";
 
 type AdminShiftSettingsContentProps = {
@@ -94,12 +93,16 @@ function ShiftGroupTabPanel({ state }: AdminShiftSettingsContentProps) {
 
       <div className="flex flex-row items-center justify-end gap-4 pb-4">
         {savingShiftGroup && (
-          <p className="text-sm text-slate-500" aria-live="polite">保存中...</p>
+          <p className="text-sm text-slate-500" aria-live="polite">
+            保存中...
+          </p>
         )}
         <AppButton
           variant="solid"
           tone="primary"
-          disabled={hasValidationError || !isShiftGroupDirty || savingShiftGroup}
+          disabled={
+            hasValidationError || !isShiftGroupDirty || savingShiftGroup
+          }
           loading={savingShiftGroup}
           onClick={handleSaveShiftGroup}
         >
@@ -111,8 +114,12 @@ function ShiftGroupTabPanel({ state }: AdminShiftSettingsContentProps) {
 }
 
 function ShiftDisplayTabPanel({ state }: AdminShiftSettingsContentProps) {
-  const { shiftDefaultMode, setShiftDefaultMode, savingShiftDisplay, isShiftDisplayDirty } =
-    state;
+  const {
+    shiftDefaultMode,
+    setShiftDefaultMode,
+    savingShiftDisplay,
+    isShiftDisplayDirty,
+  } = state;
 
   return (
     <div className="flex flex-col gap-6 pt-6">
@@ -128,32 +135,10 @@ function ShiftDisplayTabPanel({ state }: AdminShiftSettingsContentProps) {
               <span className="text-sm font-medium text-slate-700">
                 表示モード
               </span>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShiftDefaultMode("normal")}
-                  className={[
-                    "rounded-xl border px-4 py-2 text-sm font-medium transition",
-                    shiftDefaultMode === "normal"
-                      ? "border-emerald-600 bg-emerald-50 text-emerald-700"
-                      : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
-                  ].join(" ")}
-                >
-                  通常モード
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShiftDefaultMode("collaborative")}
-                  className={[
-                    "rounded-xl border px-4 py-2 text-sm font-medium transition",
-                    shiftDefaultMode === "collaborative"
-                      ? "border-emerald-600 bg-emerald-50 text-emerald-700"
-                      : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
-                  ].join(" ")}
-                >
-                  共同編集モード
-                </button>
-              </div>
+              <ShiftDisplayModeButtonGroup
+                value={shiftDefaultMode}
+                onChange={setShiftDefaultMode}
+              />
             </div>
             <span className="text-sm text-slate-500">
               スタッフ側への設定反映には数分程度かかる場合があります。
