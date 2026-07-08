@@ -12,6 +12,8 @@ import {
   ListItem,
   ListItemText,
   Stack,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
@@ -178,25 +180,52 @@ export const CellStateButtons = ({
     <Typography variant="caption" color="text.secondary" gutterBottom>
       状態を一括変更:
     </Typography>
-    <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
+    <ToggleButtonGroup
+      value={null}
+      exclusive
+      onChange={(_, value: ShiftState | null) => {
+        if (value) {
+          onChangeState(value);
+        }
+      }}
+      disabled={isUpdating || !hasEditLockForSelected}
+      sx={{
+        mt: 1,
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 1,
+        "& .MuiToggleButton-root": {
+          border: 0,
+          borderRadius: 999,
+          color: "common.white",
+          fontWeight: 600,
+          px: 1.75,
+          py: 0.5,
+          "&:hover": {
+            opacity: 0.85,
+          },
+          "&.Mui-disabled": {
+            opacity: 0.45,
+            color: "common.white",
+          },
+        },
+      }}
+    >
       {stateOptions.map((option) => (
-        <Chip
+        <ToggleButton
           key={option.state}
-          label={option.label}
-          onClick={() => onChangeState(option.state)}
-          disabled={isUpdating || !hasEditLockForSelected}
+          value={option.state}
           sx={{
             bgcolor: option.color,
-            color: "white",
-            fontWeight: 600,
-            "&:hover": {
+            "&.Mui-selected, &.Mui-selected:hover": {
               bgcolor: option.color,
-              opacity: isUpdating ? 0.5 : 0.8,
             },
           }}
-        />
+        >
+          {option.label}
+        </ToggleButton>
       ))}
-    </Stack>
+    </ToggleButtonGroup>
   </Box>
 );
 
