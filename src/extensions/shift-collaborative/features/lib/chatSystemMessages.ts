@@ -19,3 +19,9 @@ export const buildShiftStateChangedSystemMessage = (
   nextState: ShiftState,
 ) =>
   `${CHAT_SYSTEM_MESSAGE_PREFIX}${userName}が${formatShiftStateLabel(previousState)}から${formatShiftStateLabel(nextState)}に変更しました`;
+
+export const buildShiftLockChangedSystemMessage = (
+  userName: string,
+  locked: boolean,
+) =>
+  `${CHAT_SYSTEM_MESSAGE_PREFIX}${userName}が${locked ? "確定" : "確定解除"}しました`;

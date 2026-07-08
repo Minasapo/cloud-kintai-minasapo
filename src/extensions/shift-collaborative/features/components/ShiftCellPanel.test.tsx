@@ -1,7 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import dayjs from "dayjs";
 
-import { CHAT_SYSTEM_MESSAGE_PREFIX } from "../lib/chatSystemMessages";
+import {
+  CHAT_SYSTEM_MESSAGE_PREFIX,
+  buildShiftLockChangedSystemMessage,
+} from "../lib/chatSystemMessages";
 import { ShiftCellPanel } from "./ShiftCellPanel";
 
 const baseProps = {
@@ -12,8 +16,8 @@ const baseProps = {
   comments: [],
   onClear: jest.fn(),
   onChangeState: jest.fn(),
-  onLock: jest.fn(),
-  onUnlock: jest.fn(),
+  onLock: jest.fn().mockResolvedValue(true),
+  onUnlock: jest.fn().mockResolvedValue(true),
   onAddComments: jest.fn(),
   canUnlock: true,
   showLock: true,
@@ -76,6 +80,54 @@ describe("ShiftCellPanel", () => {
 
     expect(onAcquireEditLock).toHaveBeenCalledTimes(1);
     expect(onAddComments).not.toHaveBeenCalled();
+  });
+
+  it("確定成功時にシステムコメントを追加する", async () => {
+    const user = userEvent.setup();
+    const onLock = jest.fn().mockResolvedValue(true);
+    const onAddComments = jest.fn().mockResolvedValue(undefined);
+
+    render(
+      <ShiftCellPanel
+        {...baseProps}
+        showLock
+        showUnlock={false}
+        onLock={onLock}
+        onAddComments={onAddComments}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "確定" }));
+
+    expect(onLock).toHaveBeenCalledTimes(1);
+    expect(onAddComments).toHaveBeenCalledWith(
+      buildShiftLockChangedSystemMessage("石本達也", true),
+      [],
+    );
+  });
+
+  it("確定解除成功時にシステムコメントを追加する", async () => {
+    const user = userEvent.setup();
+    const onUnlock = jest.fn().mockResolvedValue(true);
+    const onAddComments = jest.fn().mockResolvedValue(undefined);
+
+    render(
+      <ShiftCellPanel
+        {...baseProps}
+        showLock={false}
+        showUnlock
+        onUnlock={onUnlock}
+        onAddComments={onAddComments}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "確定解除" }));
+
+    expect(onUnlock).toHaveBeenCalledTimes(1);
+    expect(onAddComments).toHaveBeenCalledWith(
+      buildShiftLockChangedSystemMessage("石本達也", false),
+      [],
+    );
   });
 
   it("編集ロックエラーをダイアログ内に表示する", () => {
@@ -141,5 +193,44 @@ describe("ShiftCellPanel", () => {
         screen.getByRole("button", { name: "編集ロックを強制解除" }),
       ).toBeEnabled();
     });
+  });
+
+  it("月次帯の日付セルクリックで選択ハンドラを呼ぶ", async () => {
+    const user = userEvent.setup();
+    const onDateCellClick = jest.fn();
+
+    render(
+      <ShiftCellPanel
+        {...baseProps}
+        selectedCells={[{ staffId: "staff-1", date: "01" }]}
+        shiftDataMap={
+          new Map([
+            [
+              "staff-1",
+              new Map([
+                [
+                  "01",
+                  {
+                    state: "empty",
+                    isLocked: false,
+                  },
+                ],
+              ]),
+            ],
+          ])
+        }
+        days={[dayjs("2026-07-01")]}
+        staffNameMap={new Map([["staff-1", "スタッフ1"]])}
+        onDateCellClick={onDateCellClick}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /7\/1/ }));
+
+    expect(onDateCellClick).toHaveBeenCalledWith(
+      "staff-1",
+      "01",
+      expect.any(Object),
+    );
   });
 });

@@ -550,4 +550,94 @@ describe("useCollaborativePageState", () => {
 
     expect(result.current.editLockError).toBeNull();
   });
+
+  it("日付移動時は自分が取得したロックだけ自動解除する", async () => {
+    const hasEditLockMock = jest.fn(
+      (staffId: string, date: string) => staffId === "staff-1" && date === "01",
+    );
+
+    mockUseCollaborativeShift.mockReturnValue({
+      ...buildState({ hasEditLock: false }),
+      hasEditLock: hasEditLockMock,
+    });
+    mockUseSelectionState.mockReturnValue({
+      focusedCell: { staffId: "staff-1", date: "01" },
+      registerCell: jest.fn(),
+      focusCell: jest.fn(),
+      navigate: jest.fn(),
+      clearFocus: jest.fn(),
+      selectedCells: [
+        { staffId: "staff-1", date: "01" },
+        { staffId: "staff-2", date: "01" },
+      ],
+      selectionCount: 2,
+      isCellSelected: jest.fn(() => false),
+      selectCell: jest.fn(),
+      toggleCell: jest.fn(),
+      selectRange: jest.fn(),
+      startDragSelect: jest.fn(),
+      updateDragSelect: jest.fn(),
+      endDragSelect: jest.fn(),
+      selectAll: jest.fn(),
+      clearSelection: jest.fn(),
+      isDragging: false,
+    });
+
+    const { result } = renderHook(() => useCollaborativePageState("2026-02"));
+
+    await act(async () => {
+      const clickEvent = {
+        shiftKey: false,
+        ctrlKey: false,
+        metaKey: false,
+      } as unknown as Parameters<typeof result.current.handleCellClick>[2];
+      result.current.handleCellClick("staff-3", "02", clickEvent);
+      await Promise.resolve();
+    });
+
+    expect(mockStopEditingCell).toHaveBeenCalledTimes(1);
+    expect(mockStopEditingCell).toHaveBeenCalledWith("staff-1", "01");
+  });
+
+  it("同じ日付の再選択ではロックを自動解除しない", async () => {
+    const hasEditLockMock = jest.fn(() => true);
+
+    mockUseCollaborativeShift.mockReturnValue({
+      ...buildState({ hasEditLock: false }),
+      hasEditLock: hasEditLockMock,
+    });
+    mockUseSelectionState.mockReturnValue({
+      focusedCell: { staffId: "staff-1", date: "01" },
+      registerCell: jest.fn(),
+      focusCell: jest.fn(),
+      navigate: jest.fn(),
+      clearFocus: jest.fn(),
+      selectedCells: [{ staffId: "staff-1", date: "01" }],
+      selectionCount: 1,
+      isCellSelected: jest.fn(() => true),
+      selectCell: jest.fn(),
+      toggleCell: jest.fn(),
+      selectRange: jest.fn(),
+      startDragSelect: jest.fn(),
+      updateDragSelect: jest.fn(),
+      endDragSelect: jest.fn(),
+      selectAll: jest.fn(),
+      clearSelection: jest.fn(),
+      isDragging: false,
+    });
+
+    const { result } = renderHook(() => useCollaborativePageState("2026-02"));
+
+    await act(async () => {
+      const clickEvent = {
+        shiftKey: false,
+        ctrlKey: false,
+        metaKey: false,
+      } as unknown as Parameters<typeof result.current.handleCellClick>[2];
+      result.current.handleCellClick("staff-1", "01", clickEvent);
+      await Promise.resolve();
+    });
+
+    expect(mockStopEditingCell).not.toHaveBeenCalled();
+  });
 });

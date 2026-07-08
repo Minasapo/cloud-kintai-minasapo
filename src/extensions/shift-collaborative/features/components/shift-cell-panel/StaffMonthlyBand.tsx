@@ -1,9 +1,6 @@
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { Box, Divider, Stack, Tooltip, Typography } from "@mui/material";
-import { AppIconButton } from "@shared/ui/button";
 import dayjs from "dayjs";
-import { useCallback, useRef } from "react";
+import { MouseEvent, useCallback, useRef } from "react";
 
 import {
   ShiftCellData,
@@ -26,6 +23,7 @@ interface DayCellProps {
   day: dayjs.Dayjs;
   cellData: ShiftCellData | undefined;
   isSelected: boolean;
+  onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
   buttonRef?: (element: HTMLButtonElement | null) => void;
   onFocusMove?: (direction: "left" | "right") => void;
 }
@@ -34,6 +32,7 @@ const DayCell = ({
   day,
   cellData,
   isSelected,
+  onClick,
   buttonRef,
   onFocusMove,
 }: DayCellProps) => {
@@ -53,6 +52,7 @@ const DayCell = ({
         component="button"
         ref={buttonRef}
         type="button"
+        onClick={onClick}
         onKeyDown={(event) => {
           if (!onFocusMove) return;
           if (event.key === "ArrowLeft") {
@@ -159,6 +159,11 @@ interface SingleStaffBandProps {
   days: dayjs.Dayjs[];
   shiftDataMap: ShiftDataMap;
   selectedDates: Set<string>;
+  onDayClick?: (
+    staffId: string,
+    date: string,
+    event: MouseEvent<HTMLButtonElement>,
+  ) => void;
 }
 
 const SingleStaffBand = ({
@@ -167,6 +172,7 @@ const SingleStaffBand = ({
   days,
   shiftDataMap,
   selectedDates,
+  onDayClick,
 }: SingleStaffBandProps) => {
   const staffDayMap = shiftDataMap.get(staffId);
   const cellRefs = useRef(new Map<string, HTMLButtonElement | null>());
@@ -225,9 +231,9 @@ const SingleStaffBand = ({
         <Box sx={{ display: "flex", gap: "2px", width: "max-content" }}>
           {days.map((day) => {
             const dayKey = day.format("DD");
-            const dateStr = day.format("YYYY-MM-DD");
+            const dateKey = day.format("DD");
             const cellData = staffDayMap?.get(dayKey);
-            const isSelected = selectedDates.has(dateStr);
+            const isSelected = selectedDates.has(dateKey);
 
             return (
               <DayCell
@@ -235,9 +241,10 @@ const SingleStaffBand = ({
                 day={day}
                 cellData={cellData}
                 isSelected={isSelected}
-                buttonRef={(element) => registerCell(dateStr, element)}
+                onClick={(event) => onDayClick?.(staffId, dateKey, event)}
+                buttonRef={(element) => registerCell(dateKey, element)}
                 onFocusMove={(direction) =>
-                  focusNeighborCell(dateStr, direction)
+                  focusNeighborCell(dateKey, direction)
                 }
               />
             );
@@ -256,11 +263,11 @@ export interface StaffMonthlyBandProps {
   shiftDataMap: ShiftDataMap;
   /** 選択セルの日付文字列セット ("YYYY-MM-DD") */
   selectedDates: Set<string>;
-  currentMonthLabel: string;
-  hasEditLock: boolean;
-  isNavigating: boolean;
-  onPrevMonth: () => void;
-  onNextMonth: () => void;
+  onDayClick?: (
+    staffId: string,
+    date: string,
+    event: MouseEvent<HTMLButtonElement>,
+  ) => void;
 }
 
 export const StaffMonthlyBand = ({
@@ -269,50 +276,12 @@ export const StaffMonthlyBand = ({
   days,
   shiftDataMap,
   selectedDates,
-  currentMonthLabel,
-  hasEditLock,
-  isNavigating,
-  onPrevMonth,
-  onNextMonth,
+  onDayClick,
 }: StaffMonthlyBandProps) => {
   if (staffIds.length === 0 || days.length === 0) return null;
 
   return (
     <Box sx={{ mb: 1 }}>
-      {/* 月ナビゲーション（コンパクト） */}
-      <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mb: 1 }}>
-        <AppIconButton
-          size="sm"
-          onClick={onPrevMonth}
-          aria-label="前の月へ"
-          disabled={isNavigating}
-          tooltip={hasEditLock ? "ロックを解除して前の月へ" : "前の月へ"}
-        >
-          <ChevronLeftIcon sx={{ fontSize: 16 }} />
-        </AppIconButton>
-        <Typography
-          variant="caption"
-          color="text.primary"
-          sx={{ minWidth: 70, textAlign: "center", fontWeight: 600 }}
-        >
-          {currentMonthLabel}
-        </Typography>
-        <AppIconButton
-          size="sm"
-          onClick={onNextMonth}
-          aria-label="次の月へ"
-          disabled={isNavigating}
-          tooltip={hasEditLock ? "ロックを解除して次の月へ" : "次の月へ"}
-        >
-          <ChevronRightIcon sx={{ fontSize: 16 }} />
-        </AppIconButton>
-        {hasEditLock && (
-          <Typography variant="caption" color="warning.main" sx={{ ml: 0.5 }}>
-            移動時はロック解除されます
-          </Typography>
-        )}
-      </Stack>
-
       {/* スタッフ別月次帯 */}
       <Stack spacing={1}>
         {staffIds.map((staffId, index) => (
@@ -324,6 +293,7 @@ export const StaffMonthlyBand = ({
               days={days}
               shiftDataMap={shiftDataMap}
               selectedDates={selectedDates}
+              onDayClick={onDayClick}
             />
           </Box>
         ))}

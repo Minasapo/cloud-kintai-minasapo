@@ -1,15 +1,17 @@
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import { Box, Divider, Stack, Typography } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
 import AppDialog from "@shared/ui/feedback/AppDialog";
 import dayjs from "dayjs";
-import { memo, useMemo, useState } from "react";
+import { MouseEvent, memo, useMemo, useState } from "react";
 
 import { useShiftCellPanelState } from "../hooks/useShiftCellPanelState";
-import { CHAT_SYSTEM_MESSAGE_PREFIX } from "../lib/chatSystemMessages";
+import {
+  CHAT_SYSTEM_MESSAGE_PREFIX,
+  buildShiftLockChangedSystemMessage,
+} from "../lib/chatSystemMessages";
 import {
   CellComment,
   Mention,
@@ -33,8 +35,8 @@ interface ShiftCellPanelProps {
   comments?: CellComment[];
   onClear: () => void;
   onChangeState: (state: ShiftState) => void;
-  onLock: () => void;
-  onUnlock: () => void;
+  onLock: () => Promise<boolean>;
+  onUnlock: () => Promise<boolean>;
   onAddComments?: (content: string, mentions: Mention[]) => Promise<void>;
   canUnlock: boolean;
   showLock: boolean;
@@ -50,10 +52,12 @@ interface ShiftCellPanelProps {
   /** 月次帯表示用 */
   shiftDataMap?: ShiftDataMap;
   days?: dayjs.Dayjs[];
-  currentMonthLabel?: string;
   staffNameMap?: Map<string, string>;
-  onPrevMonth?: () => void;
-  onNextMonth?: () => void;
+  onDateCellClick?: (
+    staffId: string,
+    date: string,
+    event: MouseEvent<HTMLButtonElement>,
+  ) => void;
 }
 
 const ShiftCellPanelBase = ({
@@ -80,14 +84,11 @@ const ShiftCellPanelBase = ({
   onForceReleaseLock,
   shiftDataMap,
   days,
-  currentMonthLabel,
   staffNameMap,
-  onPrevMonth,
-  onNextMonth,
+  onDateCellClick,
 }: ShiftCellPanelProps) => {
   const showCommentsPanel = Boolean(onAddComments) && selectedCells.length > 0;
   const [isLockActionPending, setIsLockActionPending] = useState(false);
-  const [isMonthNavigating, setIsMonthNavigating] = useState(false);
   const isBusy = isUpdating || isLockActionPending;
 
   const { commentText, isAddingComment, setCommentText, handleAddComment } =
@@ -101,26 +102,6 @@ const ShiftCellPanelBase = ({
       await action();
     } finally {
       setIsLockActionPending(false);
-    }
-  };
-
-  /** ロックを解除してから月を移動する */
-  const handleNavigateMonth = async (navigate: (() => void) | undefined) => {
-    if (!navigate) return;
-    setIsMonthNavigating(true);
-    try {
-      if (hasEditLockForSelected) {
-        const released = await onReleaseEditLock();
-        if (released && onAddComments) {
-          await onAddComments(
-            `${CHAT_SYSTEM_MESSAGE_PREFIX}${currentUserName}が編集ロックを解除しました`,
-            [],
-          );
-        }
-      }
-      navigate();
-    } finally {
-      setIsMonthNavigating(false);
     }
   };
 
@@ -148,7 +129,6 @@ const ShiftCellPanelBase = ({
     days != null &&
     days.length > 0 &&
     selectedStaffIds.length > 0 &&
-    currentMonthLabel != null &&
     staffNameMap != null;
 
   const handleAcquireEditLock = async () => {
@@ -182,6 +162,34 @@ const ShiftCellPanelBase = ({
   const handleForceReleaseLock = async () => {
     await runLockAction(async () => {
       await onForceReleaseLock();
+    });
+  };
+
+  const handleLockCells = async () => {
+    await runLockAction(async () => {
+      const locked = await onLock();
+      if (!locked || !onAddComments) {
+        return;
+      }
+
+      await onAddComments(
+        buildShiftLockChangedSystemMessage(currentUserName, true),
+        [],
+      );
+    });
+  };
+
+  const handleUnlockCells = async () => {
+    await runLockAction(async () => {
+      const unlocked = await onUnlock();
+      if (!unlocked || !onAddComments) {
+        return;
+      }
+
+      await onAddComments(
+        buildShiftLockChangedSystemMessage(currentUserName, false),
+        [],
+      );
     });
   };
 
@@ -224,11 +232,7 @@ const ShiftCellPanelBase = ({
             days={days!}
             shiftDataMap={shiftDataMap!}
             selectedDates={selectedDates}
-            currentMonthLabel={currentMonthLabel!}
-            hasEditLock={hasEditLockForSelected}
-            isNavigating={isMonthNavigating}
-            onPrevMonth={() => void handleNavigateMonth(onPrevMonth)}
-            onNextMonth={() => void handleNavigateMonth(onNextMonth)}
+            onDayClick={onDateCellClick}
           />
           <Divider />
         </>
@@ -274,19 +278,23 @@ const ShiftCellPanelBase = ({
             {showLock && (
               <AppButton
                 variant="solid"
-                startIcon={<LockIcon />}
-                onClick={onLock}
+                startIcon={<CheckIcon />}
+                onClick={() => {
+                  void handleLockCells();
+                }}
                 size="sm"
                 disabled={isUpdating}
               >
-                確定（ロック）
+                確定
               </AppButton>
             )}
             {showUnlock && (
               <AppButton
                 variant="outline"
                 startIcon={<LockOpenIcon />}
-                onClick={onUnlock}
+                onClick={() => {
+                  void handleUnlockCells();
+                }}
                 tone="neutral"
                 size="sm"
                 disabled={!canUnlock || isUpdating}
