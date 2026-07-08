@@ -6,9 +6,13 @@ import dayjs from "dayjs";
 import { useCallback, useMemo, useState } from "react";
 
 import { useCollaborativeShift } from "../context/CollaborativeShiftContext";
+import { buildShiftStateChangedSystemMessage } from "../lib/chatSystemMessages";
 import { SuggestedAction } from "../rules/shiftRules";
 import type { ShiftDataMap } from "../types/collaborative.types";
-import { useCellStateActions } from "./page-state/useCellStateActions";
+import {
+  AppliedStateChange,
+  useCellStateActions,
+} from "./page-state/useCellStateActions";
 import { useLockActions } from "./page-state/useLockActions";
 import { useSelectionInteractions } from "./page-state/useSelectionInteractions";
 import { useShiftPlanCapacities } from "./page-state/useShiftPlanCapacities";
@@ -79,7 +83,10 @@ const useShiftCalendarAndCellState = (
   };
 };
 
-export const useCollaborativePageState = (targetMonth: string) => {
+export const useCollaborativePageState = (
+  targetMonth: string,
+  currentUserName = "不明ユーザー",
+) => {
   const {
     state,
     updateShift,
@@ -165,6 +172,25 @@ export const useCollaborativePageState = (targetMonth: string) => {
     [stopEditingCell],
   );
 
+  const handleStateChanged = useCallback(
+    async (changes: AppliedStateChange[]) => {
+      await Promise.all(
+        changes.map((change) =>
+          addComment(
+            `${change.staffId}#${change.date}`,
+            buildShiftStateChangedSystemMessage(
+              currentUserName,
+              change.previousState,
+              change.newState,
+            ),
+            [],
+          ),
+        ),
+      );
+    },
+    [addComment, currentUserName],
+  );
+
   const { changeCellState, handleChangeState } = useCellStateActions({
     targetMonth,
     isEditingDisabled,
@@ -174,10 +200,13 @@ export const useCollaborativePageState = (targetMonth: string) => {
     isCellBeingEdited,
     getCellEditor,
     hasEditLock,
+    getCellState: (staffId: string, date: string) =>
+      getCellData(staffId, date)?.state,
     updateUserActivity,
     updateShift,
     batchUpdateShifts,
     releaseEditLocks,
+    onStateChanged: handleStateChanged,
     selectionCount,
     selectedCells,
     focusedCell,

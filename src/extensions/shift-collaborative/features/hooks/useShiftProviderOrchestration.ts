@@ -15,7 +15,9 @@ import {
 const applyRemoteChangesToHistory = (
   staffId: string,
   request: ShiftRequestData,
-  currentStaffData: Map<string, { state: ShiftState; isLocked: boolean }> | undefined,
+  currentStaffData:
+    | Map<string, { state: ShiftState; isLocked: boolean }>
+    | undefined,
   recordRemoteChange: (
     staffId: string,
     dayKey: string,
@@ -31,8 +33,12 @@ const applyRemoteChangesToHistory = (
     const newState = shiftRequestStatusToShiftStateWithEmpty(entry.status);
     if (previousState !== newState) {
       recordRemoteChange(
-        staffId, dayKey, previousState, newState,
-        request.updatedBy ?? "unknown", request.updatedBy ?? "不明",
+        staffId,
+        dayKey,
+        previousState,
+        newState,
+        request.updatedBy ?? "unknown",
+        request.updatedBy ?? "不明",
       );
     }
   }
@@ -48,7 +54,10 @@ export const usePersistHandlers = ({
 }: {
   staffNameMap: Map<string, string> | undefined;
   mergeHistoryRecords: (records: CellChangeRecord[]) => void;
-  mergeRemoteComments: (staffId: string, comments: ShiftRequestCommentData[]) => void;
+  mergeRemoteComments: (
+    staffId: string,
+    comments: ShiftRequestCommentData[],
+  ) => void;
 }) => {
   const handlePersistCompleted = useCallback(
     (request: ShiftRequestData) => {
@@ -59,7 +68,13 @@ export const usePersistHandlers = ({
       const recentHistories = sorted.slice(-2);
       if (recentHistories.length === 0) return;
       const getStaffName = (id: string) => staffNameMap?.get(id) ?? id;
-      mergeHistoryRecords(deriveHistoryCellChanges(request.staffId, recentHistories, getStaffName));
+      mergeHistoryRecords(
+        deriveHistoryCellChanges(
+          request.staffId,
+          recentHistories,
+          getStaffName,
+        ),
+      );
     },
     [staffNameMap, mergeHistoryRecords],
   );
@@ -78,6 +93,7 @@ export const usePersistHandlers = ({
  */
 export const useProviderEffects = ({
   isLoading,
+  lastFetchedAt,
   targetMonth,
   getAllShiftRequests,
   loadCommentsFromShiftRequests,
@@ -90,6 +106,7 @@ export const useProviderEffects = ({
   shiftDataMapRef,
 }: {
   isLoading: boolean;
+  lastFetchedAt: number;
   targetMonth: string;
   getAllShiftRequests: () => ShiftRequestData[];
   loadCommentsFromShiftRequests: (requests: ShiftRequestData[]) => void;
@@ -98,8 +115,13 @@ export const useProviderEffects = ({
   clearCellHistory: () => void;
   fetchShifts: () => Promise<void>;
   fetchShiftsRef: React.MutableRefObject<() => Promise<void>>;
-  shiftDataMap: Map<string, Map<string, { state: ShiftState; isLocked: boolean }>>;
-  shiftDataMapRef: React.MutableRefObject<Map<string, Map<string, { state: ShiftState; isLocked: boolean }>>>;
+  shiftDataMap: Map<
+    string,
+    Map<string, { state: ShiftState; isLocked: boolean }>
+  >;
+  shiftDataMapRef: React.MutableRefObject<
+    Map<string, Map<string, { state: ShiftState; isLocked: boolean }>>
+  >;
 }) => {
   useEffect(() => {
     fetchShiftsRef.current = fetchShifts;
@@ -109,19 +131,25 @@ export const useProviderEffects = ({
     shiftDataMapRef.current = shiftDataMap;
   }, [shiftDataMap, shiftDataMapRef]);
 
-  const commentsInitializedRef = useRef(false);
   useEffect(() => {
-    if (isLoading || commentsInitializedRef.current) return;
+    if (isLoading) return;
+
     const allRequests = getAllShiftRequests();
-    if (allRequests.length > 0) {
-      loadCommentsFromShiftRequests(allRequests);
-      commentsInitializedRef.current = true;
-    }
-  }, [isLoading, getAllShiftRequests, loadCommentsFromShiftRequests]);
+    loadCommentsFromShiftRequests(allRequests);
+  }, [
+    isLoading,
+    lastFetchedAt,
+    targetMonth,
+    getAllShiftRequests,
+    loadCommentsFromShiftRequests,
+  ]);
 
   const seededMonthRef = useRef<string | null>(null);
   useEffect(() => {
-    if (seededMonthRef.current !== null && seededMonthRef.current !== targetMonth) {
+    if (
+      seededMonthRef.current !== null &&
+      seededMonthRef.current !== targetMonth
+    ) {
       clearCellHistory();
       seededMonthRef.current = null;
     }
@@ -135,7 +163,14 @@ export const useProviderEffects = ({
       ),
     );
     seededMonthRef.current = targetMonth;
-  }, [targetMonth, isLoading, getAllShiftRequests, staffNameMap, seedHistory, clearCellHistory]);
+  }, [
+    targetMonth,
+    isLoading,
+    getAllShiftRequests,
+    staffNameMap,
+    seedHistory,
+    clearCellHistory,
+  ]);
 };
 
 /**
@@ -153,11 +188,18 @@ export const useRemoteUpdateHandler = ({
     updatedBy: string,
     updatedByName: string,
   ) => void;
-  shiftDataMapRef: React.MutableRefObject<Map<string, Map<string, { state: ShiftState; isLocked: boolean }>>>;
+  shiftDataMapRef: React.MutableRefObject<
+    Map<string, Map<string, { state: ShiftState; isLocked: boolean }>>
+  >;
 }) => {
   const handleRemoteUpdate = useCallback(
     (staffId: string, request: ShiftRequestData) => {
-      applyRemoteChangesToHistory(staffId, request, shiftDataMapRef.current.get(staffId), recordRemoteChange);
+      applyRemoteChangesToHistory(
+        staffId,
+        request,
+        shiftDataMapRef.current.get(staffId),
+        recordRemoteChange,
+      );
     },
     [recordRemoteChange, shiftDataMapRef],
   );

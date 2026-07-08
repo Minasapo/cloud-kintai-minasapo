@@ -47,7 +47,16 @@ export const ShiftCollaborativePageInner =
       onNextMonth,
     }: ShiftCollaborativePageInnerProps) => {
       const { cognitoUser } = useContext(AuthContext);
-      const pageState = useCollaborativePageState(targetMonth);
+      const currentStaffId =
+        staffs.find((staff) => staff.cognitoUserId === cognitoUser?.id)?.id ??
+        "";
+      const currentUserDisplayName =
+        staffNameMap.get(currentStaffId) || currentStaffId || "不明ユーザー";
+
+      const pageState = useCollaborativePageState(
+        targetMonth,
+        currentUserDisplayName,
+      );
       const {
         state,
         isCellBeingEdited,
@@ -196,6 +205,8 @@ export const ShiftCollaborativePageInner =
             />
 
             <ShiftCellPanel
+              currentUserId={currentUserId}
+              currentUserName={currentUserDisplayName}
               selectionCount={selectionCount}
               selectedCells={
                 selectionCount > 0

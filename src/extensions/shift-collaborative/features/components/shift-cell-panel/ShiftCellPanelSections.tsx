@@ -1,11 +1,12 @@
+import "dayjs/locale/ja";
+
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import MessageIcon from "@mui/icons-material/Message";
+import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import {
   Avatar,
   Box,
   Chip,
-  CircularProgress,
   Collapse,
   Divider,
   List,
@@ -16,20 +17,25 @@ import {
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import { AppButton } from "@shared/ui/button";
+import { AppButton, AppIconButton } from "@shared/ui/button";
 import { AppTextField } from "@shared/ui/form";
 import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 import {
   CELL_CHANGE_SOURCE_COLORS,
   CELL_CHANGE_SOURCE_LABELS,
 } from "../../lib/cellChangeSourceConfig";
+import { CHAT_SYSTEM_MESSAGE_PREFIX } from "../../lib/chatSystemMessages";
 import {
   CellChangeRecord,
   CellComment,
   Mention,
   ShiftState,
 } from "../../types/collaborative.types";
+
+dayjs.extend(relativeTime);
+dayjs.locale("ja");
 
 export interface EditLockHolder {
   staffId: string;
@@ -49,6 +55,21 @@ const SHIFT_STATE_LABELS: Record<ShiftState, string> = {
 
 const formatShiftState = (state?: ShiftState) =>
   state ? SHIFT_STATE_LABELS[state] : "未設定";
+
+const formatCommentRelativeTime = (createdAt: string | number) => {
+  const created = dayjs(createdAt);
+  const diffSeconds = dayjs().diff(created, "second");
+
+  if (diffSeconds <= 0) {
+    return "今";
+  }
+
+  if (diffSeconds < 60) {
+    return `${diffSeconds}秒前`;
+  }
+
+  return created.fromNow();
+};
 
 const stateOptions: Array<{ state: ShiftState; label: string; color: string }> =
   [
@@ -230,6 +251,7 @@ export const CellStateButtons = ({
 );
 
 interface CellCommentsSectionProps {
+  currentUserId: string;
   selectedCells: Array<{ staffId: string; date: string }>;
   comments: CellComment[];
   onAddComments?: (content: string, mentions: Mention[]) => Promise<void>;
@@ -241,6 +263,7 @@ interface CellCommentsSectionProps {
 }
 
 export const CellCommentsSection = ({
+  currentUserId,
   selectedCells,
   comments,
   onAddComments,
@@ -254,103 +277,217 @@ export const CellCommentsSection = ({
     return null;
   }
 
-  return (
-    <>
-      <Box>
-        <Typography variant="caption" color="text.secondary" gutterBottom>
-          コメント追加:
-        </Typography>
-        <Stack direction="row" spacing={1} mt={1}>
-          <AppTextField
-            placeholder="選択セルにコメントを追加..."
-            size="small"
-            fullWidth
-            value={commentText}
-            onChange={(e) => onCommentTextChange(e.target.value)}
-            disabled={isAddingComment || isUpdating}
-            multiline
-            maxRows={2}
-            sx={{ flexGrow: 1 }}
-          />
-          <AppButton
-            variant="solid"
-            startIcon={
-              isAddingComment ? <CircularProgress size={16} /> : <MessageIcon />
-            }
-            onClick={onAddComment}
-            disabled={!commentText.trim() || isAddingComment || isUpdating}
-            size="sm"
-            sx={{ whiteSpace: "nowrap" }}
-          >
-            追加
-          </AppButton>
-        </Stack>
-      </Box>
+  const timelineItems = comments
+    .map((comment, index) => ({
+      key: `comment-${comment.id}-${comment.createdAt}-${index}`,
+      createdAt: dayjs(comment.createdAt).valueOf(),
+      comment,
+    }))
+    .sort((a, b) => {
+      if (a.createdAt !== b.createdAt) {
+        return a.createdAt - b.createdAt;
+      }
 
-      {comments.length > 0 && (
-        <Box
-          sx={{
-            bgcolor: "background.default",
-            borderRadius: 1,
-            p: 2,
-            maxHeight: 200,
-            overflowY: "auto",
-            border: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            display="block"
-            mb={1}
-          >
-            {comments.length}件のコメント
-          </Typography>
-          <Stack spacing={1.5}>
-            {comments.map((comment, index) => (
-              <Box
-                key={`${comment.id}-${comment.createdAt}-${index}`}
-                sx={{ display: "flex", gap: 1 }}
-              >
-                <Avatar
-                  sx={{
-                    width: 28,
-                    height: 28,
-                    fontSize: "0.75rem",
-                    bgcolor: `hsl(${Math.abs(comment.userId.charCodeAt(0) * 131) % 360}, 70%, 50%)`,
-                  }}
+      return a.key.localeCompare(b.key);
+    });
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        minHeight: 0,
+      }}
+    >
+      <Box
+        sx={{
+          ml: "auto",
+          width: "100%",
+          maxWidth: 560,
+          bgcolor: "background.default",
+          borderRadius: 2,
+          p: 1.5,
+          flex: 1,
+          minHeight: 0,
+          overflowY: "auto",
+          border: "1px solid",
+          borderColor: "divider",
+          mb: 1,
+        }}
+      >
+        {timelineItems.length > 0 && (
+          <Stack spacing={1.25}>
+            {timelineItems.map((item) => {
+              const { comment } = item;
+              const isSystemMessage = comment.content.startsWith(
+                CHAT_SYSTEM_MESSAGE_PREFIX,
+              );
+
+              if (isSystemMessage) {
+                const systemText = comment.content.slice(
+                  CHAT_SYSTEM_MESSAGE_PREFIX.length,
+                );
+
+                return (
+                  <Box
+                    key={item.key}
+                    sx={{ display: "flex", justifyContent: "center" }}
+                  >
+                    <Stack spacing={0} alignItems="center">
+                      <Typography variant="caption" color="text.secondary">
+                        {systemText}
+                      </Typography>
+                      <Typography variant="caption" color="text.disabled">
+                        {formatCommentRelativeTime(comment.createdAt)}
+                      </Typography>
+                    </Stack>
+                  </Box>
+                );
+              }
+
+              const isOwnMessage = comment.userId === currentUserId;
+
+              return (
+                <Stack
+                  key={item.key}
+                  direction="row"
+                  spacing={1}
+                  justifyContent={isOwnMessage ? "flex-end" : "flex-start"}
+                  alignItems="flex-end"
                 >
-                  {comment.userName?.charAt(0).toUpperCase()}
-                </Avatar>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Typography variant="caption" fontWeight={600}>
-                      {comment.userName}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {dayjs(comment.createdAt).format("HH:mm")}
+                  {!isOwnMessage && (
+                    <Avatar
+                      sx={{
+                        width: 28,
+                        height: 28,
+                        fontSize: "0.75rem",
+                        bgcolor: `hsl(${Math.abs(comment.userId.charCodeAt(0) * 131) % 360}, 70%, 50%)`,
+                      }}
+                    >
+                      {comment.userName?.charAt(0).toUpperCase()}
+                    </Avatar>
+                  )}
+                  <Stack spacing={0.25} sx={{ maxWidth: "80%", minWidth: 120 }}>
+                    <Box
+                      sx={{
+                        px: 1.5,
+                        py: 1,
+                        borderRadius: isOwnMessage
+                          ? "16px 16px 4px 16px"
+                          : "16px 16px 16px 4px",
+                        bgcolor: isOwnMessage
+                          ? "primary.light"
+                          : "action.hover",
+                        border: "1px solid",
+                        borderColor: isOwnMessage ? "primary.main" : "divider",
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: "block",
+                          wordBreak: "break-word",
+                          color: isOwnMessage
+                            ? "primary.contrastText"
+                            : "text.primary",
+                        }}
+                      >
+                        {comment.content}
+                      </Typography>
+                    </Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{
+                        display: "block",
+                        textAlign: isOwnMessage ? "right" : "left",
+                        pr: isOwnMessage ? 0.5 : 0,
+                        pl: isOwnMessage ? 0 : 0.5,
+                      }}
+                    >
+                      {formatCommentRelativeTime(comment.createdAt)}
                     </Typography>
                   </Stack>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      display: "block",
-                      wordBreak: "break-word",
-                      mt: 0.5,
-                    }}
-                  >
-                    {comment.content}
-                  </Typography>
-                </Box>
-              </Box>
-            ))}
+                  {isOwnMessage && (
+                    <Avatar
+                      sx={{
+                        width: 28,
+                        height: 28,
+                        fontSize: "0.75rem",
+                        bgcolor: `hsl(${Math.abs(comment.userId.charCodeAt(0) * 131) % 360}, 70%, 50%)`,
+                      }}
+                    >
+                      {comment.userName?.charAt(0).toUpperCase()}
+                    </Avatar>
+                  )}
+                </Stack>
+              );
+            })}
           </Stack>
-        </Box>
-      )}
+        )}
+      </Box>
 
-      <Divider />
-    </>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "auto" }}>
+        <Box sx={{ width: "100%", maxWidth: 560 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "flex-end",
+              gap: 0.5,
+              px: 1,
+              py: 0.5,
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: 999,
+              bgcolor: "background.paper",
+            }}
+          >
+            <AppTextField
+              placeholder="選択セルにコメントを追加..."
+              size="small"
+              fullWidth
+              value={commentText}
+              onChange={(e) => onCommentTextChange(e.target.value)}
+              disabled={isAddingComment || isUpdating}
+              multiline
+              maxRows={2}
+              sx={{
+                flexGrow: 1,
+                "& .MuiOutlinedInput-root": {
+                  px: 0,
+                  py: 0,
+                  bgcolor: "transparent",
+                  "& fieldset": {
+                    border: "none",
+                  },
+                  "&:hover fieldset": {
+                    border: "none",
+                  },
+                  "&.Mui-focused fieldset": {
+                    border: "none",
+                  },
+                },
+                "& .MuiInputBase-inputMultiline": {
+                  py: 0.75,
+                  px: 0.5,
+                },
+              }}
+            />
+            <AppIconButton
+              aria-label="コメントを送信"
+              tone="primary"
+              size="sm"
+              loading={isAddingComment}
+              onClick={onAddComment}
+              disabled={!commentText.trim() || isAddingComment || isUpdating}
+            >
+              <SendRoundedIcon fontSize="small" />
+            </AppIconButton>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

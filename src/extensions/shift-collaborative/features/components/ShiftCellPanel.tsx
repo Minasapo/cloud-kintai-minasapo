@@ -7,6 +7,7 @@ import { AppButton } from "@shared/ui/button";
 import { memo } from "react";
 
 import { useShiftCellPanelState } from "../hooks/useShiftCellPanelState";
+import { CHAT_SYSTEM_MESSAGE_PREFIX } from "../lib/chatSystemMessages";
 import {
   CellChangeRecord,
   CellComment,
@@ -22,6 +23,8 @@ import {
 } from "./shift-cell-panel/ShiftCellPanelSections";
 
 interface ShiftCellPanelProps {
+  currentUserId: string;
+  currentUserName: string;
   selectionCount: number;
   selectedCells?: Array<{ staffId: string; date: string }>;
   comments?: CellComment[];
@@ -46,6 +49,8 @@ interface ShiftCellPanelProps {
 const MAX_HISTORY_VISIBLE = 5;
 
 const ShiftCellPanelBase = ({
+  currentUserId,
+  currentUserName,
   selectionCount,
   selectedCells = [],
   comments = [],
@@ -66,6 +71,8 @@ const ShiftCellPanelBase = ({
   onReleaseEditLock,
   onForceReleaseLock,
 }: ShiftCellPanelProps) => {
+  const showCommentsPanel = Boolean(onAddComments) && selectedCells.length > 0;
+
   const {
     commentText,
     isAddingComment,
@@ -77,6 +84,30 @@ const ShiftCellPanelBase = ({
     cellHistoryLength: cellHistory.length,
     onAddComments,
   });
+
+  const handleAcquireEditLock = () => {
+    onAcquireEditLock();
+    if (!onAddComments) {
+      return;
+    }
+
+    void onAddComments(
+      `${CHAT_SYSTEM_MESSAGE_PREFIX}${currentUserName}が編集ロックを取得しました`,
+      [],
+    );
+  };
+
+  const handleReleaseEditLock = () => {
+    onReleaseEditLock();
+    if (!onAddComments) {
+      return;
+    }
+
+    void onAddComments(
+      `${CHAT_SYSTEM_MESSAGE_PREFIX}${currentUserName}が編集ロックを解除しました`,
+      [],
+    );
+  };
 
   if (selectionCount === 0) return null;
 
@@ -91,7 +122,7 @@ const ShiftCellPanelBase = ({
         py: 2,
         borderRadius: "24px",
         border: "1px solid rgba(226,232,240,0.9)",
-        minWidth: 600,
+        width: "min(1080px, calc(100vw - 32px))",
         zIndex: 1000,
         opacity: isUpdating ? 0.6 : 1,
         pointerEvents: isUpdating ? "none" : "auto",
@@ -121,79 +152,101 @@ const ShiftCellPanelBase = ({
 
         <Divider />
 
-        <CellEditLockSection
-          cellEditLockHolders={cellEditLockHolders}
-          hasEditLockForSelected={hasEditLockForSelected}
-          isOthersEditingSelected={isOthersEditingSelected}
-          canUnlock={canUnlock}
-          isUpdating={isUpdating}
-          onAcquireEditLock={onAcquireEditLock}
-          onReleaseEditLock={onReleaseEditLock}
-          onForceReleaseLock={onForceReleaseLock}
-        />
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={2}
+          alignItems="stretch"
+        >
+          <Stack spacing={2} sx={{ flex: 1, minWidth: 0 }}>
+            <CellEditLockSection
+              cellEditLockHolders={cellEditLockHolders}
+              hasEditLockForSelected={hasEditLockForSelected}
+              isOthersEditingSelected={isOthersEditingSelected}
+              canUnlock={canUnlock}
+              isUpdating={isUpdating}
+              onAcquireEditLock={handleAcquireEditLock}
+              onReleaseEditLock={handleReleaseEditLock}
+              onForceReleaseLock={onForceReleaseLock}
+            />
 
-        <Divider />
+            <Divider />
 
-        <CellStateButtons
-          isUpdating={isUpdating}
-          hasEditLockForSelected={hasEditLockForSelected}
-          onChangeState={onChangeState}
-        />
+            <CellStateButtons
+              isUpdating={isUpdating}
+              hasEditLockForSelected={hasEditLockForSelected}
+              onChangeState={onChangeState}
+            />
 
-        <Divider />
+            <Divider />
 
-        <Stack direction="row" spacing={1}>
-          {showLock && (
-            <AppButton
-              variant="solid"
-              startIcon={<LockIcon />}
-              onClick={onLock}
-              size="sm"
-              disabled={isUpdating}
+            <Stack direction="row" spacing={1}>
+              {showLock && (
+                <AppButton
+                  variant="solid"
+                  startIcon={<LockIcon />}
+                  onClick={onLock}
+                  size="sm"
+                  disabled={isUpdating}
+                >
+                  確定（ロック）
+                </AppButton>
+              )}
+              {showUnlock && (
+                <AppButton
+                  variant="outline"
+                  startIcon={<LockOpenIcon />}
+                  onClick={onUnlock}
+                  tone="neutral"
+                  size="sm"
+                  disabled={!canUnlock || isUpdating}
+                >
+                  確定解除
+                </AppButton>
+              )}
+            </Stack>
+
+            <Divider />
+
+            <CellHistorySection
+              selectionCount={selectionCount}
+              selectedCells={selectedCells}
+              cellHistory={cellHistory}
+              historyExpanded={historyExpanded}
+              onToggleExpand={() => setHistoryExpanded((v) => !v)}
+              maxVisible={MAX_HISTORY_VISIBLE}
+            />
+
+            <Typography variant="caption" color="text.secondary">
+              <strong>ヒント:</strong>{" "}
+              Shift+クリックで範囲選択、Ctrl/Cmd+クリックで個別追加選択
+            </Typography>
+          </Stack>
+
+          {showCommentsPanel && (
+            <Box
+              sx={{
+                flex: { xs: 1, md: "0 0 420px" },
+                width: { xs: "100%", md: 420 },
+                minHeight: 0,
+                pl: { xs: 0, md: 2 },
+                borderLeft: { xs: "none", md: "1px solid" },
+                borderColor: "divider",
+              }}
             >
-              確定（ロック）
-            </AppButton>
-          )}
-          {showUnlock && (
-            <AppButton
-              variant="outline"
-              startIcon={<LockOpenIcon />}
-              onClick={onUnlock}
-              tone="neutral"
-              size="sm"
-              disabled={!canUnlock || isUpdating}
-            >
-              確定解除
-            </AppButton>
+              <CellCommentsSection
+                currentUserId={currentUserId}
+                selectedCells={selectedCells}
+                comments={comments}
+                onAddComments={onAddComments}
+                isUpdating={isUpdating}
+                commentText={commentText}
+                onCommentTextChange={setCommentText}
+                onAddComment={handleAddComment}
+                isAddingComment={isAddingComment}
+              />
+            </Box>
           )}
         </Stack>
-
-        <Divider />
-
-        <CellCommentsSection
-          selectedCells={selectedCells}
-          comments={comments}
-          onAddComments={onAddComments}
-          isUpdating={isUpdating}
-          commentText={commentText}
-          onCommentTextChange={setCommentText}
-          onAddComment={handleAddComment}
-          isAddingComment={isAddingComment}
-        />
-
-        <CellHistorySection
-          selectionCount={selectionCount}
-          selectedCells={selectedCells}
-          cellHistory={cellHistory}
-          historyExpanded={historyExpanded}
-          onToggleExpand={() => setHistoryExpanded((v) => !v)}
-          maxVisible={MAX_HISTORY_VISIBLE}
-        />
-
-        <Typography variant="caption" color="text.secondary">
-          <strong>ヒント:</strong>{" "}
-          Shift+クリックで範囲選択、Ctrl/Cmd+クリックで個別追加選択
-        </Typography>
       </Stack>
     </Paper>
   );
