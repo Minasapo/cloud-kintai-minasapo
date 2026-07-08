@@ -304,4 +304,38 @@ describe("useCollaborativePageState", () => {
       "編集前にロックを取得してください。",
     );
   });
+
+  it("ロック取得APIで例外が発生した場合はエラーを表示する", async () => {
+    mockStartEditingCell.mockRejectedValue(new Error("lock failed"));
+    mockUseCollaborativeShift.mockReturnValue(
+      buildState({ hasEditLock: false }),
+    );
+    mockUseSelectionState.mockReturnValue({
+      focusedCell: { staffId: "staff-1", date: "01" },
+      registerCell: jest.fn(),
+      focusCell: jest.fn(),
+      navigate: jest.fn(),
+      clearFocus: jest.fn(),
+      selectedCells: [{ staffId: "staff-1", date: "01" }],
+      selectionCount: 1,
+      isCellSelected: jest.fn(() => true),
+      selectCell: jest.fn(),
+      toggleCell: jest.fn(),
+      selectRange: jest.fn(),
+      startDragSelect: jest.fn(),
+      updateDragSelect: jest.fn(),
+      endDragSelect: jest.fn(),
+      selectAll: jest.fn(),
+      clearSelection: jest.fn(),
+      isDragging: false,
+    });
+
+    const { result } = renderHook(() => useCollaborativePageState("2026-02"));
+
+    await act(async () => {
+      await result.current.handleAcquireEditLock();
+    });
+
+    expect(result.current.editLockError).toBe("lock failed");
+  });
 });

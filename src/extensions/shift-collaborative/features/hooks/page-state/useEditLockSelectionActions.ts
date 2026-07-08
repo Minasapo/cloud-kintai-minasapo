@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
 
+import { normalizeErrorMessage } from "../../lib/lockUtils";
 import { buildEditLockConflictMessage } from "../useShiftEditLocks";
 
 type CellPosition = {
@@ -73,54 +74,58 @@ export const useEditLockSelectionActions = ({
 
   const applyEditLock = useCallback(
     async (acquire: boolean) => {
-      if (isEditingDisabled) {
-        setEditLockError(networkEditDisabledMessage);
-        return;
-      }
-
-      if (selectionTargets.length === 0) {
-        return;
-      }
-
-      if (acquire) {
-        await refreshLocks();
-      }
-
-      const conflicts: string[] = [];
-      for (const { staffId, date } of selectionTargets) {
-        if (acquire) {
-          if (isCellBeingEdited(staffId, date)) {
-            const editor = getCellEditor(staffId, date);
-            conflicts.push(
-              buildEditLockConflictMessage({
-                id: "",
-                targetMonth,
-                staffId,
-                date,
-                holderUserId: editor?.userId ?? "",
-                holderUserName: editor?.userName ?? "他のユーザー",
-                acquiredAt: new Date().toISOString(),
-                expiresAt: new Date().toISOString(),
-                version: 0,
-              }),
-            );
-            continue;
-          }
-
-          if (hasEditLock(staffId, date)) {
-            continue;
-          }
-
-          const result = await startEditingCell(staffId, date);
-          if (!result.acquired) {
-            conflicts.push(buildEditLockConflictMessage(result.conflict));
-          }
-        } else if (hasEditLock(staffId, date)) {
-          await stopEditingCell(staffId, date);
+      try {
+        if (isEditingDisabled) {
+          setEditLockError(networkEditDisabledMessage);
+          return;
         }
-      }
 
-      setEditLockError(conflicts.length > 0 ? conflicts[0] : null);
+        if (selectionTargets.length === 0) {
+          return;
+        }
+
+        if (acquire) {
+          await refreshLocks();
+        }
+
+        const conflicts: string[] = [];
+        for (const { staffId, date } of selectionTargets) {
+          if (acquire) {
+            if (isCellBeingEdited(staffId, date)) {
+              const editor = getCellEditor(staffId, date);
+              conflicts.push(
+                buildEditLockConflictMessage({
+                  id: "",
+                  targetMonth,
+                  staffId,
+                  date,
+                  holderUserId: editor?.userId ?? "",
+                  holderUserName: editor?.userName ?? "他のユーザー",
+                  acquiredAt: new Date().toISOString(),
+                  expiresAt: new Date().toISOString(),
+                  version: 0,
+                }),
+              );
+              continue;
+            }
+
+            if (hasEditLock(staffId, date)) {
+              continue;
+            }
+
+            const result = await startEditingCell(staffId, date);
+            if (!result.acquired) {
+              conflicts.push(buildEditLockConflictMessage(result.conflict));
+            }
+          } else if (hasEditLock(staffId, date)) {
+            await stopEditingCell(staffId, date);
+          }
+        }
+
+        setEditLockError(conflicts.length > 0 ? conflicts[0] : null);
+      } catch (error) {
+        setEditLockError(normalizeErrorMessage(error));
+      }
     },
     [
       getCellEditor,

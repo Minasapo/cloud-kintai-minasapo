@@ -2,8 +2,9 @@ import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
-import { Box, Divider, Paper, Stack, Typography } from "@mui/material";
+import { Box, Divider, Stack, Typography } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
+import AppDialog from "@shared/ui/feedback/AppDialog";
 import { memo } from "react";
 
 import { useShiftCellPanelState } from "../hooks/useShiftCellPanelState";
@@ -92,133 +93,119 @@ const ShiftCellPanelBase = ({
   if (selectionCount === 0) return null;
 
   return (
-    <Paper
-      sx={{
-        position: "fixed",
-        bottom: 24,
-        left: "50%",
-        transform: "translateX(-50%)",
-        px: 3,
-        py: 2,
-        borderRadius: "24px",
-        border: "1px solid rgba(226,232,240,0.9)",
-        width: "min(1080px, calc(100vw - 32px))",
-        zIndex: 1000,
-        opacity: isUpdating ? 0.6 : 1,
-        pointerEvents: isUpdating ? "none" : "auto",
-        bgcolor: "rgb(255 255 255)",
-        boxShadow: "0 28px 60px -36px rgba(15,23,42,0.4)",
-      }}
-    >
-      <Stack spacing={2}>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Stack direction="row" spacing={1} alignItems="center">
-            <CheckIcon color="primary" />
-            <Typography variant="subtitle1" fontWeight={600}>
-              {selectionCount}セル選択中
-            </Typography>
-          </Stack>
-          <AppButton
-            variant="ghost"
-            tone="neutral"
-            size="sm"
-            onClick={onClear}
-            startIcon={<DeleteIcon />}
-            disabled={isUpdating}
-          >
-            選択解除
-          </AppButton>
-        </Box>
-
-        <Divider />
-
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          spacing={2}
-          alignItems="stretch"
-        >
-          <Stack spacing={2} sx={{ flex: 1, minWidth: 0 }}>
-            <CellEditLockSection
-              hasEditLockForSelected={hasEditLockForSelected}
-              isOthersEditingSelected={isOthersEditingSelected}
-              canUnlock={canUnlock}
-              isUpdating={isUpdating}
-              onAcquireEditLock={handleAcquireEditLock}
-              onReleaseEditLock={handleReleaseEditLock}
-              onForceReleaseLock={onForceReleaseLock}
-            />
-
-            <Divider />
-
-            <CellStateButtons
-              isUpdating={isUpdating}
-              hasEditLockForSelected={hasEditLockForSelected}
-              onChangeState={onChangeState}
-            />
-
-            <Divider />
-
-            <Stack direction="row" spacing={1}>
-              {showLock && (
-                <AppButton
-                  variant="solid"
-                  startIcon={<LockIcon />}
-                  onClick={onLock}
-                  size="sm"
-                  disabled={isUpdating}
-                >
-                  確定（ロック）
-                </AppButton>
-              )}
-              {showUnlock && (
-                <AppButton
-                  variant="outline"
-                  startIcon={<LockOpenIcon />}
-                  onClick={onUnlock}
-                  tone="neutral"
-                  size="sm"
-                  disabled={!canUnlock || isUpdating}
-                >
-                  確定解除
-                </AppButton>
-              )}
-            </Stack>
-
-            <Divider />
-
-            <Typography variant="caption" color="text.secondary">
-              <strong>ヒント:</strong>{" "}
-              Shift+クリックで範囲選択、Ctrl/Cmd+クリックで個別追加選択
-            </Typography>
-          </Stack>
-
-          {showCommentsPanel && (
-            <Box
-              sx={{
-                flex: { xs: 1, md: "0 0 420px" },
-                width: { xs: "100%", md: 420 },
-                minHeight: 0,
-                pl: { xs: 0, md: 2 },
-                borderLeft: { xs: "none", md: "1px solid" },
-                borderColor: "divider",
-              }}
-            >
-              <CellCommentsSection
-                currentUserId={currentUserId}
-                selectedCells={selectedCells}
-                comments={comments}
-                onAddComments={onAddComments}
-                isUpdating={isUpdating}
-                commentText={commentText}
-                onCommentTextChange={setCommentText}
-                onAddComment={handleAddComment}
-                isAddingComment={isAddingComment}
-              />
-            </Box>
-          )}
+    <AppDialog
+      open={selectionCount > 0}
+      onClose={onClear}
+      maxWidth="lg"
+      fullWidth
+      loading={isUpdating}
+      title={
+        <Stack direction="row" spacing={1} alignItems="center">
+          <CheckIcon color="primary" />
+          <Typography variant="subtitle1" fontWeight={600} component="span">
+            {selectionCount}セル選択中
+          </Typography>
         </Stack>
+      }
+      actions={
+        <AppButton
+          variant="ghost"
+          tone="neutral"
+          size="sm"
+          onClick={onClear}
+          startIcon={<DeleteIcon />}
+          disabled={isUpdating}
+        >
+          選択解除
+        </AppButton>
+      }
+    >
+      <Stack
+        direction={{ xs: "column", md: "row" }}
+        spacing={2}
+        alignItems="stretch"
+      >
+        <Stack spacing={2} sx={{ flex: 1, minWidth: 0 }}>
+          <CellEditLockSection
+            hasEditLockForSelected={hasEditLockForSelected}
+            isOthersEditingSelected={isOthersEditingSelected}
+            canUnlock={canUnlock}
+            isUpdating={isUpdating}
+            onAcquireEditLock={handleAcquireEditLock}
+            onReleaseEditLock={handleReleaseEditLock}
+            onForceReleaseLock={onForceReleaseLock}
+          />
+
+          <Divider />
+
+          <CellStateButtons
+            isUpdating={isUpdating}
+            hasEditLockForSelected={hasEditLockForSelected}
+            onChangeState={onChangeState}
+          />
+
+          <Divider />
+
+          <Stack direction="row" spacing={1}>
+            {showLock && (
+              <AppButton
+                variant="solid"
+                startIcon={<LockIcon />}
+                onClick={onLock}
+                size="sm"
+                disabled={isUpdating}
+              >
+                確定（ロック）
+              </AppButton>
+            )}
+            {showUnlock && (
+              <AppButton
+                variant="outline"
+                startIcon={<LockOpenIcon />}
+                onClick={onUnlock}
+                tone="neutral"
+                size="sm"
+                disabled={!canUnlock || isUpdating}
+              >
+                確定解除
+              </AppButton>
+            )}
+          </Stack>
+
+          <Divider />
+
+          <Typography variant="caption" color="text.secondary">
+            <strong>ヒント:</strong>{" "}
+            Shift+クリックで範囲選択、Ctrl/Cmd+クリックで個別追加選択
+          </Typography>
+        </Stack>
+
+        {showCommentsPanel && (
+          <Box
+            sx={{
+              flex: { xs: 1, md: "0 0 420px" },
+              width: { xs: "100%", md: 420 },
+              minHeight: 0,
+              pl: { xs: 0, md: 2 },
+              borderLeft: { xs: "none", md: "1px solid" },
+              borderColor: "divider",
+            }}
+          >
+            <CellCommentsSection
+              currentUserId={currentUserId}
+              selectedCells={selectedCells}
+              comments={comments}
+              onAddComments={onAddComments}
+              isUpdating={isUpdating}
+              commentText={commentText}
+              onCommentTextChange={setCommentText}
+              onAddComment={handleAddComment}
+              isAddingComment={isAddingComment}
+            />
+          </Box>
+        )}
       </Stack>
-    </Paper>
+    </AppDialog>
   );
 };
 

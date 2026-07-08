@@ -1,6 +1,7 @@
-import { useCreateShiftRequestMutation } from "@entities/shift/api/shiftApi";
-import { graphqlClient } from "@shared/api/amplify/graphqlClient";
-import { updateShiftRequest } from "@shared/api/graphql/documents/mutations";
+import {
+  useCreateShiftRequestMutation,
+  useUpdateShiftCellMutation,
+} from "@entities/shift/api/shiftApi";
 import type { ShiftRequestCommentInput } from "@shared/api/graphql/types";
 import { createLogger } from "@shared/lib/logger";
 import { useCallback, useMemo } from "react";
@@ -11,6 +12,10 @@ import {
   Mention,
   ShiftRequestData,
 } from "../types/collaborative.types";
+
+type UpdateShiftCellMutationTrigger = ReturnType<
+  typeof useUpdateShiftCellMutation
+>[0];
 
 const logger = createLogger("CommentOperations");
 
@@ -83,32 +88,33 @@ interface CommentOperations {
 }
 
 /**
- * GraphQL を使用してコメントを永続化する
- * 失敗時はコールバックで通知
+ * RTK Query 経由でコメントを永続化する
+ * 成功時はローカルの shiftRequest キャッシュ（shiftRequestsRef）を更新し、
+ * 次回の loadCommentsFromShiftRequests 実行で追加直後のコメントが
+ * 消えてしまわないようにする。失敗時はコールバックで通知する。
  */
 const persistCommentsToServer = async (
   staffId: string,
   shiftRequest: ShiftRequestData,
   getCommentsInput: () => ShiftRequestCommentInput[],
   currentUserId: string,
+  updateShiftCell: UpdateShiftCellMutationTrigger,
+  upsertShiftRequest: (request: ShiftRequestData) => void,
   onStart?: () => void,
   onSuccess?: () => void,
   onError?: (error: string) => void,
 ): Promise<void> => {
   try {
     onStart?.();
-    await graphqlClient.graphql({
-      query: updateShiftRequest,
-      variables: {
-        input: {
-          id: shiftRequest.id,
-          comments: getCommentsInput(),
-          updatedBy: currentUserId,
-          updatedAt: new Date().toISOString(),
-        },
+    const updated = await updateShiftCell({
+      input: {
+        id: shiftRequest.id,
+        comments: getCommentsInput(),
+        updatedBy: currentUserId,
+        updatedAt: new Date().toISOString(),
       },
-      authMode: "userPool",
-    });
+    }).unwrap();
+    upsertShiftRequest(normalizeShiftRequest(updated));
     onSuccess?.();
   } catch (err) {
     const message =
@@ -140,6 +146,7 @@ export const useCommentOperations = ({
   callbacks,
 }: UseCommentOperationsProps): CommentOperations => {
   const [createShiftRequest] = useCreateShiftRequestMutation();
+  const [updateShiftCell] = useUpdateShiftCellMutation();
 
   const getStaffIdFromCellKey = useCallback(
     (cellKey: string) => cellKey.split("#")[0] ?? "",
@@ -200,6 +207,8 @@ export const useCommentOperations = ({
         shiftRequest,
         () => getCommentsInputForStaff(staffId),
         currentUserId,
+        updateShiftCell,
+        upsertShiftRequest,
         callbacks?.onCommentPersistStarted,
         callbacks?.onCommentPersistCompleted,
         callbacks?.onCommentPersistFailed,
@@ -210,6 +219,8 @@ export const useCommentOperations = ({
       getStaffIdFromCellKey,
       getCommentsInputForStaff,
       currentUserId,
+      updateShiftCell,
+      upsertShiftRequest,
       callbacks,
     ],
   );

@@ -1,4 +1,6 @@
-import React, { useMemo, useRef, useState } from "react";
+import { useAppDispatchV2 } from "@app/hooks";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 
 import {
   CollaborativeShiftContext,
@@ -46,6 +48,22 @@ export const CollaborativeShiftProvider: React.FC<
 }) => {
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const isOnline = useOnlineStatus();
+  const dispatch = useAppDispatchV2();
+
+  const notifyCommentPersistError = useCallback(
+    (message: string) => {
+      dispatch(
+        pushNotification({
+          message: "コメントの保存に失敗しました",
+          description: message,
+          tone: "error",
+          source: "global",
+          dedupeKey: "shift-comment-persist-error",
+        }),
+      );
+    },
+    [dispatch],
+  );
 
   const {
     addComment,
@@ -207,6 +225,9 @@ export const CollaborativeShiftProvider: React.FC<
     getCommentsByCell,
     replyToComment,
     deleteCommentReply,
+    callbacks: {
+      onCommentPersistFailed: notifyCommentPersistError,
+    },
   });
 
   const state: CollaborativeShiftState = useMemo(
