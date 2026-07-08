@@ -189,7 +189,7 @@ export const ShiftCellBase: FC<ShiftCellProps> = ({
         event.currentTarget.style.borderColor = borderColor;
       }}
     >
-      {isLocked && (
+      {(isLocked || isSelfEditing) && (
         <div
           className="absolute right-0 top-0 z-10 flex h-4 w-4 items-center justify-center rounded-bl-sm bg-slate-500 text-white"
           aria-hidden="true"

@@ -137,19 +137,21 @@ export const useEditLockSelectionActions = ({
     ],
   );
 
-  const handleAcquireEditLock = useCallback(() => {
-    void applyEditLock(true);
+  const handleAcquireEditLock = useCallback(async () => {
+    await applyEditLock(true);
   }, [applyEditLock]);
 
-  const handleReleaseEditLock = useCallback(() => {
-    void applyEditLock(false);
+  const handleReleaseEditLock = useCallback(async () => {
+    await applyEditLock(false);
   }, [applyEditLock]);
 
-  const handleForceReleaseLock = useCallback(() => {
+  const handleForceReleaseLock = useCallback(async () => {
     if (!isAdmin) return;
-    selectionTargets.forEach(({ staffId, date }) => {
-      void forceReleaseCell(staffId, date);
-    });
+    await Promise.all(
+      selectionTargets.map(({ staffId, date }) =>
+        forceReleaseCell(staffId, date),
+      ),
+    );
   }, [forceReleaseCell, isAdmin, selectionTargets]);
 
   return {

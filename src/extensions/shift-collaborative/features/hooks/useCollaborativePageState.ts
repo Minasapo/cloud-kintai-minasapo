@@ -29,7 +29,8 @@ const useShiftCalendarAndCellState = (
   targetMonth: string,
   shiftDataMap: ShiftDataMap,
 ) => {
-  const { currentMonth, shiftPlanCapacities } = useShiftPlanCapacities(targetMonth);
+  const { currentMonth, shiftPlanCapacities } =
+    useShiftPlanCapacities(targetMonth);
   const { data: registeredEventCalendars = [] } = useGetEventCalendarsQuery();
   const {
     holidayCalendars: holidays,
@@ -62,7 +63,8 @@ const useShiftCalendarAndCellState = (
     [shiftDataMap],
   );
   const isCellLocked = useCallback(
-    (staffId: string, date: string) => getCellData(staffId, date)?.isLocked ?? false,
+    (staffId: string, date: string) =>
+      getCellData(staffId, date)?.isLocked ?? false,
     [getCellData],
   );
   return {
@@ -104,7 +106,10 @@ export const useCollaborativePageState = (targetMonth: string) => {
   } = useCollaborativeShift();
 
   const { isCognitoUserRole } = useAuthSessionSummary();
-  const isAdmin = useMemo(() => isAdminRole(isCognitoUserRole), [isCognitoUserRole]);
+  const isAdmin = useMemo(
+    () => isAdminRole(isCognitoUserRole),
+    [isCognitoUserRole],
+  );
 
   const {
     currentMonth,
@@ -154,7 +159,9 @@ export const useCollaborativePageState = (targetMonth: string) => {
 
   const releaseEditLocks = useCallback(
     (targets: Array<{ staffId: string; date: string }>) =>
-      Promise.all(targets.map(({ staffId, date }) => stopEditingCell(staffId, date))).then(() => {}),
+      Promise.all(
+        targets.map(({ staffId, date }) => stopEditingCell(staffId, date)),
+      ).then(() => {}),
     [stopEditingCell],
   );
 
@@ -239,7 +246,10 @@ export const useCollaborativePageState = (targetMonth: string) => {
   });
 
   const handleApplySuggestion = useCallback(
-    ({ changes }: SuggestedAction) => changes.forEach(({ staffId, date, newState }) => changeCellState(staffId, date, newState)),
+    ({ changes }: SuggestedAction) =>
+      changes.forEach(({ staffId, date, newState }) =>
+        changeCellState(staffId, date, newState),
+      ),
     [changeCellState],
   );
 
