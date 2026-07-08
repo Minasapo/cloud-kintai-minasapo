@@ -5,16 +5,23 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 import { Box, Divider, Stack, Typography } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
 import AppDialog from "@shared/ui/feedback/AppDialog";
-import { memo, useState } from "react";
+import dayjs from "dayjs";
+import { memo, useMemo, useState } from "react";
 
 import { useShiftCellPanelState } from "../hooks/useShiftCellPanelState";
 import { CHAT_SYSTEM_MESSAGE_PREFIX } from "../lib/chatSystemMessages";
-import { CellComment, Mention, ShiftState } from "../types/collaborative.types";
+import {
+  CellComment,
+  Mention,
+  ShiftDataMap,
+  ShiftState,
+} from "../types/collaborative.types";
 import {
   CellCommentsSection,
   CellEditLockSection,
   CellStateButtons,
 } from "./shift-cell-panel/ShiftCellPanelSections";
+import { StaffMonthlyBand } from "./shift-cell-panel/StaffMonthlyBand";
 import { InfoBadge } from "./ui/Badges";
 import { InlineAlert } from "./ui/InlineAlert";
 
@@ -40,6 +47,13 @@ interface ShiftCellPanelProps {
   onAcquireEditLock: () => Promise<boolean>;
   onReleaseEditLock: () => Promise<boolean>;
   onForceReleaseLock: () => void;
+  /** 月次帯表示用 */
+  shiftDataMap?: ShiftDataMap;
+  days?: dayjs.Dayjs[];
+  currentMonthLabel?: string;
+  staffNameMap?: Map<string, string>;
+  onPrevMonth?: () => void;
+  onNextMonth?: () => void;
 }
 
 const ShiftCellPanelBase = ({
@@ -64,9 +78,16 @@ const ShiftCellPanelBase = ({
   onAcquireEditLock,
   onReleaseEditLock,
   onForceReleaseLock,
+  shiftDataMap,
+  days,
+  currentMonthLabel,
+  staffNameMap,
+  onPrevMonth,
+  onNextMonth,
 }: ShiftCellPanelProps) => {
   const showCommentsPanel = Boolean(onAddComments) && selectedCells.length > 0;
   const [isLockActionPending, setIsLockActionPending] = useState(false);
+  const [isMonthNavigating, setIsMonthNavigating] = useState(false);
   const isBusy = isUpdating || isLockActionPending;
 
   const { commentText, isAddingComment, setCommentText, handleAddComment } =
@@ -82,6 +103,53 @@ const ShiftCellPanelBase = ({
       setIsLockActionPending(false);
     }
   };
+
+  /** ロックを解除してから月を移動する */
+  const handleNavigateMonth = async (navigate: (() => void) | undefined) => {
+    if (!navigate) return;
+    setIsMonthNavigating(true);
+    try {
+      if (hasEditLockForSelected) {
+        const released = await onReleaseEditLock();
+        if (released && onAddComments) {
+          await onAddComments(
+            `${CHAT_SYSTEM_MESSAGE_PREFIX}${currentUserName}が編集ロックを解除しました`,
+            [],
+          );
+        }
+      }
+      navigate();
+    } finally {
+      setIsMonthNavigating(false);
+    }
+  };
+
+  /** 選択セルに含まれる一意スタッフIDリスト（選択順を保持） */
+  const selectedStaffIds = useMemo(() => {
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const cell of selectedCells) {
+      if (!seen.has(cell.staffId)) {
+        seen.add(cell.staffId);
+        result.push(cell.staffId);
+      }
+    }
+    return result;
+  }, [selectedCells]);
+
+  /** 選択セルの日付セット */
+  const selectedDates = useMemo(
+    () => new Set(selectedCells.map((c) => c.date)),
+    [selectedCells],
+  );
+
+  const showMonthlyBand =
+    shiftDataMap != null &&
+    days != null &&
+    days.length > 0 &&
+    selectedStaffIds.length > 0 &&
+    currentMonthLabel != null &&
+    staffNameMap != null;
 
   const handleAcquireEditLock = async () => {
     await runLockAction(async () => {
@@ -147,6 +215,25 @@ const ShiftCellPanelBase = ({
         </AppButton>
       }
     >
+      {/* 月次帯ビュー：選択スタッフの1ヶ月分を横スクロールで表示 */}
+      {showMonthlyBand && (
+        <>
+          <StaffMonthlyBand
+            staffIds={selectedStaffIds}
+            staffNameMap={staffNameMap!}
+            days={days!}
+            shiftDataMap={shiftDataMap!}
+            selectedDates={selectedDates}
+            currentMonthLabel={currentMonthLabel!}
+            hasEditLock={hasEditLockForSelected}
+            isNavigating={isMonthNavigating}
+            onPrevMonth={() => void handleNavigateMonth(onPrevMonth)}
+            onNextMonth={() => void handleNavigateMonth(onNextMonth)}
+          />
+          <Divider />
+        </>
+      )}
+
       <Stack
         direction={{ xs: "column", md: "row" }}
         spacing={2}

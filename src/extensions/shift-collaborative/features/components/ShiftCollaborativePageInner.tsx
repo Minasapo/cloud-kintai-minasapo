@@ -239,6 +239,12 @@ export const ShiftCollaborativePageInner =
               onAcquireEditLock={handleAcquireEditLock}
               onReleaseEditLock={handleReleaseEditLock}
               onForceReleaseLock={handleForceReleaseLock}
+              shiftDataMap={state.shiftDataMap}
+              days={days}
+              currentMonthLabel={currentMonth.format("YYYY年M月")}
+              staffNameMap={staffNameMap}
+              onPrevMonth={onPrevMonth}
+              onNextMonth={onNextMonth}
             />
 
             <KeyboardShortcutsHelp

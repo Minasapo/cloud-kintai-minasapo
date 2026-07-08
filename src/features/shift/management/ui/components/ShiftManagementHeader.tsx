@@ -5,8 +5,6 @@ import React from "react";
 
 type Props = {
   monthStart: Dayjs;
-  onPrevMonth: () => void;
-  onNextMonth: () => void;
   scenario: string;
   isAutoSaving: boolean;
   isAutoSavePending: boolean;
@@ -51,8 +49,6 @@ const Chip: React.FC<{
 
 export const ShiftManagementHeader: React.FC<Props> = ({
   monthStart,
-  onPrevMonth,
-  onNextMonth,
   scenario,
   isAutoSaving,
   isAutoSavePending,
@@ -66,9 +62,7 @@ export const ShiftManagementHeader: React.FC<Props> = ({
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
       <div className="flex flex-wrap items-center gap-2">
-        <Chip label="前月" onClick={onPrevMonth} />
         <Chip label={monthStart.format("YYYY年 M月")} />
-        <Chip label="翌月" onClick={onNextMonth} />
 
         {scenario === "actual" && (
           <div className="flex flex-wrap items-center gap-2 ml-2 sm:ml-4">
