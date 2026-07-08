@@ -3,8 +3,8 @@ import userEvent from "@testing-library/user-event";
 import dayjs from "dayjs";
 
 import {
-  CHAT_SYSTEM_MESSAGE_PREFIX,
   buildShiftLockChangedSystemMessage,
+  CHAT_SYSTEM_MESSAGE_PREFIX,
 } from "../lib/chatSystemMessages";
 import { ShiftCellPanel } from "./ShiftCellPanel";
 

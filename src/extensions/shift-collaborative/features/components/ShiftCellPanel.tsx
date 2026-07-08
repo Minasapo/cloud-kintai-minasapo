@@ -5,12 +5,12 @@ import { Box, Divider, Stack, Typography } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
 import AppDialog from "@shared/ui/feedback/AppDialog";
 import dayjs from "dayjs";
-import { MouseEvent, memo, useMemo, useState } from "react";
+import { memo, MouseEvent, useMemo, useState } from "react";
 
 import { useShiftCellPanelState } from "../hooks/useShiftCellPanelState";
 import {
-  CHAT_SYSTEM_MESSAGE_PREFIX,
   buildShiftLockChangedSystemMessage,
+  CHAT_SYSTEM_MESSAGE_PREFIX,
 } from "../lib/chatSystemMessages";
 import {
   CellComment,
