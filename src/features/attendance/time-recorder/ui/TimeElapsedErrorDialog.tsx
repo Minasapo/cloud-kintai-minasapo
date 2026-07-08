@@ -1,3 +1,4 @@
+import { designTokenVar } from "@shared/designSystem";
 import { AppButton } from "@shared/ui/button";
 import { AppDialog } from "@shared/ui/feedback";
 import { useEffect, useState } from "react";
@@ -63,12 +64,21 @@ export default function TimeElapsedErrorDialog({
         <>
           <AppButton
             variant="outline"
+            tone="neutral"
             onClick={handleClose}
             data-testid="time-elapsed-error-dialog-later-btn"
           >
             あとで
           </AppButton>
           <AppButton
+            tone="primary"
+            sx={{
+              backgroundColor: designTokenVar("color.brand.primary.base"),
+              color: designTokenVar("color.brand.primary.contrastText"),
+              "&:hover": {
+                backgroundColor: designTokenVar("color.brand.primary.dark"),
+              },
+            }}
             onClick={handleConfirm}
             data-testid="time-elapsed-error-dialog-confirm-btn"
           >
