@@ -8,18 +8,11 @@ import { memo } from "react";
 
 import { useShiftCellPanelState } from "../hooks/useShiftCellPanelState";
 import { CHAT_SYSTEM_MESSAGE_PREFIX } from "../lib/chatSystemMessages";
-import {
-  CellChangeRecord,
-  CellComment,
-  Mention,
-  ShiftState,
-} from "../types/collaborative.types";
+import { CellComment, Mention, ShiftState } from "../types/collaborative.types";
 import {
   CellCommentsSection,
   CellEditLockSection,
-  CellHistorySection,
   CellStateButtons,
-  EditLockHolder,
 } from "./shift-cell-panel/ShiftCellPanelSections";
 
 interface ShiftCellPanelProps {
@@ -28,7 +21,6 @@ interface ShiftCellPanelProps {
   selectionCount: number;
   selectedCells?: Array<{ staffId: string; date: string }>;
   comments?: CellComment[];
-  cellHistory?: readonly CellChangeRecord[];
   onClear: () => void;
   onChangeState: (state: ShiftState) => void;
   onLock: () => void;
@@ -38,7 +30,6 @@ interface ShiftCellPanelProps {
   showLock: boolean;
   showUnlock: boolean;
   isUpdating?: boolean;
-  cellEditLockHolders?: EditLockHolder[];
   hasEditLockForSelected: boolean;
   isOthersEditingSelected: boolean;
   onAcquireEditLock: () => void;
@@ -46,15 +37,12 @@ interface ShiftCellPanelProps {
   onForceReleaseLock: () => void;
 }
 
-const MAX_HISTORY_VISIBLE = 5;
-
 const ShiftCellPanelBase = ({
   currentUserId,
   currentUserName,
   selectionCount,
   selectedCells = [],
   comments = [],
-  cellHistory = [],
   onClear,
   onChangeState,
   onLock,
@@ -64,7 +52,6 @@ const ShiftCellPanelBase = ({
   showLock,
   showUnlock,
   isUpdating = false,
-  cellEditLockHolders = [],
   hasEditLockForSelected,
   isOthersEditingSelected,
   onAcquireEditLock,
@@ -73,17 +60,10 @@ const ShiftCellPanelBase = ({
 }: ShiftCellPanelProps) => {
   const showCommentsPanel = Boolean(onAddComments) && selectedCells.length > 0;
 
-  const {
-    commentText,
-    isAddingComment,
-    historyExpanded,
-    setCommentText,
-    setHistoryExpanded,
-    handleAddComment,
-  } = useShiftCellPanelState({
-    cellHistoryLength: cellHistory.length,
-    onAddComments,
-  });
+  const { commentText, isAddingComment, setCommentText, handleAddComment } =
+    useShiftCellPanelState({
+      onAddComments,
+    });
 
   const handleAcquireEditLock = () => {
     onAcquireEditLock();
@@ -159,7 +139,6 @@ const ShiftCellPanelBase = ({
         >
           <Stack spacing={2} sx={{ flex: 1, minWidth: 0 }}>
             <CellEditLockSection
-              cellEditLockHolders={cellEditLockHolders}
               hasEditLockForSelected={hasEditLockForSelected}
               isOthersEditingSelected={isOthersEditingSelected}
               canUnlock={canUnlock}
@@ -206,15 +185,6 @@ const ShiftCellPanelBase = ({
             </Stack>
 
             <Divider />
-
-            <CellHistorySection
-              selectionCount={selectionCount}
-              selectedCells={selectedCells}
-              cellHistory={cellHistory}
-              historyExpanded={historyExpanded}
-              onToggleExpand={() => setHistoryExpanded((v) => !v)}
-              maxVisible={MAX_HISTORY_VISIBLE}
-            />
 
             <Typography variant="caption" color="text.secondary">
               <strong>ヒント:</strong>{" "}

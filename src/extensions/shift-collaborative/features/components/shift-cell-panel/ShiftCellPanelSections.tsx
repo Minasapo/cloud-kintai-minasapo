@@ -1,34 +1,21 @@
 import "dayjs/locale/ja";
 
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import {
-  Avatar,
   Box,
-  Chip,
-  Collapse,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
+import { AppAvatar } from "@shared/ui/avatar";
 import { AppButton, AppIconButton } from "@shared/ui/button";
 import { AppTextField } from "@shared/ui/form";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
-import {
-  CELL_CHANGE_SOURCE_COLORS,
-  CELL_CHANGE_SOURCE_LABELS,
-} from "../../lib/cellChangeSourceConfig";
 import { CHAT_SYSTEM_MESSAGE_PREFIX } from "../../lib/chatSystemMessages";
 import {
-  CellChangeRecord,
   CellComment,
   Mention,
   ShiftState,
@@ -44,17 +31,6 @@ export interface EditLockHolder {
   editorColor: string;
   isSelf: boolean;
 }
-
-const SHIFT_STATE_LABELS: Record<ShiftState, string> = {
-  work: "出勤",
-  fixedOff: "固定休",
-  requestedOff: "希望休",
-  auto: "自動調整枠",
-  empty: "未入力",
-};
-
-const formatShiftState = (state?: ShiftState) =>
-  state ? SHIFT_STATE_LABELS[state] : "未設定";
 
 const formatCommentRelativeTime = (createdAt: string | number) => {
   const created = dayjs(createdAt);
@@ -81,7 +57,6 @@ const stateOptions: Array<{ state: ShiftState; label: string; color: string }> =
   ];
 
 interface CellEditLockSectionProps {
-  cellEditLockHolders: EditLockHolder[];
   hasEditLockForSelected: boolean;
   isOthersEditingSelected: boolean;
   canUnlock: boolean;
@@ -92,7 +67,6 @@ interface CellEditLockSectionProps {
 }
 
 export const CellEditLockSection = ({
-  cellEditLockHolders,
   hasEditLockForSelected,
   isOthersEditingSelected,
   canUnlock,
@@ -134,7 +108,7 @@ export const CellEditLockSection = ({
           disabled={isUpdating}
           loading={isUpdating}
         >
-          {isUpdating ? "処理中..." : "編集ロックを強制剥奪"}
+          {isUpdating ? "処理中..." : "編集ロックを強制解除"}
         </AppButton>
       )}
       {isOthersEditingSelected && !canUnlock && (
@@ -143,46 +117,6 @@ export const CellEditLockSection = ({
         </Typography>
       )}
     </Stack>
-
-    {cellEditLockHolders.length > 0 && (
-      <Stack spacing={0.5} sx={{ mt: 1 }}>
-        {cellEditLockHolders.map(
-          ({ staffId, date, editorName, editorColor, isSelf }) => (
-            <Stack
-              key={`${staffId}#${date}`}
-              direction="row"
-              spacing={1}
-              alignItems="center"
-            >
-              <Avatar
-                sx={{
-                  width: 20,
-                  height: 20,
-                  fontSize: "0.65rem",
-                  bgcolor: editorColor,
-                }}
-              >
-                {editorName.charAt(0)}
-              </Avatar>
-              <Typography variant="caption" color="text.secondary">
-                {date}日:
-              </Typography>
-              <Typography variant="caption" fontWeight={600}>
-                {editorName}
-              </Typography>
-              {isSelf && (
-                <Typography variant="caption" color="primary.main">
-                  （あなた）
-                </Typography>
-              )}
-              <Typography variant="caption" color="text.disabled">
-                が編集ロック中
-              </Typography>
-            </Stack>
-          ),
-        )}
-      </Stack>
-    )}
   </Box>
 );
 
@@ -357,7 +291,7 @@ export const CellCommentsSection = ({
                   alignItems="flex-end"
                 >
                   {!isOwnMessage && (
-                    <Avatar
+                    <AppAvatar
                       sx={{
                         width: 28,
                         height: 28,
@@ -366,7 +300,7 @@ export const CellCommentsSection = ({
                       }}
                     >
                       {comment.userName?.charAt(0).toUpperCase()}
-                    </Avatar>
+                    </AppAvatar>
                   )}
                   <Stack spacing={0.25} sx={{ maxWidth: "80%", minWidth: 120 }}>
                     <Box
@@ -410,7 +344,7 @@ export const CellCommentsSection = ({
                     </Typography>
                   </Stack>
                   {isOwnMessage && (
-                    <Avatar
+                    <AppAvatar
                       sx={{
                         width: 28,
                         height: 28,
@@ -419,7 +353,7 @@ export const CellCommentsSection = ({
                       }}
                     >
                       {comment.userName?.charAt(0).toUpperCase()}
-                    </Avatar>
+                    </AppAvatar>
                   )}
                 </Stack>
               );
@@ -488,100 +422,5 @@ export const CellCommentsSection = ({
         </Box>
       </Box>
     </Box>
-  );
-};
-
-interface CellHistorySectionProps {
-  selectionCount: number;
-  selectedCells: Array<{ staffId: string; date: string }>;
-  cellHistory: readonly CellChangeRecord[];
-  historyExpanded: boolean;
-  onToggleExpand: () => void;
-  maxVisible: number;
-}
-
-export const CellHistorySection = ({
-  selectionCount,
-  selectedCells,
-  cellHistory,
-  historyExpanded,
-  onToggleExpand,
-  maxVisible,
-}: CellHistorySectionProps) => {
-  if (selectionCount !== 1 || selectedCells.length !== 1) return null;
-  return (
-    <>
-      <Box>
-        <AppButton
-          size="sm"
-          variant="ghost"
-          tone="neutral"
-          endIcon={historyExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-          onClick={onToggleExpand}
-          sx={{ px: 0, fontWeight: 600 }}
-        >
-          変更履歴
-          {cellHistory.length > 0 ? `（${cellHistory.length}件）` : ""}
-        </AppButton>
-        <Collapse in={historyExpanded}>
-          {cellHistory.length === 0 ? (
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: "block", mt: 0.5 }}
-            >
-              変更履歴はありません
-            </Typography>
-          ) : (
-            <List dense disablePadding sx={{ mt: 0.5 }}>
-              {cellHistory.slice(0, maxVisible).map((record) => (
-                <ListItem key={record.id} disableGutters sx={{ py: 0.5 }}>
-                  <ListItemText
-                    primary={
-                      <Stack
-                        direction="row"
-                        spacing={0.5}
-                        alignItems="center"
-                        flexWrap="wrap"
-                      >
-                        <Typography variant="caption" color="text.secondary">
-                          {dayjs(record.changedAt).format("M/D HH:mm")}
-                        </Typography>
-                        <Chip
-                          size="small"
-                          label={CELL_CHANGE_SOURCE_LABELS[record.source]}
-                          color={CELL_CHANGE_SOURCE_COLORS[record.source]}
-                          variant="outlined"
-                          sx={{ height: 16, fontSize: "0.6rem" }}
-                        />
-                      </Stack>
-                    }
-                    primaryTypographyProps={{ component: "div" }}
-                    secondary={
-                      <Stack spacing={0}>
-                        <Typography variant="caption" color="text.primary">
-                          {formatShiftState(record.previousState)} →{" "}
-                          {formatShiftState(record.newState)}
-                        </Typography>
-                        <Typography variant="caption" color="text.disabled">
-                          {record.changedByName || "不明"}
-                        </Typography>
-                      </Stack>
-                    }
-                    secondaryTypographyProps={{ component: "div" }}
-                  />
-                </ListItem>
-              ))}
-              {cellHistory.length > maxVisible && (
-                <Typography variant="caption" color="text.disabled">
-                  他 {cellHistory.length - maxVisible} 件
-                </Typography>
-              )}
-            </List>
-          )}
-        </Collapse>
-      </Box>
-      <Divider />
-    </>
   );
 };

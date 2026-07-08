@@ -115,8 +115,6 @@ export const ShiftCollaborativePageInner =
         isPrintDialogOpen,
         openPrintDialog,
         closePrintDialog,
-        cellEditLockHolders,
-        cellHistory,
         suggestionsBadgeCount,
         syncButtonColor,
         syncTooltipTitle,
@@ -222,7 +220,6 @@ export const ShiftCollaborativePageInner =
                     )
                   : []
               }
-              cellHistory={cellHistory}
               onClear={clearSelection}
               onChangeState={handleChangeState}
               onLock={handleLockCells}
@@ -232,7 +229,6 @@ export const ShiftCollaborativePageInner =
               showLock={hasUnlocked && isAdmin}
               showUnlock={hasLocked}
               isUpdating={isBatchUpdating}
-              cellEditLockHolders={cellEditLockHolders}
               hasEditLockForSelected={hasEditLockForSelected}
               isOthersEditingSelected={isOthersEditingSelected}
               onAcquireEditLock={handleAcquireEditLock}
