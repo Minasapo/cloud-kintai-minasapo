@@ -1,11 +1,12 @@
+import { getOperationLogLabel } from "@entities/operation-log/lib/operationLogLabels";
+import { OperationLog, Staff } from "@shared/api/graphql/types";
+import dayjs from "dayjs";
+
 import {
   formatOperationLogInlineValue,
   getOperationLogDisplaySummary,
   getOperationLogResourceDisplay,
-} from "@entities/operation-log/lib/operationLogDisplay";
-import { getOperationLogLabel } from "@entities/operation-log/lib/operationLogLabels";
-import { OperationLog, Staff } from "@shared/api/graphql/types";
-import dayjs from "dayjs";
+} from "@/entities/operation-log/lib/operationLogDisplay";
 
 export type StaffOption = {
   label: string;

@@ -1,3 +1,4 @@
+import Chip from "@mui/material/Chip";
 import { designTokenVar } from "@shared/designSystem";
 
 type FeedbackKey = "success" | "warning" | "danger" | "info";
@@ -102,31 +103,37 @@ export default function StatusChip<T extends string = string>({
     feedbackKey != null ? FEEDBACK_COLORS[feedbackKey] : FALLBACK_COLORS;
 
   return (
-    <span
-      className="inline-flex min-h-6 max-w-full items-center justify-center whitespace-nowrap"
-      style={{
-        boxSizing: "border-box",
+    <Chip
+      label={label}
+      size="small"
+      sx={{
         borderRadius: STATUS_CHIP_BORDER_RADIUS,
         fontSize: `clamp(12px, 3.2vw, ${STATUS_CHIP_FONT_SIZE})`,
         fontWeight: STATUS_CHIP_FONT_WEIGHT,
         lineHeight: 1.4,
-        gap: STATUS_CHIP_GAP,
+        height: "auto",
+        minHeight: "1.5rem",
         maxWidth: "100%",
-        paddingLeft: STATUS_CHIP_PADDING_X,
-        paddingRight: STATUS_CHIP_PADDING_X,
-        paddingTop: "2px",
-        paddingBottom: "2px",
+        px: 0,
+        py: 0,
+        gap: STATUS_CHIP_GAP,
+        flexShrink: 1,
+        verticalAlign: "middle",
         transition: `background-color ${STATUS_CHIP_DURATION} ${STATUS_CHIP_EASING}, color ${STATUS_CHIP_DURATION} ${STATUS_CHIP_EASING}`,
         backgroundColor: palette.surface,
         color: palette.base,
         border: `1px solid ${palette.border}`,
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        verticalAlign: "middle",
-        flexShrink: 1,
+        "& .MuiChip-label": {
+          px: 0,
+          paddingLeft: STATUS_CHIP_PADDING_X,
+          paddingRight: STATUS_CHIP_PADDING_X,
+          paddingTop: "2px",
+          paddingBottom: "2px",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        },
       }}
-    >
-      {label}
-    </span>
+    />
   );
 }

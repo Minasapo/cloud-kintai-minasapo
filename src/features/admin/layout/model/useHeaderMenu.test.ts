@@ -10,6 +10,19 @@ describe("ADMIN_HEADER_MENU_ITEMS", () => {
     });
   });
 
+  it("ワークフローのラベルを表示する", () => {
+    expect(ADMIN_HEADER_MENU_ITEMS).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          primaryLabel: "ワークフロー",
+          secondaryLabel: "Workflow",
+          ctaLabel: "申請一覧を確認",
+          href: "/admin/workflow",
+        }),
+      ]),
+    );
+  });
+
   it("すべてのカテゴリに secondaryLabel と ctaLabel が設定されている", () => {
     expect(
       ADMIN_HEADER_MENU_ITEMS.every(

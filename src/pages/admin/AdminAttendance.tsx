@@ -1,10 +1,12 @@
-import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
 import AttendanceSettingsDialog from "@features/admin-config-attendance/AttendanceSettingsDialog";
 import AttendanceDailyList from "@features/attendance/daily-list/ui/AttendanceDailyList";
 import DownloadForm from "@features/attendance/download-form/ui/DownloadForm";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import { Stack } from "@mui/material";
 import { designTokenVar } from "@shared/designSystem";
 import { AppButton } from "@shared/ui/button";
+import SettingsDialog from "@shared/ui/feedback/SettingsDialog";
 import { PageSection } from "@shared/ui/layout";
 import { useState } from "react";
 
@@ -19,9 +21,15 @@ const PAGE_PADDING_Y = {
 };
 
 const PAGE_SECTION_GAP = designTokenVar("spacing.lg", "16px");
+const MAIN_GREEN = designTokenVar(
+  "color.feedback.success.base",
+  "rgb(16 185 129)",
+);
+const MAIN_GREEN_DARK = "rgb(5 150 105)";
 
 export default function AdminAttendance() {
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
+  const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
 
   return (
     <>
@@ -29,6 +37,30 @@ export default function AdminAttendance() {
         open={isSettingsDialogOpen}
         onClose={() => setIsSettingsDialogOpen(false)}
       />
+      <SettingsDialog
+        open={isDownloadDialogOpen}
+        onClose={() => setIsDownloadDialogOpen(false)}
+        title="ダウンロード"
+        description="期間と対象スタッフを選択して、勤怠データを出力できます。"
+        maxWidth="lg"
+        PaperSx={{
+          minHeight: "650px",
+        }}
+        renderActions={(requestClose) => (
+          <div className="flex w-full items-center justify-end gap-2">
+            <AppButton
+              variant="outline"
+              tone="neutral"
+              size="sm"
+              onClick={requestClose}
+            >
+              閉じる
+            </AppButton>
+          </div>
+        )}
+      >
+        <DownloadForm mode="dialog" />
+      </SettingsDialog>
       <Stack
         component="section"
         sx={{
@@ -51,36 +83,49 @@ export default function AdminAttendance() {
               </p>
             </div>
 
-            <AppButton
-              variant="outline"
-              tone="secondary"
-              onClick={() => setIsSettingsDialogOpen(true)}
-              className="self-start"
-              aria-label="勤怠設定を開く"
-              startIcon={
-                <SettingsIcon name="settings" className="text-current" />
-              }
-            >
-              <span>設定</span>
-            </AppButton>
+            <div className="flex flex-wrap items-center justify-end gap-2 self-start">
+              <AppButton
+                variant="outline"
+                tone="primary"
+                onClick={() => setIsDownloadDialogOpen(true)}
+                sx={{
+                  whiteSpace: "nowrap",
+                  "--variant-outlinedColor": MAIN_GREEN,
+                  "--variant-outlinedBorder": "rgba(16, 185, 129, 0.5)",
+                  "--variant-outlinedBg": "rgba(16, 185, 129, 0.04)",
+                  "&:hover": {
+                    "--variant-outlinedBorder": MAIN_GREEN_DARK,
+                    "--variant-outlinedBg": "rgba(16, 185, 129, 0.1)",
+                  },
+                }}
+                aria-label="勤怠ダウンロードを開く"
+                startIcon={<DownloadRoundedIcon fontSize="small" />}
+              >
+                ダウンロード
+              </AppButton>
+
+              <AppButton
+                variant="outline"
+                tone="primary"
+                onClick={() => setIsSettingsDialogOpen(true)}
+                sx={{
+                  whiteSpace: "nowrap",
+                  "--variant-outlinedColor": MAIN_GREEN,
+                  "--variant-outlinedBorder": "rgba(16, 185, 129, 0.5)",
+                  "--variant-outlinedBg": "rgba(16, 185, 129, 0.04)",
+                  "&:hover": {
+                    "--variant-outlinedBorder": MAIN_GREEN_DARK,
+                    "--variant-outlinedBg": "rgba(16, 185, 129, 0.1)",
+                  },
+                }}
+                aria-label="勤怠設定を開く"
+                startIcon={<SettingsRoundedIcon fontSize="small" />}
+              >
+                設定
+              </AppButton>
+            </div>
           </div>
         </section>
-        <PageSection
-          variant="surface"
-          layoutVariant="dashboard"
-          className="gap-0"
-          sx={{
-            position: "relative",
-            zIndex: 20,
-            overflow: "visible",
-            borderRadius: "24px",
-            border: "1px solid rgba(226,232,240,0.8)",
-            backgroundColor: "rgb(255 255 255)",
-            boxShadow: "0 24px 48px -36px rgba(15,23,42,0.35)",
-          }}
-        >
-          <DownloadForm />
-        </PageSection>
         <PageSection
           variant="surface"
           layoutVariant="dashboard"

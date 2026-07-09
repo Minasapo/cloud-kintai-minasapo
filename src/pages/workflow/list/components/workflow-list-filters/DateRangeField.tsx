@@ -1,3 +1,5 @@
+import { AppButton } from "@shared/ui/button";
+
 import styles from "./DateRangeField.module.scss";
 import FilterTrigger from "./FilterTrigger";
 import FloatingPanel from "./FloatingPanel";
@@ -70,20 +72,24 @@ export default function DateRangeField({
             onChange={(value) => onChange(toKey, value)}
           />
           <div className={styles.actions}>
-            <button
-              type="button"
+            <AppButton
               onClick={onClear}
+              variant="ghost"
+              tone="secondary"
+              size="sm"
               className={styles.clearButton}
             >
               クリア
-            </button>
-            <button
-              type="button"
+            </AppButton>
+            <AppButton
               onClick={onClose}
+              variant="outline"
+              tone="neutral"
+              size="sm"
               className={styles.closeButton}
             >
               閉じる
-            </button>
+            </AppButton>
           </div>
         </div>
       </FloatingPanel>

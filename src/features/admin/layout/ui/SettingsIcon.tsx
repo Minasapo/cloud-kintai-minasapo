@@ -52,20 +52,22 @@ export default function SettingsIcon({
   const icon = (() => {
     switch (name) {
       case "menu":
-        return wrapPath(title, (
+        return wrapPath(
+          title,
           <>
             <path d="M4 7h16" />
             <path d="M4 12h16" />
             <path d="M4 17h16" />
-          </>
-        ));
+          </>,
+        );
       case "settings":
-        return wrapPath(title, (
+        return wrapPath(
+          title,
           <>
             <circle cx="12" cy="12" r="3.1" />
             <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a1.4 1.4 0 0 1 0 2l-1.4 1.4a1.4 1.4 0 0 1-2 0l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9v.2A1.4 1.4 0 0 1 13.1 22h-2.2a1.4 1.4 0 0 1-1.4-1.4v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a1.4 1.4 0 0 1-2 0l-1.4-1.4a1.4 1.4 0 0 1 0-2l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6h-.2A1.4 1.4 0 0 1 2 13.1v-2.2a1.4 1.4 0 0 1 1.4-1.4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a1.4 1.4 0 0 1 0-2l1.4-1.4a1.4 1.4 0 0 1 2 0l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9v-.2A1.4 1.4 0 0 1 10.9 2h2.2a1.4 1.4 0 0 1 1.4 1.4v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a1.4 1.4 0 0 1 2 0l1.4 1.4a1.4 1.4 0 0 1 0 2l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2a1.4 1.4 0 0 1 1.4 1.4v2.2a1.4 1.4 0 0 1-1.4 1.4h-.2a1 1 0 0 0-.9.6Z" />
-          </>
-        ));
+          </>,
+        );
       case "chevron-down":
         return wrapPath(title, <path d="m6 9 6 6 6-6" />);
       case "chevron-up":
@@ -73,86 +75,107 @@ export default function SettingsIcon({
       case "chevron-right":
         return wrapPath(title, <path d="m9 6 6 6-6 6" />);
       case "plus":
-        return wrapPath(title, (
+        return wrapPath(
+          title,
           <>
             <path d="M12 5v14" />
             <path d="M5 12h14" />
-          </>
-        ));
+          </>,
+        );
       case "delete":
-        return wrapPath(title, (
+        return wrapPath(
+          title,
           <>
             <path d="M4 7h16" />
             <path d="m9 7 .5-2h5L15 7" />
             <path d="M8 7v11" />
             <path d="M16 7v11" />
             <path d="M6 7l1 13h10l1-13" />
-          </>
-        ));
+          </>,
+        );
       case "edit":
-        return wrapPath(title, (
+        return wrapPath(
+          title,
           <>
             <path d="M12 20h9" />
             <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-          </>
-        ));
+          </>,
+        );
       case "reset":
-        return wrapPath(title, (
+        return wrapPath(
+          title,
           <>
             <path d="M3 11a9 9 0 1 0 3-6.7" />
             <path d="M3 4v5h5" />
-          </>
-        ));
+          </>,
+        );
       case "arrow-up":
-        return wrapPath(title, (
+        return wrapPath(
+          title,
           <>
             <path d="m12 5-5 5" />
             <path d="m12 5 5 5" />
             <path d="M12 5v14" />
-          </>
-        ));
+          </>,
+        );
       case "arrow-down":
-        return wrapPath(title, (
+        return wrapPath(
+          title,
           <>
             <path d="m7 14 5 5" />
             <path d="m17 14-5 5" />
             <path d="M12 5v14" />
-          </>
-        ));
+          </>,
+        );
       case "train":
-        return wrapPath(title, (
+        return wrapPath(
+          title,
           <>
             <rect x="7" y="3" width="10" height="13" rx="2" />
             <path d="M9 7h6" />
             <path d="M9 11h6" />
             <path d="m9 19-2 2" />
             <path d="m15 19 2 2" />
-          </>
-        ));
+          </>,
+        );
       case "holiday":
-        return wrapPath(title, (
+        return wrapPath(
+          title,
           <>
             <path d="M12 3c4.4 0 8 2.8 8 6.2 0 2.9-2.4 5.4-5.6 6L15 21l-3-3-3 3 .6-5.6C6.4 14.6 4 12.1 4 9.2 4 5.8 7.6 3 12 3Z" />
-          </>
-        ));
+          </>,
+        );
       case "expense":
-        return wrapPath(title, (
+        return wrapPath(
+          title,
           <>
             <circle cx="12" cy="12" r="8" />
             <path d="M9.5 9.5c0-1.1 1.1-2 2.5-2s2.5.9 2.5 2-1.1 2-2.5 2-2.5.9-2.5 2 1.1 2 2.5 2 2.5-.9 2.5-2" />
             <path d="M12 6.5v11" />
-          </>
-        ));
+          </>,
+        );
       case "link":
-        return wrapPath(title, (
+        return wrapPath(
+          title,
           <>
             <path d="M10 14 8 16a3 3 0 1 1-4-4l3-3a3 3 0 0 1 4 0" />
             <path d="m14 10 2-2a3 3 0 1 1 4 4l-3 3a3 3 0 0 1-4 0" />
             <path d="M9 15 15 9" />
-          </>
-        ));
+          </>,
+        );
     }
   })();
 
-  return <span className={[baseClassName, className].filter(Boolean).join(" ")}>{icon}</span>;
+  return (
+    <span
+      className={[
+        "flex h-5 w-5 shrink-0 items-center justify-center",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {icon}
+    </span>
+  );
 }

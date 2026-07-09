@@ -1,3 +1,4 @@
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { AppButton } from "@shared/ui/button";
 
 export default function WorkflowCreateButton({
@@ -11,11 +12,17 @@ export default function WorkflowCreateButton({
     <AppButton
       size="sm"
       onClick={onClick}
-      className={[
-        "workflow-create-button",
-        isCompact ? "workflow-create-button--compact" : "",
-      ].join(" ")}
-      startIcon={<span className="workflow-create-button__icon">+</span>}
+      sx={{
+        width: isCompact ? "100%" : "auto",
+        "--variant-containedColor": "#fff",
+        "--variant-containedBg": "#19b985",
+        backgroundColor: "#19b985",
+        "&:hover": {
+          "--variant-containedBg": "#17ab7b",
+          backgroundColor: "#17ab7b",
+        },
+      }}
+      startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
     >
       {isCompact ? "新規" : "新規作成"}
     </AppButton>

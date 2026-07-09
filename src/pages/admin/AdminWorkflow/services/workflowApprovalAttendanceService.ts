@@ -25,13 +25,13 @@ export type AttendanceQueryTrigger = (arg: {
   workDate: string;
 }) => { unwrap: () => Promise<Attendance | null> };
 
-export type CreateAttendanceTrigger = (
-  input: CreateAttendanceMutationArg
-) => { unwrap: () => Promise<Attendance> };
+export type CreateAttendanceTrigger = (input: CreateAttendanceMutationArg) => {
+  unwrap: () => Promise<Attendance>;
+};
 
-export type UpdateAttendanceTrigger = (
-  input: UpdateAttendanceMutationArg
-) => { unwrap: () => Promise<Attendance> };
+export type UpdateAttendanceTrigger = (input: UpdateAttendanceMutationArg) => {
+  unwrap: () => Promise<Attendance>;
+};
 
 export class WorkflowApprovalUserError extends Error {}
 
@@ -85,7 +85,7 @@ export const processPaidLeaveApprovalAttendance = async ({
 
   for (let i = 0; i < dayCount; i++) {
     const targetDay = start.add(i, "day");
-    const workDate = targetDay.format("YYYY-MM-DD");
+    const workDate = targetDay.format("YYYY/MM/DD");
 
     const buildIso = (time: string) => {
       const [hour, minute] = time.split(":").map(Number);
@@ -195,7 +195,7 @@ export const processCompensatoryLeaveApprovalAttendance = async ({
   const applicantStaff = staffs.find((staff) => staff.id === workflow.staffId);
   const targetStaffId = applicantStaff?.cognitoUserId || workflow.staffId;
 
-  const workDate = compensatoryDay.format("YYYY-MM-DD");
+  const workDate = compensatoryDay.format("YYYY/MM/DD");
 
   const buildIso = (time: string) => {
     const [hour, minute] = time.split(":").map(Number);
@@ -303,30 +303,36 @@ export const processClockCorrectionApprovalAttendance = async ({
   if (!targetTime) {
     validationErrors.push("対象の時刻が null/undefined");
   }
-  if (overtimeDetails?.date && !/^\d{4}-\d{2}-\d{2}$/.test(overtimeDetails.date)) {
+  if (
+    overtimeDetails?.date &&
+    !/^\d{4}-\d{2}-\d{2}$/.test(overtimeDetails.date)
+  ) {
     validationErrors.push(
-      `workDate が正しい形式ではありません: "${overtimeDetails.date}" (YYYY-MM-DD の形式が必要)`
+      `workDate が正しい形式ではありません: "${overtimeDetails.date}" (YYYY-MM-DD の形式が必要)`,
     );
   }
   if (targetTime && !/^\d{2}:\d{2}$/.test(targetTime)) {
     validationErrors.push(
-      `${timeLabel}時刻が正しい形式ではありません: "${targetTime}" (HH:mm の形式が必要)`
+      `${timeLabel}時刻が正しい形式ではありません: "${targetTime}" (HH:mm の形式が必要)`,
     );
   }
 
   if (validationErrors.length > 0) {
     throw new WorkflowApprovalUserError(
-      `勤怠データの作成に失敗しました: ${validationErrors.join(", ")}`
+      `勤怠データの作成に失敗しました: ${validationErrors.join(", ")}`,
     );
   }
 
   let attendanceTimeIso: string;
   try {
-    const attendanceTime = new AttendanceTime(targetTime!, overtimeDetails!.date);
+    const attendanceTime = new AttendanceTime(
+      targetTime!,
+      overtimeDetails!.date,
+    );
     attendanceTimeIso = attendanceTime.toAPI();
   } catch {
     throw new WorkflowApprovalUserError(
-      "時刻の形式が正しくありません。勤怠データを作成できません。"
+      "時刻の形式が正しくありません。勤怠データを作成できません。",
     );
   }
 
@@ -351,7 +357,7 @@ export const processClockCorrectionApprovalAttendance = async ({
 
   if (isClockOutCorrection && !existingAttendance) {
     throw new WorkflowApprovalUserError(
-      "対応する出勤打刻がありません。先に出勤打刻を登録してください。"
+      "対応する出勤打刻がありません。先に出勤打刻を登録してください。",
     );
   }
 
@@ -374,17 +380,20 @@ export const processClockCorrectionApprovalAttendance = async ({
       : createInput.startTime,
     endTime: isClockOutCorrection
       ? createInput.endTime
-      : existingAttendance.endTime ?? createInput.endTime,
-    goDirectlyFlag: existingAttendance.goDirectlyFlag ?? createInput.goDirectlyFlag,
+      : (existingAttendance.endTime ?? createInput.endTime),
+    goDirectlyFlag:
+      existingAttendance.goDirectlyFlag ?? createInput.goDirectlyFlag,
     returnDirectlyFlag:
       existingAttendance.returnDirectlyFlag ?? createInput.returnDirectlyFlag,
     absentFlag: existingAttendance.absentFlag ?? createInput.absentFlag,
-    paidHolidayFlag: existingAttendance.paidHolidayFlag ?? createInput.paidHolidayFlag,
+    paidHolidayFlag:
+      existingAttendance.paidHolidayFlag ?? createInput.paidHolidayFlag,
     specialHolidayFlag:
       existingAttendance.specialHolidayFlag ?? createInput.specialHolidayFlag,
     rests: existingAttendance.rests ?? createInput.rests,
     hourlyPaidHolidayTimes:
-      existingAttendance.hourlyPaidHolidayTimes ?? createInput.hourlyPaidHolidayTimes,
+      existingAttendance.hourlyPaidHolidayTimes ??
+      createInput.hourlyPaidHolidayTimes,
     revision: existingAttendance.revision,
     logContext: {
       action: "attendance.workflow.apply",

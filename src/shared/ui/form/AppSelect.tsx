@@ -22,6 +22,8 @@ type AppSelectProps<TValue extends SelectValue> = {
   options: ReadonlyArray<AppSelectOption<TValue>>;
   onChange: (value: TValue | "") => void;
   parseValue?: (rawValue: string) => TValue;
+  placeholder?: ReactNode;
+  disabled?: boolean;
   size?: "small" | "medium";
   sx?: SxProps<Theme>;
 };
@@ -33,16 +35,22 @@ export function AppSelect<TValue extends SelectValue>({
   options,
   onChange,
   parseValue,
+  placeholder,
+  disabled = false,
   size = "small",
   sx,
 }: AppSelectProps<TValue>) {
   return (
-    <FormControl size={size} sx={sx}>
-      <InputLabel id={labelId}>{label}</InputLabel>
+    <FormControl size={size} sx={sx} disabled={disabled}>
+      <InputLabel id={labelId} shrink={placeholder ? true : undefined}>
+        {label}
+      </InputLabel>
       <Select
         labelId={labelId}
         value={value}
         label={label}
+        disabled={disabled}
+        displayEmpty={Boolean(placeholder)}
         onChange={(event) => {
           const rawValue = event.target.value;
           if (rawValue === "") {
@@ -55,6 +63,20 @@ export function AppSelect<TValue extends SelectValue>({
             : (rawValue as TValue);
           onChange(nextValue);
         }}
+        renderValue={
+          placeholder
+            ? (selected) => {
+                if (selected === "") {
+                  return placeholder;
+                }
+
+                const selectedOption = options.find(
+                  (option) => option.value === selected,
+                );
+                return selectedOption?.label ?? String(selected);
+              }
+            : undefined
+        }
       >
         {options.map((option) => (
           <MenuItem key={String(option.value)} value={option.value}>

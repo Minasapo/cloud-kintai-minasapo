@@ -186,6 +186,7 @@ export default function AttendanceDailyList() {
     displayDateFormatted,
     sortedAttendanceList,
     pendingList,
+    pendingAttendanceMap,
     staffNameMap,
     attendanceMap,
     attendanceLoadingMap,
@@ -220,7 +221,9 @@ export default function AttendanceDailyList() {
       <TableRow key={key} className="attendance-row">
         <ActionsTableCell
           row={row}
-          attendances={attendanceMap[row.sub] ?? []}
+          attendances={
+            pendingAttendanceMap[row.sub] ?? attendanceMap[row.sub] ?? []
+          }
           attendanceLoading={!!attendanceLoadingMap[row.sub]}
           attendanceError={attendanceErrorMap[row.sub] ?? null}
           holidayCalendars={holidayCalendars}
@@ -262,6 +265,7 @@ export default function AttendanceDailyList() {
       duplicateInfoByStaff,
       getAttendanceForDisplayDate,
       holidayCalendars,
+      pendingAttendanceMap,
       renderOvertimeValue,
     ],
   );
@@ -305,11 +309,11 @@ export default function AttendanceDailyList() {
         <Box sx={pendingOuterBoxSx}>
           <Box sx={pendingWarningBoxSx}>
             <Typography variant="h6" sx={sectionTitleSx}>
-              申請中のスタッフ ({pendingList.length})
+              承認待ち一覧 ({pendingList.length})
             </Typography>
             <Alert severity="warning">
               <AlertTitle sx={alertTitleBoldSx}>確認してください</AlertTitle>
-              申請中のスタッフがあります。承認されるまで反映されません
+              未承認の変更リクエストがあるスタッフを表示しています。
             </Alert>
             <TableContainer sx={tableContainerSx}>
               <Table size="small">
