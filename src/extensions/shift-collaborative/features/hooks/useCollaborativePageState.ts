@@ -171,14 +171,6 @@ export const useCollaborativePageState = (
   const isEditingDisabled =
     !state.isOnline || state.connectionState === "disconnected";
 
-  const releaseEditLocks = useCallback(
-    (targets: Array<{ staffId: string; date: string }>) =>
-      Promise.all(
-        targets.map(({ staffId, date }) => stopEditingCell(staffId, date)),
-      ).then(() => {}),
-    [stopEditingCell],
-  );
-
   const handleStateChanged = useCallback(
     async (changes: AppliedStateChange[]) => {
       await Promise.all(
@@ -212,7 +204,6 @@ export const useCollaborativePageState = (
     updateUserActivity,
     updateShift,
     batchUpdateShifts,
-    releaseEditLocks,
     onStateChanged: handleStateChanged,
     selectionCount,
     selectedCells,
@@ -281,60 +272,11 @@ export const useCollaborativePageState = (
     selectAll,
   });
 
-  const selectionTargetsForAutoRelease = useMemo(() => {
-    if (selectionCount > 0) {
-      return selectedCells;
-    }
-    if (focusedCell) {
-      return [focusedCell];
-    }
-    return [];
-  }, [selectionCount, selectedCells, focusedCell]);
-
   const handleCellClick = useCallback(
     (staffId: string, date: string, event: MouseEvent) => {
-      if (!event.shiftKey && !event.ctrlKey && !event.metaKey) {
-        const isSameAsCurrentSingleSelection =
-          selectionCount === 1 &&
-          selectedCells[0]?.staffId === staffId &&
-          selectedCells[0]?.date === date;
-        const isSameAsFocusedCellWhenNoSelection =
-          selectionCount === 0 &&
-          focusedCell?.staffId === staffId &&
-          focusedCell?.date === date;
-
-        const isDayMoved =
-          !isSameAsCurrentSingleSelection &&
-          !isSameAsFocusedCellWhenNoSelection;
-
-        if (isDayMoved) {
-          const releaseTargets = selectionTargetsForAutoRelease.filter(
-            (target) =>
-              hasEditLock(target.staffId, target.date) &&
-              !(target.staffId === staffId && target.date === date),
-          );
-
-          if (releaseTargets.length > 0) {
-            void Promise.allSettled(
-              releaseTargets.map((target) =>
-                stopEditingCell(target.staffId, target.date),
-              ),
-            );
-          }
-        }
-      }
-
       baseHandleCellClick(staffId, date, event);
     },
-    [
-      selectionCount,
-      selectedCells,
-      focusedCell,
-      selectionTargetsForAutoRelease,
-      hasEditLock,
-      stopEditingCell,
-      baseHandleCellClick,
-    ],
+    [baseHandleCellClick],
   );
 
   const handleApplySuggestion = useCallback(

@@ -40,9 +40,6 @@ type UseCellStateActionsParams = {
   batchUpdateShifts: (
     updates: Array<{ staffId: string; date: string; newState?: ShiftState }>,
   ) => Promise<void>;
-  releaseEditLocks: (
-    targets: Array<{ staffId: string; date: string }>,
-  ) => Promise<void>;
   onStateChanged?: (changes: AppliedStateChange[]) => Promise<void> | void;
   selectionCount: number;
   selectedCells: CellPosition[];
@@ -62,7 +59,6 @@ export const useCellStateActions = ({
   updateUserActivity,
   updateShift,
   batchUpdateShifts,
-  releaseEditLocks,
   onStateChanged,
   selectionCount,
   selectedCells,
@@ -107,7 +103,6 @@ export const useCellStateActions = ({
       const previousState = getCellState(staffId, date);
       updateUserActivity();
       await updateShift({ staffId, date, newState });
-      await releaseEditLocks([{ staffId, date }]);
 
       if (previousState === newState) {
         return null;
@@ -128,7 +123,6 @@ export const useCellStateActions = ({
       isCellLocked,
       isEditingDisabled,
       networkEditDisabledMessage,
-      releaseEditLocks,
       setEditLockError,
       targetMonth,
       updateShift,
@@ -177,7 +171,6 @@ export const useCellStateActions = ({
               setEditLockError(null);
               updateUserActivity();
               await batchUpdateShifts(validUpdates);
-              await releaseEditLocks(validUpdates);
 
               const changed = validUpdates
                 .map((update) => {
@@ -235,7 +228,6 @@ export const useCellStateActions = ({
       isEditingDisabled,
       networkEditDisabledMessage,
       onStateChanged,
-      releaseEditLocks,
       selectedCells,
       selectionCount,
       setEditLockError,

@@ -13,7 +13,7 @@ import { AppButton, AppIconButton } from "@shared/ui/button";
 import { AppTextField } from "@shared/ui/form";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { CHAT_SYSTEM_MESSAGE_PREFIX } from "../../lib/chatSystemMessages";
 import {
@@ -57,133 +57,182 @@ const stateOptions: Array<{ state: ShiftState; label: string; color: string }> =
     { state: "empty", label: "未入力", color: "rgb(158 158 158)" },
   ];
 
-interface CellEditLockSectionProps {
+interface CellAcquireEditLockSectionProps {
   hasEditLockForSelected: boolean;
   isOthersEditingSelected: boolean;
-  canUnlock: boolean;
   isUpdating: boolean;
   onAcquireEditLock: () => Promise<void>;
-  onReleaseEditLock: () => Promise<void>;
-  onForceReleaseLock: () => void;
 }
 
-export const CellEditLockSection = ({
+export const CellAcquireEditLockSection = ({
   hasEditLockForSelected,
   isOthersEditingSelected,
-  canUnlock,
   isUpdating,
   onAcquireEditLock,
-  onReleaseEditLock,
-  onForceReleaseLock,
-}: CellEditLockSectionProps) => (
-  <Box>
-    <Stack direction="row" spacing={1}>
-      {!hasEditLockForSelected && !isOthersEditingSelected && (
+}: CellAcquireEditLockSectionProps) => {
+  const isAcquireLoading =
+    isUpdating && !hasEditLockForSelected && !isOthersEditingSelected;
+
+  return (
+    <Box>
+      <Stack direction="row" spacing={1}>
         <AppButton
           variant="solid"
           size="sm"
           onClick={onAcquireEditLock}
-          disabled={isUpdating}
-          loading={isUpdating}
+          disabled={
+            isUpdating || hasEditLockForSelected || isOthersEditingSelected
+          }
+          loading={isAcquireLoading}
         >
-          {isUpdating ? "処理中..." : "編集開始（ロック取得）"}
+          {isAcquireLoading ? "処理中..." : "編集開始（ロック取得）"}
         </AppButton>
-      )}
-      {hasEditLockForSelected && (
-        <AppButton
-          variant="outline"
-          size="sm"
-          onClick={onReleaseEditLock}
-          disabled={isUpdating}
-          loading={isUpdating}
-        >
-          {isUpdating ? "処理中..." : "編集終了（ロック解除）"}
-        </AppButton>
-      )}
-      {canUnlock && (
-        <AppButton
-          variant="solid"
-          tone="danger"
-          size="sm"
-          onClick={onForceReleaseLock}
-          disabled={isUpdating}
-          loading={isUpdating}
-        >
-          {isUpdating ? "処理中..." : "編集ロックを強制解除"}
-        </AppButton>
-      )}
-      {isOthersEditingSelected && !canUnlock && (
-        <Typography variant="body2" color="error" sx={{ alignSelf: "center" }}>
-          他のユーザーが編集中です
-        </Typography>
-      )}
-    </Stack>
-  </Box>
-);
+        {isOthersEditingSelected && (
+          <Typography
+            variant="body2"
+            color="error"
+            sx={{ alignSelf: "center" }}
+          >
+            他のユーザーが編集中です
+          </Typography>
+        )}
+      </Stack>
+    </Box>
+  );
+};
+
+interface CellReleaseLockSectionProps {
+  hasEditLockForSelected: boolean;
+  canUnlock: boolean;
+  isOthersEditingSelected: boolean;
+  isUpdating: boolean;
+  onReleaseEditLock: () => Promise<void>;
+  onForceReleaseLock: () => void;
+}
+
+export const CellReleaseLockSection = ({
+  hasEditLockForSelected,
+  canUnlock,
+  isOthersEditingSelected,
+  isUpdating,
+  onReleaseEditLock,
+  onForceReleaseLock,
+}: CellReleaseLockSectionProps) => {
+  const isReleaseLoading = isUpdating && hasEditLockForSelected;
+  const isForceReleaseLoading = isUpdating && canUnlock;
+
+  return (
+    <Box>
+      <Stack spacing={1.5}>
+        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+          <AppButton
+            variant="outline"
+            size="sm"
+            onClick={onReleaseEditLock}
+            disabled={isUpdating || !hasEditLockForSelected}
+            loading={isReleaseLoading}
+          >
+            {isReleaseLoading ? "処理中..." : "編集終了（ロック解除）"}
+          </AppButton>
+          {isOthersEditingSelected && !canUnlock && (
+            <Typography
+              variant="body2"
+              color="error"
+              sx={{ alignSelf: "center" }}
+            >
+              他のユーザーが編集中です
+            </Typography>
+          )}
+        </Stack>
+
+        {canUnlock && (
+          <Stack spacing={0.75}>
+            <Typography variant="caption" color="text.secondary">
+              管理者のみ:
+              ロック保持者の操作継続が難しい場合に、編集ロックを強制解除できます。
+            </Typography>
+            <AppButton
+              variant="solid"
+              tone="danger"
+              size="sm"
+              onClick={onForceReleaseLock}
+              disabled={isUpdating}
+              loading={isForceReleaseLoading}
+            >
+              {isForceReleaseLoading ? "処理中..." : "編集ロックを強制解除"}
+            </AppButton>
+          </Stack>
+        )}
+      </Stack>
+    </Box>
+  );
+};
 
 interface CellStateButtonsProps {
   isUpdating: boolean;
   hasEditLockForSelected: boolean;
   onChangeState: (state: ShiftState) => void;
+  currentState?: ShiftState | null;
+  showTitle?: boolean;
 }
 
 export const CellStateButtons = ({
   isUpdating,
   hasEditLockForSelected,
   onChangeState,
-}: CellStateButtonsProps) => (
-  <Box>
-    <Typography variant="caption" color="text.secondary" gutterBottom>
-      状態を一括変更:
-    </Typography>
-    <ToggleButtonGroup
-      value={null}
-      exclusive
-      onChange={(_, value: ShiftState | null) => {
-        if (value) {
+  currentState = null,
+  showTitle = true,
+}: CellStateButtonsProps) => {
+  const [selectedState, setSelectedState] = useState<ShiftState | null>(
+    currentState,
+  );
+
+  useEffect(() => {
+    setSelectedState(currentState);
+  }, [currentState]);
+
+  return (
+    <Box>
+      {showTitle && (
+        <Typography variant="caption" color="text.secondary" gutterBottom>
+          状態を変更:
+        </Typography>
+      )}
+      <ToggleButtonGroup
+        value={selectedState}
+        size="small"
+        exclusive
+        onChange={(_, value: ShiftState | null) => {
+          if (!value) {
+            return;
+          }
+
+          setSelectedState(value);
           onChangeState(value);
-        }
-      }}
-      disabled={isUpdating || !hasEditLockForSelected}
-      sx={{
-        mt: 1,
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 1,
-        "& .MuiToggleButton-root": {
-          border: 0,
-          borderRadius: 999,
-          color: "common.white",
-          fontWeight: 600,
-          px: 1.75,
-          py: 0.5,
-          "&:hover": {
-            opacity: 0.85,
-          },
-          "&.Mui-disabled": {
-            opacity: 0.45,
-            color: "common.white",
-          },
-        },
-      }}
-    >
-      {stateOptions.map((option) => (
-        <ToggleButton
-          key={option.state}
-          value={option.state}
-          sx={{
-            bgcolor: option.color,
-            "&.Mui-selected, &.Mui-selected:hover": {
-              bgcolor: option.color,
-            },
-          }}
-        >
-          {option.label}
-        </ToggleButton>
-      ))}
-    </ToggleButtonGroup>
-  </Box>
-);
+        }}
+        disabled={isUpdating || !hasEditLockForSelected}
+      >
+        {stateOptions.map((option) => (
+          <ToggleButton
+            key={option.state}
+            value={option.state}
+            sx={{
+              color: option.color,
+              borderColor: option.color,
+              "&.Mui-selected, &.Mui-selected:hover": {
+                color: "common.white",
+                bgcolor: option.color,
+                borderColor: option.color,
+              },
+            }}
+          >
+            {option.label}
+          </ToggleButton>
+        ))}
+      </ToggleButtonGroup>
+    </Box>
+  );
+};
 
 interface CellCommentsSectionProps {
   currentUserId: string;
@@ -380,13 +429,21 @@ export const CellCommentsSection = ({
         )}
       </Box>
 
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "auto" }}>
-        <Box sx={{ width: "100%", maxWidth: 560 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          mt: "auto",
+          minWidth: 0,
+        }}
+      >
+        <Box sx={{ width: "100%", maxWidth: 560, minWidth: 0 }}>
           <Box
             sx={{
               display: "flex",
               alignItems: "flex-end",
               gap: 0.5,
+              minWidth: 0,
               px: 1,
               py: 0.5,
               border: "1px solid",
@@ -406,6 +463,7 @@ export const CellCommentsSection = ({
               maxRows={2}
               sx={{
                 flexGrow: 1,
+                minWidth: 0,
                 "& .MuiOutlinedInput-root": {
                   px: 0,
                   py: 0,
@@ -433,6 +491,7 @@ export const CellCommentsSection = ({
               loading={isAddingComment}
               onClick={onAddComment}
               disabled={!commentText.trim() || isAddingComment || isUpdating}
+              className="shrink-0"
             >
               <SendRoundedIcon fontSize="small" />
             </AppIconButton>
