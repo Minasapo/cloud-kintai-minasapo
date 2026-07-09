@@ -12,7 +12,11 @@ import {
 } from "react";
 
 import { useCollaborativeShift } from "../context/CollaborativeShiftContext";
-import { buildShiftStateChangedSystemMessage } from "../lib/chatSystemMessages";
+import {
+  buildShiftStateChangedSystemMessage,
+  CHAT_SYSTEM_MESSAGE_PREFIX,
+} from "../lib/chatSystemMessages";
+import { normalizeErrorMessage } from "../lib/lockUtils";
 import { SuggestedAction } from "../rules/shiftRules";
 import type { ShiftDataMap } from "../types/collaborative.types";
 import {
@@ -34,6 +38,11 @@ const isAdminRole = (isCognitoUserRole: (role: StaffRole) => boolean) =>
   isCognitoUserRole(StaffRole.ADMIN) ||
   isCognitoUserRole(StaffRole.STAFF_ADMIN) ||
   isCognitoUserRole(StaffRole.OWNER);
+
+type CellPosition = {
+  staffId: string;
+  date: string;
+};
 
 const useShiftCalendarAndCellState = (
   targetMonth: string,
@@ -203,12 +212,38 @@ export const useCollaborativePageState = (
       getCellData(staffId, date)?.state,
     updateUserActivity,
     updateShift,
+    stopEditingCell,
     batchUpdateShifts,
     onStateChanged: handleStateChanged,
     selectionCount,
     selectedCells,
     focusedCell,
   });
+
+  const releaseOwnedEditLocks = useCallback(
+    async (targets: CellPosition[], addSystemComment: boolean) => {
+      const ownedTargets = targets.filter(({ staffId, date }) =>
+        hasEditLock(staffId, date),
+      );
+
+      await Promise.all(
+        ownedTargets.map(async ({ staffId, date }) => {
+          await stopEditingCell(staffId, date);
+
+          if (!addSystemComment) {
+            return;
+          }
+
+          await addComment(
+            `${staffId}#${date}`,
+            `${CHAT_SYSTEM_MESSAGE_PREFIX}${currentUserName}が編集ロックを解除しました`,
+            [],
+          );
+        }),
+      );
+    },
+    [addComment, currentUserName, hasEditLock, stopEditingCell],
+  );
 
   const {
     hasLocked,
@@ -274,9 +309,33 @@ export const useCollaborativePageState = (
 
   const handleCellClick = useCallback(
     (staffId: string, date: string, event: MouseEvent) => {
-      baseHandleCellClick(staffId, date, event);
+      const previousTargets: CellPosition[] =
+        selectionCount > 0 ? selectedCells : focusedCell ? [focusedCell] : [];
+      const didMoveDate = previousTargets.some(
+        (target) => target.date !== date,
+      );
+
+      const run = async () => {
+        try {
+          if (didMoveDate) {
+            await releaseOwnedEditLocks(previousTargets, true);
+          }
+
+          baseHandleCellClick(staffId, date, event);
+        } catch (error) {
+          setEditLockError(normalizeErrorMessage(error));
+        }
+      };
+
+      void run();
     },
-    [baseHandleCellClick],
+    [
+      baseHandleCellClick,
+      focusedCell,
+      releaseOwnedEditLocks,
+      selectedCells,
+      selectionCount,
+    ],
   );
 
   const handleApplySuggestion = useCallback(

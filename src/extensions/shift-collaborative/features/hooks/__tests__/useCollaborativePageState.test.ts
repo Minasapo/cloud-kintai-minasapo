@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 
+import { CHAT_SYSTEM_MESSAGE_PREFIX } from "../../lib/chatSystemMessages";
 import { useCollaborativePageState } from "../useCollaborativePageState";
 
 const mockUseCollaborativeShift = jest.fn();
@@ -53,6 +54,7 @@ describe("useCollaborativePageState", () => {
   const mockStartEditingCell = jest.fn();
   const mockStopEditingCell = jest.fn();
   const mockUpdateUserActivity = jest.fn();
+  const mockAddComment = jest.fn();
 
   const buildState = ({
     isOnline = true,
@@ -95,7 +97,7 @@ describe("useCollaborativePageState", () => {
     retryPendingChanges: jest.fn(),
     getCellHistory: jest.fn(() => []),
     getAllCellHistory: jest.fn(() => []),
-    addComment: jest.fn(),
+    addComment: mockAddComment,
     updateComment: jest.fn(),
     deleteComment: jest.fn(),
     getCommentsByCell: jest.fn(() => []),
@@ -110,6 +112,7 @@ describe("useCollaborativePageState", () => {
     mockStartEditingCell.mockReset();
     mockStopEditingCell.mockReset();
     mockUpdateUserActivity.mockReset();
+    mockAddComment.mockReset();
     mockGraphql.mockReset();
     mockGraphql.mockReturnValue(new Promise(() => undefined));
 
@@ -597,6 +600,11 @@ describe("useCollaborativePageState", () => {
 
     expect(mockStopEditingCell).toHaveBeenCalledTimes(1);
     expect(mockStopEditingCell).toHaveBeenCalledWith("staff-1", "01");
+    expect(mockAddComment).toHaveBeenCalledWith(
+      "staff-1#01",
+      `${CHAT_SYSTEM_MESSAGE_PREFIX}不明ユーザーが編集ロックを解除しました`,
+      [],
+    );
   });
 
   it("同じ日付の再選択ではロックを自動解除しない", async () => {
