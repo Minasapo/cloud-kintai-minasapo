@@ -33,6 +33,7 @@ export const shiftStateConfig: Record<
 export const SHIFT_CELL_SIZE = 50;
 export const SHIFT_CELL_BASE_STYLE: CSSProperties = {
   position: "relative",
+  zIndex: 0,
   cursor: "pointer",
   minWidth: SHIFT_CELL_SIZE,
   maxWidth: SHIFT_CELL_SIZE,
@@ -192,7 +193,7 @@ export const ShiftCellBase: FC<ShiftCellProps> = ({
     >
       {(isLocked || isSelfEditing) && (
         <div
-          className="absolute right-0 top-0 z-10 flex h-4 w-4 items-center justify-center rounded-bl-sm text-white shadow-sm"
+          className="absolute right-0 top-0 z-0 flex h-4 w-4 items-center justify-center rounded-bl-sm text-white shadow-sm"
           style={{
             backgroundColor: isLocked ? "rgb(34 197 94)" : "rgb(100 116 139)",
           }}

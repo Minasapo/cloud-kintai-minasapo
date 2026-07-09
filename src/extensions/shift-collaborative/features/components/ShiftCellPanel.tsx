@@ -489,10 +489,13 @@ const ShiftCellPanelBase = ({
           {showCommentsPanel && (
             <Box
               sx={{
+                display: "flex",
+                flexDirection: "column",
                 flex: { xs: 1, md: "0 0 420px" },
                 width: { xs: "100%", md: 420 },
                 minHeight: 0,
                 pl: { xs: 0, md: 2 },
+                pb: { xs: 1, md: 1.5 },
                 borderLeft: { xs: "none", md: "1px solid" },
                 borderColor: "divider",
               }}

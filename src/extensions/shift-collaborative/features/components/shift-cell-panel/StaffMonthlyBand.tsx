@@ -1,3 +1,4 @@
+import CheckIcon from "@mui/icons-material/Check";
 import { Box, Divider, Stack, Tooltip, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { MouseEvent, useCallback, useRef } from "react";
@@ -126,25 +127,23 @@ const DayCell = ({
           >
             {config.label}
           </Typography>
-          {/* ロックアイコン */}
+          {/* 確定アイコン */}
           {cellData?.isLocked && (
             <Box
               sx={{
                 position: "absolute",
                 bottom: 0,
                 right: 0,
-                width: 7,
-                height: 7,
-                bgcolor: "rgba(0,0,0,0.45)",
+                width: 8,
+                height: 8,
+                bgcolor: "success.main",
                 borderRadius: "2px 0 2px 0",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Typography sx={{ fontSize: 5, color: "#fff", lineHeight: 1 }}>
-                🔒
-              </Typography>
+              <CheckIcon sx={{ fontSize: 6, color: "#fff" }} />
             </Box>
           )}
         </Box>

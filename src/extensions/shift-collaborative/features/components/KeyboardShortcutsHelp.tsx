@@ -48,11 +48,7 @@ export const KeyboardShortcutsHelpBase = ({
     },
     {
       title: "選択",
-      shortcuts: [
-        { key: "Ctrl/Cmd + A", description: "全セル選択" },
-        { key: "Shift + クリック", description: "範囲選択" },
-        { key: "Ctrl/Cmd + クリック", description: "複数選択" },
-      ],
+      shortcuts: [{ key: "クリック", description: "単一セルを選択" }],
     },
     {
       title: "その他",
@@ -70,11 +66,7 @@ export const KeyboardShortcutsHelpBase = ({
       <DialogTitle>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">キーボードショートカット</Typography>
-          <AppIconButton
-            onClick={onClose}
-            aria-label="close"
-            size="sm"
-          >
+          <AppIconButton onClick={onClose} aria-label="close" size="sm">
             <CloseIcon />
           </AppIconButton>
         </Box>

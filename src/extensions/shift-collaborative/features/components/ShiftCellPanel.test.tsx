@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import dayjs from "dayjs";
 
@@ -232,5 +232,37 @@ describe("ShiftCellPanel", () => {
       "01",
       expect.any(Object),
     );
+  });
+
+  it("月次帯の確定セルはロック絵文字ではなくチェックアイコンを表示する", () => {
+    render(
+      <ShiftCellPanel
+        {...baseProps}
+        selectedCells={[{ staffId: "staff-1", date: "01" }]}
+        shiftDataMap={
+          new Map([
+            [
+              "staff-1",
+              new Map([
+                [
+                  "01",
+                  {
+                    state: "requestedOff",
+                    isLocked: true,
+                  },
+                ],
+              ]),
+            ],
+          ])
+        }
+        days={[dayjs("2026-07-01")]}
+        staffNameMap={new Map([["staff-1", "スタッフ1"]])}
+      />,
+    );
+
+    const dayButton = screen.getByRole("button", { name: /7\/1/ });
+
+    expect(within(dayButton).getByTestId("CheckIcon")).toBeInTheDocument();
+    expect(within(dayButton).queryByText("🔒")).not.toBeInTheDocument();
   });
 });

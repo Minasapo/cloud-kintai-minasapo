@@ -292,10 +292,7 @@ export const CellCommentsSection = ({
       sx={{
         display: "flex",
         flexDirection: "column",
-        height: {
-          xs: 420,
-          md: 560,
-        },
+        flex: 1,
         minHeight: 0,
       }}
     >
@@ -432,24 +429,26 @@ export const CellCommentsSection = ({
       <Box
         sx={{
           display: "flex",
-          justifyContent: "flex-end",
-          mt: "auto",
+          justifyContent: "stretch",
+          mt: 1,
           minWidth: 0,
         }}
       >
-        <Box sx={{ width: "100%", maxWidth: 560, minWidth: 0 }}>
+        <Box sx={{ width: "100%", maxWidth: "100%", minWidth: 0 }}>
           <Box
             sx={{
               display: "flex",
-              alignItems: "flex-end",
+              alignItems: "center",
               gap: 0.5,
+              minHeight: 52,
               minWidth: 0,
               px: 1,
-              py: 0.5,
+              py: 0.75,
               border: "1px solid",
               borderColor: "divider",
               borderRadius: 999,
               bgcolor: "background.paper",
+              flexWrap: "nowrap",
             }}
           >
             <AppTextField
