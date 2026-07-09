@@ -1,6 +1,5 @@
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import LockOpenIcon from "@mui/icons-material/LockOpen";
 import {
   Box,
   Divider,
@@ -46,11 +45,9 @@ interface ShiftCellPanelProps {
   onClear: () => void;
   onChangeState: (state: ShiftState) => void;
   onLock: () => Promise<boolean>;
-  onUnlock: () => Promise<boolean>;
   onAddComments?: (content: string, mentions: Mention[]) => Promise<void>;
   canUnlock: boolean;
   showLock: boolean;
-  showUnlock: boolean;
   isUpdating?: boolean;
   hasEditLockForSelected: boolean;
   isOthersEditingSelected: boolean;
@@ -79,11 +76,9 @@ const ShiftCellPanelBase = ({
   onClear,
   onChangeState,
   onLock,
-  onUnlock,
   onAddComments,
   canUnlock,
   showLock,
-  showUnlock,
   isUpdating = false,
   hasEditLockForSelected,
   isOthersEditingSelected,
@@ -259,26 +254,6 @@ const ShiftCellPanelBase = ({
     });
   };
 
-  const handleUnlockCells = async () => {
-    await runLockAction(4, async () => {
-      const unlocked = await onUnlock();
-      if (!unlocked) {
-        return;
-      }
-
-      setIsLockConfirmed(false);
-
-      if (!onAddComments) {
-        return;
-      }
-
-      await onAddComments(
-        buildShiftLockChangedSystemMessage(currentUserName, false),
-        [],
-      );
-    });
-  };
-
   if (selectionCount === 0) return null;
 
   return (
@@ -437,14 +412,14 @@ const ShiftCellPanelBase = ({
                 </Step>
 
                 <Step expanded>
-                  <StepLabel>変更を反映</StepLabel>
+                  <StepLabel>シフトを確定</StepLabel>
                   <StepContent>
                     <Typography
                       variant="body2"
                       color="text.secondary"
                       sx={{ mb: 1 }}
                     >
-                      管理者のみ操作可能です。確定すると選択したシフトがロックされ、スタッフは編集できなくなります。必要に応じて確定解除でロックを外せます。
+                      管理者のみ操作可能です。確定すると選択したシフトがロックされ、スタッフは編集できなくなります。
                     </Typography>
                     <Stack direction="row" spacing={1}>
                       <AppButton
@@ -457,18 +432,6 @@ const ShiftCellPanelBase = ({
                         disabled={isUpdating || !showLock}
                       >
                         確定
-                      </AppButton>
-                      <AppButton
-                        variant="outline"
-                        startIcon={<LockOpenIcon />}
-                        onClick={() => {
-                          void handleUnlockCells();
-                        }}
-                        tone="neutral"
-                        size="sm"
-                        disabled={!canUnlock || isUpdating || !showUnlock}
-                      >
-                        確定解除
                       </AppButton>
                     </Stack>
                   </StepContent>

@@ -17,11 +17,9 @@ const baseProps = {
   onClear: jest.fn(),
   onChangeState: jest.fn(),
   onLock: jest.fn().mockResolvedValue(true),
-  onUnlock: jest.fn().mockResolvedValue(true),
   onAddComments: jest.fn(),
   canUnlock: true,
   showLock: true,
-  showUnlock: false,
   isUpdating: false,
   hasEditLockForSelected: false,
   isOthersEditingSelected: false,
@@ -91,7 +89,6 @@ describe("ShiftCellPanel", () => {
       <ShiftCellPanel
         {...baseProps}
         showLock
-        showUnlock={false}
         onLock={onLock}
         onAddComments={onAddComments}
       />,
@@ -106,28 +103,13 @@ describe("ShiftCellPanel", () => {
     );
   });
 
-  it("確定解除成功時にシステムコメントを追加する", async () => {
-    const user = userEvent.setup();
-    const onUnlock = jest.fn().mockResolvedValue(true);
-    const onAddComments = jest.fn().mockResolvedValue(undefined);
+  it("確定ボタンのみ表示し確定解除は表示しない", () => {
+    render(<ShiftCellPanel {...baseProps} />);
 
-    render(
-      <ShiftCellPanel
-        {...baseProps}
-        showLock={false}
-        showUnlock
-        onUnlock={onUnlock}
-        onAddComments={onAddComments}
-      />,
-    );
-
-    await user.click(screen.getByRole("button", { name: "確定解除" }));
-
-    expect(onUnlock).toHaveBeenCalledTimes(1);
-    expect(onAddComments).toHaveBeenCalledWith(
-      buildShiftLockChangedSystemMessage("石本達也", false),
-      [],
-    );
+    expect(screen.getByRole("button", { name: "確定" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "確定解除" }),
+    ).not.toBeInTheDocument();
   });
 
   it("編集ロックエラーをダイアログ内に表示する", () => {

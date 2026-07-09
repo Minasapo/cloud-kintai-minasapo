@@ -75,16 +75,12 @@ export const ShiftCollaborativePageInner =
         getEventsForDay,
         selectedCells,
         selectionCount,
-        hasLocked,
         hasUnlocked,
         clearSelection,
         handleChangeState,
         handleLockCells,
-        handleUnlockCells,
         handleLockStaffRow,
-        handleUnlockStaffRow,
         handleLockMonth,
-        handleUnlockMonth,
         handleApplySuggestion,
         violations,
         isAnalyzing,
@@ -194,9 +190,7 @@ export const ShiftCollaborativePageInner =
               currentUserId={currentUserId}
               isAdmin={isAdmin}
               onLockStaffRow={handleLockStaffRow}
-              onUnlockStaffRow={handleUnlockStaffRow}
               onLockMonth={handleLockMonth}
-              onUnlockMonth={handleUnlockMonth}
               currentMonth={currentMonth.format("YYYY年M月")}
             />
 
@@ -226,11 +220,9 @@ export const ShiftCollaborativePageInner =
               onClear={clearSelection}
               onChangeState={handleChangeState}
               onLock={handleLockCells}
-              onUnlock={handleUnlockCells}
               onAddComments={handleAddCommentsToSelectedCells}
               canUnlock={isAdmin}
               showLock={hasUnlocked && isAdmin}
-              showUnlock={hasLocked}
               isUpdating={isBatchUpdating}
               hasEditLockForSelected={hasEditLockForSelected}
               isOthersEditingSelected={isOthersEditingSelected}

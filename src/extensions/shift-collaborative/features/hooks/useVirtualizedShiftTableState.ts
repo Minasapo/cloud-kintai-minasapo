@@ -4,9 +4,7 @@ import { ShiftState } from "../types/collaborative.types";
 
 export type PendingLockAction =
   | { kind: "lockStaff"; staffId: string; staffName: string }
-  | { kind: "unlockStaff"; staffId: string; staffName: string }
-  | { kind: "lockMonth" }
-  | { kind: "unlockMonth" };
+  | { kind: "lockMonth" };
 
 interface UseVirtualizedShiftTableStateParams {
   staffs: Array<{
@@ -29,34 +27,23 @@ interface UseVirtualizedShiftTableStateParams {
   >;
   currentMonth?: string;
   onLockStaffRow?: (staffId: string) => void;
-  onUnlockStaffRow?: (staffId: string) => void;
   onLockMonth?: () => void;
-  onUnlockMonth?: () => void;
 }
 
 const buildConfirmDialogProps = (
   pendingAction: PendingLockAction | null,
   currentMonth?: string,
-):
-  | {
-      title: string;
-      message: string;
-      confirmLabel: string;
-    }
-  | null => {
+): {
+  title: string;
+  message: string;
+  confirmLabel: string;
+} | null => {
   if (!pendingAction) return null;
   if (pendingAction.kind === "lockStaff") {
     return {
       title: "シフトを確定",
       message: `${pendingAction.staffName} さんの${currentMonth ?? ""}シフトをすべて確定しますか？`,
       confirmLabel: "確定する",
-    };
-  }
-  if (pendingAction.kind === "unlockStaff") {
-    return {
-      title: "確定を解除",
-      message: `${pendingAction.staffName} さんの${currentMonth ?? ""}シフトの確定をすべて解除しますか？`,
-      confirmLabel: "解除する",
     };
   }
   if (pendingAction.kind === "lockMonth") {
@@ -66,11 +53,7 @@ const buildConfirmDialogProps = (
       confirmLabel: "確定する",
     };
   }
-  return {
-    title: "確定を解除",
-    message: `全員の${currentMonth ?? ""}シフトの確定をすべて解除しますか？`,
-    confirmLabel: "解除する",
-  };
+  return null;
 };
 
 export const useVirtualizedShiftTableState = ({
@@ -79,9 +62,7 @@ export const useVirtualizedShiftTableState = ({
   shiftDataMap,
   currentMonth,
   onLockStaffRow,
-  onUnlockStaffRow,
   onLockMonth,
-  onUnlockMonth,
 }: UseVirtualizedShiftTableStateParams) => {
   const staffMap = useMemo(
     () =>
@@ -105,16 +86,10 @@ export const useVirtualizedShiftTableState = ({
 
   const handleConfirm = () => {
     if (!pendingAction) return;
-    if (pendingAction.kind === "lockStaff" || pendingAction.kind === "unlockStaff") {
-      if (pendingAction.kind === "lockStaff") {
-        onLockStaffRow?.(pendingAction.staffId);
-      } else {
-        onUnlockStaffRow?.(pendingAction.staffId);
-      }
+    if (pendingAction.kind === "lockStaff") {
+      onLockStaffRow?.(pendingAction.staffId);
     } else if (pendingAction.kind === "lockMonth") {
       onLockMonth?.();
-    } else {
-      onUnlockMonth?.();
     }
     setPendingAction(null);
   };
