@@ -37,7 +37,6 @@ type UseCellStateActionsParams = {
     date: string;
     newState: ShiftState;
   }) => Promise<void>;
-  stopEditingCell: (staffId: string, date: string) => Promise<void>;
   batchUpdateShifts: (
     updates: Array<{ staffId: string; date: string; newState?: ShiftState }>,
   ) => Promise<void>;
@@ -59,7 +58,6 @@ export const useCellStateActions = ({
   getCellState,
   updateUserActivity,
   updateShift,
-  stopEditingCell,
   batchUpdateShifts,
   onStateChanged,
   selectionCount,
@@ -148,7 +146,6 @@ export const useCellStateActions = ({
             }
             const changed = await changeCellState(staffId, date, newState);
             if (changed) {
-              await stopEditingCell(staffId, date);
               await onStateChanged?.([changed]);
             }
             return;
@@ -174,11 +171,6 @@ export const useCellStateActions = ({
               setEditLockError(null);
               updateUserActivity();
               await batchUpdateShifts(validUpdates);
-              await Promise.all(
-                validUpdates.map(({ staffId, date }) =>
-                  stopEditingCell(staffId, date),
-                ),
-              );
 
               const changed = validUpdates
                 .map((update) => {
@@ -217,7 +209,6 @@ export const useCellStateActions = ({
               newState,
             );
             if (changed) {
-              await stopEditingCell(focusedCell.staffId, focusedCell.date);
               await onStateChanged?.([changed]);
             }
           }
@@ -240,7 +231,6 @@ export const useCellStateActions = ({
       selectedCells,
       selectionCount,
       setEditLockError,
-      stopEditingCell,
       updateUserActivity,
     ],
   );

@@ -89,6 +89,7 @@ describe("ShiftCellPanel", () => {
       <ShiftCellPanel
         {...baseProps}
         showLock
+        hasEditLockForSelected
         onLock={onLock}
         onAddComments={onAddComments}
       />,
@@ -103,13 +104,133 @@ describe("ShiftCellPanel", () => {
     );
   });
 
+  it("編集ロック未取得時は確定ボタンを表示しない", () => {
+    const onLock = jest.fn().mockResolvedValue(true);
+
+    render(
+      <ShiftCellPanel
+        {...baseProps}
+        showLock
+        hasEditLockForSelected={false}
+        onLock={onLock}
+      />,
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "確定" }),
+    ).not.toBeInTheDocument();
+    expect(onLock).not.toHaveBeenCalled();
+  });
+
+  it("編集ロック未取得時は後続ステップの内容を折りたたむ", () => {
+    render(<ShiftCellPanel {...baseProps} hasEditLockForSelected={false} />);
+
+    expect(
+      screen.queryByText("選択したセルの勤務状態を変更します。"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "管理者のみ操作可能です。確定すると選択したシフトがロックされ、スタッフは編集できなくなります。",
+      ),
+    ).not.toBeInTheDocument();
+  });
+
+  it("既存状態セルを選択していても編集ロック未取得なら後続ステップを折りたたむ", () => {
+    render(
+      <ShiftCellPanel
+        {...baseProps}
+        hasEditLockForSelected={false}
+        selectedCells={[{ staffId: "staff-1", date: "01" }]}
+        shiftDataMap={
+          new Map([
+            [
+              "staff-1",
+              new Map([
+                [
+                  "01",
+                  {
+                    state: "work",
+                    isLocked: false,
+                  },
+                ],
+              ]),
+            ],
+          ])
+        }
+      />,
+    );
+
+    expect(
+      screen.queryByText("選択したセルの勤務状態を変更します。"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "管理者のみ操作可能です。確定すると選択したシフトがロックされ、スタッフは編集できなくなります。",
+      ),
+    ).not.toBeInTheDocument();
+  });
+
+  it("確定済みセルを選択していても編集ロック未取得なら後続ステップを折りたたむ", () => {
+    render(
+      <ShiftCellPanel
+        {...baseProps}
+        hasEditLockForSelected={false}
+        selectedCells={[{ staffId: "staff-1", date: "01" }]}
+        shiftDataMap={
+          new Map([
+            [
+              "staff-1",
+              new Map([
+                [
+                  "01",
+                  {
+                    state: "work",
+                    isLocked: true,
+                  },
+                ],
+              ]),
+            ],
+          ])
+        }
+      />,
+    );
+
+    expect(
+      screen.queryByText("選択したセルの勤務状態を変更します。"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "管理者のみ操作可能です。確定すると選択したシフトがロックされ、スタッフは編集できなくなります。",
+      ),
+    ).not.toBeInTheDocument();
+  });
+
+  it("編集ロック取得時は後続ステップの内容を展開する", () => {
+    render(<ShiftCellPanel {...baseProps} hasEditLockForSelected />);
+
+    expect(
+      screen.getByText("選択したセルの勤務状態を変更します。"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "管理者のみ操作可能です。確定すると選択したシフトがロックされ、スタッフは編集できなくなります。",
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("確定ボタンのみ表示し確定解除は表示しない", () => {
-    render(<ShiftCellPanel {...baseProps} />);
+    render(<ShiftCellPanel {...baseProps} hasEditLockForSelected />);
 
     expect(screen.getByRole("button", { name: "確定" })).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "確定解除" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("スタッフの編集完了ステップは表示しない", () => {
+    render(<ShiftCellPanel {...baseProps} hasEditLockForSelected />);
+
+    expect(screen.queryByText("スタッフの編集完了")).not.toBeInTheDocument();
   });
 
   it("編集ロックエラーをダイアログ内に表示する", () => {
@@ -138,6 +259,26 @@ describe("ShiftCellPanel", () => {
     expect(
       screen.getByRole("button", { name: "編集ロックを強制解除" }),
     ).toBeInTheDocument();
+  });
+
+  it("編集ロック未取得時は閉じるボタンラベルを表示する", () => {
+    render(<ShiftCellPanel {...baseProps} hasEditLockForSelected={false} />);
+
+    expect(screen.getByRole("button", { name: "閉じる" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "ロックを解除して閉じる" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("編集ロック取得時はロック解除して閉じるボタンラベルを表示する", () => {
+    render(<ShiftCellPanel {...baseProps} hasEditLockForSelected />);
+
+    expect(
+      screen.getByRole("button", { name: "ロックを解除して閉じる" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "閉じる" }),
+    ).not.toBeInTheDocument();
   });
 
   it("強制解除の実行中は処理中表示に切り替わる", async () => {
@@ -246,5 +387,68 @@ describe("ShiftCellPanel", () => {
 
     expect(within(dayButton).getByTestId("CheckIcon")).toBeInTheDocument();
     expect(within(dayButton).queryByText("🔒")).not.toBeInTheDocument();
+  });
+
+  it("月次帯で編集ロック取得セルにロックアイコンを表示する", () => {
+    render(
+      <ShiftCellPanel
+        {...baseProps}
+        selectedCells={[{ staffId: "staff-1", date: "01" }]}
+        shiftDataMap={
+          new Map([
+            [
+              "staff-1",
+              new Map([
+                [
+                  "01",
+                  {
+                    state: "empty",
+                    isLocked: false,
+                  },
+                ],
+              ]),
+            ],
+          ])
+        }
+        days={[dayjs("2026-07-01")]}
+        staffNameMap={new Map([["staff-1", "スタッフ1"]])}
+        hasEditLock={(staffId, date) => staffId === "staff-1" && date === "01"}
+      />,
+    );
+
+    const dayButton = screen.getByRole("button", { name: /7\/1/ });
+
+    expect(within(dayButton).getByTestId("LockIcon")).toBeInTheDocument();
+  });
+
+  it("選択セルが確定済みなら完了ステップを完了状態で表示する", () => {
+    render(
+      <ShiftCellPanel
+        {...baseProps}
+        selectedCells={[{ staffId: "staff-1", date: "01" }]}
+        shiftDataMap={
+          new Map([
+            [
+              "staff-1",
+              new Map([
+                [
+                  "01",
+                  {
+                    state: "work",
+                    isLocked: true,
+                  },
+                ],
+              ]),
+            ],
+          ])
+        }
+      />,
+    );
+
+    const completedStepLabel = screen
+      .getByText("完了")
+      .closest(".MuiStep-root");
+
+    expect(completedStepLabel).toHaveClass("Mui-completed");
   });
 });

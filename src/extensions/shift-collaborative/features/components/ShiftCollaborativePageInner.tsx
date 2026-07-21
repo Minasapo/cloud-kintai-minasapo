@@ -93,6 +93,7 @@ export const ShiftCollaborativePageInner =
         staffIds,
         isBatchUpdating,
         commentsMap,
+        hasEditLock,
         hasEditLockForSelected,
         isOthersEditingSelected,
         editLockError,
@@ -224,6 +225,8 @@ export const ShiftCollaborativePageInner =
               canUnlock={isAdmin}
               showLock={hasUnlocked && isAdmin}
               isUpdating={isBatchUpdating}
+              hasEditLock={hasEditLock}
+              isCellBeingEdited={isCellBeingEdited}
               hasEditLockForSelected={hasEditLockForSelected}
               isOthersEditingSelected={isOthersEditingSelected}
               editLockError={editLockError}

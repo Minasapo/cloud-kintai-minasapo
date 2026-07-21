@@ -211,7 +211,7 @@ describe("useCollaborativePageState", () => {
     );
   });
 
-  it("単一セルの状態変更成功後に編集ロックを解除する", async () => {
+  it("単一セルの状態変更成功後も編集ロックは維持する", async () => {
     mockUpdateShift.mockResolvedValue(undefined);
 
     const { result } = renderHook(() => useCollaborativePageState("2026-02"));
@@ -227,10 +227,10 @@ describe("useCollaborativePageState", () => {
       date: "01",
       newState: "fixedOff",
     });
-    expect(mockStopEditingCell).toHaveBeenCalledWith("staff-1", "01");
+    expect(mockStopEditingCell).not.toHaveBeenCalled();
   });
 
-  it("一括状態変更成功後に更新対象セルの編集ロックを解除する", async () => {
+  it("一括状態変更成功後も更新対象セルの編集ロックは維持する", async () => {
     mockBatchUpdateShifts.mockResolvedValue(undefined);
     mockUseSelectionState.mockReturnValue({
       focusedCell: { staffId: "staff-1", date: "01" },
@@ -274,11 +274,10 @@ describe("useCollaborativePageState", () => {
       { staffId: "staff-1", date: "01", newState: "fixedOff" },
       { staffId: "staff-2", date: "02", newState: "fixedOff" },
     ]);
-    expect(mockStopEditingCell).toHaveBeenNthCalledWith(1, "staff-1", "01");
-    expect(mockStopEditingCell).toHaveBeenNthCalledWith(2, "staff-2", "02");
+    expect(mockStopEditingCell).not.toHaveBeenCalled();
   });
 
-  it("状態変更失敗時は編集ロックを解除しない", async () => {
+  it("状態変更失敗時は編集ロックを維持する", async () => {
     mockUpdateShift.mockRejectedValue(new Error("update failed"));
     const consoleErrorSpy = jest
       .spyOn(console, "error")

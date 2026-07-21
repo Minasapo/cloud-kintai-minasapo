@@ -1,5 +1,6 @@
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import LockOpenIcon from "@mui/icons-material/LockOpen";
 import {
   Box,
   Divider,
@@ -29,7 +30,6 @@ import {
 import {
   CellAcquireEditLockSection,
   CellCommentsSection,
-  CellReleaseLockSection,
   CellStateButtons,
 } from "./shift-cell-panel/ShiftCellPanelSections";
 import { StaffMonthlyBand } from "./shift-cell-panel/StaffMonthlyBand";
@@ -49,6 +49,8 @@ interface ShiftCellPanelProps {
   canUnlock: boolean;
   showLock: boolean;
   isUpdating?: boolean;
+  hasEditLock?: (staffId: string, date: string) => boolean;
+  isCellBeingEdited?: (staffId: string, date: string) => boolean;
   hasEditLockForSelected: boolean;
   isOthersEditingSelected: boolean;
   editLockError: string | null;
@@ -80,6 +82,8 @@ const ShiftCellPanelBase = ({
   canUnlock,
   showLock,
   isUpdating = false,
+  hasEditLock,
+  isCellBeingEdited,
   hasEditLockForSelected,
   isOthersEditingSelected,
   editLockError,
@@ -98,7 +102,6 @@ const ShiftCellPanelBase = ({
     null,
   );
   const [isLockConfirmed, setIsLockConfirmed] = useState(false);
-  const [isEditReleased, setIsEditReleased] = useState(false);
   const isBusy = isUpdating || isLockActionPending;
 
   const { commentText, isAddingComment, setCommentText, handleAddComment } =
@@ -163,28 +166,53 @@ const ShiftCellPanelBase = ({
     return states.every((state) => state === firstState) ? firstState : null;
   }, [selectedCells, shiftDataMap]);
 
+  const isShiftConfirmed = useMemo(() => {
+    if (!shiftDataMap || selectedCells.length === 0) {
+      return false;
+    }
+
+    const lockStates = selectedCells
+      .map((cell) => shiftDataMap.get(cell.staffId)?.get(cell.date)?.isLocked)
+      .filter((isLocked): isLocked is boolean => isLocked != null);
+
+    if (lockStates.length !== selectedCells.length) {
+      return false;
+    }
+
+    return lockStates.every((isLocked) => isLocked);
+  }, [selectedCells, shiftDataMap]);
+
   const hasCompletedStateSelection =
     selectedCurrentState != null && selectedCurrentState !== "empty";
 
+  const selectedCellKeys = useMemo(
+    () => selectedCells.map((cell) => `${cell.staffId}#${cell.date}`).join("|"),
+    [selectedCells],
+  );
+
+  const isFlowUnlockedByEditLock = hasEditLockForSelected || isLockConfirmed;
+
   const currentFlowStep =
     activeStepOverride ??
-    (isLockConfirmed
-      ? 5
-      : hasCompletedStateSelection
-        ? 4
-        : isEditReleased
-          ? 3
-          : hasEditLockForSelected
-            ? 1
-            : 0);
+    (!isFlowUnlockedByEditLock
+      ? 0
+      : isLockConfirmed || isShiftConfirmed
+        ? 3
+        : hasCompletedStateSelection
+          ? 2
+          : 1);
 
   useEffect(() => {
     if (selectionCount === 0) {
       setIsLockConfirmed(false);
-      setIsEditReleased(false);
       setActiveStepOverride(null);
     }
   }, [selectionCount]);
+
+  useEffect(() => {
+    setIsLockConfirmed(false);
+    setActiveStepOverride(null);
+  }, [selectedCellKeys]);
 
   const handleAcquireEditLock = async () => {
     await runLockAction(0, async () => {
@@ -192,8 +220,6 @@ const ShiftCellPanelBase = ({
       if (!acquired) {
         return;
       }
-
-      setIsEditReleased(false);
 
       if (!onAddComments) {
         return;
@@ -206,42 +232,39 @@ const ShiftCellPanelBase = ({
     });
   };
 
-  const handleReleaseEditLock = async () => {
-    await runLockAction(2, async () => {
-      const released = await onReleaseEditLock();
-      if (!released) {
-        return;
-      }
-
-      // 通常の編集ロック解除が成功したら、次の完了ステップへ進める。
-      setIsEditReleased(true);
-
-      if (!onAddComments) {
-        return;
-      }
-
-      await onAddComments(
-        `${CHAT_SYSTEM_MESSAGE_PREFIX}${currentUserName}が編集ロックを解除しました`,
-        [],
-      );
-    });
-  };
-
   const handleForceReleaseLock = async () => {
     await runLockAction(2, async () => {
       await onForceReleaseLock();
     });
   };
 
+  const handleClose = async () => {
+    if (hasEditLockForSelected) {
+      await runLockAction(2, async () => {
+        const released = await onReleaseEditLock();
+        if (!released) {
+          return;
+        }
+
+        if (onAddComments) {
+          await onAddComments(
+            `${CHAT_SYSTEM_MESSAGE_PREFIX}${currentUserName}が編集ロックを解除しました`,
+            [],
+          );
+        }
+      });
+    }
+    onClear();
+  };
+
   const handleLockCells = async () => {
-    await runLockAction(4, async () => {
+    await runLockAction(3, async () => {
       const locked = await onLock();
       if (!locked) {
         return;
       }
 
       setIsLockConfirmed(true);
-      setIsEditReleased(false);
 
       if (!onAddComments) {
         return;
@@ -255,6 +278,11 @@ const ShiftCellPanelBase = ({
   };
 
   if (selectionCount === 0) return null;
+
+  const isForceReleaseLoading = isBusy && canUnlock;
+  const closeButtonLabel = hasEditLockForSelected
+    ? "ロックを解除して閉じる"
+    : "閉じる";
 
   return (
     <AppDialog
@@ -282,16 +310,33 @@ const ShiftCellPanelBase = ({
         </Stack>
       }
       actions={
-        <AppButton
-          variant="ghost"
-          tone="neutral"
-          size="sm"
-          onClick={onClear}
-          startIcon={<CloseIcon />}
-          disabled={isUpdating}
-        >
-          閉じる
-        </AppButton>
+        <Stack direction="row" spacing={1}>
+          {canUnlock && (
+            <AppButton
+              variant="ghost"
+              tone="danger"
+              size="sm"
+              onClick={() => {
+                void handleForceReleaseLock();
+              }}
+              startIcon={<LockOpenIcon />}
+              disabled={isBusy}
+              loading={isForceReleaseLoading}
+            >
+              {isForceReleaseLoading ? "処理中..." : "編集ロックを強制解除"}
+            </AppButton>
+          )}
+          <AppButton
+            variant="ghost"
+            tone="neutral"
+            size="sm"
+            onClick={handleClose}
+            startIcon={<CloseIcon />}
+            disabled={isBusy}
+          >
+            {closeButtonLabel}
+          </AppButton>
+        </Stack>
       }
     >
       <Stack spacing={2} sx={{ height: "100%", minHeight: 0 }}>
@@ -304,6 +349,8 @@ const ShiftCellPanelBase = ({
               days={days!}
               shiftDataMap={shiftDataMap!}
               selectedDates={selectedDates}
+              hasEditLock={hasEditLock}
+              isCellBeingEdited={isCellBeingEdited}
               onDayClick={onDateCellClick}
             />
             <Divider />
@@ -361,7 +408,7 @@ const ShiftCellPanelBase = ({
                   </StepContent>
                 </Step>
 
-                <Step expanded>
+                <Step expanded={isFlowUnlockedByEditLock}>
                   <StepLabel>状態を変更</StepLabel>
                   <StepContent>
                     <Typography
@@ -381,37 +428,7 @@ const ShiftCellPanelBase = ({
                   </StepContent>
                 </Step>
 
-                <Step expanded>
-                  <StepLabel>編集ロック解除</StepLabel>
-                  <StepContent>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ mb: 1 }}
-                    >
-                      変更後は編集ロックを解除して、他のスタッフが編集できる状態に戻します。
-                    </Typography>
-                    <CellReleaseLockSection
-                      hasEditLockForSelected={hasEditLockForSelected}
-                      canUnlock={canUnlock}
-                      isOthersEditingSelected={isOthersEditingSelected}
-                      isUpdating={isBusy}
-                      onReleaseEditLock={handleReleaseEditLock}
-                      onForceReleaseLock={handleForceReleaseLock}
-                    />
-                  </StepContent>
-                </Step>
-
-                <Step expanded>
-                  <StepLabel>スタッフの編集完了</StepLabel>
-                  <StepContent>
-                    <Typography variant="body2" color="text.secondary">
-                      スタッフの編集が完了しました。
-                    </Typography>
-                  </StepContent>
-                </Step>
-
-                <Step expanded>
+                <Step expanded={isFlowUnlockedByEditLock}>
                   <StepLabel>シフトを確定</StepLabel>
                   <StepContent>
                     <Typography
@@ -429,7 +446,9 @@ const ShiftCellPanelBase = ({
                           void handleLockCells();
                         }}
                         size="sm"
-                        disabled={isUpdating || !showLock}
+                        disabled={
+                          isUpdating || !showLock || !hasEditLockForSelected
+                        }
                       >
                         確定
                       </AppButton>
@@ -437,7 +456,10 @@ const ShiftCellPanelBase = ({
                   </StepContent>
                 </Step>
 
-                <Step expanded>
+                <Step
+                  expanded={isFlowUnlockedByEditLock}
+                  completed={isLockConfirmed || isShiftConfirmed}
+                >
                   <StepLabel>完了</StepLabel>
                   <StepContent>
                     <Typography variant="body2" color="text.secondary">

@@ -1,4 +1,5 @@
 import CheckIcon from "@mui/icons-material/Check";
+import LockIcon from "@mui/icons-material/Lock";
 import { Box, Divider, Stack, Tooltip, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { MouseEvent, useCallback, useRef } from "react";
@@ -24,6 +25,8 @@ interface DayCellProps {
   day: dayjs.Dayjs;
   cellData: ShiftCellData | undefined;
   isSelected: boolean;
+  isSelfEditing: boolean;
+  isOtherEditing: boolean;
   onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
   buttonRef?: (element: HTMLButtonElement | null) => void;
   onFocusMove?: (direction: "left" | "right") => void;
@@ -33,6 +36,8 @@ const DayCell = ({
   day,
   cellData,
   isSelected,
+  isSelfEditing,
+  isOtherEditing,
   onClick,
   buttonRef,
   onFocusMove,
@@ -46,7 +51,7 @@ const DayCell = ({
 
   return (
     <Tooltip
-      title={`${day.format("M/D(ddd)")} ${state === "empty" ? "未入力" : config.label === "出" ? "出勤" : state === "requestedOff" ? "希望休" : state === "fixedOff" ? "固定休" : "自動調整"}`}
+      title={`${day.format("M/D(ddd)")} ${state === "empty" ? "未入力" : config.label === "出" ? "出勤" : state === "requestedOff" ? "希望休" : state === "fixedOff" ? "固定休" : "自動調整"}${cellData?.isLocked ? "（確定済み）" : isSelfEditing ? "（編集中）" : isOtherEditing ? "（他ユーザー編集中）" : ""}`}
       arrow
     >
       <Box
@@ -146,6 +151,25 @@ const DayCell = ({
               <CheckIcon sx={{ fontSize: 6, color: "#fff" }} />
             </Box>
           )}
+
+          {!cellData?.isLocked && (isSelfEditing || isOtherEditing) && (
+            <Box
+              sx={{
+                position: "absolute",
+                bottom: 0,
+                right: 0,
+                width: 8,
+                height: 8,
+                bgcolor: isSelfEditing ? "info.main" : "warning.main",
+                borderRadius: "2px 0 2px 0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <LockIcon sx={{ fontSize: 6, color: "#fff" }} />
+            </Box>
+          )}
         </Box>
       </Box>
     </Tooltip>
@@ -158,6 +182,8 @@ interface SingleStaffBandProps {
   days: dayjs.Dayjs[];
   shiftDataMap: ShiftDataMap;
   selectedDates: Set<string>;
+  hasEditLock?: (staffId: string, date: string) => boolean;
+  isCellBeingEdited?: (staffId: string, date: string) => boolean;
   onDayClick?: (
     staffId: string,
     date: string,
@@ -171,6 +197,8 @@ const SingleStaffBand = ({
   days,
   shiftDataMap,
   selectedDates,
+  hasEditLock,
+  isCellBeingEdited,
   onDayClick,
 }: SingleStaffBandProps) => {
   const staffDayMap = shiftDataMap.get(staffId);
@@ -233,6 +261,9 @@ const SingleStaffBand = ({
             const dateKey = day.format("DD");
             const cellData = staffDayMap?.get(dayKey);
             const isSelected = selectedDates.has(dateKey);
+            const isSelfEditing = hasEditLock?.(staffId, dateKey) ?? false;
+            const isOtherEditing =
+              isCellBeingEdited?.(staffId, dateKey) ?? false;
 
             return (
               <DayCell
@@ -240,6 +271,8 @@ const SingleStaffBand = ({
                 day={day}
                 cellData={cellData}
                 isSelected={isSelected}
+                isSelfEditing={isSelfEditing}
+                isOtherEditing={isOtherEditing}
                 onClick={(event) => onDayClick?.(staffId, dateKey, event)}
                 buttonRef={(element) => registerCell(dateKey, element)}
                 onFocusMove={(direction) =>
@@ -262,6 +295,8 @@ export interface StaffMonthlyBandProps {
   shiftDataMap: ShiftDataMap;
   /** 選択セルの日付文字列セット ("YYYY-MM-DD") */
   selectedDates: Set<string>;
+  hasEditLock?: (staffId: string, date: string) => boolean;
+  isCellBeingEdited?: (staffId: string, date: string) => boolean;
   onDayClick?: (
     staffId: string,
     date: string,
@@ -275,6 +310,8 @@ export const StaffMonthlyBand = ({
   days,
   shiftDataMap,
   selectedDates,
+  hasEditLock,
+  isCellBeingEdited,
   onDayClick,
 }: StaffMonthlyBandProps) => {
   if (staffIds.length === 0 || days.length === 0) return null;
@@ -292,6 +329,8 @@ export const StaffMonthlyBand = ({
               days={days}
               shiftDataMap={shiftDataMap}
               selectedDates={selectedDates}
+              hasEditLock={hasEditLock}
+              isCellBeingEdited={isCellBeingEdited}
               onDayClick={onDayClick}
             />
           </Box>

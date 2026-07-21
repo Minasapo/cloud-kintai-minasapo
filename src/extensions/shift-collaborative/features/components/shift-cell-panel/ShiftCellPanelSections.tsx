@@ -107,7 +107,6 @@ interface CellReleaseLockSectionProps {
   isOthersEditingSelected: boolean;
   isUpdating: boolean;
   onReleaseEditLock: () => Promise<void>;
-  onForceReleaseLock: () => void;
 }
 
 export const CellReleaseLockSection = ({
@@ -116,10 +115,8 @@ export const CellReleaseLockSection = ({
   isOthersEditingSelected,
   isUpdating,
   onReleaseEditLock,
-  onForceReleaseLock,
 }: CellReleaseLockSectionProps) => {
   const isReleaseLoading = isUpdating && hasEditLockForSelected;
-  const isForceReleaseLoading = isUpdating && canUnlock;
 
   return (
     <Box>
@@ -144,25 +141,6 @@ export const CellReleaseLockSection = ({
             </Typography>
           )}
         </Stack>
-
-        {canUnlock && (
-          <Stack spacing={0.75}>
-            <Typography variant="caption" color="text.secondary">
-              管理者のみ:
-              ロック保持者の操作継続が難しい場合に、編集ロックを強制解除できます。
-            </Typography>
-            <AppButton
-              variant="solid"
-              tone="danger"
-              size="sm"
-              onClick={onForceReleaseLock}
-              disabled={isUpdating}
-              loading={isForceReleaseLoading}
-            >
-              {isForceReleaseLoading ? "処理中..." : "編集ロックを強制解除"}
-            </AppButton>
-          </Stack>
-        )}
       </Stack>
     </Box>
   );
