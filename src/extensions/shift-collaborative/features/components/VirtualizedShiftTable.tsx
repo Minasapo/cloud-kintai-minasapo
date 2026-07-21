@@ -92,9 +92,7 @@ interface VirtualizedShiftTableProps {
   currentUserId?: string;
   isAdmin?: boolean;
   onLockStaffRow?: (staffId: string) => void;
-  onUnlockStaffRow?: (staffId: string) => void;
   onLockMonth?: () => void;
-  onUnlockMonth?: () => void;
   currentMonth?: string;
 }
 
@@ -128,9 +126,7 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
     currentUserId,
     isAdmin,
     onLockStaffRow,
-    onUnlockStaffRow,
     onLockMonth,
-    onUnlockMonth,
     currentMonth,
   }) => {
     const {
@@ -145,9 +141,7 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
       shiftDataMap,
       currentMonth,
       onLockStaffRow,
-      onUnlockStaffRow,
       onLockMonth,
-      onUnlockMonth,
     });
 
     if (isLoading) {
@@ -196,7 +190,11 @@ export const VirtualizedShiftTable = memo<VirtualizedShiftTableProps>(
                 >
                   キャンセル
                 </AppButton>
-                <AppButton variant="solid" tone="primary" onClick={handleConfirm}>
+                <AppButton
+                  variant="solid"
+                  tone="primary"
+                  onClick={handleConfirm}
+                >
                   {confirmDialogProps.confirmLabel}
                 </AppButton>
               </>

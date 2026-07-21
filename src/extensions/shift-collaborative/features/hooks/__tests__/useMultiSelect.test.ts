@@ -35,12 +35,14 @@ describe("useMultiSelect", () => {
 
       expect(result.current.selectionCount).toBe(1);
       expect(result.current.isCellSelected("staff-2", "2024-03-02")).toBe(true);
-      expect(result.current.isCellSelected("staff-1", "2024-03-01")).toBe(false);
+      expect(result.current.isCellSelected("staff-1", "2024-03-01")).toBe(
+        false,
+      );
     });
   });
 
   describe("toggleCell", () => {
-    it("adds cell to selection", () => {
+    it("selects target cell", () => {
       const { result } = renderHook(() => useMultiSelect({ staffIds, dates }));
 
       act(() => {
@@ -58,10 +60,12 @@ describe("useMultiSelect", () => {
         result.current.toggleCell("staff-1", "2024-03-01");
       });
 
-      expect(result.current.isCellSelected("staff-1", "2024-03-01")).toBe(false);
+      expect(result.current.isCellSelected("staff-1", "2024-03-01")).toBe(
+        false,
+      );
     });
 
-    it("adds multiple cells independently", () => {
+    it("keeps single selection when another cell is toggled", () => {
       const { result } = renderHook(() => useMultiSelect({ staffIds, dates }));
 
       act(() => {
@@ -69,12 +73,16 @@ describe("useMultiSelect", () => {
         result.current.toggleCell("staff-2", "2024-03-02");
       });
 
-      expect(result.current.selectionCount).toBe(2);
+      expect(result.current.selectionCount).toBe(1);
+      expect(result.current.isCellSelected("staff-2", "2024-03-02")).toBe(true);
+      expect(result.current.isCellSelected("staff-1", "2024-03-01")).toBe(
+        false,
+      );
     });
   });
 
   describe("selectRange", () => {
-    it("selects just the target cell when no lastClickedCell", () => {
+    it("selects only the target cell", () => {
       const { result } = renderHook(() => useMultiSelect({ staffIds, dates }));
 
       act(() => {
@@ -85,10 +93,9 @@ describe("useMultiSelect", () => {
       expect(result.current.isCellSelected("staff-1", "2024-03-01")).toBe(true);
     });
 
-    it("selects a rectangular range using lastClickedCell as anchor", () => {
+    it("replaces previous selection instead of range selecting", () => {
       const { result } = renderHook(() => useMultiSelect({ staffIds, dates }));
 
-      // First select a cell to set lastClickedCell via selectCell
       act(() => {
         result.current.selectCell("staff-1", "2024-03-01");
       });
@@ -97,37 +104,23 @@ describe("useMultiSelect", () => {
         result.current.selectRange("staff-2", "2024-03-02");
       });
 
-      expect(result.current.selectionCount).toBe(4);
-      expect(result.current.isCellSelected("staff-1", "2024-03-01")).toBe(true);
-      expect(result.current.isCellSelected("staff-1", "2024-03-02")).toBe(true);
-      expect(result.current.isCellSelected("staff-2", "2024-03-01")).toBe(true);
+      expect(result.current.selectionCount).toBe(1);
       expect(result.current.isCellSelected("staff-2", "2024-03-02")).toBe(true);
-    });
-
-    it("handles inverted range (end before start)", () => {
-      const { result } = renderHook(() => useMultiSelect({ staffIds, dates }));
-
-      act(() => {
-        result.current.selectCell("staff-2", "2024-03-02");
-      });
-
-      act(() => {
-        result.current.selectRange("staff-1", "2024-03-01");
-      });
-
-      expect(result.current.selectionCount).toBe(4);
+      expect(result.current.isCellSelected("staff-1", "2024-03-01")).toBe(
+        false,
+      );
     });
   });
 
   describe("drag selection", () => {
-    it("starts drag and selects initial cell", () => {
+    it("starts selection from initial cell", () => {
       const { result } = renderHook(() => useMultiSelect({ staffIds, dates }));
 
       act(() => {
         result.current.startDragSelect("staff-1", "2024-03-01");
       });
 
-      expect(result.current.isDragging).toBe(true);
+      expect(result.current.isDragging).toBe(false);
       expect(result.current.isCellSelected("staff-1", "2024-03-01")).toBe(true);
     });
 
@@ -141,7 +134,7 @@ describe("useMultiSelect", () => {
       expect(result.current.selectionCount).toBe(0);
     });
 
-    it("updateDragSelect expands selection during drag", () => {
+    it("updateDragSelect does not expand to multiple cells", () => {
       const { result } = renderHook(() => useMultiSelect({ staffIds, dates }));
 
       act(() => {
@@ -152,7 +145,8 @@ describe("useMultiSelect", () => {
         result.current.updateDragSelect("staff-2", "2024-03-02");
       });
 
-      expect(result.current.selectionCount).toBe(4);
+      expect(result.current.selectionCount).toBe(1);
+      expect(result.current.isCellSelected("staff-1", "2024-03-01")).toBe(true);
     });
 
     it("endDragSelect stops dragging", () => {
@@ -168,14 +162,19 @@ describe("useMultiSelect", () => {
   });
 
   describe("selectAll", () => {
-    it("selects all cells", () => {
+    it("does not change selection", () => {
       const { result } = renderHook(() => useMultiSelect({ staffIds, dates }));
+
+      act(() => {
+        result.current.selectCell("staff-1", "2024-03-01");
+      });
 
       act(() => {
         result.current.selectAll();
       });
 
-      expect(result.current.selectionCount).toBe(staffIds.length * dates.length);
+      expect(result.current.selectionCount).toBe(1);
+      expect(result.current.isCellSelected("staff-1", "2024-03-01")).toBe(true);
     });
   });
 
@@ -184,10 +183,10 @@ describe("useMultiSelect", () => {
       const { result } = renderHook(() => useMultiSelect({ staffIds, dates }));
 
       act(() => {
-        result.current.selectAll();
+        result.current.selectCell("staff-1", "2024-03-01");
       });
 
-      expect(result.current.selectionCount).toBe(9);
+      expect(result.current.selectionCount).toBe(1);
 
       act(() => {
         result.current.clearSelection();
@@ -215,7 +214,7 @@ describe("useMultiSelect", () => {
     it("handles staffId containing :: separator correctly", () => {
       const specialStaffs = ["staff::with::colons"];
       const { result } = renderHook(() =>
-        useMultiSelect({ staffIds: specialStaffs, dates })
+        useMultiSelect({ staffIds: specialStaffs, dates }),
       );
 
       act(() => {

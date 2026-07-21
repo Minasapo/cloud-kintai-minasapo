@@ -24,7 +24,6 @@ export const useShiftPageDerivedState = (
     selectedCells,
     focusedCell,
     getCellEditor,
-    getCellHistory,
     violations,
     addComment,
     isCellSelected,
@@ -65,18 +64,6 @@ export const useShiftPageDerivedState = (
       ),
     [selectionCount, selectedCells, focusedCell, getCellEditor, currentUserId],
   );
-
-  const cellHistory = useMemo(() => {
-    if (selectionCount === 1 && selectedCells.length === 1) {
-      return getCellHistory(
-        `${selectedCells[0].staffId}#${selectedCells[0].date}`,
-      );
-    }
-    if (focusedCell) {
-      return getCellHistory(`${focusedCell.staffId}#${focusedCell.date}`);
-    }
-    return [];
-  }, [selectionCount, selectedCells, focusedCell, getCellHistory]);
 
   const suggestionsBadgeCount = useMemo(
     () =>
@@ -125,7 +112,6 @@ export const useShiftPageDerivedState = (
     openPrintDialog,
     closePrintDialog,
     cellEditLockHolders,
-    cellHistory,
     suggestionsBadgeCount,
     syncButtonColor,
     syncTooltipTitle,

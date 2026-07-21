@@ -11,6 +11,13 @@ type CellPosition = {
   date: string;
 };
 
+export type AppliedStateChange = {
+  staffId: string;
+  date: string;
+  previousState: ShiftState | undefined;
+  newState: ShiftState;
+};
+
 type UseCellStateActionsParams = {
   targetMonth: string;
   isEditingDisabled: boolean;
@@ -23,6 +30,7 @@ type UseCellStateActionsParams = {
     date: string,
   ) => { userId?: string; userName?: string } | undefined;
   hasEditLock: (staffId: string, date: string) => boolean;
+  getCellState: (staffId: string, date: string) => ShiftState | undefined;
   updateUserActivity: () => void;
   updateShift: (payload: {
     staffId: string;
@@ -32,7 +40,7 @@ type UseCellStateActionsParams = {
   batchUpdateShifts: (
     updates: Array<{ staffId: string; date: string; newState?: ShiftState }>,
   ) => Promise<void>;
-  releaseEditLocks: (targets: Array<{ staffId: string; date: string }>) => Promise<void>;
+  onStateChanged?: (changes: AppliedStateChange[]) => Promise<void> | void;
   selectionCount: number;
   selectedCells: CellPosition[];
   focusedCell: CellPosition | null;
@@ -47,10 +55,11 @@ export const useCellStateActions = ({
   isCellBeingEdited,
   getCellEditor,
   hasEditLock,
+  getCellState,
   updateUserActivity,
   updateShift,
   batchUpdateShifts,
-  releaseEditLocks,
+  onStateChanged,
   selectionCount,
   selectedCells,
   focusedCell,
@@ -91,19 +100,29 @@ export const useCellStateActions = ({
       }
 
       setEditLockError(null);
+      const previousState = getCellState(staffId, date);
       updateUserActivity();
       await updateShift({ staffId, date, newState });
-      await releaseEditLocks([{ staffId, date }]);
-      return true;
+
+      if (previousState === newState) {
+        return null;
+      }
+
+      return {
+        staffId,
+        date,
+        previousState,
+        newState,
+      } satisfies AppliedStateChange;
     },
     [
+      getCellState,
       getCellEditor,
       hasEditLock,
       isCellBeingEdited,
       isCellLocked,
       isEditingDisabled,
       networkEditDisabledMessage,
-      releaseEditLocks,
       setEditLockError,
       targetMonth,
       updateShift,
@@ -125,7 +144,10 @@ export const useCellStateActions = ({
             if (!staffId || !date) {
               return;
             }
-            await changeCellState(staffId, date, newState);
+            const changed = await changeCellState(staffId, date, newState);
+            if (changed) {
+              await onStateChanged?.([changed]);
+            }
             return;
           }
 
@@ -135,20 +157,60 @@ export const useCellStateActions = ({
               date,
               newState,
             }));
-            const validUpdates = updates.filter((u) => hasEditLock(u.staffId, u.date));
+            const validUpdates = updates.filter((u) =>
+              hasEditLock(u.staffId, u.date),
+            );
             if (validUpdates.length > 0) {
+              const previousStates = new Map(
+                validUpdates.map((update) => [
+                  `${update.staffId}#${update.date}`,
+                  getCellState(update.staffId, update.date),
+                ]),
+              );
+
               setEditLockError(null);
               updateUserActivity();
               await batchUpdateShifts(validUpdates);
-              await releaseEditLocks(validUpdates);
+
+              const changed = validUpdates
+                .map((update) => {
+                  const previousState = previousStates.get(
+                    `${update.staffId}#${update.date}`,
+                  );
+
+                  if (previousState === newState) {
+                    return null;
+                  }
+
+                  return {
+                    staffId: update.staffId,
+                    date: update.date,
+                    previousState,
+                    newState,
+                  } satisfies AppliedStateChange;
+                })
+                .filter((value): value is AppliedStateChange => value !== null);
+
+              if (changed.length > 0) {
+                await onStateChanged?.(changed);
+              }
             } else {
-              setEditLockError("一括編集前に対象セルのロックを取得してください。");
+              setEditLockError(
+                "一括編集前に対象セルのロックを取得してください。",
+              );
             }
             return;
           }
 
           if (focusedCell) {
-            await changeCellState(focusedCell.staffId, focusedCell.date, newState);
+            const changed = await changeCellState(
+              focusedCell.staffId,
+              focusedCell.date,
+              newState,
+            );
+            if (changed) {
+              await onStateChanged?.([changed]);
+            }
           }
         } catch (error) {
           logger.error("Failed to change shift state:", error);
@@ -162,9 +224,10 @@ export const useCellStateActions = ({
       changeCellState,
       focusedCell,
       hasEditLock,
+      getCellState,
       isEditingDisabled,
       networkEditDisabledMessage,
-      releaseEditLocks,
+      onStateChanged,
       selectedCells,
       selectionCount,
       setEditLockError,

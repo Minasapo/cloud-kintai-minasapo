@@ -22,7 +22,7 @@ describe("TimeElapsedErrorDialog", () => {
       </MemoryRouter>,
     );
 
-    const overlayRoot = document.getElementById("app-overlay-root");
+    const overlayRoot = document.body;
     expect(overlayRoot).toContainElement(
       screen.getByTestId("time-elapsed-error-dialog"),
     );
@@ -42,11 +42,17 @@ describe("TimeElapsedErrorDialog", () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByTestId("time-elapsed-error-dialog-confirm-btn"));
+    fireEvent.click(
+      screen.getByTestId("time-elapsed-error-dialog-confirm-btn"),
+    );
 
     await waitFor(() => {
-      expect(screen.queryByTestId("time-elapsed-error-dialog")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("time-elapsed-error-dialog"),
+      ).not.toBeInTheDocument();
     });
-    expect(screen.getByTestId("location-path")).toHaveTextContent("/attendance/list");
+    expect(screen.getByTestId("location-path")).toHaveTextContent(
+      "/attendance/list",
+    );
   });
 });

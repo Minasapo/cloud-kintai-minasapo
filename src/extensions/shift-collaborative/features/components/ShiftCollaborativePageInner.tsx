@@ -47,7 +47,16 @@ export const ShiftCollaborativePageInner =
       onNextMonth,
     }: ShiftCollaborativePageInnerProps) => {
       const { cognitoUser } = useContext(AuthContext);
-      const pageState = useCollaborativePageState(targetMonth);
+      const currentStaffId =
+        staffs.find((staff) => staff.cognitoUserId === cognitoUser?.id)?.id ??
+        "";
+      const currentUserDisplayName =
+        staffNameMap.get(currentStaffId) || currentStaffId || "不明ユーザー";
+
+      const pageState = useCollaborativePageState(
+        targetMonth,
+        currentUserDisplayName,
+      );
       const {
         state,
         isCellBeingEdited,
@@ -66,16 +75,12 @@ export const ShiftCollaborativePageInner =
         getEventsForDay,
         selectedCells,
         selectionCount,
-        hasLocked,
         hasUnlocked,
         clearSelection,
         handleChangeState,
         handleLockCells,
-        handleUnlockCells,
         handleLockStaffRow,
-        handleUnlockStaffRow,
         handleLockMonth,
-        handleUnlockMonth,
         handleApplySuggestion,
         violations,
         isAnalyzing,
@@ -87,7 +92,8 @@ export const ShiftCollaborativePageInner =
         days,
         staffIds,
         isBatchUpdating,
-        getCommentsByCell,
+        commentsMap,
+        hasEditLock,
         hasEditLockForSelected,
         isOthersEditingSelected,
         editLockError,
@@ -106,8 +112,6 @@ export const ShiftCollaborativePageInner =
         isPrintDialogOpen,
         openPrintDialog,
         closePrintDialog,
-        cellEditLockHolders,
-        cellHistory,
         suggestionsBadgeCount,
         syncButtonColor,
         syncTooltipTitle,
@@ -156,8 +160,6 @@ export const ShiftCollaborativePageInner =
             <ShiftConnectionAlerts
               isOnline={state.isOnline}
               connectionState={state.connectionState}
-              editLockError={editLockError}
-              clearEditLockError={clearEditLockError}
             />
 
             <ProgressPanel progress={progress} totalDays={days.length} />
@@ -189,13 +191,13 @@ export const ShiftCollaborativePageInner =
               currentUserId={currentUserId}
               isAdmin={isAdmin}
               onLockStaffRow={handleLockStaffRow}
-              onUnlockStaffRow={handleUnlockStaffRow}
               onLockMonth={handleLockMonth}
-              onUnlockMonth={handleUnlockMonth}
               currentMonth={currentMonth.format("YYYY年M月")}
             />
 
             <ShiftCellPanel
+              currentUserId={currentUserId}
+              currentUserName={currentUserDisplayName}
               selectionCount={selectionCount}
               selectedCells={
                 selectionCount > 0
@@ -205,28 +207,37 @@ export const ShiftCollaborativePageInner =
                     : []
               }
               comments={
-                focusedCell
-                  ? getCommentsByCell(
-                      `${focusedCell.staffId}#${focusedCell.date}`,
+                selectedCells.length > 0
+                  ? selectedCells.flatMap(
+                      (cell) =>
+                        commentsMap.get(`${cell.staffId}#${cell.date}`) || [],
                     )
-                  : []
+                  : focusedCell
+                    ? commentsMap.get(
+                        `${focusedCell.staffId}#${focusedCell.date}`,
+                      ) || []
+                    : []
               }
-              cellHistory={cellHistory}
               onClear={clearSelection}
               onChangeState={handleChangeState}
               onLock={handleLockCells}
-              onUnlock={handleUnlockCells}
               onAddComments={handleAddCommentsToSelectedCells}
               canUnlock={isAdmin}
               showLock={hasUnlocked && isAdmin}
-              showUnlock={hasLocked}
               isUpdating={isBatchUpdating}
-              cellEditLockHolders={cellEditLockHolders}
+              hasEditLock={hasEditLock}
+              isCellBeingEdited={isCellBeingEdited}
               hasEditLockForSelected={hasEditLockForSelected}
               isOthersEditingSelected={isOthersEditingSelected}
+              editLockError={editLockError}
+              onClearEditLockError={clearEditLockError}
               onAcquireEditLock={handleAcquireEditLock}
               onReleaseEditLock={handleReleaseEditLock}
               onForceReleaseLock={handleForceReleaseLock}
+              shiftDataMap={state.shiftDataMap}
+              days={days}
+              staffNameMap={staffNameMap}
+              onDateCellClick={handleCellClick}
             />
 
             <KeyboardShortcutsHelp

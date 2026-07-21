@@ -3,6 +3,7 @@ import {
   SettingsAlert,
   SettingsButton,
 } from "@features/admin/layout/ui/SettingsPrimitives";
+import ShiftDisplayModeButtonGroup from "@features/admin-config-shift/ShiftDisplayModeButtonGroup";
 import { SubsectionTitle } from "@shared/ui/typography";
 
 type ShiftDisplaySettingsPanelProps = {
@@ -31,32 +32,10 @@ export default function ShiftDisplaySettingsPanel({
               <span className="text-sm font-medium text-slate-700">
                 表示モード
               </span>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={() => onSwitchShiftDefaultMode("normal")}
-                  className={[
-                    "rounded-xl border px-4 py-2 text-sm font-medium transition",
-                    shiftDefaultMode === "normal"
-                      ? "border-emerald-600 bg-emerald-50 text-emerald-700"
-                      : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
-                  ].join(" ")}
-                >
-                  通常モード
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onSwitchShiftDefaultMode("collaborative")}
-                  className={[
-                    "rounded-xl border px-4 py-2 text-sm font-medium transition",
-                    shiftDefaultMode === "collaborative"
-                      ? "border-emerald-600 bg-emerald-50 text-emerald-700"
-                      : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
-                  ].join(" ")}
-                >
-                  共同編集モード
-                </button>
-              </div>
+              <ShiftDisplayModeButtonGroup
+                value={shiftDefaultMode}
+                onChange={onSwitchShiftDefaultMode}
+              />
             </div>
             <span className="text-sm text-slate-500">
               スタッフ側への設定反映には数分程度かかる場合があります。

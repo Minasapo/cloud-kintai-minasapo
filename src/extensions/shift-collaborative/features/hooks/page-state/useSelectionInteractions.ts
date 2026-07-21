@@ -20,24 +20,17 @@ type UseSelectionInteractionsParams = {
 
 export const useSelectionInteractions = ({
   isBatchUpdating,
-  isDragging,
   showHelp,
   setShowHelp,
   updateUserActivity,
-  selectRange,
-  toggleCell,
   focusCell,
   selectCell,
-  startDragSelect,
-  updateDragSelect,
-  endDragSelect,
   clearSelection,
   clearFocus,
-  selectAll,
 }: UseSelectionInteractionsParams) => {
   const handleSelectAll = useCallback(() => {
-    selectAll();
-  }, [selectAll]);
+    return;
+  }, []);
 
   const handleEscape = useCallback(() => {
     if (showHelp) {
@@ -56,28 +49,14 @@ export const useSelectionInteractions = ({
 
       updateUserActivity();
 
-      if (event.shiftKey) {
-        selectRange(staffId, date);
-        return;
-      }
-
-      if (event.ctrlKey || event.metaKey) {
-        toggleCell(staffId, date);
-        focusCell(staffId, date);
-        return;
+      if (event.shiftKey || event.ctrlKey || event.metaKey) {
+        event.preventDefault();
       }
 
       selectCell(staffId, date);
       focusCell(staffId, date);
     },
-    [
-      isBatchUpdating,
-      updateUserActivity,
-      selectRange,
-      toggleCell,
-      focusCell,
-      selectCell,
-    ],
+    [isBatchUpdating, updateUserActivity, focusCell, selectCell],
   );
 
   const handleCellMouseDown = useCallback(
@@ -90,25 +69,22 @@ export const useSelectionInteractions = ({
         return;
       }
 
-      startDragSelect(staffId, date);
+      selectCell(staffId, date);
+      focusCell(staffId, date);
     },
-    [isBatchUpdating, startDragSelect],
+    [isBatchUpdating, selectCell, focusCell],
   );
 
   const handleCellMouseEnter = useCallback(
-    (staffId: string, date: string) => {
-      if (isDragging) {
-        updateDragSelect(staffId, date);
-      }
+    (_staffId: string, _date: string) => {
+      return;
     },
-    [isDragging, updateDragSelect],
+    [],
   );
 
   const handleMouseUp = useCallback(() => {
-    if (isDragging) {
-      endDragSelect();
-    }
-  }, [isDragging, endDragSelect]);
+    return;
+  }, []);
 
   return {
     handleSelectAll,

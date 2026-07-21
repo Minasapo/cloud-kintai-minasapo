@@ -95,20 +95,17 @@ export const useLockActions = ({
       }
       return true;
     },
-    [
-      isAdmin,
-      isEditingDisabled,
-      networkEditDisabledMessage,
-      setEditLockError,
-    ],
+    [isAdmin, isEditingDisabled, networkEditDisabledMessage, setEditLockError],
   );
 
   const submitLockUpdates = useCallback(
-    (updates: LockUpdate[]) => {
+    async (updates: LockUpdate[]) => {
       if (updates.length === 0) {
-        return;
+        return false;
       }
-      void batchUpdateShifts(updates);
+
+      await batchUpdateShifts(updates);
+      return true;
     },
     [batchUpdateShifts],
   );
@@ -124,9 +121,9 @@ export const useLockActions = ({
   }, [selectionCount, selectedCells, focusedCell]);
 
   const applyLockState = useCallback(
-    (locked: boolean) => {
+    async (locked: boolean) => {
       if (!ensureLockOperationAllowed()) {
-        return;
+        return false;
       }
 
       const updates = selectionTargets
@@ -136,9 +133,14 @@ export const useLockActions = ({
           return { staffId, date, isLocked: locked };
         })
         .filter((update): update is LockUpdate => update !== null);
-      submitLockUpdates(updates);
+      return submitLockUpdates(updates);
     },
-    [ensureLockOperationAllowed, selectionTargets, getCellData, submitLockUpdates],
+    [
+      ensureLockOperationAllowed,
+      selectionTargets,
+      getCellData,
+      submitLockUpdates,
+    ],
   );
 
   const applyLockStateForStaff = useCallback(
@@ -161,12 +163,7 @@ export const useLockActions = ({
         .filter((update): update is LockUpdate => update !== null);
       submitLockUpdates(updates);
     },
-    [
-      dateKeys,
-      ensureLockOperationAllowed,
-      shiftDataMap,
-      submitLockUpdates,
-    ],
+    [dateKeys, ensureLockOperationAllowed, shiftDataMap, submitLockUpdates],
   );
 
   const applyLockStateForMonth = useCallback(
@@ -186,21 +183,18 @@ export const useLockActions = ({
       }
       submitLockUpdates(updates);
     },
-    [
-      dateKeys,
-      ensureLockOperationAllowed,
-      shiftDataMap,
-      submitLockUpdates,
-    ],
+    [dateKeys, ensureLockOperationAllowed, shiftDataMap, submitLockUpdates],
   );
 
   const hasLocked = useMemo(
-    () => selectionTargets.some((t) => getCellData(t.staffId, t.date)?.isLocked),
+    () =>
+      selectionTargets.some((t) => getCellData(t.staffId, t.date)?.isLocked),
     [selectionTargets, getCellData],
   );
 
   const hasUnlocked = useMemo(
-    () => selectionTargets.some((t) => !getCellData(t.staffId, t.date)?.isLocked),
+    () =>
+      selectionTargets.some((t) => !getCellData(t.staffId, t.date)?.isLocked),
     [selectionTargets, getCellData],
   );
 
@@ -231,11 +225,11 @@ export const useLockActions = ({
   }, [setEditLockError]);
 
   const handleLockCells = useCallback(() => {
-    applyLockState(true);
+    return applyLockState(true);
   }, [applyLockState]);
 
   const handleUnlockCells = useCallback(() => {
-    applyLockState(false);
+    return applyLockState(false);
   }, [applyLockState]);
 
   const handleLockStaffRow = useCallback(

@@ -194,21 +194,25 @@ export const useCollaborativeShiftData = ({
     }
   }, [shouldSkipFetch, refetch]);
 
-  const { isBatchUpdating, updateShift, batchUpdateShifts, retryPendingChanges } =
-    useShiftPersist({
-      targetMonth,
-      currentUserId,
-      shiftDataMap,
-      setShiftDataMap,
-      shiftRequestsRef,
-      pendingChangesRef,
-      setConnectionState,
-      updateShiftRequestState,
-      onSaveStartedRef,
-      onSaveCompletedRef,
-      onSaveFailedRef,
-      onPersistCompletedRef,
-    });
+  const {
+    isBatchUpdating,
+    updateShift,
+    batchUpdateShifts,
+    retryPendingChanges,
+  } = useShiftPersist({
+    targetMonth,
+    currentUserId,
+    shiftDataMap,
+    setShiftDataMap,
+    shiftRequestsRef,
+    pendingChangesRef,
+    setConnectionState,
+    updateShiftRequestState,
+    onSaveStartedRef,
+    onSaveCompletedRef,
+    onSaveFailedRef,
+    onPersistCompletedRef,
+  });
 
   useShiftDataSubscriptions({
     staffIds,
@@ -231,6 +235,13 @@ export const useCollaborativeShiftData = ({
     [],
   );
 
+  const upsertShiftRequest = useCallback(
+    (request: ShiftRequestData) => {
+      updateShiftRequestState(request);
+    },
+    [updateShiftRequestState],
+  );
+
   return {
     shiftDataMap,
     pendingChanges: pendingChangesRef.current,
@@ -245,5 +256,6 @@ export const useCollaborativeShiftData = ({
     retryPendingChanges,
     getShiftRequest,
     getAllShiftRequests,
+    upsertShiftRequest,
   };
 };

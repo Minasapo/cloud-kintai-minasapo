@@ -94,7 +94,8 @@ describe("useShiftEditLocks", () => {
           },
           {
             contains: "OnUpdateShiftEditLock",
-            resolve: () => subscriptionHarness.buildPassiveSubscriptionResponse(),
+            resolve: () =>
+              subscriptionHarness.buildPassiveSubscriptionResponse(),
           },
           {
             contains: "OnDeleteShiftEditLock",
@@ -169,6 +170,89 @@ describe("useShiftEditLocks", () => {
     expect(result.current.isCellBeingEdited("staff-1", "01")).toBe(true);
   });
 
+  it("月内ロック一覧で競合が見つかる場合は取得を実行しない", async () => {
+    const legacyConflictLock = {
+      ...activeLock,
+      id: "legacy-2026-03#staff-1#2026-03-01",
+      date: "2026-03-01",
+    };
+
+    const subscriptionHarness = createEditLockSubscriptionHarness();
+    setupEditLockGraphqlMock({
+      subscriptionHarness,
+      getShiftEditLockResponse: null,
+      listItems: [legacyConflictLock],
+    });
+
+    const { result } = renderHook(() =>
+      useShiftEditLocks({
+        currentUserId: "user-1",
+        currentUserName: "User One",
+        targetMonth: "2026-03",
+      }),
+    );
+
+    await waitFor(() => expect(mockGraphql).toHaveBeenCalled());
+
+    let acquireResult:
+      | Awaited<ReturnType<typeof result.current.acquireEditLock>>
+      | undefined;
+
+    await act(async () => {
+      acquireResult = await result.current.acquireEditLock("staff-1", "01");
+    });
+
+    const createCalls = mockGraphql.mock.calls.filter((call) =>
+      String(call?.[0]?.query).includes("mutation CustomCreateShiftEditLock"),
+    );
+    const updateCalls = mockGraphql.mock.calls.filter((call) =>
+      String(call?.[0]?.query).includes("mutation CustomUpdateShiftEditLock"),
+    );
+
+    expect(createCalls).toHaveLength(0);
+    expect(updateCalls).toHaveLength(0);
+    expect(acquireResult).toEqual({
+      acquired: false,
+      conflict: legacyConflictLock,
+    });
+  });
+
+  it("競合ロックが見つからない場合は再取得を試行し、それでも無ければ失敗として返す", async () => {
+    const subscriptionHarness = createEditLockSubscriptionHarness();
+    setupEditLockGraphqlMock({
+      subscriptionHarness,
+      getShiftEditLockResponse: null,
+      listItems: [],
+    });
+
+    const { result } = renderHook(() =>
+      useShiftEditLocks({
+        currentUserId: "user-1",
+        currentUserName: "User One",
+        targetMonth: "2026-03",
+      }),
+    );
+
+    await waitFor(() => expect(mockGraphql).toHaveBeenCalled());
+
+    let acquireResult:
+      | Awaited<ReturnType<typeof result.current.acquireEditLock>>
+      | undefined;
+
+    await act(async () => {
+      acquireResult = await result.current.acquireEditLock("staff-1", "01");
+    });
+
+    const createCalls = mockGraphql.mock.calls.filter((call) =>
+      String(call?.[0]?.query).includes("mutation CustomCreateShiftEditLock"),
+    );
+
+    expect(createCalls).toHaveLength(2);
+    expect(acquireResult?.acquired).toBe(false);
+    expect(acquireResult?.reason).toContain("phase=retry-postcheck");
+    expect(result.current.hasEditLock("staff-1", "01")).toBe(false);
+  });
+
   it("subscriptionイベントでロック状態を即時反映する", async () => {
     const subscriptionHarness = createEditLockSubscriptionHarness();
     setupEditLockGraphqlMock({
@@ -190,7 +274,9 @@ describe("useShiftEditLocks", () => {
         subscriptionHarness.hasHandler("onCreateShiftEditLock"),
       ).toBeTruthy(),
     );
-    expect(subscriptionHarness.hasHandler("onDeleteShiftEditLock")).toBeTruthy();
+    expect(
+      subscriptionHarness.hasHandler("onDeleteShiftEditLock"),
+    ).toBeTruthy();
 
     act(() => {
       subscriptionHarness.emit("onCreateShiftEditLock", activeLock);
@@ -310,9 +396,6 @@ describe("useShiftEditLocks", () => {
         query: expect.stringContaining("DeleteShiftEditLock"),
         variables: {
           input: { id: "2026-03#staff-1#01" },
-          condition: {
-            version: { eq: 3 },
-          },
         },
         authMode: "userPool",
       }),
