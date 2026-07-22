@@ -1,10 +1,5 @@
 import AppsRoundedIcon from "@mui/icons-material/AppsRounded";
-import {
-  Box,
-  ButtonBase,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Box, ButtonBase, Paper, Typography } from "@mui/material";
 import {
   predefinedIcons,
   type PredefinedIconValue,
@@ -164,7 +159,15 @@ function LinksSection({
           pb: 1.5,
         }}
       >
-        <Box sx={{ height: 8, width: 8, flexShrink: 0, borderRadius: 9999, bgcolor: "emerald.600" }} />
+        <Box
+          sx={{
+            height: 8,
+            width: 8,
+            flexShrink: 0,
+            borderRadius: 9999,
+            bgcolor: "emerald.600",
+          }}
+        />
         <Typography
           variant="body2"
           sx={{
@@ -268,7 +271,7 @@ function LinkGridItem({
           color: "emerald.800",
         }}
       >
-          {iconComponent}
+        {iconComponent}
       </Box>
       <Typography
         variant="caption"
@@ -279,7 +282,7 @@ function LinkGridItem({
           wordBreak: "break-word",
         }}
       >
-          {title}
+        {title}
       </Typography>
     </ButtonBase>
   );
@@ -403,7 +406,13 @@ const ExternalLinks = ({
             }}
           >
             <Box sx={{ overflowY: "auto", pr: 0.5 }}>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: POPPER_GAP }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: POPPER_GAP,
+                }}
+              >
                 {companyLinks.length > 0 ? (
                   <LinksSection
                     title="共通"
@@ -420,12 +429,18 @@ const ExternalLinks = ({
                   />
                 ) : null}
                 {personalLinksFetchError ? (
-                  <Typography variant="body2" sx={{ m: 0, color: PERSONAL_LINK_ERROR_COLOR }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ m: 0, color: PERSONAL_LINK_ERROR_COLOR }}
+                  >
                     プライベートリンクの取得に失敗しました
                   </Typography>
                 ) : null}
                 {companyLinks.length === 0 && personalLinks.length === 0 ? (
-                  <Typography variant="body2" sx={{ m: 0, textAlign: "center", color: EMPTY_STATE_COLOR }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ m: 0, textAlign: "center", color: EMPTY_STATE_COLOR }}
+                  >
                     表示できるリンクがありません
                   </Typography>
                 ) : null}

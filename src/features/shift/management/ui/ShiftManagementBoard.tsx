@@ -10,18 +10,15 @@ import { Loader2 } from "lucide-react";
 import React, { useContext, useMemo, useState } from "react";
 
 import * as MESSAGE_CODE from "@/errors";
-import AdminShiftSettingsDialog from "@/features/admin-config-shift/AdminShiftSettingsDialog";
 
 import { ShiftState } from "../lib/generateMockShifts";
 import { useShiftDisplayData } from "../model/useShiftDisplayData";
 import useShiftManagementDialogs from "../model/useShiftManagementDialogs";
 import useShiftSelection from "../model/useShiftSelection";
 import { useShiftStaffGroups } from "../model/useShiftStaffGroups";
-import ShiftBulkEditDialog from "./components/ShiftBulkEditDialog";
-import ShiftEditDialog from "./components/ShiftEditDialog";
+import { ShiftManagementContent } from "./components/ShiftManagementContent";
+import { ShiftManagementDialogs } from "./components/ShiftManagementDialogs";
 import { ShiftManagementHeader } from "./components/ShiftManagementHeader";
-import ShiftManagementLegend from "./components/ShiftManagementLegend";
-import { ShiftManagementTable } from "./components/ShiftManagementTable";
 
 const logger = createLogger("ShiftManagementBoard");
 
@@ -354,86 +351,47 @@ export default function ShiftManagementBoard() {
         onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
-      {(loading || shiftRequestsLoading) && (
-        <div className="flex justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
-        </div>
-      )}
-
-      {error && (
-        <div
-          className="mb-4 rounded bg-red-50 p-4 text-sm text-red-800"
-          role="alert"
-        >
-          スタッフデータの取得に失敗しました
-        </div>
-      )}
-
-      {Boolean(calendarsError) && (
-        <div
-          className="mb-4 rounded bg-red-50 p-4 text-sm text-red-800"
-          role="alert"
-        >
-          カレンダー情報の取得に失敗しました
-        </div>
-      )}
-
-      {!loading && !shiftRequestsLoading && (
-        <ShiftManagementTable
-          days={days}
-          groupedShiftStaffs={groupedShiftStaffs.map((group) => ({
-            groupName: group.groupName,
-            staffs: group.members.map((staff) => ({
-              id: staff.id,
-              name: `${staff.familyName}${staff.givenName}`,
-            })),
-          }))}
-          holidaySet={holidaySet}
-          companyHolidaySet={companyHolidaySet}
-          holidayNameMap={holidayNameMap}
-          companyHolidayNameMap={companyHolidayNameMap}
-          selectedStaffIds={selectedStaffIds}
-          selectedDayKeys={selectedDayKeys}
-          onStaffCheckboxChange={handleStaffCheckboxChange}
-          onDayCheckboxChange={handleDayCheckboxChange}
-          displayShifts={displayShifts}
-          dailyCounts={dailyCounts}
-          plannedDailyCounts={plannedDailyCounts}
-          onOpenShiftEditDialog={openShiftEditDialog}
-        />
-      )}
-
-      <div className="mt-6">
-        <ShiftManagementLegend />
-      </div>
-
-      {/* ダイアログ類 */}
-      <ShiftEditDialog
-        open={isEditDialogOpen}
-        editingCell={editingCell}
-        editingState={editingState}
-        isSaving={isSavingSingleEdit}
-        onClose={closeShiftEditDialog}
-        onStateChange={handleEditingStateChange}
-        onSubmit={saveShiftEdit}
+      <ShiftManagementContent
+        days={days}
+        groupedShiftStaffs={groupedShiftStaffs}
+        loading={loading}
+        shiftRequestsLoading={shiftRequestsLoading}
+        error={error}
+        calendarsError={calendarsError}
+        holidaySet={holidaySet}
+        companyHolidaySet={companyHolidaySet}
+        holidayNameMap={holidayNameMap}
+        companyHolidayNameMap={companyHolidayNameMap}
+        selectedStaffIds={selectedStaffIds}
+        selectedDayKeys={selectedDayKeys}
+        onStaffCheckboxChange={handleStaffCheckboxChange}
+        onDayCheckboxChange={handleDayCheckboxChange}
+        displayShifts={displayShifts}
+        dailyCounts={dailyCounts}
+        plannedDailyCounts={plannedDailyCounts}
+        onOpenShiftEditDialog={openShiftEditDialog}
       />
 
-      <ShiftBulkEditDialog
-        open={isBulkDialogOpen}
+      <ShiftManagementDialogs
+        isEditDialogOpen={isEditDialogOpen}
+        editingCell={editingCell}
+        editingState={editingState}
+        isSavingSingleEdit={isSavingSingleEdit}
+        closeShiftEditDialog={closeShiftEditDialog}
+        handleEditingStateChange={handleEditingStateChange}
+        saveShiftEdit={saveShiftEdit}
+        isBulkDialogOpen={isBulkDialogOpen}
         selectedStaffCount={selectedStaffIds.size}
         selectedDayCount={selectedDayKeys.size}
         selectedCellCount={selectedCellCount}
         bulkEditState={bulkEditState}
-        isSaving={isSavingBulkEdit}
-        canSubmit={hasBulkSelection}
-        onClose={closeBulkEditDialog}
-        onStateChange={handleBulkEditStateChange}
-        onSubmit={handleApplyBulkEdit}
-      />
-
-      <AdminShiftSettingsDialog
-        open={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
+        isSavingBulkEdit={isSavingBulkEdit}
+        hasBulkSelection={hasBulkSelection}
+        closeBulkEditDialog={closeBulkEditDialog}
+        handleBulkEditStateChange={handleBulkEditStateChange}
+        handleApplyBulkEdit={handleApplyBulkEdit}
+        isSettingsOpen={isSettingsOpen}
+        onCloseSettings={() => setIsSettingsOpen(false)}
       />
     </div>
   );

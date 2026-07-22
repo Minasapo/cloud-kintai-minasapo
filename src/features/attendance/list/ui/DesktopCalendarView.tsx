@@ -3,10 +3,10 @@ import { AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
 import AttendanceStatusChip from "@entities/attendance/ui/AttendanceStatusChip";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ErrorIcon from "@mui/icons-material/Error";
-import PendingIcon from "@mui/icons-material/Pending";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ErrorIcon from "@mui/icons-material/Error";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
+import PendingIcon from "@mui/icons-material/Pending";
 import { Box, Chip, Stack, styled, Tooltip, Typography } from "@mui/material";
 import { alpha, Theme, useTheme } from "@mui/material/styles";
 import {
