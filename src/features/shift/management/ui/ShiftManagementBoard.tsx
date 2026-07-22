@@ -8,12 +8,10 @@ import { Loader2 } from "lucide-react";
 import { useContext, useMemo, useRef, useState } from "react";
 
 import type { ShiftState } from "../lib/generateMockShifts";
+import { useHolidayCalendarErrorNotification } from "../model/useHolidayCalendarErrorNotification";
+import { useShiftAutoSaveState } from "../model/useShiftAutoSaveState";
+import { useShiftBulkEditActions } from "../model/useShiftBulkEditActions";
 import { useShiftDisplayData } from "../model/useShiftDisplayData";
-import {
-  useHolidayCalendarErrorNotification,
-  useShiftAutoSaveState,
-  useShiftBulkEditActions,
-} from "../model/useShiftManagementBoardHelpers";
 import useShiftManagementDialogs from "../model/useShiftManagementDialogs";
 import useShiftSelection from "../model/useShiftSelection";
 import { useShiftStaffGroups } from "../model/useShiftStaffGroups";
