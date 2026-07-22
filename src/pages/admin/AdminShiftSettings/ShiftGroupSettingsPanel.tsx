@@ -3,6 +3,7 @@ import {
   SettingsAlert,
   SettingsButton,
 } from "@features/admin/layout/ui/SettingsPrimitives";
+import { AppButton } from "@shared/ui/button";
 import { SubsectionTitle } from "@shared/ui/typography";
 import type { Control, FieldArrayWithId } from "react-hook-form";
 
@@ -69,14 +70,14 @@ export default function ShiftGroupSettingsPanel({
               ))
             )}
           </div>
-          <button
-            className="flex flex-row items-center gap-2 self-start rounded-lg border border-slate-300 px-4 py-2 text-slate-700 transition hover:bg-slate-50"
+          <AppButton
+            variant="outline"
+            tone="neutral"
+            startIcon={<SettingsIcon name="plus" />}
             onClick={onAddGroup}
-            type="button"
           >
-            <SettingsIcon name="plus" className="text-slate-500" />
-            <span>グループを追加</span>
-          </button>
+            グループを追加
+          </AppButton>
           {hasValidationError && (
             <SettingsAlert variant="warning">
               <div className="flex flex-col gap-2">

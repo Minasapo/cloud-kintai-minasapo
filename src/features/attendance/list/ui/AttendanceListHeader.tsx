@@ -3,13 +3,7 @@ import "./AttendanceListHeader.scss";
 import { PageTitle } from "@shared/ui/typography";
 import { useState } from "react";
 
-type AttendanceListHeaderProps = {
-  rangeLabelForDisplay: string;
-};
-
-export default function AttendanceListHeader({
-  rangeLabelForDisplay,
-}: AttendanceListHeaderProps) {
+export default function AttendanceListHeader() {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   return (
@@ -36,11 +30,6 @@ export default function AttendanceListHeader({
           >
             {isDescriptionExpanded ? "閉じる" : "続きを読む"}
           </button>
-        </div>
-        <div className="attendance-list-header__summary">
-          <p className="attendance-list-header__summary-inline">
-            集計期間：{rangeLabelForDisplay}
-          </p>
         </div>
       </div>
     </section>

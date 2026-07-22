@@ -5,7 +5,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Stack,  Typography,
+  Stack,
+  Typography,
 } from "@mui/material";
 import { Attendance, AttendanceChangeRequest } from "@shared/api/graphql/types";
 import { AppButton } from "@shared/ui/button";
@@ -17,6 +18,10 @@ export type ChangeRequestQuickViewDialogProps = {
   open: boolean;
   attendance: Attendance | null;
   changeRequest: AttendanceChangeRequest | null;
+  canOpenPrevious?: boolean;
+  canOpenNext?: boolean;
+  onOpenPrevious?: () => void;
+  onOpenNext?: () => void;
   onClose: () => void;
 };
 
@@ -24,6 +29,10 @@ export default function ChangeRequestQuickViewDialog({
   open,
   attendance,
   changeRequest,
+  canOpenPrevious = false,
+  canOpenNext = false,
+  onOpenPrevious,
+  onOpenNext,
   onClose,
 }: ChangeRequestQuickViewDialogProps) {
   const workDate = attendance?.workDate ?? null;
@@ -44,6 +53,22 @@ export default function ChangeRequestQuickViewDialog({
           </Typography>
         </DialogContent>
         <DialogActions>
+          <AppButton
+            variant="ghost"
+            tone="neutral"
+            onClick={onOpenPrevious}
+            disabled={!canOpenPrevious}
+          >
+            前へ
+          </AppButton>
+          <AppButton
+            variant="ghost"
+            tone="neutral"
+            onClick={onOpenNext}
+            disabled={!canOpenNext}
+          >
+            次へ
+          </AppButton>
           <AppButton variant="ghost" tone="neutral" onClick={onClose}>
             閉じる
           </AppButton>
@@ -77,6 +102,22 @@ export default function ChangeRequestQuickViewDialog({
         </Stack>
       </DialogContent>
       <DialogActions>
+        <AppButton
+          variant="ghost"
+          tone="neutral"
+          onClick={onOpenPrevious}
+          disabled={!canOpenPrevious}
+        >
+          前へ
+        </AppButton>
+        <AppButton
+          variant="ghost"
+          tone="neutral"
+          onClick={onOpenNext}
+          disabled={!canOpenNext}
+        >
+          次へ
+        </AppButton>
         <AppButton variant="ghost" tone="neutral" onClick={onClose}>
           閉じる
         </AppButton>

@@ -191,7 +191,11 @@ export default function AdminStaffAttendanceList() {
     quickViewAttendance,
     quickViewChangeRequest,
     quickViewOpen,
+    canOpenPreviousQuickView,
+    canOpenNextQuickView,
     handleCloseQuickView,
+    handleOpenPreviousQuickView,
+    handleOpenNextQuickView,
   } = changeRequestControls;
 
   const { handleEdit, handleOpenInRightPanel, buildCalendarNavigatePath } =
@@ -348,6 +352,10 @@ export default function AdminStaffAttendanceList() {
         open={quickViewOpen}
         attendance={quickViewAttendance}
         changeRequest={quickViewChangeRequest}
+        canOpenPrevious={canOpenPreviousQuickView}
+        canOpenNext={canOpenNextQuickView}
+        onOpenPrevious={handleOpenPreviousQuickView}
+        onOpenNext={handleOpenNextQuickView}
         onClose={handleCloseQuickView}
       />
     </>

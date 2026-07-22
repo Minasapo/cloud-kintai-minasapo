@@ -2,144 +2,313 @@ import { type UpdateAttendanceMutationArg } from "@entities/attendance/api/atten
 import { ChangeRequest } from "@entities/attendance/lib/ChangeRequest";
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import handleApproveChangeRequest from "@features/attendance/edit/ui/ChangeRequestDialog/handleApproveChangeRequest";
-import { Attendance, AttendanceChangeRequest, Staff, } from "@shared/api/graphql/types";
+import handleRejectChangeRequest from "@features/attendance/edit/ui/ChangeRequestDialog/handleRejectChangeRequest";
+import {
+  Attendance,
+  AttendanceChangeRequest,
+  Staff,
+} from "@shared/api/graphql/types";
 import { createLogger } from "@shared/lib/logger";
 import { GenericMailSender } from "@shared/lib/mail/GenericMailSender";
 import { pushNotification } from "@shared/lib/store/notificationSlice";
-import { type MutableRefObject, useCallback, useEffect, useMemo, useState, } from "react";
+import {
+  type MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useDispatch } from "react-redux";
 
 import * as MESSAGE_CODE from "@/errors";
 
 const logger = createLogger("useAdminAttendanceChangeRequests");
 export type UseAdminAttendanceChangeRequestsParams = {
-    staffId?: string;
-    staff: Staff | undefined | null;
-    staffForMail: StaffType | null;
-    pendingAttendances: Attendance[];
-    updateAttendance: (input: UpdateAttendanceMutationArg) => Promise<Attendance>;
-    isBulkApprovingRef: MutableRefObject<boolean>;
+  staffId?: string;
+  staff: Staff | undefined | null;
+  staffForMail: StaffType | null;
+  pendingAttendances: Attendance[];
+  updateAttendance: (input: UpdateAttendanceMutationArg) => Promise<Attendance>;
+  isBulkApprovingRef: MutableRefObject<boolean>;
 };
-export const useAdminAttendanceChangeRequests = ({ staffId, staff, staffForMail, pendingAttendances, updateAttendance, isBulkApprovingRef, }: UseAdminAttendanceChangeRequestsParams) => {
-    const dispatch = useDispatch();
-    const [quickViewAttendance, setQuickViewAttendance] = useState<Attendance | null>(null);
-    const [quickViewChangeRequest, setQuickViewChangeRequest] = useState<AttendanceChangeRequest | null>(null);
-    const [quickViewOpen, setQuickViewOpen] = useState(false);
-    const [selectedAttendanceIds, setSelectedAttendanceIds] = useState<string[]>([]);
-    const [bulkApproving, setBulkApproving] = useState(false);
-    const getPendingChangeRequest = useCallback((attendance: Attendance) => {
-        return new ChangeRequest(attendance.changeRequests).getFirstUnapproved();
-    }, []);
-    const handleOpenQuickView = useCallback((attendance: Attendance) => {
-        const pendingRequest = getPendingChangeRequest(attendance);
-        if (!pendingRequest)
-            return;
-        setQuickViewAttendance(attendance);
-        setQuickViewChangeRequest(pendingRequest);
-        setQuickViewOpen(true);
-    }, [getPendingChangeRequest]);
-    const handleCloseQuickView = useCallback(() => {
-        setQuickViewOpen(false);
-        setQuickViewAttendance(null);
-        setQuickViewChangeRequest(null);
-    }, []);
-    const isAttendanceSelected = useCallback((attendanceId: string) => selectedAttendanceIds.includes(attendanceId), [selectedAttendanceIds]);
-    const toggleAttendanceSelection = useCallback((attendanceId: string) => {
-        setSelectedAttendanceIds((prev) => {
-            if (prev.includes(attendanceId)) {
-                return prev.filter((id) => id !== attendanceId);
-            }
-            return [...prev, attendanceId];
-        });
-    }, []);
-    const toggleSelectAllPending = useCallback(() => {
-        if (pendingAttendances.length === 0)
-            return;
-        setSelectedAttendanceIds((prev) => {
-            if (prev.length === pendingAttendances.length) {
-                return [];
-            }
-            return pendingAttendances.map((attendance) => attendance.id);
-        });
-    }, [pendingAttendances]);
-    useEffect(() => {
-        if (bulkApproving)
-            return;
-        setSelectedAttendanceIds((prev) => prev.filter((id) => pendingAttendances.some((attendance) => attendance.id === id)));
-    }, [pendingAttendances, bulkApproving]);
-    const handleBulkApprove = useCallback(async () => {
-        if (selectedAttendanceIds.length === 0 ||
-            !staffId ||
-            !staff ||
-            !staffForMail) {
-            return;
-        }
-        const targetAttendances = pendingAttendances.filter((attendance) => selectedAttendanceIds.includes(attendance.id));
-        if (targetAttendances.length === 0)
-            return;
-        let mailErrorOccurred = false;
-        setBulkApproving(true);
-        isBulkApprovingRef.current = true;
-        try {
-            await Promise.all(targetAttendances.map(async (attendance) => {
-                const updatedAttendance = await handleApproveChangeRequest(attendance, (input: UpdateAttendanceMutationArg) => updateAttendance(input), undefined);
-                await Promise.allSettled([
-                    new GenericMailSender(staffForMail, updatedAttendance)
-                        .approveChangeRequest(undefined)
-                        .catch((mailError: unknown) => {
-                        const message = mailError instanceof Error
-                            ? mailError.message
-                            : String(mailError);
-                        logger.error("Failed to send approval notification mail:", message);
-                        mailErrorOccurred = true;
-                    }),
-                ]);
-            }));
-            const firstAttendanceId = selectedAttendanceIds[0];
-            const attendance = pendingAttendances.find((a) => a.id === firstAttendanceId);
-            dispatch(pushNotification({
-                tone: "success",
-                message: "勤怠情報の変更リクエストを承認しました",
-                description: attendance?.workDate
-                    ? `${attendance.workDate} の勤怠情報の変更リクエストが承認されました`
-                    : undefined
-            }));
-            setSelectedAttendanceIds([]);
-            if (mailErrorOccurred) {
-                dispatch(pushNotification({
-                    tone: "error",
-                    message: MESSAGE_CODE.E00002
-                }));
-            }
-        }
-        catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            logger.error("Bulk approve failed:", message);
-            dispatch(pushNotification({
-                tone: "error",
-                message: MESSAGE_CODE.E04006
-            }));
-        }
-        finally {
-            isBulkApprovingRef.current = false;
-            setBulkApproving(false);
-        }
-    }, [
-        selectedAttendanceIds,
-        staffId,
-        staff,
-        staffForMail,
-        pendingAttendances,
-        updateAttendance,
-        dispatch,
-    ]);
-    const canBulkApprove = useMemo(() => Boolean(staffForMail), [staffForMail]);
-    const controls = useMemo(() => ({
+export const useAdminAttendanceChangeRequests = ({
+  staffId,
+  staff,
+  staffForMail,
+  pendingAttendances,
+  updateAttendance,
+  isBulkApprovingRef,
+}: UseAdminAttendanceChangeRequestsParams) => {
+  const dispatch = useDispatch();
+  const [quickViewAttendance, setQuickViewAttendance] =
+    useState<Attendance | null>(null);
+  const [quickViewChangeRequest, setQuickViewChangeRequest] =
+    useState<AttendanceChangeRequest | null>(null);
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
+  const [selectedAttendanceIds, setSelectedAttendanceIds] = useState<string[]>(
+    [],
+  );
+  const [bulkApproving, setBulkApproving] = useState(false);
+  const getPendingChangeRequest = useCallback((attendance: Attendance) => {
+    return new ChangeRequest(attendance.changeRequests).getFirstUnapproved();
+  }, []);
+  const handleOpenQuickView = useCallback(
+    (attendance: Attendance) => {
+      const pendingRequest = getPendingChangeRequest(attendance);
+      if (!pendingRequest) return;
+      setQuickViewAttendance(attendance);
+      setQuickViewChangeRequest(pendingRequest);
+      setQuickViewOpen(true);
+    },
+    [getPendingChangeRequest],
+  );
+  const handleCloseQuickView = useCallback(() => {
+    setQuickViewOpen(false);
+    setQuickViewAttendance(null);
+    setQuickViewChangeRequest(null);
+  }, []);
+  const quickViewIndex = useMemo(() => {
+    if (!quickViewAttendance) {
+      return -1;
+    }
+    return pendingAttendances.findIndex(
+      (attendance) => attendance.id === quickViewAttendance.id,
+    );
+  }, [pendingAttendances, quickViewAttendance]);
+  const canOpenPreviousQuickView = quickViewIndex > 0;
+  const canOpenNextQuickView =
+    quickViewIndex >= 0 && quickViewIndex < pendingAttendances.length - 1;
+  const handleOpenAdjacentQuickView = useCallback(
+    (direction: -1 | 1) => {
+      if (quickViewIndex < 0) {
+        return;
+      }
+      const targetAttendance = pendingAttendances[quickViewIndex + direction];
+      if (!targetAttendance) {
+        return;
+      }
+      const pendingRequest = getPendingChangeRequest(targetAttendance);
+      if (!pendingRequest) {
+        return;
+      }
+      setQuickViewAttendance(targetAttendance);
+      setQuickViewChangeRequest(pendingRequest);
+      setQuickViewOpen(true);
+    },
+    [getPendingChangeRequest, pendingAttendances, quickViewIndex],
+  );
+  const handleOpenPreviousQuickView = useCallback(() => {
+    handleOpenAdjacentQuickView(-1);
+  }, [handleOpenAdjacentQuickView]);
+  const handleOpenNextQuickView = useCallback(() => {
+    handleOpenAdjacentQuickView(1);
+  }, [handleOpenAdjacentQuickView]);
+  const isAttendanceSelected = useCallback(
+    (attendanceId: string) => selectedAttendanceIds.includes(attendanceId),
+    [selectedAttendanceIds],
+  );
+  const toggleAttendanceSelection = useCallback((attendanceId: string) => {
+    setSelectedAttendanceIds((prev) => {
+      if (prev.includes(attendanceId)) {
+        return prev.filter((id) => id !== attendanceId);
+      }
+      return [...prev, attendanceId];
+    });
+  }, []);
+  const toggleSelectAllPending = useCallback(() => {
+    if (pendingAttendances.length === 0) return;
+    setSelectedAttendanceIds((prev) => {
+      if (prev.length === pendingAttendances.length) {
+        return [];
+      }
+      return pendingAttendances.map((attendance) => attendance.id);
+    });
+  }, [pendingAttendances]);
+  useEffect(() => {
+    if (bulkApproving) return;
+    setSelectedAttendanceIds((prev) =>
+      prev.filter((id) =>
+        pendingAttendances.some((attendance) => attendance.id === id),
+      ),
+    );
+  }, [pendingAttendances, bulkApproving]);
+  const handleBulkApprove = useCallback(async () => {
+    if (
+      selectedAttendanceIds.length === 0 ||
+      !staffId ||
+      !staff ||
+      !staffForMail
+    ) {
+      return;
+    }
+    const targetAttendances = pendingAttendances.filter((attendance) =>
+      selectedAttendanceIds.includes(attendance.id),
+    );
+    if (targetAttendances.length === 0) return;
+    let mailErrorOccurred = false;
+    setBulkApproving(true);
+    isBulkApprovingRef.current = true;
+    try {
+      await Promise.all(
+        targetAttendances.map(async (attendance) => {
+          const updatedAttendance = await handleApproveChangeRequest(
+            attendance,
+            (input: UpdateAttendanceMutationArg) => updateAttendance(input),
+            undefined,
+          );
+          await Promise.allSettled([
+            new GenericMailSender(staffForMail, updatedAttendance)
+              .approveChangeRequest(undefined)
+              .catch((mailError: unknown) => {
+                const message =
+                  mailError instanceof Error
+                    ? mailError.message
+                    : String(mailError);
+                logger.error(
+                  "Failed to send approval notification mail:",
+                  message,
+                );
+                mailErrorOccurred = true;
+              }),
+          ]);
+        }),
+      );
+      const firstAttendanceId = selectedAttendanceIds[0];
+      const attendance = pendingAttendances.find(
+        (a) => a.id === firstAttendanceId,
+      );
+      dispatch(
+        pushNotification({
+          tone: "success",
+          message: "勤怠情報の変更リクエストを承認しました",
+          description: attendance?.workDate
+            ? `${attendance.workDate} の勤怠情報の変更リクエストが承認されました`
+            : undefined,
+        }),
+      );
+      setSelectedAttendanceIds([]);
+      if (mailErrorOccurred) {
+        dispatch(
+          pushNotification({
+            tone: "error",
+            message: MESSAGE_CODE.E00002,
+          }),
+        );
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error("Bulk approve failed:", message);
+      dispatch(
+        pushNotification({
+          tone: "error",
+          message: MESSAGE_CODE.E04006,
+        }),
+      );
+    } finally {
+      isBulkApprovingRef.current = false;
+      setBulkApproving(false);
+    }
+  }, [
+    selectedAttendanceIds,
+    staffId,
+    staff,
+    staffForMail,
+    pendingAttendances,
+    updateAttendance,
+    dispatch,
+  ]);
+  const handleBulkReject = useCallback(async () => {
+    if (
+      selectedAttendanceIds.length === 0 ||
+      !staffId ||
+      !staff ||
+      !staffForMail
+    ) {
+      return;
+    }
+    const targetAttendances = pendingAttendances.filter((attendance) =>
+      selectedAttendanceIds.includes(attendance.id),
+    );
+    if (targetAttendances.length === 0) return;
+    let mailErrorOccurred = false;
+    setBulkApproving(true);
+    isBulkApprovingRef.current = true;
+    try {
+      await Promise.all(
+        targetAttendances.map(async (attendance) => {
+          const updatedAttendance = await handleRejectChangeRequest(
+            attendance,
+            (input: UpdateAttendanceMutationArg) => updateAttendance(input),
+            undefined,
+          );
+          await Promise.allSettled([
+            new GenericMailSender(staffForMail, updatedAttendance)
+              .rejectChangeRequest(undefined)
+              .catch((mailError: unknown) => {
+                const message =
+                  mailError instanceof Error
+                    ? mailError.message
+                    : String(mailError);
+                logger.error(
+                  "Failed to send rejection notification mail:",
+                  message,
+                );
+                mailErrorOccurred = true;
+              }),
+          ]);
+        }),
+      );
+      dispatch(
+        pushNotification({
+          tone: "success",
+          message: MESSAGE_CODE.S04007,
+        }),
+      );
+      setSelectedAttendanceIds([]);
+      if (mailErrorOccurred) {
+        dispatch(
+          pushNotification({
+            tone: "error",
+            message: MESSAGE_CODE.E00002,
+          }),
+        );
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error("Bulk reject failed:", message);
+      dispatch(
+        pushNotification({
+          tone: "error",
+          message: MESSAGE_CODE.E04007,
+        }),
+      );
+    } finally {
+      isBulkApprovingRef.current = false;
+      setBulkApproving(false);
+    }
+  }, [
+    selectedAttendanceIds,
+    staffId,
+    staff,
+    staffForMail,
+    pendingAttendances,
+    updateAttendance,
+    dispatch,
+    isBulkApprovingRef,
+  ]);
+  const canBulkApprove = useMemo(() => Boolean(staffForMail), [staffForMail]);
+  const controls = useMemo(
+    () =>
+      ({
         quickViewAttendance,
         quickViewChangeRequest,
         quickViewOpen,
         handleOpenQuickView,
         handleCloseQuickView,
+        canOpenPreviousQuickView,
+        canOpenNextQuickView,
+        handleOpenPreviousQuickView,
+        handleOpenNextQuickView,
         selectedAttendanceIds,
         isAttendanceSelected,
         toggleAttendanceSelection,
@@ -147,19 +316,27 @@ export const useAdminAttendanceChangeRequests = ({ staffId, staff, staffForMail,
         bulkApproving,
         canBulkApprove,
         handleBulkApprove,
-    }) as const, [
-        quickViewAttendance,
-        quickViewChangeRequest,
-        quickViewOpen,
-        handleOpenQuickView,
-        handleCloseQuickView,
-        selectedAttendanceIds,
-        isAttendanceSelected,
-        toggleAttendanceSelection,
-        toggleSelectAllPending,
-        bulkApproving,
-        canBulkApprove,
-        handleBulkApprove,
-    ]);
-    return controls;
+        handleBulkReject,
+      }) as const,
+    [
+      quickViewAttendance,
+      quickViewChangeRequest,
+      quickViewOpen,
+      handleOpenQuickView,
+      handleCloseQuickView,
+      canOpenPreviousQuickView,
+      canOpenNextQuickView,
+      handleOpenPreviousQuickView,
+      handleOpenNextQuickView,
+      selectedAttendanceIds,
+      isAttendanceSelected,
+      toggleAttendanceSelection,
+      toggleSelectAllPending,
+      bulkApproving,
+      canBulkApprove,
+      handleBulkApprove,
+      handleBulkReject,
+    ],
+  );
+  return controls;
 };

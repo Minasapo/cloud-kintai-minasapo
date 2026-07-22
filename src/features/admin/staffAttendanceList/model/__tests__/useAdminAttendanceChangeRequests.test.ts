@@ -1,5 +1,9 @@
 import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
-import { Attendance, AttendanceChangeRequest , Staff } from "@shared/api/graphql/types";
+import {
+  Attendance,
+  AttendanceChangeRequest,
+  Staff,
+} from "@shared/api/graphql/types";
 import { createMockAttendance, createMockStaff } from "@shared/test-utils";
 import { act, renderHook } from "@testing-library/react";
 import { MutableRefObject } from "react";
@@ -27,13 +31,24 @@ jest.mock(
   }),
 );
 
+const mockHandleRejectChangeRequest = jest.fn();
+jest.mock(
+  "@features/attendance/edit/ui/ChangeRequestDialog/handleRejectChangeRequest",
+  () => ({
+    __esModule: true,
+    default: (...args: unknown[]) => mockHandleRejectChangeRequest(...args),
+  }),
+);
+
 // ─────────────────────────────────────────
 // モック: GenericMailSender
 // ─────────────────────────────────────────
 const mockApproveChangeRequest = jest.fn().mockResolvedValue(undefined);
+const mockRejectChangeRequest = jest.fn().mockResolvedValue(undefined);
 jest.mock("@shared/lib/mail/GenericMailSender", () => ({
   GenericMailSender: jest.fn().mockImplementation(() => ({
     approveChangeRequest: mockApproveChangeRequest,
+    rejectChangeRequest: mockRejectChangeRequest,
   })),
 }));
 
@@ -95,7 +110,9 @@ const mockGraphqlStaff: Staff = {
 };
 
 const createDefaultParams = (
-  overrides: Partial<Parameters<typeof useAdminAttendanceChangeRequests>[0]> = {},
+  overrides: Partial<
+    Parameters<typeof useAdminAttendanceChangeRequests>[0]
+  > = {},
 ) => ({
   staffId: "staff-1",
   staff: mockGraphqlStaff as Staff,
@@ -119,6 +136,7 @@ describe("useAdminAttendanceChangeRequests", () => {
       jest.requireMock("react-redux") as { useDispatch: jest.Mock }
     ).useDispatch.mockReturnValue(mockDispatch);
     mockApproveChangeRequest.mockResolvedValue(undefined);
+    mockRejectChangeRequest.mockResolvedValue(undefined);
   });
 
   // ── 初期状態 ──────────────────────────────────────────────────────
@@ -223,6 +241,54 @@ describe("useAdminAttendanceChangeRequests", () => {
     expect(result.current.quickViewOpen).toBe(false);
     expect(result.current.quickViewAttendance).toBeNull();
     expect(result.current.quickViewChangeRequest).toBeNull();
+  });
+
+  it("前後に対象がある場合、quick view の前へ/次へを判定できること", () => {
+    const first = createAttendanceWithPendingRequest("att-1");
+    const second = createAttendanceWithPendingRequest("att-2");
+    const third = createAttendanceWithPendingRequest("att-3");
+    const params = createDefaultParams({
+      pendingAttendances: [first, second, third],
+    });
+    const { result } = renderHook(() =>
+      useAdminAttendanceChangeRequests(params),
+    );
+
+    act(() => {
+      result.current.handleOpenQuickView(second);
+    });
+
+    expect(result.current.canOpenPreviousQuickView).toBe(true);
+    expect(result.current.canOpenNextQuickView).toBe(true);
+  });
+
+  it("handleOpenNextQuickView / handleOpenPreviousQuickView: 前後の未承認リクエストへ移動できること", () => {
+    const first = createAttendanceWithPendingRequest("att-1");
+    const second = createAttendanceWithPendingRequest("att-2");
+    const third = createAttendanceWithPendingRequest("att-3");
+    const params = createDefaultParams({
+      pendingAttendances: [first, second, third],
+    });
+    const { result } = renderHook(() =>
+      useAdminAttendanceChangeRequests(params),
+    );
+
+    act(() => {
+      result.current.handleOpenQuickView(second);
+    });
+
+    act(() => {
+      result.current.handleOpenNextQuickView();
+    });
+
+    expect(result.current.quickViewAttendance?.id).toBe(third.id);
+    expect(result.current.canOpenNextQuickView).toBe(false);
+
+    act(() => {
+      result.current.handleOpenPreviousQuickView();
+    });
+
+    expect(result.current.quickViewAttendance?.id).toBe(second.id);
   });
 
   // ── toggleAttendanceSelection / isAttendanceSelected ──────────────
@@ -443,6 +509,72 @@ describe("useAdminAttendanceChangeRequests", () => {
     expect(result.current.bulkApproving).toBe(false);
   });
 
+  // ── handleBulkReject ──────────────────────────────────────────────
+
+  it("handleBulkReject: 選択なしの場合、何もしないこと", async () => {
+    const params = createDefaultParams();
+    const { result } = renderHook(() =>
+      useAdminAttendanceChangeRequests(params),
+    );
+
+    await act(async () => {
+      await result.current.handleBulkReject();
+    });
+
+    expect(mockHandleRejectChangeRequest).not.toHaveBeenCalled();
+    expect(mockDispatch).not.toHaveBeenCalled();
+  });
+
+  it("handleBulkReject: 一括却下が成功した場合、成功通知を dispatch すること", async () => {
+    const att1 = createAttendanceWithPendingRequest("att-1");
+    const updatedAttendance = createMockAttendance({ id: "att-1" });
+    mockHandleRejectChangeRequest.mockResolvedValue(updatedAttendance);
+
+    const params = createDefaultParams({ pendingAttendances: [att1] });
+    const { result } = renderHook(() =>
+      useAdminAttendanceChangeRequests(params),
+    );
+
+    act(() => {
+      result.current.toggleAttendanceSelection("att-1");
+    });
+
+    await act(async () => {
+      await result.current.handleBulkReject();
+    });
+
+    expect(mockHandleRejectChangeRequest).toHaveBeenCalledTimes(1);
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: expect.objectContaining({ tone: "success" }),
+      }),
+    );
+  });
+
+  it("handleBulkReject: updateAttendance が失敗した場合、エラー通知を dispatch すること", async () => {
+    const att1 = createAttendanceWithPendingRequest("att-1");
+    mockHandleRejectChangeRequest.mockRejectedValue(new Error("API Error"));
+
+    const params = createDefaultParams({ pendingAttendances: [att1] });
+    const { result } = renderHook(() =>
+      useAdminAttendanceChangeRequests(params),
+    );
+
+    act(() => {
+      result.current.toggleAttendanceSelection("att-1");
+    });
+
+    await act(async () => {
+      await result.current.handleBulkReject();
+    });
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: expect.objectContaining({ tone: "error" }),
+      }),
+    );
+  });
+
   // ── useEffect: pendingAttendances 同期 ─────────────────────────────
 
   it("pendingAttendances から外れた勤怠 ID が selectedAttendanceIds から除去されること", () => {
@@ -452,7 +584,9 @@ describe("useAdminAttendanceChangeRequests", () => {
     const { result, rerender } = renderHook(
       (props: { pending: Attendance[] }) => {
         // 毎レンダリングで params を再生成しない
-        const params = createDefaultParams({ pendingAttendances: props.pending });
+        const params = createDefaultParams({
+          pendingAttendances: props.pending,
+        });
         return useAdminAttendanceChangeRequests(params);
       },
       { initialProps: { pending: [att1, att2] } },

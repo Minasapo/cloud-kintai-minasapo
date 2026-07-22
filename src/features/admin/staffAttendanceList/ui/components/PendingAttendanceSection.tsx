@@ -1,7 +1,5 @@
 import { AttendanceRecordTableRow } from "@entities/attendance/ui/adminStaffAttendance/AttendanceRecordTableRow";
-import {
-  AttendanceRowVariant,
-} from "@entities/attendance/ui/rowVariant";
+import { AttendanceRowVariant } from "@entities/attendance/ui/rowVariant";
 import { AttendanceRecordActionCell } from "@features/attendance/list/ui/AttendanceRecordActionCell";
 import {
   Alert,
@@ -23,7 +21,8 @@ import {
   Staff,
 } from "@shared/api/graphql/types";
 import { designTokenVar } from "@shared/designSystem";
-import { AppButton } from "@shared/ui/button";
+import { AppSplitButton } from "@shared/ui/button";
+import { useMemo, useState } from "react";
 
 import { ChangeRequestQuickViewButton } from "./ChangeRequestQuickViewButton";
 
@@ -60,8 +59,11 @@ export type PendingAttendanceControls = {
   bulkApproving: boolean;
   canBulkApprove: boolean;
   onBulkApprove: () => Promise<void> | void;
+  onBulkReject: () => Promise<void> | void;
   onOpenQuickView: (attendance: Attendance) => void;
 };
+
+type BulkActionKey = "approve" | "reject";
 
 export function PendingAttendanceSection({
   attendances,
@@ -81,8 +83,40 @@ export function PendingAttendanceSection({
     bulkApproving,
     canBulkApprove,
     onBulkApprove,
+    onBulkReject,
     onOpenQuickView,
   } = changeRequestControls;
+  const [selectedBulkAction, setSelectedBulkAction] =
+    useState<BulkActionKey>("approve");
+  const bulkActionOptions = useMemo(
+    () => [
+      { key: "approve", label: "選択を一括承認" },
+      { key: "reject", label: "選択を一括却下" },
+    ],
+    [],
+  );
+
+  const isBulkActionDisabled =
+    bulkApproving || selectedAttendanceIds.length === 0 || !canBulkApprove;
+
+  const handleSelectedBulkActionChange = (key: string) => {
+    if (key === "approve" || key === "reject") {
+      setSelectedBulkAction(key);
+    }
+  };
+
+  const handlePrimaryBulkAction = () => {
+    if (selectedBulkAction === "reject") {
+      void onBulkReject();
+      return;
+    }
+    void onBulkApprove();
+  };
+
+  const bulkActionLabel =
+    selectedBulkAction === "reject" ? "却下処理中..." : "承認処理中...";
+  const bulkActionTone = selectedBulkAction === "reject" ? "danger" : "primary";
+
   if (attendances.length === 0) {
     return null;
   }
@@ -102,18 +136,23 @@ export function PendingAttendanceSection({
           <Typography variant="body2" color="text.secondary">
             選択中: {selectedAttendanceIds.length} 件
           </Typography>
-          <AppButton
+          <AppSplitButton
+            options={bulkActionOptions}
+            selectedKey={selectedBulkAction}
+            onSelectedKeyChange={handleSelectedBulkActionChange}
+            onPrimaryClick={handlePrimaryBulkAction}
+            disabled={isBulkActionDisabled}
             variant="solid"
-            disabled={
-              bulkApproving ||
-              selectedAttendanceIds.length === 0 ||
-              !canBulkApprove
-            }
-            onClick={onBulkApprove}
-            data-testid="bulk-approve-button"
-          >
-            {bulkApproving ? "承認処理中..." : "選択を一括承認"}
-          </AppButton>
+            tone={bulkActionTone}
+            size="md"
+            primaryButtonTestId="bulk-approve-button"
+            toggleButtonTestId="bulk-action-toggle-button"
+          />
+          {bulkApproving ? (
+            <Typography variant="body2" color="text.secondary">
+              {bulkActionLabel}
+            </Typography>
+          ) : null}
         </Stack>
       </Stack>
       <Alert severity="warning">

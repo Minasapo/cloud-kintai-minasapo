@@ -1,4 +1,7 @@
-import { CompanyHolidayCalendar,HolidayCalendar } from "@shared/api/graphql/types";
+import {
+  CompanyHolidayCalendar,
+  HolidayCalendar,
+} from "@shared/api/graphql/types";
 import { createMockAttendance } from "@shared/test-utils";
 import { renderHook, waitFor } from "@testing-library/react";
 import dayjs from "dayjs";
@@ -80,6 +83,7 @@ jest.mock("../useAdminAttendanceChangeRequests", () => ({
     bulkApproving: false,
     canBulkApprove: false,
     handleBulkApprove: jest.fn(),
+    handleBulkReject: jest.fn(),
   })),
 }));
 
@@ -135,11 +139,15 @@ describe("useAdminStaffAttendanceListViewModel", () => {
         useAdminStaffAttendanceListViewModel(),
       );
       const now = dayjs().startOf("month");
-      const expectedStart = now.subtract(1, "month").startOf("month").format("YYYY-MM-DD");
+      const expectedStart = now
+        .subtract(1, "month")
+        .startOf("month")
+        .format("YYYY-MM-DD");
       const expectedEnd = now.endOf("month").format("YYYY-MM-DD");
 
       // dateRange は内部計算なので attendanceApi の引数から確認
-      const callArgs = mockUseListAttendancesByDateRangeQuery.mock.calls[0]?.[0];
+      const callArgs =
+        mockUseListAttendancesByDateRangeQuery.mock.calls[0]?.[0];
       expect(callArgs?.startDate).toBe(expectedStart);
       expect(callArgs?.endDate).toBe(expectedEnd);
 
@@ -153,7 +161,8 @@ describe("useAdminStaffAttendanceListViewModel", () => {
         useAdminStaffAttendanceListViewModel("staff-1", march2024),
       );
 
-      const callArgs = mockUseListAttendancesByDateRangeQuery.mock.calls[0]?.[0];
+      const callArgs =
+        mockUseListAttendancesByDateRangeQuery.mock.calls[0]?.[0];
       expect(callArgs?.startDate).toBe("2024-02-01");
       expect(callArgs?.endDate).toBe("2024-03-31");
     });
@@ -164,7 +173,8 @@ describe("useAdminStaffAttendanceListViewModel", () => {
         useAdminStaffAttendanceListViewModel("staff-1", jan2024),
       );
 
-      const callArgs = mockUseListAttendancesByDateRangeQuery.mock.calls[0]?.[0];
+      const callArgs =
+        mockUseListAttendancesByDateRangeQuery.mock.calls[0]?.[0];
       expect(callArgs?.startDate).toBe("2023-12-01");
       expect(callArgs?.endDate).toBe("2024-01-31");
     });
@@ -221,9 +231,18 @@ describe("useAdminStaffAttendanceListViewModel", () => {
 
   describe("duplicateAttendances", () => {
     it("同じ workDate の勤怠が複数ある場合、重複として検出すること", () => {
-      const att1 = createMockAttendance({ id: "att-1", workDate: "2024-03-15" });
-      const att2 = createMockAttendance({ id: "att-2", workDate: "2024-03-15" });
-      const att3 = createMockAttendance({ id: "att-3", workDate: "2024-03-16" });
+      const att1 = createMockAttendance({
+        id: "att-1",
+        workDate: "2024-03-15",
+      });
+      const att2 = createMockAttendance({
+        id: "att-2",
+        workDate: "2024-03-15",
+      });
+      const att3 = createMockAttendance({
+        id: "att-3",
+        workDate: "2024-03-16",
+      });
 
       mockUseListAttendancesByDateRangeQuery.mockReturnValue({
         data: [att1, att2, att3],
@@ -239,15 +258,23 @@ describe("useAdminStaffAttendanceListViewModel", () => {
       );
 
       expect(result.current.duplicateAttendances).toHaveLength(1);
-      expect(result.current.duplicateAttendances[0].workDate).toBe("2024-03-15");
+      expect(result.current.duplicateAttendances[0].workDate).toBe(
+        "2024-03-15",
+      );
       expect(result.current.duplicateAttendances[0].ids).toEqual(
         expect.arrayContaining(["att-1", "att-2"]),
       );
     });
 
     it("重複がない場合、duplicateAttendances は空配列であること", () => {
-      const att1 = createMockAttendance({ id: "att-1", workDate: "2024-03-15" });
-      const att2 = createMockAttendance({ id: "att-2", workDate: "2024-03-16" });
+      const att1 = createMockAttendance({
+        id: "att-1",
+        workDate: "2024-03-15",
+      });
+      const att2 = createMockAttendance({
+        id: "att-2",
+        workDate: "2024-03-16",
+      });
 
       mockUseListAttendancesByDateRangeQuery.mockReturnValue({
         data: [att1, att2],
