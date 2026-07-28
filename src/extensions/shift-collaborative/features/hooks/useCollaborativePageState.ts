@@ -3,12 +3,26 @@ import { useCalendars } from "@entities/calendar/model/useCalendars";
 import { StaffRole } from "@entities/staff/model/useStaffs/useStaffs";
 import { useAuthSessionSummary } from "@shared/lib/useAuthSessionSummary";
 import dayjs from "dayjs";
-import { useCallback, useMemo, useState } from "react";
+import {
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { useCollaborativeShift } from "../context/CollaborativeShiftContext";
+import {
+  buildShiftStateChangedSystemMessage,
+  CHAT_SYSTEM_MESSAGE_PREFIX,
+} from "../lib/chatSystemMessages";
+import { normalizeErrorMessage } from "../lib/lockUtils";
 import { SuggestedAction } from "../rules/shiftRules";
 import type { ShiftDataMap } from "../types/collaborative.types";
-import { useCellStateActions } from "./page-state/useCellStateActions";
+import {
+  AppliedStateChange,
+  useCellStateActions,
+} from "./page-state/useCellStateActions";
 import { useLockActions } from "./page-state/useLockActions";
 import { useSelectionInteractions } from "./page-state/useSelectionInteractions";
 import { useShiftPlanCapacities } from "./page-state/useShiftPlanCapacities";
@@ -25,11 +39,17 @@ const isAdminRole = (isCognitoUserRole: (role: StaffRole) => boolean) =>
   isCognitoUserRole(StaffRole.STAFF_ADMIN) ||
   isCognitoUserRole(StaffRole.OWNER);
 
+type CellPosition = {
+  staffId: string;
+  date: string;
+};
+
 const useShiftCalendarAndCellState = (
   targetMonth: string,
   shiftDataMap: ShiftDataMap,
 ) => {
-  const { currentMonth, shiftPlanCapacities } = useShiftPlanCapacities(targetMonth);
+  const { currentMonth, shiftPlanCapacities } =
+    useShiftPlanCapacities(targetMonth);
   const { data: registeredEventCalendars = [] } = useGetEventCalendarsQuery();
   const {
     holidayCalendars: holidays,
@@ -62,7 +82,8 @@ const useShiftCalendarAndCellState = (
     [shiftDataMap],
   );
   const isCellLocked = useCallback(
-    (staffId: string, date: string) => getCellData(staffId, date)?.isLocked ?? false,
+    (staffId: string, date: string) =>
+      getCellData(staffId, date)?.isLocked ?? false,
     [getCellData],
   );
   return {
@@ -77,7 +98,10 @@ const useShiftCalendarAndCellState = (
   };
 };
 
-export const useCollaborativePageState = (targetMonth: string) => {
+export const useCollaborativePageState = (
+  targetMonth: string,
+  currentUserName = "不明ユーザー",
+) => {
   const {
     state,
     updateShift,
@@ -95,6 +119,7 @@ export const useCollaborativePageState = (targetMonth: string) => {
     updateUserActivity,
     getCellHistory,
     getAllCellHistory,
+    commentsMap,
     addComment,
     updateComment,
     deleteComment,
@@ -104,7 +129,10 @@ export const useCollaborativePageState = (targetMonth: string) => {
   } = useCollaborativeShift();
 
   const { isCognitoUserRole } = useAuthSessionSummary();
-  const isAdmin = useMemo(() => isAdminRole(isCognitoUserRole), [isCognitoUserRole]);
+  const isAdmin = useMemo(
+    () => isAdminRole(isCognitoUserRole),
+    [isCognitoUserRole],
+  );
 
   const {
     currentMonth,
@@ -152,10 +180,23 @@ export const useCollaborativePageState = (targetMonth: string) => {
   const isEditingDisabled =
     !state.isOnline || state.connectionState === "disconnected";
 
-  const releaseEditLocks = useCallback(
-    (targets: Array<{ staffId: string; date: string }>) =>
-      Promise.all(targets.map(({ staffId, date }) => stopEditingCell(staffId, date))).then(() => {}),
-    [stopEditingCell],
+  const handleStateChanged = useCallback(
+    async (changes: AppliedStateChange[]) => {
+      await Promise.all(
+        changes.map((change) =>
+          addComment(
+            `${change.staffId}#${change.date}`,
+            buildShiftStateChangedSystemMessage(
+              currentUserName,
+              change.previousState,
+              change.newState,
+            ),
+            [],
+          ),
+        ),
+      );
+    },
+    [addComment, currentUserName],
   );
 
   const { changeCellState, handleChangeState } = useCellStateActions({
@@ -167,14 +208,41 @@ export const useCollaborativePageState = (targetMonth: string) => {
     isCellBeingEdited,
     getCellEditor,
     hasEditLock,
+    getCellState: (staffId: string, date: string) =>
+      getCellData(staffId, date)?.state,
     updateUserActivity,
     updateShift,
     batchUpdateShifts,
-    releaseEditLocks,
+    onStateChanged: handleStateChanged,
     selectionCount,
     selectedCells,
     focusedCell,
   });
+
+  const releaseOwnedEditLocks = useCallback(
+    async (targets: CellPosition[], addSystemComment: boolean) => {
+      const ownedTargets = targets.filter(({ staffId, date }) =>
+        hasEditLock(staffId, date),
+      );
+
+      await Promise.all(
+        ownedTargets.map(async ({ staffId, date }) => {
+          await stopEditingCell(staffId, date);
+
+          if (!addSystemComment) {
+            return;
+          }
+
+          await addComment(
+            `${staffId}#${date}`,
+            `${CHAT_SYSTEM_MESSAGE_PREFIX}${currentUserName}が編集ロックを解除しました`,
+            [],
+          );
+        }),
+      );
+    },
+    [addComment, currentUserName, hasEditLock, stopEditingCell],
+  );
 
   const {
     hasLocked,
@@ -216,7 +284,7 @@ export const useCollaborativePageState = (targetMonth: string) => {
   const {
     handleSelectAll,
     handleEscape,
-    handleCellClick,
+    handleCellClick: baseHandleCellClick,
     handleCellMouseDown,
     handleCellMouseEnter,
     handleMouseUp,
@@ -238,12 +306,55 @@ export const useCollaborativePageState = (targetMonth: string) => {
     selectAll,
   });
 
+  const handleCellClick = useCallback(
+    (staffId: string, date: string, event: MouseEvent) => {
+      const previousTargets: CellPosition[] =
+        selectionCount > 0 ? selectedCells : focusedCell ? [focusedCell] : [];
+      const didMoveDate = previousTargets.some(
+        (target) => target.date !== date,
+      );
+
+      const run = async () => {
+        try {
+          if (didMoveDate) {
+            await releaseOwnedEditLocks(previousTargets, true);
+          }
+
+          baseHandleCellClick(staffId, date, event);
+        } catch (error) {
+          setEditLockError(normalizeErrorMessage(error));
+        }
+      };
+
+      void run();
+    },
+    [
+      baseHandleCellClick,
+      focusedCell,
+      releaseOwnedEditLocks,
+      selectedCells,
+      selectionCount,
+    ],
+  );
+
   const handleApplySuggestion = useCallback(
-    ({ changes }: SuggestedAction) => changes.forEach(({ staffId, date, newState }) => changeCellState(staffId, date, newState)),
+    ({ changes }: SuggestedAction) =>
+      changes.forEach(({ staffId, date, newState }) =>
+        changeCellState(staffId, date, newState),
+      ),
     [changeCellState],
   );
 
-  const handleSync = triggerSync;
+  const handleSync = useCallback(async () => {
+    await triggerSync();
+    setEditLockError(null);
+  }, [triggerSync]);
+
+  useEffect(() => {
+    if (selectionCount === 0) {
+      setEditLockError(null);
+    }
+  }, [selectionCount]);
 
   const { calculateDailyCount, progress } = useShiftMetrics(
     days,
@@ -290,9 +401,11 @@ export const useCollaborativePageState = (targetMonth: string) => {
     setShowHelp,
     getCellEditor,
     isCellBeingEdited,
+    hasEditLock,
     isBatchUpdating,
     getCellHistory,
     getAllCellHistory,
+    commentsMap,
     addComment,
     updateComment,
     deleteComment,

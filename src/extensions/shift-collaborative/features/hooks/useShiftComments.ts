@@ -10,7 +10,10 @@ import {
 } from "../types/collaborative.types";
 
 const generateCommentId = (): string => {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
     return `comment_${crypto.randomUUID()}`;
   }
   return `comment_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
@@ -162,7 +165,7 @@ const deleteCommentReplyFromMap = (
   commentsMap: CommentsMap,
   parentCommentId: string,
   replyCommentId: string,
-): { next: CommentsMap; deleted: boolean } => {
+): { next: CommentsMap; deleted: boolean; cellKey?: string } => {
   for (const [cellKey, comments] of commentsMap) {
     const parentIndex = comments.findIndex((c) => c.id === parentCommentId);
     if (parentIndex === -1) {
@@ -190,7 +193,7 @@ const deleteCommentReplyFromMap = (
     newComments[parentIndex] = updatedParent;
     const next = new Map(commentsMap);
     next.set(cellKey, newComments);
-    return { next, deleted: true };
+    return { next, deleted: true, cellKey };
   }
 
   return { next: commentsMap, deleted: false };
@@ -207,7 +210,11 @@ const parseMentions = (
     const mentionedName = match[1];
     const user = availableUsers.find((u) => u.userName === mentionedName);
     if (user) {
-      mentions.push({ userId: user.userId, userName: user.userName, position: match.index });
+      mentions.push({
+        userId: user.userId,
+        userName: user.userName,
+        position: match.index,
+      });
     }
   }
   return mentions;
@@ -233,10 +240,12 @@ export const useShiftComments = () => {
   const commentsMapRef = useRef<CommentsMap>(initialMap);
   const [commentsMap, setCommentsMap] = useState<CommentsMap>(initialMap);
 
-  const applyUpdate = useCallback((next: CommentsMap) => {
-    commentsMapRef.current = next;
-    setCommentsMap(next);
-  }, []);
+  const applyUpdateRef = useRef<((next: CommentsMap) => void) | undefined>(
+    (next: CommentsMap) => {
+      commentsMapRef.current = next;
+      setCommentsMap(next);
+    },
+  );
 
   /**
    * コメントを追加
@@ -264,11 +273,13 @@ export const useShiftComments = () => {
       const next = new Map(commentsMapRef.current);
       const existingComments = next.get(cellKey) || [];
       next.set(cellKey, [...existingComments, comment]);
-      applyUpdate(next);
+      if (applyUpdateRef.current) {
+        applyUpdateRef.current(next);
+      }
 
       return comment;
     },
-    [applyUpdate],
+    [],
   );
 
   /**
@@ -287,11 +298,13 @@ export const useShiftComments = () => {
         mentions,
       );
       if (updatedComment) {
-        applyUpdate(next);
+        if (applyUpdateRef.current) {
+          applyUpdateRef.current(next);
+        }
       }
       return updatedComment;
     },
-    [applyUpdate],
+    [],
   );
 
   /**
@@ -304,22 +317,21 @@ export const useShiftComments = () => {
         commentId,
       );
       if (deleted) {
-        applyUpdate(next);
+        if (applyUpdateRef.current) {
+          applyUpdateRef.current(next);
+        }
       }
       return { deleted, cellKey };
     },
-    [applyUpdate],
+    [],
   );
 
   /**
    * セルのコメント一覧を取得
    */
-  const getCommentsByCell = useCallback(
-    (cellKey: string): CellComment[] => {
-      return commentsMap.get(cellKey) || [];
-    },
-    [commentsMap],
-  );
+  const getCommentsByCell = useCallback((cellKey: string): CellComment[] => {
+    return commentsMapRef.current.get(cellKey) || [];
+  }, []);
 
   /**
    * コメントに返信を追加
@@ -343,51 +355,54 @@ export const useShiftComments = () => {
         mentions,
       );
       if (reply) {
-        applyUpdate(next);
+        if (applyUpdateRef.current) {
+          applyUpdateRef.current(next);
+        }
       }
       return reply;
     },
-    [applyUpdate],
+    [],
   );
 
   /**
    * コメントの返信を削除
    */
   const deleteCommentReply = useCallback(
-    (parentCommentId: string, replyCommentId: string): boolean => {
-      const { next, deleted } = deleteCommentReplyFromMap(
+    (
+      parentCommentId: string,
+      replyCommentId: string,
+    ): { deleted: boolean; cellKey?: string } => {
+      const { next, deleted, cellKey } = deleteCommentReplyFromMap(
         commentsMapRef.current,
         parentCommentId,
         replyCommentId,
       );
       if (deleted) {
-        applyUpdate(next);
+        if (applyUpdateRef.current) {
+          applyUpdateRef.current(next);
+        }
       }
-      return deleted;
+      return { deleted, cellKey };
     },
-    [applyUpdate],
+    [],
   );
 
   /**
    * 全コメント取得
    */
   const getAllComments = useCallback((): CommentsMap => {
-    return new Map(commentsMap);
-  }, [commentsMap]);
+    return new Map(commentsMapRef.current);
+  }, []);
 
   /**
    * コメント数を取得（返信を含む）
    */
-  const getCommentCount = useCallback(
-    (cellKey: string): number => {
-      const comments = commentsMap.get(cellKey) || [];
-      return comments.reduce((count, comment) => {
-        return count + 1 + (comment.replies?.length || 0);
-      }, 0);
-    },
-    [commentsMap],
-  );
-
+  const getCommentCount = useCallback((cellKey: string): number => {
+    const comments = commentsMapRef.current.get(cellKey) || [];
+    return comments.reduce((count, comment) => {
+      return count + 1 + (comment.replies?.length || 0);
+    }, 0);
+  }, []);
 
   const commentDataToCellComment = useCallback(
     (c: ShiftRequestCommentData, usedIds: Set<string>): CellComment => ({
@@ -417,9 +432,11 @@ export const useShiftComments = () => {
           next.set(c.cellKey, [...existing, cellComment]);
         });
       });
-      applyUpdate(next);
+      if (applyUpdateRef.current) {
+        applyUpdateRef.current(next);
+      }
     },
-    [commentDataToCellComment, applyUpdate],
+    [commentDataToCellComment],
   );
 
   const mergeRemoteComments = useCallback(
@@ -440,9 +457,11 @@ export const useShiftComments = () => {
         const existing = next.get(c.cellKey) || [];
         next.set(c.cellKey, [...existing, cellComment]);
       });
-      applyUpdate(next);
+      if (applyUpdateRef.current) {
+        applyUpdateRef.current(next);
+      }
     },
-    [commentDataToCellComment, applyUpdate],
+    [commentDataToCellComment],
   );
 
   const getCommentsInputForStaff = useCallback(
@@ -468,6 +487,7 @@ export const useShiftComments = () => {
   );
 
   return {
+    commentsMap,
     addComment,
     updateComment,
     deleteComment,

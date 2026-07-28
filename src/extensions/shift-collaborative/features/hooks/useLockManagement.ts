@@ -151,7 +151,9 @@ export const useLockManagement = ({
 
   const forceReleaseLock = useCallback(
     (staffId: string, date: string) =>
-      executeDeleteLock(targetMonth, staffId, date, null, removeLock),
+      executeDeleteLock(targetMonth, staffId, date, null, removeLock, {
+        skipFetch: true,
+      }),
     [removeLock, targetMonth],
   );
 
@@ -159,7 +161,9 @@ export const useLockManagement = ({
     (staffId: string, date: string) => {
       const editor = editingCells.get(toCellKey(staffId, date));
       return Boolean(
-        editor && editor.userId !== currentUserId && editor.expiresAt > Date.now(),
+        editor &&
+        editor.userId !== currentUserId &&
+        editor.expiresAt > Date.now(),
       );
     },
     [currentUserId, editingCells],
@@ -169,7 +173,9 @@ export const useLockManagement = ({
     (staffId: string, date: string) => {
       const editor = editingCells.get(toCellKey(staffId, date));
       return Boolean(
-        editor && editor.userId === currentUserId && editor.expiresAt > Date.now(),
+        editor &&
+        editor.userId === currentUserId &&
+        editor.expiresAt > Date.now(),
       );
     },
     [currentUserId, editingCells],
@@ -185,7 +191,10 @@ export const useLockManagement = ({
       return {
         userId: editor.userId,
         userName: editor.userName,
-        color: editor.userId === currentUserId ? "rgb(33 150 243)" : "rgb(76 175 80)",
+        color:
+          editor.userId === currentUserId
+            ? "rgb(33 150 243)"
+            : "rgb(76 175 80)",
         lastActivity: editor.startTime,
       };
     },

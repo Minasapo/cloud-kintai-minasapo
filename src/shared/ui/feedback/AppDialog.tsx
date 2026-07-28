@@ -22,6 +22,7 @@ type AppDialogProps = {
   fullWidth?: boolean;
   loading?: boolean;
   PaperSx?: SxProps<Theme>;
+  testId?: string;
 };
 
 export default function AppDialog({
@@ -35,6 +36,7 @@ export default function AppDialog({
   fullWidth = true,
   loading = false,
   PaperSx,
+  testId,
 }: AppDialogProps) {
   if (!open) {
     return null;
@@ -49,6 +51,7 @@ export default function AppDialog({
       keepMounted={false}
       PaperProps={{
         sx: PaperSx,
+        ...(testId ? { "data-testid": testId } : {}),
       }}
     >
       {title && <DialogTitle>{title}</DialogTitle>}

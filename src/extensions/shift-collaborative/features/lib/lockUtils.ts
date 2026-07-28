@@ -16,9 +16,32 @@ export type ShiftEditLockMap = Map<
   }
 >;
 
-export const toCellKey = (staffId: string, date: string) => `${staffId}_${date}`;
+export const normalizeLockDateKey = (date: string) => {
+  if (!date) {
+    return date;
+  }
+
+  if (/^\d{2}$/.test(date)) {
+    return date;
+  }
+
+  const dayToken = date.split("-").at(-1);
+  if (!dayToken) {
+    return date;
+  }
+
+  const day = Number(dayToken);
+  if (!Number.isFinite(day) || day <= 0 || day > 31) {
+    return date;
+  }
+
+  return String(day).padStart(2, "0");
+};
+
+export const toCellKey = (staffId: string, date: string) =>
+  `${staffId}_${normalizeLockDateKey(date)}`;
 export const toLockId = (targetMonth: string, staffId: string, date: string) =>
-  `${targetMonth}#${staffId}#${date}`;
+  `${targetMonth}#${staffId}#${normalizeLockDateKey(date)}`;
 export const toMs = (value: string) => new Date(value).getTime();
 export const isActiveLock = (lock: ShiftEditLockData, now = Date.now()) =>
   toMs(lock.expiresAt) > now;
@@ -32,7 +55,9 @@ export const toEditingMapEntry = (lock: ShiftEditLockData) => ({
   version: lock.version,
 });
 
-export const toEditingCellsMap = (locks: ShiftEditLockData[]): ShiftEditLockMap =>
+export const toEditingCellsMap = (
+  locks: ShiftEditLockData[],
+): ShiftEditLockMap =>
   new Map(
     locks.map((lock) => [
       toCellKey(lock.staffId, lock.date),

@@ -5,7 +5,7 @@ import useShiftPlanYear from "@features/shift/management/model/useShiftPlanYear"
 import { createLogger } from "@shared/lib/logger";
 import { useAppNotification } from "@shared/lib/useAppNotification";
 import { useAutoSave } from "@shared/lib/useAutoSave";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import { Loader2 } from "lucide-react";
 import React, { useContext, useMemo, useState } from "react";
 
@@ -35,7 +35,9 @@ function useShiftAutoSaveState({
 }: {
   scenario: string;
   isAuthenticated: boolean;
-  pendingChangesRef: React.MutableRefObject<Map<string, Map<string, ShiftState>>>;
+  pendingChangesRef: React.MutableRefObject<
+    Map<string, Map<string, ShiftState>>
+  >;
   persistShiftRequestChanges: (
     staffId: string,
     dayKeys: string[],
@@ -160,19 +162,6 @@ function useHolidayCalendarErrorNotification({
   }, [calendarsError, notify]);
 }
 
-function useMonthNavigation(
-  setCurrentMonth: React.Dispatch<React.SetStateAction<Dayjs>>,
-) {
-  const prevMonth = React.useCallback(() => {
-    setCurrentMonth((m) => m.subtract(1, "month"));
-  }, [setCurrentMonth]);
-  const nextMonth = React.useCallback(() => {
-    setCurrentMonth((m) => m.add(1, "month"));
-  }, [setCurrentMonth]);
-
-  return { prevMonth, nextMonth };
-}
-
 function useShiftBulkEditActions({
   hasBulkSelection,
   openBulkEditDialog,
@@ -218,7 +207,7 @@ export default function ShiftManagementBoard() {
     staffIdToIndex,
   } = useShiftStaffGroups();
 
-  const [currentMonth, setCurrentMonth] = useState(dayjs());
+  const currentMonth = useMemo(() => dayjs().startOf("month"), []);
   const monthStart = useMemo(
     () => currentMonth.startOf("month"),
     [currentMonth],
@@ -275,9 +264,9 @@ export default function ShiftManagementBoard() {
     [companyHolidayCalendars],
   );
 
-  const {
-    plans: shiftPlanPlans,
-  } = useShiftPlanYear(monthStart.year(), { enabled: isAuthenticated });
+  const { plans: shiftPlanPlans } = useShiftPlanYear(monthStart.year(), {
+    enabled: isAuthenticated,
+  });
 
   const {
     scenario,
@@ -297,7 +286,9 @@ export default function ShiftManagementBoard() {
     shiftPlanPlans,
   });
 
-  const pendingChangesRef = React.useRef<Map<string, Map<string, ShiftState>>>(new Map());
+  const pendingChangesRef = React.useRef<Map<string, Map<string, ShiftState>>>(
+    new Map(),
+  );
   const {
     isSaving: isAutoSaving,
     isPending: isAutoSavePending,
@@ -331,8 +322,14 @@ export default function ShiftManagementBoard() {
     applyBulkEdit,
   } = useShiftManagementDialogs(applyShiftState);
 
-  const { prevMonth, nextMonth } = useMonthNavigation(setCurrentMonth);
-  const { handleOpenBulkEditDialog, handleApplyBulkEdit } = useShiftBulkEditActions({ hasBulkSelection, openBulkEditDialog, applyBulkEdit, selectedStaffIds, selectedDayKeys });
+  const { handleOpenBulkEditDialog, handleApplyBulkEdit } =
+    useShiftBulkEditActions({
+      hasBulkSelection,
+      openBulkEditDialog,
+      applyBulkEdit,
+      selectedStaffIds,
+      selectedDayKeys,
+    });
 
   if (!isAuthenticated) {
     return (
@@ -346,8 +343,6 @@ export default function ShiftManagementBoard() {
     <div className="py-6 px-2 md:px-8">
       <ShiftManagementHeader
         monthStart={monthStart}
-        onPrevMonth={prevMonth}
-        onNextMonth={nextMonth}
         scenario={scenario}
         isAutoSaving={isAutoSaving}
         isAutoSavePending={isAutoSavePending}
@@ -366,13 +361,19 @@ export default function ShiftManagementBoard() {
       )}
 
       {error && (
-        <div className="mb-4 rounded bg-red-50 p-4 text-sm text-red-800" role="alert">
+        <div
+          className="mb-4 rounded bg-red-50 p-4 text-sm text-red-800"
+          role="alert"
+        >
           スタッフデータの取得に失敗しました
         </div>
       )}
 
       {Boolean(calendarsError) && (
-        <div className="mb-4 rounded bg-red-50 p-4 text-sm text-red-800" role="alert">
+        <div
+          className="mb-4 rounded bg-red-50 p-4 text-sm text-red-800"
+          role="alert"
+        >
           カレンダー情報の取得に失敗しました
         </div>
       )}

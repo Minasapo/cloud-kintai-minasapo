@@ -1,4 +1,4 @@
-import SettingsIcon from "@features/admin/layout/ui/SettingsIcon";
+import { AppDeleteIconButton } from "@shared/ui/button";
 import RHFTextField from "@shared/ui/form/RHFTextField";
 import React, { useCallback } from "react";
 import type { Control } from "react-hook-form";
@@ -59,14 +59,12 @@ const ShiftGroupRow: React.FC<ShiftGroupRowProps> = ({
           label="ラベル名"
           sx={{ flexGrow: 1 }}
         />
-        <button
-          className="text-red-500 hover:bg-red-50 p-2 rounded-full transition self-end sm:self-auto"
+        <AppDeleteIconButton
           aria-label={`${labelValue || "未設定"}を削除`}
           onClick={handleDelete}
-          type="button"
-        >
-          <SettingsIcon name="delete" />
-        </button>
+          size="sm"
+          className="self-end sm:self-auto"
+        />
       </div>
       <RHFTextField
         control={control}

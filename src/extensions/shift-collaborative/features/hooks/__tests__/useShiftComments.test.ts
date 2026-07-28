@@ -341,7 +341,11 @@ describe("useShiftComments", () => {
 
       let deleted = false;
       act(() => {
-        deleted = result.current.deleteCommentReply(parentCommentId, replyId);
+        const result_delete = result.current.deleteCommentReply(
+          parentCommentId,
+          replyId,
+        );
+        deleted = result_delete.deleted;
       });
 
       expect(deleted).toBe(true);

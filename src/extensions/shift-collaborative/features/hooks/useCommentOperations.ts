@@ -1,14 +1,21 @@
-import { graphqlClient } from "@shared/api/amplify/graphqlClient";
-import { updateShiftRequest } from "@shared/api/graphql/documents/mutations";
+import {
+  useCreateShiftRequestMutation,
+  useUpdateShiftCellMutation,
+} from "@entities/shift/api/shiftApi";
 import type { ShiftRequestCommentInput } from "@shared/api/graphql/types";
 import { createLogger } from "@shared/lib/logger";
 import { useCallback, useMemo } from "react";
 
+import { normalizeShiftRequest } from "../lib/shiftTransformers";
 import {
   CellComment,
   Mention,
   ShiftRequestData,
 } from "../types/collaborative.types";
+
+type UpdateShiftCellMutationTrigger = ReturnType<
+  typeof useUpdateShiftCellMutation
+>[0];
 
 const logger = createLogger("CommentOperations");
 
@@ -19,59 +26,99 @@ export interface CommentOperationCallbacks {
 }
 
 interface UseCommentOperationsProps {
+  targetMonth: string;
   currentUserId: string;
   currentUserName: string;
   currentUserColor: string;
   getShiftRequest: (staffId: string) => ShiftRequestData | undefined;
+  upsertShiftRequest: (request: ShiftRequestData) => void;
   getCommentsInputForStaff: (staffId: string) => ShiftRequestCommentInput[];
-  addComment: (cellKey: string, userId: string, userName: string, color: string, content: string, mentions: Mention[]) => CellComment;
-  updateComment: (commentId: string, content: string, mentions?: Mention[]) => CellComment | null;
+  addComment: (
+    cellKey: string,
+    userId: string,
+    userName: string,
+    color: string,
+    content: string,
+    mentions: Mention[],
+  ) => CellComment;
+  updateComment: (
+    commentId: string,
+    content: string,
+    mentions?: Mention[],
+  ) => CellComment | null;
   deleteComment: (commentId: string) => { deleted: boolean; cellKey?: string };
   getCommentsByCell: (cellKey: string) => CellComment[];
-  replyToComment: (parentCommentId: string, userId: string, userName: string, userColor: string, content: string, mentions?: Mention[]) => CellComment | null;
-  deleteCommentReply: (parentCommentId: string, replyCommentId: string) => boolean;
+  replyToComment: (
+    parentCommentId: string,
+    userId: string,
+    userName: string,
+    userColor: string,
+    content: string,
+    mentions?: Mention[],
+  ) => CellComment | null;
+  deleteCommentReply: (
+    parentCommentId: string,
+    replyCommentId: string,
+  ) => { deleted: boolean; cellKey?: string };
   callbacks?: CommentOperationCallbacks;
 }
 
 interface CommentOperations {
-  addComment: (cellKey: string, content: string, mentions: Mention[]) => Promise<CellComment>;
-  updateComment: (commentId: string, content: string, mentions: Mention[]) => Promise<CellComment>;
+  addComment: (
+    cellKey: string,
+    content: string,
+    mentions: Mention[],
+  ) => Promise<CellComment>;
+  updateComment: (
+    commentId: string,
+    content: string,
+    mentions: Mention[],
+  ) => Promise<CellComment>;
   deleteComment: (commentId: string) => Promise<void>;
   getCommentsByCell: (cellKey: string) => CellComment[];
-  replyToComment: (parentCommentId: string, content: string, mentions: Mention[]) => Promise<CellComment>;
-  deleteCommentReply: (parentCommentId: string, replyCommentId: string) => Promise<void>;
+  replyToComment: (
+    parentCommentId: string,
+    content: string,
+    mentions: Mention[],
+  ) => Promise<CellComment>;
+  deleteCommentReply: (
+    parentCommentId: string,
+    replyCommentId: string,
+  ) => Promise<void>;
 }
 
 /**
- * GraphQL を使用してコメントを永続化する
- * 失敗時はコールバックで通知
+ * RTK Query 経由でコメントを永続化する
+ * 成功時はローカルの shiftRequest キャッシュ（shiftRequestsRef）を更新し、
+ * 次回の loadCommentsFromShiftRequests 実行で追加直後のコメントが
+ * 消えてしまわないようにする。失敗時はコールバックで通知する。
  */
 const persistCommentsToServer = async (
   staffId: string,
   shiftRequest: ShiftRequestData,
   getCommentsInput: () => ShiftRequestCommentInput[],
   currentUserId: string,
+  updateShiftCell: UpdateShiftCellMutationTrigger,
+  upsertShiftRequest: (request: ShiftRequestData) => void,
   onStart?: () => void,
   onSuccess?: () => void,
   onError?: (error: string) => void,
 ): Promise<void> => {
   try {
     onStart?.();
-    await graphqlClient.graphql({
-      query: updateShiftRequest,
-      variables: {
-        input: {
-          id: shiftRequest.id,
-          comments: getCommentsInput(),
-          updatedBy: currentUserId,
-          updatedAt: new Date().toISOString(),
-        },
+    const updated = await updateShiftCell({
+      input: {
+        id: shiftRequest.id,
+        comments: getCommentsInput(),
+        updatedBy: currentUserId,
+        updatedAt: new Date().toISOString(),
       },
-      authMode: "userPool",
-    });
+    }).unwrap();
+    upsertShiftRequest(normalizeShiftRequest(updated));
     onSuccess?.();
   } catch (err) {
-    const message = err instanceof Error ? err.message : "コメント保存に失敗しました";
+    const message =
+      err instanceof Error ? err.message : "コメント保存に失敗しました";
     logger.error(`Failed to persist comments for staff ${staffId}:`, err);
     onError?.(message);
     throw new Error(`Comment persistence failed: ${message}`);
@@ -83,10 +130,12 @@ const persistCommentsToServer = async (
  * 永続化時のエラーハンドリングと通知を含む
  */
 export const useCommentOperations = ({
+  targetMonth,
   currentUserId,
   currentUserName,
   currentUserColor,
   getShiftRequest,
+  upsertShiftRequest,
   getCommentsInputForStaff,
   addComment: addCommentLocal,
   updateComment: updateCommentLocal,
@@ -96,9 +145,54 @@ export const useCommentOperations = ({
   deleteCommentReply: deleteCommentReplyLocal,
   callbacks,
 }: UseCommentOperationsProps): CommentOperations => {
+  const [createShiftRequest] = useCreateShiftRequestMutation();
+  const [updateShiftCell] = useUpdateShiftCellMutation();
+
   const getStaffIdFromCellKey = useCallback(
     (cellKey: string) => cellKey.split("#")[0] ?? "",
     [],
+  );
+
+  const ensureShiftRequestForComments = useCallback(
+    async (staffId: string): Promise<ShiftRequestData> => {
+      const existing = getShiftRequest(staffId);
+      if (existing) {
+        return existing;
+      }
+
+      const timestamp = new Date().toISOString();
+      const created = await createShiftRequest({
+        input: {
+          staffId,
+          targetMonth,
+          entries: [],
+          comments: getCommentsInputForStaff(staffId),
+          updatedBy: currentUserId,
+          updatedAt: timestamp,
+          version: 1,
+          histories: [
+            {
+              version: 1,
+              entries: [],
+              recordedAt: timestamp,
+              recordedByStaffId: currentUserId,
+            },
+          ],
+        },
+      }).unwrap();
+
+      const normalized = normalizeShiftRequest(created);
+      upsertShiftRequest(normalized);
+      return normalized;
+    },
+    [
+      createShiftRequest,
+      currentUserId,
+      getCommentsInputForStaff,
+      getShiftRequest,
+      targetMonth,
+      upsertShiftRequest,
+    ],
   );
 
   const persistCommentsByCellKey = useCallback(
@@ -106,53 +200,80 @@ export const useCommentOperations = ({
       const staffId = getStaffIdFromCellKey(cellKey);
       if (!staffId) return;
 
-      const shiftRequest = getShiftRequest(staffId);
-      if (!shiftRequest) {
-        logger.warn(`No shift request found for staff ${staffId}`);
-        return;
-      }
+      const shiftRequest = await ensureShiftRequestForComments(staffId);
 
       await persistCommentsToServer(
         staffId,
         shiftRequest,
         () => getCommentsInputForStaff(staffId),
         currentUserId,
+        updateShiftCell,
+        upsertShiftRequest,
         callbacks?.onCommentPersistStarted,
         callbacks?.onCommentPersistCompleted,
         callbacks?.onCommentPersistFailed,
       );
     },
     [
+      ensureShiftRequestForComments,
       getStaffIdFromCellKey,
-      getShiftRequest,
       getCommentsInputForStaff,
       currentUserId,
+      updateShiftCell,
+      upsertShiftRequest,
       callbacks,
     ],
   );
 
   const addCommentHandler = useCallback(
-    async (cellKey: string, content: string, mentions: Mention[]): Promise<CellComment> => {
-      const comment = addCommentLocal(cellKey, currentUserId, currentUserName, currentUserColor, content, mentions);
+    async (
+      cellKey: string,
+      content: string,
+      mentions: Mention[],
+    ): Promise<CellComment> => {
+      const comment = addCommentLocal(
+        cellKey,
+        currentUserId,
+        currentUserName,
+        currentUserColor,
+        content,
+        mentions,
+      );
       try {
         await persistCommentsByCellKey(cellKey);
       } catch (err) {
-        logger.error("Failed to persist new comment, but local change is retained:", err);
+        logger.error(
+          "Failed to persist new comment, but local change is retained:",
+          err,
+        );
         // ローカル状態は保持してユーザーが再試行できるようにする
       }
       return comment;
     },
-    [addCommentLocal, currentUserId, currentUserName, currentUserColor, persistCommentsByCellKey],
+    [
+      addCommentLocal,
+      currentUserId,
+      currentUserName,
+      currentUserColor,
+      persistCommentsByCellKey,
+    ],
   );
 
   const updateCommentHandler = useCallback(
-    async (commentId: string, content: string, mentions: Mention[]): Promise<CellComment> => {
+    async (
+      commentId: string,
+      content: string,
+      mentions: Mention[],
+    ): Promise<CellComment> => {
       const updated = updateCommentLocal(commentId, content, mentions);
       if (!updated) throw new Error(`Comment ${commentId} not found`);
       try {
         await persistCommentsByCellKey(updated.cellKey);
       } catch (err) {
-        logger.error("Failed to persist comment update, but local change is retained:", err);
+        logger.error(
+          "Failed to persist comment update, but local change is retained:",
+          err,
+        );
       }
       return updated;
     },
@@ -166,7 +287,10 @@ export const useCommentOperations = ({
         try {
           await persistCommentsByCellKey(cellKey);
         } catch (err) {
-          logger.error("Failed to persist comment deletion, but local change is retained:", err);
+          logger.error(
+            "Failed to persist comment deletion, but local change is retained:",
+            err,
+          );
         }
       }
     },
@@ -179,36 +303,58 @@ export const useCommentOperations = ({
   );
 
   const replyToCommentHandler = useCallback(
-    async (parentCommentId: string, content: string, mentions: Mention[]): Promise<CellComment> => {
+    async (
+      parentCommentId: string,
+      content: string,
+      mentions: Mention[],
+    ): Promise<CellComment> => {
       const reply = replyToCommentLocal(
-        parentCommentId, currentUserId, currentUserName, currentUserColor, content, mentions,
+        parentCommentId,
+        currentUserId,
+        currentUserName,
+        currentUserColor,
+        content,
+        mentions,
       );
-      if (!reply) throw new Error(`Parent comment ${parentCommentId} not found`);
+      if (!reply)
+        throw new Error(`Parent comment ${parentCommentId} not found`);
       try {
         await persistCommentsByCellKey(reply.cellKey);
       } catch (err) {
-        logger.error("Failed to persist comment reply, but local change is retained:", err);
+        logger.error(
+          "Failed to persist comment reply, but local change is retained:",
+          err,
+        );
       }
       return reply;
     },
-    [replyToCommentLocal, currentUserId, currentUserName, currentUserColor, persistCommentsByCellKey],
+    [
+      replyToCommentLocal,
+      currentUserId,
+      currentUserName,
+      currentUserColor,
+      persistCommentsByCellKey,
+    ],
   );
 
   const deleteCommentReplyHandler = useCallback(
     async (parentCommentId: string, replyCommentId: string): Promise<void> => {
-      deleteCommentReplyLocal(parentCommentId, replyCommentId);
-      // 親コメントのセルキーを取得するために、ローカルコメント取得関数を使用
-      const allComments = getCommentsByCellLocal("all-cells");
-      const parentComment = allComments.find((c) => c.id === parentCommentId);
-      if (parentComment) {
+      const { cellKey } = deleteCommentReplyLocal(
+        parentCommentId,
+        replyCommentId,
+      );
+      if (cellKey) {
         try {
-          await persistCommentsByCellKey(parentComment.cellKey);
+          await persistCommentsByCellKey(cellKey);
         } catch (err) {
-          logger.error("Failed to persist comment reply deletion, but local change is retained:", err);
+          logger.error(
+            "Failed to persist comment reply deletion, but local change is retained:",
+            err,
+          );
         }
       }
     },
-    [deleteCommentReplyLocal, persistCommentsByCellKey, getCommentsByCellLocal],
+    [deleteCommentReplyLocal, persistCommentsByCellKey],
   );
 
   return useMemo(

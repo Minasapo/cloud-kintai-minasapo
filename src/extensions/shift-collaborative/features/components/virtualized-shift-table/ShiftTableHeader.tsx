@@ -1,12 +1,5 @@
 import LockIcon from "@mui/icons-material/Lock";
-import LockOpenIcon from "@mui/icons-material/LockOpen";
-import {
-  Box,
-  TableCell,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
+import { Box, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
 import dayjs from "dayjs";
 
@@ -52,27 +45,18 @@ const ShiftTableHeader = ({
               size="sm"
               variant="outline"
               tone="neutral"
-              startIcon={
-                isAllMonthLocked ? (
-                  <LockOpenIcon fontSize="inherit" />
-                ) : (
-                  <LockIcon fontSize="inherit" />
-                )
-              }
-              onClick={() =>
-                onPendingAction(
-                  isAllMonthLocked ? { kind: "unlockMonth" } : { kind: "lockMonth" },
-                )
-              }
+              startIcon={<LockIcon fontSize="inherit" />}
+              onClick={() => onPendingAction({ kind: "lockMonth" })}
+              disabled={isAllMonthLocked}
               sx={{
                 fontSize: "0.7rem",
                 py: 0.25,
                 px: 1,
-                color: isAllMonthLocked ? "warning.main" : "primary.main",
-                borderColor: isAllMonthLocked ? "warning.main" : "primary.main",
+                color: "primary.main",
+                borderColor: "primary.main",
               }}
             >
-              {isAllMonthLocked ? "全員解除" : "全員確定"}
+              全員確定
             </AppButton>
           )}
         </Box>
@@ -85,7 +69,9 @@ const ShiftTableHeader = ({
             key={dayKey}
             align="center"
             sx={{
-              bgcolor: isWeekend(day) ? "rgba(244, 67, 54, 0.05)" : "background.paper",
+              bgcolor: isWeekend(day)
+                ? "rgba(244, 67, 54, 0.05)"
+                : "background.paper",
               minWidth: 50,
             }}
           >
@@ -97,7 +83,11 @@ const ShiftTableHeader = ({
             </Typography>
             <Typography
               variant="caption"
-              color={count.work !== count.plannedCapacity ? "warning.main" : "text.secondary"}
+              color={
+                count.work !== count.plannedCapacity
+                  ? "warning.main"
+                  : "text.secondary"
+              }
             >
               {count.work}人
             </Typography>

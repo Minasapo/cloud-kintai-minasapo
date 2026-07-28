@@ -1,8 +1,6 @@
-import React, {
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useAppDispatchV2 } from "@app/hooks";
+import { pushNotification } from "@shared/lib/store/notificationSlice";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 
 import {
   CollaborativeShiftContext,
@@ -50,8 +48,25 @@ export const CollaborativeShiftProvider: React.FC<
 }) => {
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const isOnline = useOnlineStatus();
+  const dispatch = useAppDispatchV2();
+
+  const notifyCommentPersistError = useCallback(
+    (message: string) => {
+      dispatch(
+        pushNotification({
+          message: "コメントの保存に失敗しました",
+          description: message,
+          tone: "error",
+          source: "global",
+          dedupeKey: "shift-comment-persist-error",
+        }),
+      );
+    },
+    [dispatch],
+  );
 
   const {
+    commentsMap,
     addComment,
     updateComment,
     deleteComment,
@@ -80,16 +95,26 @@ export const CollaborativeShiftProvider: React.FC<
     Map<string, Map<string, { state: ShiftState; isLocked: boolean }>>
   >(new Map());
 
-  const { handlePersistCompleted, handleCommentsReceived } = usePersistHandlers({
-    staffNameMap,
-    mergeHistoryRecords,
-    mergeRemoteComments,
-  });
+  const { handlePersistCompleted, handleCommentsReceived } = usePersistHandlers(
+    {
+      staffNameMap,
+      mergeHistoryRecords,
+      mergeRemoteComments,
+    },
+  );
 
   const {
-    isSyncing, syncError, triggerSync, lastAutoSyncedAt, lastSyncedAt,
-    dataStatus, notifyAutoSyncReceived, notifySaveStarted, notifySaveCompleted,
-    notifySaveFailed, clearSyncError,
+    isSyncing,
+    syncError,
+    triggerSync,
+    lastAutoSyncedAt,
+    lastSyncedAt,
+    dataStatus,
+    notifyAutoSyncReceived,
+    notifySaveStarted,
+    notifySaveCompleted,
+    notifySaveFailed,
+    clearSyncError,
   } = useShiftSync({
     onManualSync: async () => {
       await fetchShiftsRef.current();
@@ -97,11 +122,24 @@ export const CollaborativeShiftProvider: React.FC<
   });
 
   const {
-    shiftDataMap, pendingChanges, isLoading, isBatchUpdating, error,
-    connectionState, fetchShifts, updateShift, batchUpdateShifts,
-    retryPendingChanges, getShiftRequest, getAllShiftRequests,
+    shiftDataMap,
+    pendingChanges,
+    isLoading,
+    isBatchUpdating,
+    error,
+    connectionState,
+    lastFetchedAt,
+    fetchShifts,
+    updateShift,
+    batchUpdateShifts,
+    retryPendingChanges,
+    getShiftRequest,
+    getAllShiftRequests,
+    upsertShiftRequest,
   } = useCollaborativeShiftData({
-    staffIds, targetMonth, currentUserId,
+    staffIds,
+    targetMonth,
+    currentUserId,
     onAutoSyncReceived: notifyAutoSyncReceived,
     onSaveStarted: notifySaveStarted,
     onSaveCompleted: notifySaveCompleted,
@@ -114,9 +152,18 @@ export const CollaborativeShiftProvider: React.FC<
   });
 
   useProviderEffects({
-    isLoading, targetMonth, getAllShiftRequests, loadCommentsFromShiftRequests,
-    staffNameMap, seedHistory, clearCellHistory, fetchShifts, fetchShiftsRef,
-    shiftDataMap, shiftDataMapRef,
+    isLoading,
+    lastFetchedAt,
+    targetMonth,
+    getAllShiftRequests,
+    loadCommentsFromShiftRequests,
+    staffNameMap,
+    seedHistory,
+    clearCellHistory,
+    fetchShifts,
+    fetchShiftsRef,
+    shiftDataMap,
+    shiftDataMapRef,
   });
 
   const { handleRemoteUpdate } = useRemoteUpdateHandler({
@@ -125,60 +172,134 @@ export const CollaborativeShiftProvider: React.FC<
   });
 
   const { activeUsers, updateActivity } = useShiftPresence({
-    currentUserId, currentUserName, shiftRequestId, targetMonth,
+    currentUserId,
+    currentUserName,
+    shiftRequestId,
+    targetMonth,
   });
   const currentUserColor = useMemo(
-    () => activeUsers.find((u) => u.userId === currentUserId)?.color || "rgb(25 118 210)",
+    () =>
+      activeUsers.find((u) => u.userId === currentUserId)?.color ||
+      "rgb(25 118 210)",
     [activeUsers, currentUserId],
   );
 
   const {
-    editingCells, acquireEditLock, releaseEditLock,
-    isCellBeingEdited, hasEditLock, getCellEditor,
-    forceReleaseLock, getAllEditingCells, refreshLocks,
+    editingCells,
+    acquireEditLock,
+    releaseEditLock,
+    isCellBeingEdited,
+    hasEditLock,
+    getCellEditor,
+    forceReleaseLock,
+    getAllEditingCells,
+    refreshLocks,
   } = useShiftEditLocks({ currentUserId, currentUserName, targetMonth });
 
   const operationHandlers = useShiftOperations({
-    currentUserId, currentUserName, shiftDataMapRef, updateActivity,
-    recordCellChange, recordBatchCellChanges, updateShift, batchUpdateShifts,
-    acquireEditLock, releaseEditLock, forceReleaseLock, triggerSync, setSelectedCells,
+    currentUserId,
+    currentUserName,
+    shiftDataMapRef,
+    updateActivity,
+    recordCellChange,
+    recordBatchCellChanges,
+    updateShift,
+    batchUpdateShifts,
+    acquireEditLock,
+    releaseEditLock,
+    forceReleaseLock,
+    triggerSync,
+    setSelectedCells,
   });
 
   const commentHandlers = useCommentOperations({
-    currentUserId, currentUserName, currentUserColor,
-    getShiftRequest, getCommentsInputForStaff,
-    addComment, updateComment, deleteComment,
-    getCommentsByCell, replyToComment, deleteCommentReply,
+    targetMonth,
+    currentUserId,
+    currentUserName,
+    currentUserColor,
+    getShiftRequest,
+    upsertShiftRequest,
+    getCommentsInputForStaff,
+    addComment,
+    updateComment,
+    deleteComment,
+    getCommentsByCell,
+    replyToComment,
+    deleteCommentReply,
+    callbacks: {
+      onCommentPersistFailed: notifyCommentPersistError,
+    },
   });
 
   const state: CollaborativeShiftState = useMemo(
     () => ({
-      shiftDataMap, activeUsers, editingCells, pendingChanges, selectedCells,
-      isLoading, isSyncing, lastSyncedAt, lastAutoSyncedAt, dataStatus,
-      error: error || syncError || null, connectionState, isOnline, lastRemoteUpdate: null,
+      shiftDataMap,
+      activeUsers,
+      editingCells,
+      pendingChanges,
+      selectedCells,
+      isLoading,
+      isSyncing,
+      lastSyncedAt,
+      lastAutoSyncedAt,
+      dataStatus,
+      error: error || syncError || null,
+      connectionState,
+      isOnline,
+      lastRemoteUpdate: null,
     }),
     [
-      shiftDataMap, activeUsers, editingCells, pendingChanges, selectedCells,
-      isLoading, isSyncing, lastSyncedAt, lastAutoSyncedAt, dataStatus,
-      error, syncError, connectionState, isOnline,
+      shiftDataMap,
+      activeUsers,
+      editingCells,
+      pendingChanges,
+      selectedCells,
+      isLoading,
+      isSyncing,
+      lastSyncedAt,
+      lastAutoSyncedAt,
+      dataStatus,
+      error,
+      syncError,
+      connectionState,
+      isOnline,
     ],
   );
 
   const contextValue: CollaborativeShiftContextType = useMemo(
     () => ({
-      state, isBatchUpdating,
-      isCellBeingEdited, hasEditLock, getCellEditor, getAllEditingCells,
-      refreshLocks, clearSyncError, retryPendingChanges,
-      getCellHistory, getAllCellHistory, getStaffCellHistory,
+      state,
+      isBatchUpdating,
+      isCellBeingEdited,
+      hasEditLock,
+      getCellEditor,
+      getAllEditingCells,
+      refreshLocks,
+      clearSyncError,
+      retryPendingChanges,
+      getCellHistory,
+      getAllCellHistory,
+      getStaffCellHistory,
+      commentsMap,
       ...operationHandlers,
       ...commentHandlers,
     }),
     [
-      state, isBatchUpdating,
-      isCellBeingEdited, hasEditLock, getCellEditor, getAllEditingCells,
-      refreshLocks, clearSyncError, retryPendingChanges,
-      getCellHistory, getAllCellHistory, getStaffCellHistory,
-      operationHandlers, commentHandlers,
+      state,
+      isBatchUpdating,
+      isCellBeingEdited,
+      hasEditLock,
+      getCellEditor,
+      getAllEditingCells,
+      refreshLocks,
+      clearSyncError,
+      retryPendingChanges,
+      getCellHistory,
+      getAllCellHistory,
+      getStaffCellHistory,
+      commentsMap,
+      operationHandlers,
+      commentHandlers,
     ],
   );
 

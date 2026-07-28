@@ -1,11 +1,5 @@
 import LockIcon from "@mui/icons-material/Lock";
-import LockOpenIcon from "@mui/icons-material/LockOpen";
-import {
-  alpha,
-  Box,
-  TableCell,
-  TableRow,
-} from "@mui/material";
+import { alpha, Box, TableCell, TableRow } from "@mui/material";
 import { AppButton } from "@shared/ui/button";
 import dayjs from "dayjs";
 import React, { useMemo } from "react";
@@ -53,7 +47,10 @@ interface StaffTableRowProps {
   isAdmin?: boolean;
   currentUserId?: string;
   isCellBeingEdited: (staffId: string, date: string) => boolean;
-  getCellEditor: (staffId: string, date: string) => CollaborativeUser | undefined;
+  getCellEditor: (
+    staffId: string,
+    date: string,
+  ) => CollaborativeUser | undefined;
   focusedCell: { staffId: string; date: string } | null;
   isCellSelected: (staffId: string, date: string) => boolean;
   onCellClick: (staffId: string, date: string, event: React.MouseEvent) => void;
@@ -62,7 +59,11 @@ interface StaffTableRowProps {
     date: string,
     element: HTMLElement | null,
   ) => void;
-  onCellMouseDown: (staffId: string, date: string, event: React.MouseEvent) => void;
+  onCellMouseDown: (
+    staffId: string,
+    date: string,
+    event: React.MouseEvent,
+  ) => void;
   onCellMouseEnter: (staffId: string, date: string) => void;
   onCellContextMenu?: (
     staffId: string,
@@ -103,9 +104,13 @@ const StaffTableRow = ({
   return (
     <TableRow
       sx={{
-        backgroundColor: isCurrentUser ? alpha("rgb(33 150 243)", 0.1) : "transparent",
+        backgroundColor: isCurrentUser
+          ? alpha("rgb(33 150 243)", 0.1)
+          : "transparent",
         "&:hover": {
-          backgroundColor: isCurrentUser ? alpha("rgb(33 150 243)", 0.15) : undefined,
+          backgroundColor: isCurrentUser
+            ? alpha("rgb(33 150 243)", 0.15)
+            : undefined,
         },
       }}
     >
@@ -114,7 +119,9 @@ const StaffTableRow = ({
           position: "sticky",
           left: 0,
           zIndex: 2,
-          bgcolor: isCurrentUser ? alpha("rgb(33 150 243)", 0.1) : "background.paper",
+          bgcolor: isCurrentUser
+            ? alpha("rgb(33 150 243)", 0.1)
+            : "background.paper",
           fontWeight: isCurrentUser ? 700 : 600,
           color: isCurrentUser ? "primary.main" : undefined,
           whiteSpace: "nowrap",
@@ -127,25 +134,24 @@ const StaffTableRow = ({
               size="sm"
               variant="outline"
               tone="neutral"
-              startIcon={
-                allLocked ? <LockOpenIcon fontSize="inherit" /> : <LockIcon fontSize="inherit" />
-              }
+              startIcon={<LockIcon fontSize="inherit" />}
               onClick={() =>
-                onRequestPendingAction(
-                  allLocked
-                    ? { kind: "unlockStaff", staffId, staffName }
-                    : { kind: "lockStaff", staffId, staffName },
-                )
+                onRequestPendingAction({
+                  kind: "lockStaff",
+                  staffId,
+                  staffName,
+                })
               }
+              disabled={allLocked}
               sx={{
                 fontSize: "0.7rem",
                 py: 0.25,
                 px: 1,
-                color: allLocked ? "warning.main" : "primary.main",
-                borderColor: allLocked ? "warning.main" : "primary.main",
+                color: "primary.main",
+                borderColor: "primary.main",
               }}
             >
-              {allLocked ? "解除" : "確定"}
+              確定
             </AppButton>
           )}
         </Box>
@@ -165,7 +171,8 @@ const StaffTableRow = ({
             ? "self"
             : "other"
           : null;
-        const isFocused = focusedCell?.staffId === staffId && focusedCell?.date === dayKey;
+        const isFocused =
+          focusedCell?.staffId === staffId && focusedCell?.date === dayKey;
         const isSelected = isCellSelected(staffId, dayKey);
 
         return (
@@ -182,12 +189,15 @@ const StaffTableRow = ({
             lastChangedBy={cell.lastChangedBy}
             lastChangedAt={cell.lastChangedAt}
             onClick={(event) => onCellClick(staffId, dayKey, event)}
-            onRegisterRef={(element) => onCellRegisterRef(staffId, dayKey, element)}
+            onRegisterRef={(element) =>
+              onCellRegisterRef(staffId, dayKey, element)
+            }
             onMouseDown={(event) => onCellMouseDown(staffId, dayKey, event)}
             onMouseEnter={() => onCellMouseEnter(staffId, dayKey)}
             onContextMenu={
               onCellContextMenu
-                ? (event: React.MouseEvent) => onCellContextMenu(staffId, dayKey, event)
+                ? (event: React.MouseEvent) =>
+                    onCellContextMenu(staffId, dayKey, event)
                 : undefined
             }
             isFocused={isFocused}

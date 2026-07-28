@@ -1,3 +1,4 @@
+import CheckIcon from "@mui/icons-material/Check";
 import LockIcon from "@mui/icons-material/Lock";
 import { alpha } from "@mui/material/styles";
 import dayjs from "dayjs";
@@ -32,6 +33,7 @@ export const shiftStateConfig: Record<
 export const SHIFT_CELL_SIZE = 50;
 export const SHIFT_CELL_BASE_STYLE: CSSProperties = {
   position: "relative",
+  zIndex: 0,
   cursor: "pointer",
   minWidth: SHIFT_CELL_SIZE,
   maxWidth: SHIFT_CELL_SIZE,
@@ -107,7 +109,7 @@ export const ShiftCellBase: FC<ShiftCellProps> = ({
   const selfEditingColor = "rgb(33 150 243)";
 
   const backgroundColor = isLocked
-    ? "rgba(148, 163, 184, 0.12)"
+    ? "rgba(34, 197, 94, 0.12)"
     : isSelfEditing
       ? alpha(selfEditingColor, 0.14)
       : isOtherEditing
@@ -118,7 +120,7 @@ export const ShiftCellBase: FC<ShiftCellProps> = ({
             ? alpha("rgb(156 39 176)", 0.15)
             : "rgb(255 255 255)";
   const borderColor = isLocked
-    ? "rgba(100, 116, 139, 0.5)"
+    ? "rgba(22, 163, 74, 0.6)"
     : isSelfEditing
       ? selfEditingColor
       : isOtherEditing
@@ -189,17 +191,24 @@ export const ShiftCellBase: FC<ShiftCellProps> = ({
         event.currentTarget.style.borderColor = borderColor;
       }}
     >
-      {isLocked && (
+      {(isLocked || isSelfEditing) && (
         <div
-          className="absolute right-0 top-0 z-10 flex h-4 w-4 items-center justify-center rounded-bl-sm bg-slate-500 text-white"
+          className="absolute right-0 top-0 z-0 flex h-4 w-4 items-center justify-center rounded-bl-sm text-white shadow-sm"
+          style={{
+            backgroundColor: isLocked ? "rgb(34 197 94)" : "rgb(100 116 139)",
+          }}
           aria-hidden="true"
         >
-          <LockIcon sx={{ fontSize: 10 }} />
+          {isLocked ? (
+            <CheckIcon sx={{ fontSize: 10 }} />
+          ) : (
+            <LockIcon sx={{ fontSize: 10 }} />
+          )}
         </div>
       )}
       <div
         className="flex items-center justify-center gap-0.5"
-        style={{ opacity: isLocked ? 0.65 : 1 }}
+        style={{ opacity: isLocked ? 0.78 : 1 }}
       >
         {editorTab}
         <span className={`text-sm font-semibold ${config.textClassName}`}>

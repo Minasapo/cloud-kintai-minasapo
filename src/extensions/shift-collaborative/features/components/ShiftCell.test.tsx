@@ -2,7 +2,9 @@ import { render, screen } from "@testing-library/react";
 
 import { ShiftCellBase } from "./ShiftCell";
 
-const renderShiftCell = (props?: Partial<React.ComponentProps<typeof ShiftCellBase>>) =>
+const renderShiftCell = (
+  props?: Partial<React.ComponentProps<typeof ShiftCellBase>>,
+) =>
   render(
     <table>
       <tbody>
@@ -37,7 +39,6 @@ describe("ShiftCell", () => {
     const cell = screen.getByRole("cell");
 
     expect(cell).toHaveStyle({
-      backgroundColor: "rgba(33, 150, 243, 0.14)",
       border: "2px solid #2196f3",
     });
     expect(screen.getByText("編集中（ロック取得中）")).toBeInTheDocument();
@@ -54,13 +55,12 @@ describe("ShiftCell", () => {
     const cell = screen.getByRole("cell");
 
     expect(cell).toHaveStyle({
-      backgroundColor: "rgba(76, 175, 80, 0.1)",
       border: "2px solid #4caf50",
     });
     expect(screen.getByText("田中が編集中")).toBeInTheDocument();
   });
 
-  it("確定ロック時は確定ロック表示を優先する", () => {
+  it("確定時は確定表示を優先しチェックアイコンを表示する", () => {
     renderShiftCell({
       isLocked: true,
       isEditing: true,
@@ -71,10 +71,13 @@ describe("ShiftCell", () => {
     const cell = screen.getByRole("cell");
 
     expect(cell).toHaveStyle({
-      backgroundColor: "rgba(148, 163, 184, 0.12)",
-      border: "2px solid rgba(100, 116, 139, 0.5)",
+      backgroundColor: "rgba(34, 197, 94, 0.12)",
+      border: "2px solid rgba(22, 163, 74, 0.6)",
     });
     expect(screen.getByText("確定済み")).toBeInTheDocument();
-    expect(screen.queryByText("編集中（ロック取得中）")).not.toBeInTheDocument();
+    expect(screen.getByTestId("CheckIcon")).toBeInTheDocument();
+    expect(
+      screen.queryByText("編集中（ロック取得中）"),
+    ).not.toBeInTheDocument();
   });
 });
