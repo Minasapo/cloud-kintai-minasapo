@@ -275,14 +275,25 @@ export default function CreateStaffDialog({
                             control={control}
                             watch={watch}
                             setValue={setValue}
-                            cognitoUser={cognitoUser}
-                            staffs={staffs}
                             shiftGroupOptions={shiftGroupOptions}
                           />
                         ),
                       },
                       {
                         value: 1,
+                        label: "ワークフロー",
+                        content: (
+                          <WorkflowSettingsTabContent
+                            control={control}
+                            watch={watch}
+                            setValue={setValue}
+                            cognitoUser={cognitoUser}
+                            staffs={staffs}
+                          />
+                        ),
+                      },
+                      {
+                        value: 2,
                         label: "オーナー設定",
                         disabled: !canEditOwnerOnly,
                         content: (
@@ -293,7 +304,7 @@ export default function CreateStaffDialog({
                         ),
                       },
                       {
-                        value: 2,
+                        value: 3,
                         label: "開発者向け",
                         disabled: !canEditOwnerOnly,
                         content: (
@@ -345,6 +356,74 @@ type FormTableProps = {
   staffs: StaffType[];
   shiftGroupOptions: ShiftGroupOption[];
 };
+
+function WorkflowSettingsTabContent({
+  control,
+  watch,
+  setValue,
+  cognitoUser,
+  staffs,
+}: Pick<
+  FormTableProps,
+  "control" | "watch" | "setValue" | "cognitoUser" | "staffs"
+>) {
+  return (
+    <section className="overflow-x-auto rounded-2xl border border-emerald-100 bg-white/95">
+      <table className="w-full min-w-[860px]">
+        <tbody>
+          <tr>
+            <td className={LABEL_CELL_CLASS}>承認者設定</td>
+            <td className={VALUE_CELL_CLASS}>
+              <Controller
+                name="approverSetting"
+                control={control}
+                render={({ field }) => (
+                  <RadioGroup
+                    row
+                    value={field.value}
+                    onChange={(e) => {
+                      const v = e.target.value as ApproverSettingMode;
+                      setValue("approverSetting", v, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                      field.onChange(v);
+                    }}
+                  >
+                    <FormControlLabel
+                      value={ApproverSettingMode.ADMINS}
+                      control={<Radio />}
+                      label="管理者全員 (デフォルト)"
+                    />
+                    <FormControlLabel
+                      value={ApproverSettingMode.SINGLE}
+                      control={<Radio />}
+                      label="特定の承認者を1名に限定"
+                    />
+                    <FormControlLabel
+                      value={ApproverSettingMode.MULTIPLE}
+                      control={<Radio />}
+                      label="特定の承認者を複数選択"
+                    />
+                  </RadioGroup>
+                )}
+              />
+            </td>
+          </tr>
+          <ApproverSettingTableRows
+            control={control}
+            watch={watch}
+            staffs={staffs}
+            currentCognitoUserId={cognitoUser?.id}
+            labelCellClassName={LABEL_CELL_CLASS}
+            valueCellClassName={VALUE_CELL_CLASS}
+          />
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
 function OwnerCheckboxRow({
   control,
   setValue,
@@ -405,10 +484,11 @@ function GeneralCreateStaffTabContent({
   control,
   watch,
   setValue,
-  cognitoUser,
-  staffs,
   shiftGroupOptions,
-}: FormTableProps) {
+}: Pick<
+  FormTableProps,
+  "register" | "control" | "watch" | "setValue" | "shiftGroupOptions"
+>) {
   const isShiftSelected = isShiftWorkType(watch("workType"));
 
   return (
@@ -647,53 +727,6 @@ function GeneralCreateStaffTabContent({
               </td>
             </tr>
           )}
-          <tr>
-            <td className={LABEL_CELL_CLASS}>承認者設定</td>
-            <td className={VALUE_CELL_CLASS}>
-              <Controller
-                name="approverSetting"
-                control={control}
-                render={({ field }) => (
-                  <RadioGroup
-                    row
-                    value={field.value}
-                    onChange={(e) => {
-                      const v = e.target.value as ApproverSettingMode;
-                      setValue("approverSetting", v, {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                      });
-                      field.onChange(v);
-                    }}
-                  >
-                    <FormControlLabel
-                      value={ApproverSettingMode.ADMINS}
-                      control={<Radio />}
-                      label="管理者全員 (デフォルト)"
-                    />
-                    <FormControlLabel
-                      value={ApproverSettingMode.SINGLE}
-                      control={<Radio />}
-                      label="特定の承認者を1名に限定"
-                    />
-                    <FormControlLabel
-                      value={ApproverSettingMode.MULTIPLE}
-                      control={<Radio />}
-                      label="特定の承認者を複数選択"
-                    />
-                  </RadioGroup>
-                )}
-              />
-            </td>
-          </tr>
-          <ApproverSettingTableRows
-            control={control}
-            watch={watch}
-            staffs={staffs}
-            currentCognitoUserId={cognitoUser?.id}
-            labelCellClassName={LABEL_CELL_CLASS}
-            valueCellClassName={VALUE_CELL_CLASS}
-          />
         </tbody>
       </table>
     </section>

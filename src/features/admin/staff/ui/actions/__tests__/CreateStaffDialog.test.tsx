@@ -215,6 +215,7 @@ describe("CreateStaffDialog", () => {
       const user = userEvent.setup();
       renderComponent();
       await user.click(screen.getByRole("button", { name: /スタッフ登録/ }));
+      await user.click(screen.getByRole("tab", { name: "ワークフロー" }));
       expect(
         screen.getByRole("radio", { name: "管理者全員 (デフォルト)" }),
       ).toBeInTheDocument();
@@ -427,6 +428,7 @@ describe("CreateStaffDialog", () => {
       const user = userEvent.setup();
       renderComponent();
       await user.click(screen.getByRole("button", { name: /スタッフ登録/ }));
+      await user.click(screen.getByRole("tab", { name: "ワークフロー" }));
       const adminRadio = screen.getByRole("radio", {
         name: "管理者全員 (デフォルト)",
       });
@@ -461,6 +463,7 @@ describe("CreateStaffDialog", () => {
       );
 
       await user.click(screen.getByRole("button", { name: /スタッフ登録/ }));
+      await user.click(screen.getByRole("tab", { name: "ワークフロー" }));
       await user.click(
         screen.getByRole("radio", { name: "特定の承認者を1名に限定" }),
       );
@@ -477,6 +480,7 @@ describe("CreateStaffDialog", () => {
       const user = userEvent.setup();
       renderComponent();
       await user.click(screen.getByRole("button", { name: /スタッフ登録/ }));
+      await user.click(screen.getByRole("tab", { name: "ワークフロー" }));
       await user.click(
         screen.getByRole("radio", { name: "特定の承認者を複数選択" }),
       );
@@ -495,6 +499,7 @@ describe("CreateStaffDialog", () => {
       const user = userEvent.setup();
       renderComponent();
       await user.click(screen.getByRole("button", { name: /スタッフ登録/ }));
+      await user.click(screen.getByRole("tab", { name: "ワークフロー" }));
       await user.click(
         screen.getByRole("radio", { name: "特定の承認者を複数選択" }),
       );
