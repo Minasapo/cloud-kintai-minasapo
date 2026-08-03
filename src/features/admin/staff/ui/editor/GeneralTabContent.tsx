@@ -2,9 +2,8 @@ import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { StaffFormValues } from "@features/admin/staff/model/staffForm";
 import { ApproverSettingTableRows } from "@features/admin/staff/ui/shared/ApproverSettingTableRows";
 import { Checkbox, FormControlLabel, Radio, RadioGroup } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers";
 import { ApproverSettingMode } from "@shared/api/graphql/types";
-import { AppTextField } from "@shared/ui/form";
+import { AppTextField, DateField } from "@shared/ui/form";
 import dayjs from "dayjs";
 import {
   Control,
@@ -109,19 +108,15 @@ export function GeneralTabContent({
                   name="usageStartDate"
                   control={control}
                   render={({ field }) => (
-                    <DatePicker
+                    <DateField
                       value={field.value ? dayjs(field.value) : null}
-                      onChange={(v) => {
-                        const next = v ? v.format("YYYY-MM-DD") : null;
+                      onChange={(value) => {
+                        const next = value ? value.format("YYYY-MM-DD") : null;
                         field.onChange(next);
                       }}
-                      format="YYYY/M/D"
-                      slotProps={{
-                        textField: {
-                          onBlur: field.onBlur,
-                          size: "small",
-                        },
-                      }}
+                      format="YYYY/MM/DD"
+                      className="w-full sm:max-w-[400px]"
+                      helperText="全角数字は自動で半角に変換されます"
                     />
                   )}
                 />

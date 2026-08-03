@@ -274,7 +274,7 @@ describe("CreateStaffDialog", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("cognitoUser.owner が true のとき、オーナー権限フィールドが表示される", async () => {
+    it("cognitoUser.owner が true のとき、オーナー設定と開発者向けタブが有効になる", async () => {
       const ownerAuthValue = {
         ...baseAuthContextValue,
         cognitoUser: {
@@ -308,16 +308,24 @@ describe("CreateStaffDialog", () => {
         { wrapper: OwnerWrapper },
       );
       await user.click(screen.getByRole("button", { name: /スタッフ登録/ }));
+      expect(screen.getByRole("tab", { name: "オーナー設定" })).toBeEnabled();
+      expect(screen.getByRole("tab", { name: "開発者向け" })).toBeEnabled();
+
+      await user.click(screen.getByRole("tab", { name: "オーナー設定" }));
       expect(screen.getByText("オーナー権限")).toBeInTheDocument();
+
+      await user.click(screen.getByRole("tab", { name: "開発者向け" }));
       expect(screen.getByText("開発者フラグ")).toBeInTheDocument();
     });
 
-    it("cognitoUser.owner が false のとき、オーナー権限フィールドが非表示", async () => {
+    it("cognitoUser.owner が false のとき、オーナー設定と開発者向けタブが無効になる", async () => {
       const user = userEvent.setup();
       renderComponent();
       await user.click(screen.getByRole("button", { name: /スタッフ登録/ }));
-      expect(screen.queryByText("オーナー権限")).not.toBeInTheDocument();
-      expect(screen.queryByText("開発者フラグ")).not.toBeInTheDocument();
+      expect(screen.getByRole("tab", { name: "オーナー設定" })).toBeDisabled();
+      expect(screen.getByRole("tab", { name: "開発者向け" })).toBeDisabled();
+      expect(screen.getByText("オーナー権限")).not.toBeVisible();
+      expect(screen.getByText("開発者フラグ")).not.toBeVisible();
     });
 
     it("ダイアログを開くと勤怠管理対象チェックボックスが表示される", async () => {
@@ -327,8 +335,6 @@ describe("CreateStaffDialog", () => {
       expect(screen.getByText("勤怠管理対象")).toBeInTheDocument();
     });
   });
-
-  // ─── バリデーション ────────────────────────────────────────────────────────
   describe("フォームバリデーション", () => {
     it("姓をクリアすると isValid が false になり登録ボタンが無効のままになる", async () => {
       const user = userEvent.setup();

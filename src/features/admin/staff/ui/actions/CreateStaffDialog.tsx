@@ -22,7 +22,8 @@ import {
   Checkbox,
   FormControlLabel,
   Radio,
-  RadioGroup,} from "@mui/material";
+  RadioGroup,
+} from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import {
   ApproverMultipleMode,
@@ -34,10 +35,18 @@ import { pushNotification } from "@shared/lib/store/notificationSlice";
 import { AppButton } from "@shared/ui/button";
 import { useDialogCloseGuard } from "@shared/ui/feedback/useDialogCloseGuard";
 import { AppTextField } from "@shared/ui/form";
+import { AppTabs } from "@shared/ui/tabs";
 import { SectionTitle } from "@shared/ui/typography";
 import dayjs from "dayjs";
 import { useContext, useMemo, useState } from "react";
-import { type Control, Controller, useForm, type UseFormRegister, type UseFormSetValue, type UseFormWatch } from "react-hook-form";
+import {
+  type Control,
+  Controller,
+  useForm,
+  type UseFormRegister,
+  type UseFormSetValue,
+  type UseFormWatch,
+} from "react-hook-form";
 import { z } from "zod";
 
 import * as MESSAGE_CODE from "@/errors";
@@ -67,6 +76,8 @@ type Inputs = CreateStaffFormValues & z.infer<typeof createStaffSchema>;
 const LABEL_CELL_CLASS =
   "w-[220px] min-w-[180px] border-b border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900";
 const VALUE_CELL_CLASS = "border-b border-slate-200 px-4 py-3 align-middle";
+const DATE_PICKER_POPUP_Z_INDEX = 1500;
+const AUTOCOMPLETE_POPUP_Z_INDEX = 1500;
 export default function CreateStaffDialog({
   staffs,
   refreshStaff,
@@ -81,7 +92,9 @@ export default function CreateStaffDialog({
   const dispatch = useAppDispatchV2();
   const { getShiftGroups } = useContext(AppConfigContext);
   const { cognitoUser } = useContext(AuthContext);
+  const canEditOwnerOnly = Boolean(cognitoUser?.owner);
   const [open, setOpen] = useState(false);
+  const [tabIndex, setTabIndex] = useState(0);
   const {
     register,
     control,
@@ -101,6 +114,7 @@ export default function CreateStaffDialog({
     onClose: () => {
       reset(CREATE_STAFF_DEFAULT_VALUES);
       setOpen(false);
+      setTabIndex(0);
     },
   });
   const shiftGroupOptions = useMemo(
@@ -109,6 +123,7 @@ export default function CreateStaffDialog({
   );
   const handleClickOpen = () => {
     reset(CREATE_STAFF_DEFAULT_VALUES);
+    setTabIndex(0);
     setOpen(true);
   };
   const onSubmit = async (data: Inputs) => {
@@ -243,15 +258,54 @@ export default function CreateStaffDialog({
                 </div>
               </section>
 
-              <CreateStaffFormTable
-                register={register}
-                control={control}
-                watch={watch}
-                setValue={setValue}
-                cognitoUser={cognitoUser}
-                staffs={staffs}
-                shiftGroupOptions={shiftGroupOptions}
-              />
+              <section className="overflow-hidden rounded-2xl border border-emerald-100 bg-white/95">
+                <AppTabs
+                  value={tabIndex}
+                  onChange={setTabIndex}
+                  appearance="underline"
+                  panelPadding={0}
+                  tabsProps={{ "aria-label": "スタッフ登録タブ" }}
+                  items={[
+                    {
+                      value: 0,
+                      label: "一般",
+                      content: (
+                        <GeneralCreateStaffTabContent
+                          register={register}
+                          control={control}
+                          watch={watch}
+                          setValue={setValue}
+                          cognitoUser={cognitoUser}
+                          staffs={staffs}
+                          shiftGroupOptions={shiftGroupOptions}
+                        />
+                      ),
+                    },
+                    {
+                      value: 1,
+                      label: "オーナー設定",
+                      disabled: !canEditOwnerOnly,
+                      content: (
+                        <OwnerSettingsTabContent
+                          control={control}
+                          setValue={setValue}
+                        />
+                      ),
+                    },
+                    {
+                      value: 2,
+                      label: "開発者向け",
+                      disabled: !canEditOwnerOnly,
+                      content: (
+                        <DeveloperSettingsTabContent
+                          control={control}
+                          setValue={setValue}
+                        />
+                      ),
+                    },
+                  ]}
+                />
+              </section>
 
               <div className="flex justify-end gap-2 pb-1 pt-1">
                 <AppButton
@@ -290,7 +344,10 @@ type FormTableProps = {
   staffs: StaffType[];
   shiftGroupOptions: ShiftGroupOption[];
 };
-function OwnerCheckboxRow({ control, setValue }: Pick<FormTableProps, "control" | "setValue">) {
+function OwnerCheckboxRow({
+  control,
+  setValue,
+}: Pick<FormTableProps, "control" | "setValue">) {
   return (
     <tr>
       <td className={LABEL_CELL_CLASS}>オーナー権限</td>
@@ -313,7 +370,44 @@ function OwnerCheckboxRow({ control, setValue }: Pick<FormTableProps, "control" 
   );
 }
 
-function CreateStaffFormTable({ register, control, watch, setValue, cognitoUser, staffs, shiftGroupOptions }: FormTableProps) {
+function DeveloperCheckboxRow({
+  control,
+  setValue,
+}: Pick<FormTableProps, "control" | "setValue">) {
+  return (
+    <tr>
+      <td className={LABEL_CELL_CLASS}>開発者フラグ</td>
+      <td className={VALUE_CELL_CLASS}>
+        <Controller
+          name="developer"
+          control={control}
+          render={({ field }) => (
+            <Checkbox
+              checked={Boolean(field.value)}
+              onChange={(e) => {
+                setValue("developer", e.target.checked, { shouldDirty: true });
+                field.onChange(e.target.checked);
+              }}
+            />
+          )}
+        />
+        <p className="text-sm text-slate-500">
+          開発用の機能を表示するための設定です。
+        </p>
+      </td>
+    </tr>
+  );
+}
+
+function GeneralCreateStaffTabContent({
+  register,
+  control,
+  watch,
+  setValue,
+  cognitoUser,
+  staffs,
+  shiftGroupOptions,
+}: FormTableProps) {
   return (
     <section className="overflow-x-auto rounded-2xl border border-emerald-100 bg-white/95">
       <table className="w-full min-w-[860px]">
@@ -321,22 +415,42 @@ function CreateStaffFormTable({ register, control, watch, setValue, cognitoUser,
           <tr>
             <td className={LABEL_CELL_CLASS}>汎用コード</td>
             <td className={VALUE_CELL_CLASS}>
-              <AppTextField {...register("sortKey")} size="small" sx={{ width: { xs: "100%", sm: 400 } }} placeholder="例：1、2、3...やZZ001、ZZ002...など" />
+              <AppTextField
+                {...register("sortKey")}
+                size="small"
+                sx={{ width: { xs: "100%", sm: 400 } }}
+                placeholder="例：1、2、3...やZZ001、ZZ002...など"
+              />
             </td>
           </tr>
           <tr>
             <td className={LABEL_CELL_CLASS}>スタッフ名</td>
             <td className={VALUE_CELL_CLASS}>
               <div className="flex flex-col gap-2 sm:flex-row">
-                <AppTextField {...register("familyName")} size="small" label="姓" sx={{ width: { xs: "100%", sm: 200 } }} />
-                <AppTextField {...register("givenName")} size="small" label="名" sx={{ width: { xs: "100%", sm: 200 } }} />
+                <AppTextField
+                  {...register("familyName")}
+                  size="small"
+                  label="姓"
+                  sx={{ width: { xs: "100%", sm: 200 } }}
+                />
+                <AppTextField
+                  {...register("givenName")}
+                  size="small"
+                  label="名"
+                  sx={{ width: { xs: "100%", sm: 200 } }}
+                />
               </div>
             </td>
           </tr>
           <tr>
             <td className={LABEL_CELL_CLASS}>メールアドレス</td>
             <td className={VALUE_CELL_CLASS}>
-              <AppTextField {...register("mailAddress")} type="email" size="small" sx={{ width: { xs: "100%", sm: 400 } }} />
+              <AppTextField
+                {...register("mailAddress")}
+                type="email"
+                size="small"
+                sx={{ width: { xs: "100%", sm: 400 } }}
+              />
             </td>
           </tr>
           <tr>
@@ -348,13 +462,29 @@ function CreateStaffFormTable({ register, control, watch, setValue, cognitoUser,
                 render={({ field }) => (
                   <Autocomplete
                     {...field}
-                    value={ROLE_OPTIONS.find((option) => String(option.value) === field.value) ?? null}
+                    value={
+                      ROLE_OPTIONS.find(
+                        (option) => String(option.value) === field.value,
+                      ) ?? null
+                    }
                     options={ROLE_OPTIONS}
                     getOptionLabel={(option) => option.label}
-                    renderInput={(params) => <AppTextField {...params} size="small" sx={{ width: { xs: "100%", sm: 400 } }} />}
+                    slotProps={{
+                      popper: { sx: { zIndex: AUTOCOMPLETE_POPUP_Z_INDEX } },
+                    }}
+                    renderInput={(params) => (
+                      <AppTextField
+                        {...params}
+                        size="small"
+                        sx={{ width: { xs: "100%", sm: 400 } }}
+                      />
+                    )}
                     onChange={(_, data) => {
                       if (!data) return;
-                      setValue("role", data.value, { shouldDirty: true, shouldValidate: true });
+                      setValue("role", data.value, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
                       field.onChange(data.value);
                     }}
                   />
@@ -362,7 +492,6 @@ function CreateStaffFormTable({ register, control, watch, setValue, cognitoUser,
               />
             </td>
           </tr>
-          {cognitoUser?.owner && <OwnerCheckboxRow control={control} setValue={setValue} />}
           <tr>
             <td className={LABEL_CELL_CLASS}>利用開始日</td>
             <td className={VALUE_CELL_CLASS}>
@@ -374,11 +503,23 @@ function CreateStaffFormTable({ register, control, watch, setValue, cognitoUser,
                     value={field.value ? dayjs(field.value) : null}
                     onChange={(v) => {
                       const next = v ? v.format("YYYY-MM-DD") : null;
-                      setValue("usageStartDate", next, { shouldDirty: true, shouldValidate: true });
+                      setValue("usageStartDate", next, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
                       field.onChange(next);
                     }}
                     format="YYYY/M/D"
-                    slotProps={{ textField: { onBlur: field.onBlur, size: "small" } }}
+                    slotProps={{
+                      textField: { onBlur: field.onBlur, size: "small" },
+                      popper: { sx: { zIndex: DATE_PICKER_POPUP_Z_INDEX } },
+                      desktopPaper: {
+                        sx: { zIndex: DATE_PICKER_POPUP_Z_INDEX },
+                      },
+                      mobilePaper: {
+                        sx: { zIndex: DATE_PICKER_POPUP_Z_INDEX },
+                      },
+                    }}
                   />
                 )}
               />
@@ -395,11 +536,17 @@ function CreateStaffFormTable({ register, control, watch, setValue, cognitoUser,
                     <Checkbox
                       checked={field.value ?? true}
                       onChange={(e) => {
-                        setValue("attendanceManagementEnabled", e.target.checked, { shouldDirty: true, shouldValidate: true });
+                        setValue(
+                          "attendanceManagementEnabled",
+                          e.target.checked,
+                          { shouldDirty: true, shouldValidate: true },
+                        );
                         field.onChange(e.target.checked);
                       }}
                     />
-                    <p className="text-xs text-slate-500">オフにすると勤怠チェックでエラーとして扱われなくなります</p>
+                    <p className="text-xs text-slate-500">
+                      オフにすると勤怠チェックでエラーとして扱われなくなります
+                    </p>
                   </div>
                 )}
               />
@@ -414,13 +561,29 @@ function CreateStaffFormTable({ register, control, watch, setValue, cognitoUser,
                 render={({ field }) => (
                   <Autocomplete
                     {...field}
-                    value={WORK_TYPE_OPTIONS.find((option) => option.value === field.value) ?? null}
+                    value={
+                      WORK_TYPE_OPTIONS.find(
+                        (option) => option.value === field.value,
+                      ) ?? null
+                    }
                     options={WORK_TYPE_OPTIONS}
                     getOptionLabel={(option) => option.label}
-                    renderInput={(params) => <AppTextField {...params} size="small" sx={{ width: { xs: "100%", sm: 400 } }} />}
+                    slotProps={{
+                      popper: { sx: { zIndex: AUTOCOMPLETE_POPUP_Z_INDEX } },
+                    }}
+                    renderInput={(params) => (
+                      <AppTextField
+                        {...params}
+                        size="small"
+                        sx={{ width: { xs: "100%", sm: 400 } }}
+                      />
+                    )}
                     onChange={(_, data) => {
                       if (!data) return;
-                      setValue("workType", data.value, { shouldDirty: true, shouldValidate: true });
+                      setValue("workType", data.value, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
                       field.onChange(data.value);
                     }}
                   />
@@ -440,18 +603,37 @@ function CreateStaffFormTable({ register, control, watch, setValue, cognitoUser,
                   name="shiftGroup"
                   control={control}
                   render={({ field }) => {
-                    const selectedOption = shiftGroupOptions.find((option) => option.value === field.value) ?? null;
+                    const selectedOption =
+                      shiftGroupOptions.find(
+                        (option) => option.value === field.value,
+                      ) ?? null;
                     return (
                       <Autocomplete
                         value={selectedOption}
                         options={shiftGroupOptions}
+                        slotProps={{
+                          popper: {
+                            sx: { zIndex: AUTOCOMPLETE_POPUP_Z_INDEX },
+                          },
+                        }}
                         onChange={(_, newValue) => {
-                          setValue("shiftGroup", newValue?.value ?? null, { shouldDirty: true, shouldValidate: true });
+                          setValue("shiftGroup", newValue?.value ?? null, {
+                            shouldDirty: true,
+                            shouldValidate: true,
+                          });
                           field.onChange(newValue?.value ?? null);
                         }}
-                        isOptionEqualToValue={(option, value) => option.value === value.value}
+                        isOptionEqualToValue={(option, value) =>
+                          option.value === value.value
+                        }
                         renderInput={(params) => (
-                          <AppTextField {...params} size="small" sx={{ width: { xs: "100%", sm: 400 } }} placeholder="所属させるシフトグループを選択" onBlur={field.onBlur} />
+                          <AppTextField
+                            {...params}
+                            size="small"
+                            sx={{ width: { xs: "100%", sm: 400 } }}
+                            placeholder="所属させるシフトグループを選択"
+                            onBlur={field.onBlur}
+                          />
                         )}
                       />
                     );
@@ -472,13 +654,28 @@ function CreateStaffFormTable({ register, control, watch, setValue, cognitoUser,
                     value={field.value}
                     onChange={(e) => {
                       const v = e.target.value as ApproverSettingMode;
-                      setValue("approverSetting", v, { shouldDirty: true, shouldValidate: true });
+                      setValue("approverSetting", v, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
                       field.onChange(v);
                     }}
                   >
-                    <FormControlLabel value={ApproverSettingMode.ADMINS} control={<Radio />} label="管理者全員 (デフォルト)" />
-                    <FormControlLabel value={ApproverSettingMode.SINGLE} control={<Radio />} label="特定の承認者を1名に限定" />
-                    <FormControlLabel value={ApproverSettingMode.MULTIPLE} control={<Radio />} label="特定の承認者を複数選択" />
+                    <FormControlLabel
+                      value={ApproverSettingMode.ADMINS}
+                      control={<Radio />}
+                      label="管理者全員 (デフォルト)"
+                    />
+                    <FormControlLabel
+                      value={ApproverSettingMode.SINGLE}
+                      control={<Radio />}
+                      label="特定の承認者を1名に限定"
+                    />
+                    <FormControlLabel
+                      value={ApproverSettingMode.MULTIPLE}
+                      control={<Radio />}
+                      label="特定の承認者を複数選択"
+                    />
                   </RadioGroup>
                 )}
               />
@@ -492,27 +689,36 @@ function CreateStaffFormTable({ register, control, watch, setValue, cognitoUser,
             labelCellClassName={LABEL_CELL_CLASS}
             valueCellClassName={VALUE_CELL_CLASS}
           />
-          {cognitoUser?.owner && (
-            <tr>
-              <td className={LABEL_CELL_CLASS}>開発者フラグ</td>
-              <td className={VALUE_CELL_CLASS}>
-                <Controller
-                  name="developer"
-                  control={control}
-                  render={({ field }) => (
-                    <Checkbox
-                      checked={Boolean(field.value)}
-                      onChange={(e) => {
-                        setValue("developer", e.target.checked, { shouldDirty: true, shouldValidate: true });
-                        field.onChange(e.target.checked);
-                      }}
-                    />
-                  )}
-                />
-                <p className="text-sm text-slate-500">開発用の機能を表示するための設定です。</p>
-              </td>
-            </tr>
-          )}
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
+function OwnerSettingsTabContent({
+  control,
+  setValue,
+}: Pick<FormTableProps, "control" | "setValue">) {
+  return (
+    <section className="overflow-x-auto rounded-2xl border border-emerald-100 bg-white/95">
+      <table className="w-full min-w-[860px]">
+        <tbody>
+          <OwnerCheckboxRow control={control} setValue={setValue} />
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
+function DeveloperSettingsTabContent({
+  control,
+  setValue,
+}: Pick<FormTableProps, "control" | "setValue">) {
+  return (
+    <section className="overflow-x-auto rounded-2xl border border-emerald-100 bg-white/95">
+      <table className="w-full min-w-[860px]">
+        <tbody>
+          <DeveloperCheckboxRow control={control} setValue={setValue} />
         </tbody>
       </table>
     </section>
