@@ -1,8 +1,5 @@
-import { StaffType } from "@entities/staff/model/useStaffs/useStaffs";
 import { StaffFormValues } from "@features/admin/staff/model/staffForm";
-import { ApproverSettingTableRows } from "@features/admin/staff/ui/shared/ApproverSettingTableRows";
-import { Checkbox, FormControlLabel, Radio, RadioGroup } from "@mui/material";
-import { ApproverSettingMode } from "@shared/api/graphql/types";
+import { Checkbox } from "@mui/material";
 import { AppTextField, DateField } from "@shared/ui/form";
 import dayjs from "dayjs";
 import {
@@ -10,7 +7,6 @@ import {
   Controller,
   UseFormRegister,
   UseFormSetValue,
-  UseFormWatch,
 } from "react-hook-form";
 
 import { MailAddressTableCell } from "./MailAddressTableCell";
@@ -27,9 +23,7 @@ type GeneralTabContentProps = {
   register: UseFormRegister<StaffFormValues>;
   control: Control<StaffFormValues>;
   setValue: UseFormSetValue<StaffFormValues>;
-  watch: UseFormWatch<StaffFormValues>;
   cognitoUser: { id?: string; owner?: boolean | null } | null | undefined;
-  staffs: StaffType[];
   shiftGroupOptions: { value: string; label: string }[];
 };
 
@@ -37,9 +31,7 @@ export function GeneralTabContent({
   register,
   control,
   setValue,
-  watch,
   cognitoUser,
-  staffs,
   shiftGroupOptions,
 }: GeneralTabContentProps) {
   return (
@@ -149,51 +141,6 @@ export function GeneralTabContent({
             <ShiftGroupRow
               control={control}
               shiftGroupOptions={shiftGroupOptions}
-            />
-
-            <tr>
-              <td className={LABEL_CELL_CLASS}>承認者設定</td>
-              <td className={VALUE_CELL_CLASS}>
-                <Controller
-                  name="approverSetting"
-                  control={control}
-                  render={({ field }) => (
-                    <RadioGroup
-                      row
-                      value={field.value}
-                      onChange={(e) => {
-                        const v = e.target.value as ApproverSettingMode;
-                        field.onChange(v);
-                      }}
-                    >
-                      <FormControlLabel
-                        value={ApproverSettingMode.ADMINS}
-                        control={<Radio />}
-                        label="管理者全員 (デフォルト)"
-                      />
-                      <FormControlLabel
-                        value={ApproverSettingMode.SINGLE}
-                        control={<Radio />}
-                        label="特定の承認者を1名に限定"
-                      />
-                      <FormControlLabel
-                        value={ApproverSettingMode.MULTIPLE}
-                        control={<Radio />}
-                        label="特定の承認者を複数選択"
-                      />
-                    </RadioGroup>
-                  )}
-                />
-              </td>
-            </tr>
-
-            <ApproverSettingTableRows
-              control={control}
-              watch={watch}
-              staffs={staffs}
-              currentCognitoUserId={cognitoUser?.id}
-              labelCellClassName={LABEL_CELL_CLASS}
-              valueCellClassName={VALUE_CELL_CLASS}
             />
           </>
         </tbody>

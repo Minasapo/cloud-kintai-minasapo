@@ -8,6 +8,7 @@ import { PageTitle } from "@shared/ui/typography";
 
 import { AdvancedTabContent } from "./AdvancedTabContent";
 import { GeneralTabContent } from "./GeneralTabContent";
+import { WorkflowTabContent } from "./WorkflowTabContent";
 
 export default function AdminStaffEditor() {
   const {
@@ -84,15 +85,26 @@ export default function AdminStaffEditor() {
                     register={register}
                     control={control}
                     setValue={setValue}
-                    watch={watch}
                     cognitoUser={cognitoUser}
-                    staffs={staffs}
                     shiftGroupOptions={shiftGroupOptions}
                   />
                 ),
               },
               {
                 value: 1,
+                label: "ワークフロー",
+                content: (
+                  <WorkflowTabContent
+                    control={control}
+                    setValue={setValue}
+                    watch={watch}
+                    cognitoUser={cognitoUser}
+                    staffs={staffs}
+                  />
+                ),
+              },
+              {
+                value: 2,
                 label: "高度設定",
                 disabled: !cognitoUser?.owner,
                 content: (

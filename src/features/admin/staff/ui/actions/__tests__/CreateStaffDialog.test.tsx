@@ -1,7 +1,10 @@
 // ─── Imports (must come before jest.mock per ESLint import/first) ─────────────
 import { AuthContext } from "@app/providers/auth/AuthContext";
 import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
-import { StaffRole, type StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import {
+  StaffRole,
+  type StaffType,
+} from "@entities/staff/model/useStaffs/useStaffs";
 import { ApproverSettingMode } from "@shared/api/graphql/types";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -230,13 +233,14 @@ describe("CreateStaffDialog", () => {
       expect(screen.getByRole("button", { name: "登録" })).toBeDisabled();
     });
 
-    it("シフトグループが空の場合、案内メッセージが表示される", async () => {
+    it("初期状態 (weekday) ではシフトグループ行が表示されない", async () => {
       const user = userEvent.setup();
       renderComponent();
       await user.click(screen.getByRole("button", { name: /スタッフ登録/ }));
       expect(
-        screen.getByText(/利用可能なシフトグループがありません/),
-      ).toBeInTheDocument();
+        screen.queryByText(/利用可能なシフトグループがありません/),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText("シフトグループ")).not.toBeInTheDocument();
     });
 
     it("シフトグループが存在する場合 Autocomplete が表示される", async () => {
@@ -246,9 +250,7 @@ describe("CreateStaffDialog", () => {
         ],
       } as unknown as React.ContextType<typeof AppConfigContext>;
 
-      const WrapperWithGroups = ({
-        children,
-      }: React.PropsWithChildren) => (
+      const WrapperWithGroups = ({ children }: React.PropsWithChildren) => (
         <AuthContext.Provider value={baseAuthContextValue}>
           <AppConfigContext.Provider value={appConfigWithGroups}>
             {children}
@@ -614,9 +616,7 @@ describe("CreateStaffDialog", () => {
     });
 
     it("addUserToGroup が失敗した場合、エラー通知が表示され後続処理は呼ばれない", async () => {
-      mockAddUserToGroupFn.mockRejectedValue(
-        new Error("add to group failed"),
-      );
+      mockAddUserToGroupFn.mockRejectedValue(new Error("add to group failed"));
 
       const { user } = await openAndFill();
       await user.click(screen.getByRole("button", { name: "登録" }));
@@ -665,7 +665,8 @@ describe("CreateStaffDialog", () => {
           expect.objectContaining({
             payload: expect.objectContaining({
               tone: "error",
-              message: expect.stringContaining("作成したスタッフが見つかりません"),
+              message:
+                expect.stringContaining("作成したスタッフが見つかりません"),
             }),
           }),
         );

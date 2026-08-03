@@ -1,7 +1,9 @@
 import { useAppDispatchV2 } from "@app/hooks";
 import { AuthContext } from "@app/providers/auth/AuthContext";
 import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
-import WORK_TYPE_OPTIONS from "@entities/staff/lib/workTypeOptions";
+import WORK_TYPE_OPTIONS, {
+  isShiftWorkType,
+} from "@entities/staff/lib/workTypeOptions";
 import addUserToGroup from "@entities/staff/model/cognito/addUserToGroup";
 import createCognitoUser from "@entities/staff/model/cognito/createCognitoUser";
 import { CognitoUser } from "@entities/staff/model/useCognitoUser";
@@ -238,10 +240,10 @@ export default function CreateStaffDialog({
           onClick={requestClose}
         >
           <div
-            className="w-full max-w-5xl rounded-2xl bg-slate-50 p-3 shadow-2xl sm:p-4"
+            className="flex h-[min(78vh,880px)] w-full max-w-5xl flex-col rounded-2xl bg-slate-50 p-3 shadow-2xl sm:p-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="space-y-2.5">
+            <div className="flex min-h-0 flex-1 flex-col gap-2.5">
               <section className="rounded-[18px] border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 px-5 py-4">
                 <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
                   <div>
@@ -252,59 +254,58 @@ export default function CreateStaffDialog({
                       登録するスタッフの情報と承認設定を入力してください。
                     </p>
                   </div>
-                  <span className="inline-flex items-center rounded-full border border-emerald-200 bg-white px-2.5 py-1 text-xs font-bold text-slate-700">
-                    新規作成
-                  </span>
                 </div>
               </section>
 
-              <section className="overflow-hidden rounded-2xl border border-emerald-100 bg-white/95">
-                <AppTabs
-                  value={tabIndex}
-                  onChange={setTabIndex}
-                  appearance="underline"
-                  panelPadding={0}
-                  tabsProps={{ "aria-label": "スタッフ登録タブ" }}
-                  items={[
-                    {
-                      value: 0,
-                      label: "一般",
-                      content: (
-                        <GeneralCreateStaffTabContent
-                          register={register}
-                          control={control}
-                          watch={watch}
-                          setValue={setValue}
-                          cognitoUser={cognitoUser}
-                          staffs={staffs}
-                          shiftGroupOptions={shiftGroupOptions}
-                        />
-                      ),
-                    },
-                    {
-                      value: 1,
-                      label: "オーナー設定",
-                      disabled: !canEditOwnerOnly,
-                      content: (
-                        <OwnerSettingsTabContent
-                          control={control}
-                          setValue={setValue}
-                        />
-                      ),
-                    },
-                    {
-                      value: 2,
-                      label: "開発者向け",
-                      disabled: !canEditOwnerOnly,
-                      content: (
-                        <DeveloperSettingsTabContent
-                          control={control}
-                          setValue={setValue}
-                        />
-                      ),
-                    },
-                  ]}
-                />
+              <section className="min-h-0 flex-1 overflow-hidden rounded-2xl border border-emerald-100 bg-white/95">
+                <div className="h-full overflow-y-auto">
+                  <AppTabs
+                    value={tabIndex}
+                    onChange={setTabIndex}
+                    appearance="underline"
+                    panelPadding={0}
+                    tabsProps={{ "aria-label": "スタッフ登録タブ" }}
+                    items={[
+                      {
+                        value: 0,
+                        label: "一般",
+                        content: (
+                          <GeneralCreateStaffTabContent
+                            register={register}
+                            control={control}
+                            watch={watch}
+                            setValue={setValue}
+                            cognitoUser={cognitoUser}
+                            staffs={staffs}
+                            shiftGroupOptions={shiftGroupOptions}
+                          />
+                        ),
+                      },
+                      {
+                        value: 1,
+                        label: "オーナー設定",
+                        disabled: !canEditOwnerOnly,
+                        content: (
+                          <OwnerSettingsTabContent
+                            control={control}
+                            setValue={setValue}
+                          />
+                        ),
+                      },
+                      {
+                        value: 2,
+                        label: "開発者向け",
+                        disabled: !canEditOwnerOnly,
+                        content: (
+                          <DeveloperSettingsTabContent
+                            control={control}
+                            setValue={setValue}
+                          />
+                        ),
+                      },
+                    ]}
+                  />
+                </div>
               </section>
 
               <div className="flex justify-end gap-2 pb-1 pt-1">
@@ -408,6 +409,8 @@ function GeneralCreateStaffTabContent({
   staffs,
   shiftGroupOptions,
 }: FormTableProps) {
+  const isShiftSelected = isShiftWorkType(watch("workType"));
+
   return (
     <section className="overflow-x-auto rounded-2xl border border-emerald-100 bg-white/95">
       <table className="w-full min-w-[860px]">
@@ -591,57 +594,59 @@ function GeneralCreateStaffTabContent({
               />
             </td>
           </tr>
-          <tr>
-            <td className={LABEL_CELL_CLASS}>シフトグループ</td>
-            <td className={VALUE_CELL_CLASS}>
-              {shiftGroupOptions.length === 0 ? (
-                <p className="text-sm text-slate-500">
-                  利用可能なシフトグループがありません。管理画面の「シフト設定」で登録してください。
-                </p>
-              ) : (
-                <Controller
-                  name="shiftGroup"
-                  control={control}
-                  render={({ field }) => {
-                    const selectedOption =
-                      shiftGroupOptions.find(
-                        (option) => option.value === field.value,
-                      ) ?? null;
-                    return (
-                      <Autocomplete
-                        value={selectedOption}
-                        options={shiftGroupOptions}
-                        slotProps={{
-                          popper: {
-                            sx: { zIndex: AUTOCOMPLETE_POPUP_Z_INDEX },
-                          },
-                        }}
-                        onChange={(_, newValue) => {
-                          setValue("shiftGroup", newValue?.value ?? null, {
-                            shouldDirty: true,
-                            shouldValidate: true,
-                          });
-                          field.onChange(newValue?.value ?? null);
-                        }}
-                        isOptionEqualToValue={(option, value) =>
-                          option.value === value.value
-                        }
-                        renderInput={(params) => (
-                          <AppTextField
-                            {...params}
-                            size="small"
-                            sx={{ width: { xs: "100%", sm: 400 } }}
-                            placeholder="所属させるシフトグループを選択"
-                            onBlur={field.onBlur}
-                          />
-                        )}
-                      />
-                    );
-                  }}
-                />
-              )}
-            </td>
-          </tr>
+          {isShiftSelected && (
+            <tr>
+              <td className={LABEL_CELL_CLASS}>シフトグループ</td>
+              <td className={VALUE_CELL_CLASS}>
+                {shiftGroupOptions.length === 0 ? (
+                  <p className="text-sm text-slate-500">
+                    利用可能なシフトグループがありません。管理画面の「シフト設定」で登録してください。
+                  </p>
+                ) : (
+                  <Controller
+                    name="shiftGroup"
+                    control={control}
+                    render={({ field }) => {
+                      const selectedOption =
+                        shiftGroupOptions.find(
+                          (option) => option.value === field.value,
+                        ) ?? null;
+                      return (
+                        <Autocomplete
+                          value={selectedOption}
+                          options={shiftGroupOptions}
+                          slotProps={{
+                            popper: {
+                              sx: { zIndex: AUTOCOMPLETE_POPUP_Z_INDEX },
+                            },
+                          }}
+                          onChange={(_, newValue) => {
+                            setValue("shiftGroup", newValue?.value ?? null, {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            });
+                            field.onChange(newValue?.value ?? null);
+                          }}
+                          isOptionEqualToValue={(option, value) =>
+                            option.value === value.value
+                          }
+                          renderInput={(params) => (
+                            <AppTextField
+                              {...params}
+                              size="small"
+                              sx={{ width: { xs: "100%", sm: 400 } }}
+                              placeholder="所属させるシフトグループを選択"
+                              onBlur={field.onBlur}
+                            />
+                          )}
+                        />
+                      );
+                    }}
+                  />
+                )}
+              </td>
+            </tr>
+          )}
           <tr>
             <td className={LABEL_CELL_CLASS}>承認者設定</td>
             <td className={VALUE_CELL_CLASS}>

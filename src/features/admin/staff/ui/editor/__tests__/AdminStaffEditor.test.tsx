@@ -338,7 +338,6 @@ describe("AdminStaffEditor", () => {
     it("利用開始日フィールドが表示される", () => {
       renderComponent();
       expect(screen.getByText("利用開始日")).toBeInTheDocument();
-      expect(screen.getByTestId("date-picker")).toBeInTheDocument();
     });
 
     it("勤怠管理対象フィールドが表示される", () => {
@@ -351,9 +350,9 @@ describe("AdminStaffEditor", () => {
       expect(screen.getByText("勤務形態")).toBeInTheDocument();
     });
 
-    it("シフトグループフィールドが表示される", () => {
+    it("勤務形態が weekday のときシフトグループフィールドは表示されない", () => {
       renderComponent();
-      expect(screen.getByText("シフトグループ")).toBeInTheDocument();
+      expect(screen.queryByText("シフトグループ")).not.toBeInTheDocument();
     });
 
     it("承認者設定フィールドが表示される", () => {
@@ -554,21 +553,39 @@ describe("AdminStaffEditor", () => {
   // ── Shift groups ─────────────────────────────────────────────────────────
 
   describe("シフトグループ", () => {
-    it("シフトグループが 0 件のとき空メッセージが表示される", () => {
+    it("勤務形態が shift かつシフトグループが 0 件のとき空メッセージが表示される", () => {
+      mockUseStaffs.mockReturnValue({
+        staffs: [{ ...STAFF_BASE, workType: "shift" }],
+        loading: false,
+        error: null,
+        updateStaff: mockUpdateStaff,
+      });
       renderComponent(undefined, []);
       expect(
         screen.getByText(/利用可能なシフトグループがありません/),
       ).toBeInTheDocument();
     });
 
-    it("シフトグループが存在するとき Autocomplete が表示される", () => {
+    it("勤務形態が shift かつシフトグループが存在するときフィールドが表示される", () => {
+      mockUseStaffs.mockReturnValue({
+        staffs: [{ ...STAFF_BASE, workType: "shift" }],
+        loading: false,
+        error: null,
+        updateStaff: mockUpdateStaff,
+      });
       renderComponent(undefined, [
         { label: "グループA", description: "説明A" },
         { label: "グループB" },
       ]);
+      expect(screen.getByText("シフトグループ")).toBeInTheDocument();
       expect(
         screen.queryByText(/利用可能なシフトグループがありません/),
       ).not.toBeInTheDocument();
+    });
+
+    it("勤務形態が weekday のときシフトグループは表示されない", () => {
+      renderComponent(undefined, [{ label: "グループA" }]);
+      expect(screen.queryByText("シフトグループ")).not.toBeInTheDocument();
     });
   });
 
