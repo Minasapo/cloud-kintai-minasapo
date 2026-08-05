@@ -298,12 +298,12 @@ describe("useAttendanceEditFormSync", () => {
   // -------------------------------------------------------------------------
 
   describe("isOnBreak", () => {
-    it("returns false initially (no startTime, no rests)", () => {
+    it("初期状態では false を返すこと（startTime なし・rests なし）", () => {
       const { result } = setup({ staffId: "staff-1", targetWorkDateISO: "2024-06-01" });
       expect(result.current.isOnBreak).toBe(false);
     });
 
-    it("returns true when startTime is set AND rests[0].startTime is set AND rests[0].endTime is null", async () => {
+    it("startTime と rests[0].startTime が設定され rests[0].endTime が null の場合、true を返すこと", async () => {
       const { result } = setup({ staffId: "staff-1", targetWorkDateISO: "2024-06-01" });
 
       await act(async () => {
@@ -316,7 +316,7 @@ describe("useAttendanceEditFormSync", () => {
       expect(result.current.isOnBreak).toBe(true);
     });
 
-    it("returns false when rests is empty even if startTime is set", async () => {
+    it("startTime が設定済みでも rests が空の場合、false を返すこと", async () => {
       const { result } = setup({ staffId: "staff-1", targetWorkDateISO: "2024-06-01" });
 
       await act(async () => {
@@ -327,7 +327,7 @@ describe("useAttendanceEditFormSync", () => {
       expect(result.current.isOnBreak).toBe(false);
     });
 
-    it("returns false when rests[0].endTime is set (not on break anymore)", async () => {
+    it("rests[0].endTime が設定されている場合、false を返すこと", async () => {
       const { result } = setup({ staffId: "staff-1", targetWorkDateISO: "2024-06-01" });
 
       await act(async () => {
@@ -343,7 +343,7 @@ describe("useAttendanceEditFormSync", () => {
       expect(result.current.isOnBreak).toBe(false);
     });
 
-    it("returns false when startTime is null/undefined even if rests exist", async () => {
+    it("rests が存在しても startTime が null/undefined の場合、false を返すこと", async () => {
       const { result } = setup({ staffId: "staff-1", targetWorkDateISO: "2024-06-01" });
 
       await act(async () => {
@@ -356,7 +356,7 @@ describe("useAttendanceEditFormSync", () => {
       expect(result.current.isOnBreak).toBe(false);
     });
 
-    it("returns false when rests[0].startTime is null/undefined", async () => {
+    it("rests[0].startTime が null/undefined の場合、false を返すこと", async () => {
       const { result } = setup({ staffId: "staff-1", targetWorkDateISO: "2024-06-01" });
 
       await act(async () => {

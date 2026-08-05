@@ -25,7 +25,7 @@ describe("useAdminOperationLogs", () => {
   });
 
   describe("loadInitial", () => {
-    it("sets logs on success and clears loading", async () => {
+    it("loadInitial 成功時に logs を設定し loading を解除すること", async () => {
       mockFetchLogs.mockResolvedValue({
         items: [makeLog()],
         nextToken: null,
@@ -44,7 +44,7 @@ describe("useAdminOperationLogs", () => {
       expect(result.current.error).toBeNull();
     });
 
-    it("sets nextToken when provided", async () => {
+    it("nextToken が返された場合に nextToken を設定すること", async () => {
       mockFetchLogs.mockResolvedValue({
         items: [makeLog()],
         nextToken: "token-123",
@@ -60,7 +60,7 @@ describe("useAdminOperationLogs", () => {
       expect(result.current.nextToken).toBe("token-123");
     });
 
-    it("sorts logs newest-first by timestamp", async () => {
+    it("timestamp の新しい順に logs をソートすること", async () => {
       const older = makeLog({
         id: "old",
         timestamp: "2024-01-10T08:00:00.000Z",
@@ -83,7 +83,7 @@ describe("useAdminOperationLogs", () => {
       expect(result.current.logs[1].id).toBe("old");
     });
 
-    it("falls back to createdAt for sorting when timestamp is null", async () => {
+    it("timestamp が null の場合は createdAt を使ってソートすること", async () => {
       const older = makeLog({
         id: "old",
         timestamp: null,
@@ -107,7 +107,7 @@ describe("useAdminOperationLogs", () => {
       expect(result.current.logs[0].id).toBe("new");
     });
 
-    it("returns the items from the response", async () => {
+    it("レスポンスの items を返すこと", async () => {
       const log = makeLog();
       mockFetchLogs.mockResolvedValue({
         items: [log],
@@ -123,7 +123,7 @@ describe("useAdminOperationLogs", () => {
       expect(returned).toHaveLength(1);
     });
 
-    it("sets excludedInvalidRecords and count from response", async () => {
+    it("レスポンスから excludedInvalidRecords と件数を設定すること", async () => {
       mockFetchLogs.mockResolvedValue({
         items: [makeLog()],
         nextToken: null,
@@ -140,7 +140,7 @@ describe("useAdminOperationLogs", () => {
       expect(result.current.excludedInvalidRecordCount).toBe(3);
     });
 
-    it("passes filter and initialLimit to fetchOperationLogs", async () => {
+    it("fetchOperationLogs に filter と initialLimit を渡すこと", async () => {
       mockFetchLogs.mockResolvedValue({
         items: [],
         nextToken: null,
@@ -155,7 +155,7 @@ describe("useAdminOperationLogs", () => {
       expect(fetchAdminOperationLogs).toHaveBeenCalledWith(null, 50, filter);
     });
 
-    it("sets error state and rethrows on failure", async () => {
+    it("失敗時に error 状態を設定し再 throw すること", async () => {
       const error = new Error("Fetch failed");
       mockFetchLogs.mockRejectedValue(error);
 
@@ -172,7 +172,7 @@ describe("useAdminOperationLogs", () => {
   });
 
   describe("loadMore", () => {
-    it("returns empty array and skips fetch when nextToken is null", async () => {
+    it("nextToken が null の場合は空配列を返して取得をスキップすること", async () => {
       const { result } = renderHook(() => useAdminOperationLogs());
       let returned: unknown;
       await act(async () => {
@@ -183,7 +183,7 @@ describe("useAdminOperationLogs", () => {
       expect(fetchAdminOperationLogs).not.toHaveBeenCalled();
     });
 
-    it("appends new logs and sorts merged list newest-first", async () => {
+    it("新規 logs を追加し結合結果を新しい順にソートすること", async () => {
       const initial = makeLog({
         id: "log-1",
         timestamp: "2024-01-10T10:00:00.000Z",
@@ -215,7 +215,7 @@ describe("useAdminOperationLogs", () => {
       expect(result.current.nextToken).toBeNull();
     });
 
-    it("updates nextToken to null when response returns null", async () => {
+    it("レスポンスの nextToken が null の場合に nextToken を null に更新すること", async () => {
       mockFetchLogs
         .mockResolvedValueOnce({
           items: [makeLog()],
@@ -237,7 +237,7 @@ describe("useAdminOperationLogs", () => {
       expect(result.current.nextToken).toBeNull();
     });
 
-    it("accumulates excludedInvalidRecordCount across loadMore calls", async () => {
+    it("loadMore 複数回で excludedInvalidRecordCount を累積すること", async () => {
       mockFetchLogs
         .mockResolvedValueOnce({
           items: [makeLog({ id: "log-1" })],
@@ -263,7 +263,7 @@ describe("useAdminOperationLogs", () => {
       expect(result.current.excludedInvalidRecordCount).toBe(3);
     });
 
-    it("sets error state and rethrows on loadMore failure", async () => {
+    it("loadMore 失敗時に error 状態を設定し再 throw すること", async () => {
       mockFetchLogs
         .mockResolvedValueOnce({
           items: [makeLog()],
@@ -287,7 +287,7 @@ describe("useAdminOperationLogs", () => {
   });
 
   describe("error conversion", () => {
-    it("converts string error to Error", async () => {
+    it("文字列エラーを Error に変換すること", async () => {
       mockFetchLogs.mockRejectedValue("string error");
 
       const { result } = renderHook(() => useAdminOperationLogs());
@@ -300,7 +300,7 @@ describe("useAdminOperationLogs", () => {
       expect(result.current.error?.message).toBe("string error");
     });
 
-    it("converts object with message property to Error", async () => {
+    it("message プロパティを持つオブジェクトを Error に変換すること", async () => {
       mockFetchLogs.mockRejectedValue({ message: "object error" });
 
       const { result } = renderHook(() => useAdminOperationLogs());
@@ -313,7 +313,7 @@ describe("useAdminOperationLogs", () => {
       expect(result.current.error?.message).toBe("object error");
     });
 
-    it("converts object with errors array to Error using first item", async () => {
+    it("errors 配列を持つオブジェクトは先頭要素を使って Error に変換すること", async () => {
       mockFetchLogs.mockRejectedValue({
         errors: [{ message: "errors array msg" }],
       });
@@ -328,7 +328,7 @@ describe("useAdminOperationLogs", () => {
       expect(result.current.error?.message).toBe("errors array msg");
     });
 
-    it("uses fallback message for unrecognised error shape", async () => {
+    it("認識できないエラー形式ではフォールバックメッセージを使うこと", async () => {
       mockFetchLogs.mockRejectedValue({ weird: "stuff" });
 
       const { result } = renderHook(() => useAdminOperationLogs());
