@@ -45,12 +45,12 @@ const workflowFixture = (
 });
 
 describe("deriveWorkflowApproverInfo", () => {
-  it("defaults to 管理者全員 when staff missing", () => {
+  it("staff が見つからない場合、管理者全員を既定値として返すこと", () => {
     const info = deriveWorkflowApproverInfo(workflowFixture(), []);
     expect(info).toEqual({ mode: "any", items: ["管理者全員"] });
   });
 
-  it("resolves single approver from staff settings", () => {
+  it("スタッフ設定から単一承認者を解決すること", () => {
     const workflow = workflowFixture({ staffId: "staff-2" });
     const staffs = [
       staffFixture({
@@ -64,7 +64,7 @@ describe("deriveWorkflowApproverInfo", () => {
     expect(info).toEqual({ mode: "single", items: ["山田 太郎"] });
   });
 
-  it("respects ordered multiple approvers", () => {
+  it("複数承認者の ORDER 設定順を尊重すること", () => {
     const workflow = workflowFixture({ staffId: "staff-3" });
     const staffs = [
       staffFixture({
@@ -89,7 +89,7 @@ describe("buildWorkflowApprovalTimeline", () => {
   const applicantName = "申請 太郎";
   const applicationDate = "2024/01/02";
 
-  it("returns applicant-only step when workflow is null", () => {
+  it("workflow が null の場合、申請者ステップのみを返すこと", () => {
     const result = buildWorkflowApprovalTimeline({
       workflow: null,
       staffs,
@@ -108,7 +108,7 @@ describe("buildWorkflowApprovalTimeline", () => {
     ]);
   });
 
-  it("uses existing approval steps when present", () => {
+  it("approvalSteps がある場合、既存ステップを使用すること", () => {
     const workflow = workflowFixture({
       approvalSteps: [
         {
@@ -153,7 +153,7 @@ describe("buildWorkflowApprovalTimeline", () => {
     });
   });
 
-  it("falls back to derived approvers when no steps exist", () => {
+  it("approvalSteps がない場合、導出した承認者へフォールバックすること", () => {
     const workflow = workflowFixture({
       staffId: "staff-3",
       status: WorkflowStatus.APPROVED,
@@ -211,7 +211,7 @@ describe("mapApprovalStatus coverage (via normalizeApprovalSteps)", () => {
     ],
   });
 
-  it("maps SKIPPED status to スキップ", () => {
+  it("SKIPPED を スキップ にマッピングすること", () => {
     const result = buildWorkflowApprovalTimeline({
       workflow: makeWorkflowWithStep(ApprovalStatus.SKIPPED),
       staffs,
@@ -221,7 +221,7 @@ describe("mapApprovalStatus coverage (via normalizeApprovalSteps)", () => {
     expect(result[1].state).toBe("スキップ");
   });
 
-  it("maps PENDING status to 未承認", () => {
+  it("PENDING を 未承認 にマッピングすること", () => {
     const result = buildWorkflowApprovalTimeline({
       workflow: makeWorkflowWithStep(ApprovalStatus.PENDING),
       staffs,
@@ -231,7 +231,7 @@ describe("mapApprovalStatus coverage (via normalizeApprovalSteps)", () => {
     expect(result[1].state).toBe("未承認");
   });
 
-  it("maps null status to 未承認", () => {
+  it("null ステータスを 未承認 にマッピングすること", () => {
     const result = buildWorkflowApprovalTimeline({
       workflow: makeWorkflowWithStep(null),
       staffs,
