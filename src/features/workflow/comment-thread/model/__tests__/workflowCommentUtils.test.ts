@@ -35,18 +35,18 @@ const commentFixture = (
 });
 
 describe("formatWorkflowCommentSender", () => {
-  it("returns システム when sender is missing", () => {
+  it("sender が未設定の場合、システムを返すこと", () => {
     expect(formatWorkflowCommentSender(undefined)).toBe("システム");
     expect(formatWorkflowCommentSender("   ")).toBe("システム");
   });
 
-  it("normalizes system/bot labels", () => {
+  it("system/bot ラベルを正規化すること", () => {
     expect(formatWorkflowCommentSender("system")).toBe("システム");
     expect(formatWorkflowCommentSender("system-auto")).toBe("システム");
     expect(formatWorkflowCommentSender("ApprovalBot")).toBe("システム");
   });
 
-  it("returns trimmed sender otherwise", () => {
+  it("それ以外は trim 済み sender を返すこと", () => {
     expect(formatWorkflowCommentSender(" 田中 ")).toBe("田中");
   });
 });
@@ -61,7 +61,7 @@ describe("commentsToWorkflowMessages", () => {
     }),
   ];
 
-  it("maps comments to display messages with staff names", () => {
+  it("comments をスタッフ名付きの表示メッセージへ変換すること", () => {
     const comments: WorkflowComment[] = [
       commentFixture({ id: "c-1", staffId: "staff-1", text: "こんにちは" }),
       commentFixture({
@@ -103,7 +103,7 @@ describe("commentsToWorkflowMessages", () => {
     ]);
   });
 
-  it("uses default formatTimestamp when not provided", () => {
+  it("formatTimestamp 未指定時はデフォルト実装を使うこと", () => {
     const comments = [commentFixture({ id: "c-1", staffId: "staff-1", text: "テスト" })];
     const result = commentsToWorkflowMessages(comments, staffs, {
       generateId: () => "gen-id",
@@ -112,7 +112,7 @@ describe("commentsToWorkflowMessages", () => {
     expect(typeof result[0].time).toBe("string");
   });
 
-  it("ignores null entries", () => {
+  it("null エントリは無視すること", () => {
     const result = commentsToWorkflowMessages(
       [commentFixture(), null],
       staffs,
@@ -126,17 +126,17 @@ describe("commentsToWorkflowMessages", () => {
 });
 
 describe("shouldTruncateWorkflowMessage", () => {
-  it("returns true when line count exceeds five and not expanded", () => {
+  it("展開しておらず行数が 5 行を超える場合、true を返すこと", () => {
     const text = "1\n2\n3\n4\n5\n6";
     expect(shouldTruncateWorkflowMessage(text, false)).toBe(true);
   });
 
-  it("returns true when character length exceeds 800", () => {
+  it("文字数が 800 を超える場合、true を返すこと", () => {
     const text = "x".repeat(801);
     expect(shouldTruncateWorkflowMessage(text, false)).toBe(true);
   });
 
-  it("returns false when expanded", () => {
+  it("展開状態の場合、false を返すこと", () => {
     const text = "1\n2\n3\n4\n5\n6";
     expect(shouldTruncateWorkflowMessage(text, true)).toBe(false);
   });

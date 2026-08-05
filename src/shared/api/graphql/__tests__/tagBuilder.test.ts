@@ -3,25 +3,25 @@ import { buildListAndItemTags } from "../tagBuilder";
 describe("buildListAndItemTags", () => {
   const idExtractor = (item: { id?: string | null }) => item.id ?? "unknown";
 
-  it("returns only the LIST tag when result is undefined", () => {
+  it("result が undefined の場合、LIST タグのみを返すこと", () => {
     expect(buildListAndItemTags("Staff", undefined, idExtractor)).toEqual([
       { type: "Staff", id: "LIST" },
     ]);
   });
 
-  it("returns only the LIST tag when result is null", () => {
+  it("result が null の場合、LIST タグのみを返すこと", () => {
     expect(buildListAndItemTags("Staff", null, idExtractor)).toEqual([
       { type: "Staff", id: "LIST" },
     ]);
   });
 
-  it("returns only the LIST tag when result is an empty array", () => {
+  it("result が空配列の場合、LIST タグのみを返すこと", () => {
     expect(buildListAndItemTags("Staff", [], idExtractor)).toEqual([
       { type: "Staff", id: "LIST" },
     ]);
   });
 
-  it("returns LIST tag plus one tag per item", () => {
+  it("LIST タグに加えて item ごとのタグを返すこと", () => {
     const items = [{ id: "id-1" }, { id: "id-2" }];
     expect(buildListAndItemTags("Staff", items, idExtractor)).toEqual([
       { type: "Staff", id: "LIST" },
@@ -30,7 +30,7 @@ describe("buildListAndItemTags", () => {
     ]);
   });
 
-  it("uses the fallback value from idExtractor when id is undefined", () => {
+  it("id が undefined の場合、idExtractor のフォールバック値を使うこと", () => {
     const items = [{ id: undefined }, { id: "id-2" }];
     expect(buildListAndItemTags("Staff", items, idExtractor)).toEqual([
       { type: "Staff", id: "LIST" },
@@ -39,14 +39,14 @@ describe("buildListAndItemTags", () => {
     ]);
   });
 
-  it("preserves the TagType string in every returned object", () => {
+  it("返却オブジェクトの type に TagType 文字列を保持すること", () => {
     const result = buildListAndItemTags("Workflow", [{ id: "w-1" }], idExtractor);
     result.forEach((tag) => {
       expect(tag.type).toBe("Workflow");
     });
   });
 
-  it("works with a custom idExtractor that combines multiple fields", () => {
+  it("複数フィールドを組み合わせる custom idExtractor でも動作すること", () => {
     const items = [
       { staffId: "s1", year: 2024 },
       { staffId: "s2", year: 2024 },
