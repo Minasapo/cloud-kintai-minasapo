@@ -259,7 +259,7 @@ describe("deriveWorkflowApproverInfo — additional branches", () => {
       ...overrides,
     } as StaffType);
 
-  it("returns 未設定 for SINGLE setting with no approverSingle", () => {
+  it("SINGLE 設定で approverSingle がない場合、未設定を返すこと", () => {
     const wf: NonNullable<GetWorkflowQuery["getWorkflow"]> = {
       __typename: "Workflow",
       id: "wf-y",
@@ -282,7 +282,7 @@ describe("deriveWorkflowApproverInfo — additional branches", () => {
     expect(result).toEqual({ mode: "single", items: ["未設定"] });
   });
 
-  it("returns 未設定 for MULTIPLE setting with empty list", () => {
+  it("MULTIPLE 設定でリストが空の場合、未設定を返すこと", () => {
     const wf: NonNullable<GetWorkflowQuery["getWorkflow"]> = {
       __typename: "Workflow",
       id: "wf-z",
@@ -305,7 +305,7 @@ describe("deriveWorkflowApproverInfo — additional branches", () => {
     expect(result).toEqual({ mode: "any", items: ["未設定"] });
   });
 
-  it("returns mode=any for MULTIPLE without ORDER mode", () => {
+  it("MULTIPLE で ORDER 以外の場合、mode=any を返すこと", () => {
     const wf: NonNullable<GetWorkflowQuery["getWorkflow"]> = {
       __typename: "Workflow",
       id: "wf-m",
@@ -351,7 +351,7 @@ describe("buildWorkflowApprovalTimeline — fallback mode branches", () => {
   const applicantName = "申請者";
   const applicationDate = "2024-01-01";
 
-  it("uses single-mode fallback approver", () => {
+  it("single モードのフォールバック承認者を使用すること", () => {
     const wf: NonNullable<GetWorkflowQuery["getWorkflow"]> = {
       __typename: "Workflow",
       id: "wf-single",
@@ -381,7 +381,7 @@ describe("buildWorkflowApprovalTimeline — fallback mode branches", () => {
     expect(result[1].role).toBe("承認者");
   });
 
-  it("uses order-mode fallback with multiple approvers", () => {
+  it("複数承認者の order モードフォールバックを使用すること", () => {
     const wf: NonNullable<GetWorkflowQuery["getWorkflow"]> = {
       __typename: "Workflow",
       id: "wf-order",
@@ -412,7 +412,7 @@ describe("buildWorkflowApprovalTimeline — fallback mode branches", () => {
     expect(result[2].id).toBe("s2");
   });
 
-  it("uses any-mode fallback with specific approver names", () => {
+  it("specific approver 名で any モードフォールバックを使用すること", () => {
     const wf: NonNullable<GetWorkflowQuery["getWorkflow"]> = {
       __typename: "Workflow",
       id: "wf-any",

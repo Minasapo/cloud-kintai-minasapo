@@ -15,7 +15,7 @@ import {
 } from "../workflowLabels";
 
 describe("workflowLabels", () => {
-  it("resolves clock correction labels based on reason", () => {
+  it("理由に応じて打刻修正ラベルを解決すること", () => {
     expect(resolveClockCorrectionLabel(CLOCK_CORRECTION_CHECK_IN_LABEL)).toBe(
       CLOCK_CORRECTION_CHECK_IN_LABEL,
     );
@@ -27,7 +27,7 @@ describe("workflowLabels", () => {
     );
   });
 
-  it("returns category label with clock correction handled via reason", () => {
+  it("打刻修正は reason を使ってカテゴリラベルを返すこと", () => {
     expect(
       getWorkflowCategoryLabel({
         category: WorkflowCategory.CLOCK_CORRECTION,
@@ -40,12 +40,12 @@ describe("workflowLabels", () => {
     ).toBe(CATEGORY_LABELS[WorkflowCategory.PAID_LEAVE]);
   });
 
-  it("returns '-' when category is missing", () => {
+  it("category がない場合 '-' を返すこと", () => {
     expect(getWorkflowCategoryLabel(null)).toBe("-");
     expect(getWorkflowCategoryLabel({})).toBe("-");
   });
 
-  it("includes reverse mappings for category and status labels", () => {
+  it("category と status ラベルの逆引きマッピングを含むこと", () => {
     Object.entries(CATEGORY_LABELS).forEach(([key, label]) => {
       expect(REVERSE_CATEGORY[label]).toBe(key);
     });
@@ -61,7 +61,7 @@ describe("workflowLabels", () => {
     });
   });
 
-  it("normalizes workflow category order and fills missing categories", () => {
+  it("workflow category 順序を正規化し不足カテゴリを補完すること", () => {
     const normalized = normalizeWorkflowCategoryOrder([
       {
         category: WorkflowCategory.OVERTIME,
@@ -89,7 +89,7 @@ describe("workflowLabels", () => {
     ).toBe(true);
   });
 
-  it("returns enabled categories from appConfig workflowCategoryOrder", () => {
+  it("appConfig の workflowCategoryOrder から有効カテゴリを返すこと", () => {
     const enabled = getEnabledWorkflowCategories({
       workflowCategoryOrder: {
         categories: [
@@ -117,7 +117,7 @@ describe("workflowLabels", () => {
     ).toBe(false);
   });
 
-  it("falls back to default order when appConfig is missing", () => {
+  it("appConfig がない場合、デフォルト順序へフォールバックすること", () => {
     const categories = getWorkflowCategoryOrder(undefined);
     expect(categories.length).toBeGreaterThan(0);
     expect(categories[0]?.category).toBe(WorkflowCategory.PAID_LEAVE);
