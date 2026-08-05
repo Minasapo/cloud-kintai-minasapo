@@ -33,14 +33,14 @@ const makeWorkflow = (overrides: Record<string, unknown> = {}) => ({
 
 describe("useWorkflowDetailViewModel", () => {
   describe("staffName", () => {
-    it("returns em-dash when workflow is null", () => {
+    it("workflow が null の場合、em-dash を返すこと", () => {
       const { result } = renderHook(() =>
         useWorkflowDetailViewModel({ workflow: null, staffs: [] }),
       );
       expect(result.current.staffName).toBe("—");
     });
 
-    it("returns em-dash when workflow has no staffId", () => {
+    it("workflow に staffId がない場合、em-dash を返すこと", () => {
       const { result } = renderHook(() =>
         useWorkflowDetailViewModel({
           workflow: makeWorkflow({ staffId: null }) as never,
@@ -50,7 +50,7 @@ describe("useWorkflowDetailViewModel", () => {
       expect(result.current.staffName).toBe("—");
     });
 
-    it("returns staff name when staff is found", () => {
+    it("スタッフが見つかる場合、スタッフ名を返すこと", () => {
       const { result } = renderHook(() =>
         useWorkflowDetailViewModel({
           workflow: makeWorkflow() as never,
@@ -60,7 +60,7 @@ describe("useWorkflowDetailViewModel", () => {
       expect(result.current.staffName).toBe("山田 太郎");
     });
 
-    it("returns staffId when staff is not found", () => {
+    it("スタッフが見つからない場合、staffId を返すこと", () => {
       const { result } = renderHook(() =>
         useWorkflowDetailViewModel({
           workflow: makeWorkflow() as never,
@@ -72,7 +72,7 @@ describe("useWorkflowDetailViewModel", () => {
   });
 
   describe("approverInfo — ADMINS mode", () => {
-    it("returns 管理者全員 for ADMINS setting", () => {
+    it("ADMINS 設定の場合、管理者全員を返すこと", () => {
       const { result } = renderHook(() =>
         useWorkflowDetailViewModel({
           workflow: makeWorkflow() as never,
@@ -82,7 +82,7 @@ describe("useWorkflowDetailViewModel", () => {
       expect(result.current.approvalSteps[1].name).toBe("管理者全員");
     });
 
-    it("returns 管理者全員 when approverSetting is null", () => {
+    it("approverSetting が null の場合、管理者全員を返すこと", () => {
       const { result } = renderHook(() =>
         useWorkflowDetailViewModel({
           workflow: makeWorkflow() as never,
@@ -94,7 +94,7 @@ describe("useWorkflowDetailViewModel", () => {
   });
 
   describe("approverInfo — SINGLE mode", () => {
-    it("returns approver name for SINGLE mode", () => {
+    it("SINGLE モードの場合、承認者名を返すこと", () => {
       const approver = makeStaff({
         id: "approver-1",
         cognitoUserId: "cognito-approver",
@@ -116,7 +116,7 @@ describe("useWorkflowDetailViewModel", () => {
       expect(result.current.approvalSteps[1].name).toBe("佐藤 花子");
     });
 
-    it("returns 未設定 when approverSingle is not set", () => {
+    it("approverSingle が未設定の場合、未設定を返すこと", () => {
       const { result } = renderHook(() =>
         useWorkflowDetailViewModel({
           workflow: makeWorkflow() as never,
@@ -128,7 +128,7 @@ describe("useWorkflowDetailViewModel", () => {
   });
 
   describe("approverInfo — MULTIPLE mode", () => {
-    it("returns approver names for MULTIPLE mode in ORDER", () => {
+    it("MULTIPLE の ORDER モードの場合、承認者名を順に返すこと", () => {
       const approver1 = makeStaff({
         id: "a1",
         cognitoUserId: "c1",
@@ -160,7 +160,7 @@ describe("useWorkflowDetailViewModel", () => {
       expect(steps[2].name).toBe("田中 二郎");
     });
 
-    it("returns 未設定 when approverMultiple is empty", () => {
+    it("approverMultiple が空の場合、未設定を返すこと", () => {
       const { result } = renderHook(() =>
         useWorkflowDetailViewModel({
           workflow: makeWorkflow() as never,
@@ -177,7 +177,7 @@ describe("useWorkflowDetailViewModel", () => {
   });
 
   describe("approvalSteps — with explicit approvalSteps in workflow", () => {
-    it("builds steps from approvalSteps array", () => {
+    it("workflow の approvalSteps 配列からステップを構築すること", () => {
       const workflow = makeWorkflow({
         status: WorkflowStatus.APPROVED,
         approvalSteps: [
@@ -203,7 +203,7 @@ describe("useWorkflowDetailViewModel", () => {
       expect(steps[1].comment).toBe("OK");
     });
 
-    it("shows 却下 state for rejected step", () => {
+    it("却下されたステップは却下状態で表示すること", () => {
       const workflow = makeWorkflow({
         approvalSteps: [
           {
@@ -226,7 +226,7 @@ describe("useWorkflowDetailViewModel", () => {
       expect(result.current.approvalSteps[1].name).toBe("管理者全員");
     });
 
-    it("shows スキップ state for skipped step", () => {
+    it("スキップされたステップはスキップ状態で表示すること", () => {
       const workflow = makeWorkflow({
         approvalSteps: [
           {
@@ -250,7 +250,7 @@ describe("useWorkflowDetailViewModel", () => {
   });
 
   describe("approvalSteps — APPROVED workflow without explicit steps", () => {
-    it("shows 承認済み when approved", () => {
+    it("明示的なステップがなくても APPROVED の場合は承認済みを表示すること", () => {
       const { result } = renderHook(() =>
         useWorkflowDetailViewModel({
           workflow: makeWorkflow({ status: WorkflowStatus.APPROVED }) as never,
