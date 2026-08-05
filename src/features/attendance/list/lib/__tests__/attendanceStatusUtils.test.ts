@@ -40,7 +40,7 @@ describe("attendanceStatusUtils.getStatus", () => {
     },
   ];
 
-  it("treats shift worker as evaluation target on holidays when attendance is missing", () => {
+  it("勤怠が未登録でもシフト勤務者は休日に判定対象とすること", () => {
     const status = getStatus(
       undefined,
       buildStaff("shift"),
@@ -52,7 +52,7 @@ describe("attendanceStatusUtils.getStatus", () => {
     expect(status).toBe(AttendanceStatus.Error);
   });
 
-  it("keeps non-shift worker as out of scope on holidays when attendance is missing", () => {
+  it("勤怠未登録の非シフト勤務者は休日に判定対象外のままとすること", () => {
     const status = getStatus(
       undefined,
       buildStaff("weekday"),
@@ -66,7 +66,7 @@ describe("attendanceStatusUtils.getStatus", () => {
 });
 
 describe("buildWeeks", () => {
-  it("returns arrays of 7-day weeks covering the full month", () => {
+  it("月全体をカバーする7日単位の週配列を返すこと", () => {
     const weeks = buildWeeks(dayjs("2024-01-01"));
     weeks.forEach((week) => expect(week).toHaveLength(7));
     const allDays = weeks.flat();
@@ -93,15 +93,15 @@ describe("getTotalRestHours", () => {
     ...overrides,
   });
 
-  it("returns 0 when attendance is undefined", () => {
+  it("attendance が undefined の場合、0 を返すこと", () => {
     expect(getTotalRestHours(undefined)).toBe(0);
   });
 
-  it("returns 0 when rests is null", () => {
+  it("rests が null の場合、0 を返すこと", () => {
     expect(getTotalRestHours(makeAttendance({ rests: null }))).toBe(0);
   });
 
-  it("returns 0 when endTime is missing", () => {
+  it("endTime が未設定の場合、0 を返すこと", () => {
     expect(
       getTotalRestHours(
         makeAttendance({
@@ -118,7 +118,7 @@ describe("getTotalRestHours", () => {
     ).toBe(0);
   });
 
-  it("returns correct total rest hours", () => {
+  it("休憩時間の合計を正しく返すこと", () => {
     const attendance = makeAttendance({
       rests: [
         {
@@ -146,17 +146,17 @@ describe("getNetWorkingHours", () => {
     ...overrides,
   });
 
-  it("returns 0 when attendance is undefined", () => {
+  it("attendance が undefined の場合、0 を返すこと", () => {
     expect(getNetWorkingHours(undefined)).toBe(0);
   });
 
-  it("returns 0 when startTime is missing", () => {
+  it("startTime が未設定の場合、0 を返すこと", () => {
     expect(
       getNetWorkingHours(makeAttendance({ endTime: "2024-01-01T18:00:00Z" })),
     ).toBe(0);
   });
 
-  it("returns correct net hours without rest", () => {
+  it("休憩なしの場合、正しい実働時間を返すこと", () => {
     const attendance = makeAttendance({
       startTime: "2024-01-01T09:00:00Z",
       endTime: "2024-01-01T17:00:00Z",
@@ -164,7 +164,7 @@ describe("getNetWorkingHours", () => {
     expect(getNetWorkingHours(attendance)).toBeCloseTo(8);
   });
 
-  it("subtracts rest time from work time", () => {
+  it("実働時間から休憩時間を差し引くこと", () => {
     const attendance = makeAttendance({
       startTime: "2024-01-01T09:00:00Z",
       endTime: "2024-01-01T18:00:00Z",
@@ -194,15 +194,15 @@ describe("formatTimeRange", () => {
     ...overrides,
   });
 
-  it("returns undefined when attendance is undefined", () => {
+  it("attendance が undefined の場合、undefined を返すこと", () => {
     expect(formatTimeRange(undefined)).toBeUndefined();
   });
 
-  it("returns undefined when both startTime and endTime are null", () => {
+  it("startTime と endTime が両方 null の場合、undefined を返すこと", () => {
     expect(formatTimeRange(makeAttendance({}))).toBeUndefined();
   });
 
-  it("formats time range as HH:mm - HH:mm", () => {
+  it("時刻範囲を HH:mm - HH:mm 形式で返すこと", () => {
     const attendance = makeAttendance({
       startTime: "2024-01-01T00:00:00Z",
       endTime: "2024-01-01T09:00:00Z",
@@ -224,12 +224,12 @@ describe("getHolidayNames", () => {
     },
   ];
 
-  it("returns holiday name for a holiday date", () => {
+  it("休日の日付では休日名を返すこと", () => {
     const result = getHolidayNames(dayjs("2024-01-01"), holidayCalendars, []);
     expect(result.holidayName).toBe("元日");
   });
 
-  it("returns undefined names for non-holiday date", () => {
+  it("非休日の日付では休日名を undefined で返すこと", () => {
     const result = getHolidayNames(dayjs("2024-01-02"), holidayCalendars, []);
     expect(result.holidayName).toBeUndefined();
     expect(result.companyHolidayName).toBeUndefined();
@@ -261,17 +261,17 @@ describe("isHolidayLike", () => {
     updatedAt: "",
   });
 
-  it("returns true for weekday worker on Sunday", () => {
+  it("平日勤務者の日曜日は true を返すこと", () => {
     const sunday = dayjs("2024-01-07"); // Sunday
     expect(isHolidayLike(sunday, makeStaff("weekday"), [], [])).toBe(true);
   });
 
-  it("returns false for shift worker on Sunday (no company holiday)", () => {
+  it("会社休日でない日曜日のシフト勤務者は false を返すこと", () => {
     const sunday = dayjs("2024-01-07");
     expect(isHolidayLike(sunday, makeStaff("shift"), [], [])).toBe(false);
   });
 
-  it("returns true for both worker types on a national holiday", () => {
+  it("祝日は勤務種別に関係なく true を返すこと", () => {
     const holiday = dayjs("2024-01-01");
     expect(
       isHolidayLike(holiday, makeStaff("shift"), holidayCalendars, []),

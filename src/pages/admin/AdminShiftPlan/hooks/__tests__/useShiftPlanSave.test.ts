@@ -71,7 +71,7 @@ describe("useShiftPlanSave", () => {
     (useAppDispatchV2 as jest.Mock).mockReturnValue(mockDispatch);
   });
 
-  it("returns initial state with isSaving=false and empty yearRecordIds", () => {
+  it("初期状態で isSaving=false かつ yearRecordIds が空であること", () => {
     const { result } = renderHook(() => useShiftPlanSave(defaultParams));
     expect(result.current.isSaving).toBe(false);
     expect(result.current.yearRecordIds).toEqual({});
@@ -79,7 +79,7 @@ describe("useShiftPlanSave", () => {
   });
 
   describe("performSave – create path (no existing record)", () => {
-    it("returns true and updates yearRecordIds on success", async () => {
+    it("作成保存に成功した場合、true を返して yearRecordIds を更新すること", async () => {
       (graphqlClient.graphql as jest.Mock).mockResolvedValue(makeCreateResponse());
 
       const { result } = renderHook(() => useShiftPlanSave(defaultParams));
@@ -96,7 +96,7 @@ describe("useShiftPlanSave", () => {
       });
     });
 
-    it("sets lastAutoSaveTime on success", async () => {
+    it("作成保存に成功した場合、lastAutoSaveTime を設定すること", async () => {
       (graphqlClient.graphql as jest.Mock).mockResolvedValue(makeCreateResponse());
 
       const { result } = renderHook(() => useShiftPlanSave(defaultParams));
@@ -107,7 +107,7 @@ describe("useShiftPlanSave", () => {
       expect(result.current.lastAutoSaveTime).toMatch(/^\d{2}:\d{2}:\d{2}$/);
     });
 
-    it("calls setSavedYearlyPlans on success", async () => {
+    it("作成保存に成功した場合、setSavedYearlyPlans を呼び出すこと", async () => {
       (graphqlClient.graphql as jest.Mock).mockResolvedValue(makeCreateResponse());
 
       const { result } = renderHook(() => useShiftPlanSave(defaultParams));
@@ -118,7 +118,7 @@ describe("useShiftPlanSave", () => {
       expect(mockSetSavedYearlyPlans).toHaveBeenCalled();
     });
 
-    it("dispatches success notification by default", async () => {
+    it("既定では作成保存成功時に成功通知を dispatch すること", async () => {
       (graphqlClient.graphql as jest.Mock).mockResolvedValue(makeCreateResponse());
 
       const { result } = renderHook(() => useShiftPlanSave(defaultParams));
@@ -132,7 +132,7 @@ describe("useShiftPlanSave", () => {
       expect(mockDispatch).toHaveBeenCalled();
     });
 
-    it("suppresses notification when showNotification=false on success", async () => {
+    it("showNotification=false の成功時は通知を抑制すること", async () => {
       (graphqlClient.graphql as jest.Mock).mockResolvedValue(makeCreateResponse());
 
       const { result } = renderHook(() => useShiftPlanSave(defaultParams));
@@ -143,7 +143,7 @@ describe("useShiftPlanSave", () => {
       expect(mockDispatch).not.toHaveBeenCalled();
     });
 
-    it("returns false and dispatches error notification on graphql rejection", async () => {
+    it("GraphQL が reject した場合、false を返してエラー通知を dispatch すること", async () => {
       (graphqlClient.graphql as jest.Mock).mockRejectedValue(
         new Error("Network error"),
       );
@@ -160,7 +160,7 @@ describe("useShiftPlanSave", () => {
       );
     });
 
-    it("returns false when createShiftPlanYear returns no id", async () => {
+    it("createShiftPlanYear が id を返さない場合、false を返すこと", async () => {
       (graphqlClient.graphql as jest.Mock).mockResolvedValue({
         data: { createShiftPlanYear: { version: 1 } },
       });
@@ -174,7 +174,7 @@ describe("useShiftPlanSave", () => {
       expect(success).toBe(false);
     });
 
-    it("returns false when response contains GraphQL errors", async () => {
+    it("レスポンスに GraphQL errors が含まれる場合、false を返すこと", async () => {
       (graphqlClient.graphql as jest.Mock).mockResolvedValue({
         data: null,
         errors: [{ message: "Some GraphQL error" }],
@@ -189,7 +189,7 @@ describe("useShiftPlanSave", () => {
       expect(success).toBe(false);
     });
 
-    it("suppresses notification when showNotification=false on failure", async () => {
+    it("showNotification=false の失敗時は通知を抑制すること", async () => {
       (graphqlClient.graphql as jest.Mock).mockRejectedValue(new Error("err"));
 
       const { result } = renderHook(() => useShiftPlanSave(defaultParams));
@@ -208,7 +208,7 @@ describe("useShiftPlanSave", () => {
       updatedAt: "2024-01-01T00:00:00Z",
     };
 
-    it("returns true and updates yearRecordIds on success", async () => {
+    it("更新保存に成功した場合、true を返して yearRecordIds を更新すること", async () => {
       (graphqlClient.graphql as jest.Mock).mockResolvedValue(makeUpdateResponse());
 
       const { result } = renderHook(() => useShiftPlanSave(defaultParams));
@@ -227,7 +227,7 @@ describe("useShiftPlanSave", () => {
       });
     });
 
-    it("returns false when updateShiftPlanYear returns GraphQL errors", async () => {
+    it("updateShiftPlanYear が GraphQL errors を返す場合、false を返すこと", async () => {
       (graphqlClient.graphql as jest.Mock).mockResolvedValue({
         data: { updateShiftPlanYear: null },
         errors: [{ message: "ConditionalCheckFailed" }],
@@ -244,7 +244,7 @@ describe("useShiftPlanSave", () => {
       expect(success).toBe(false);
     });
 
-    it("returns false when updateShiftPlanYear returns no id", async () => {
+    it("updateShiftPlanYear が id を返さない場合、false を返すこと", async () => {
       (graphqlClient.graphql as jest.Mock).mockResolvedValue({
         data: { updateShiftPlanYear: { version: 2 } },
       });
@@ -262,7 +262,7 @@ describe("useShiftPlanSave", () => {
   });
 
   describe("handleSaveAll", () => {
-    it("calls performSave after validation passes and resets isSaving", async () => {
+    it("バリデーション通過後に performSave を実行し、isSaving を false に戻すこと", async () => {
       (graphqlClient.graphql as jest.Mock).mockResolvedValue(makeCreateResponse());
 
       const { result } = renderHook(() => useShiftPlanSave(defaultParams));
@@ -274,7 +274,7 @@ describe("useShiftPlanSave", () => {
       expect(graphqlClient.graphql).toHaveBeenCalled();
     });
 
-    it("dispatches error and aborts when enabled row has empty editStart", async () => {
+    it("有効行の editStart が空の場合、エラー通知して中断すること", async () => {
       const rowsWithMissing = defaultRows.map((r) =>
         r.month === 1 ? { ...r, enabled: true, editStart: "" } : r,
       );
@@ -294,7 +294,7 @@ describe("useShiftPlanSave", () => {
       expect(graphqlClient.graphql).not.toHaveBeenCalled();
     });
 
-    it("dispatches error and aborts when enabled row has empty editEnd", async () => {
+    it("有効行の editEnd が空の場合、エラー通知して中断すること", async () => {
       const rowsWithMissing = defaultRows.map((r) =>
         r.month === 1 ? { ...r, enabled: true, editEnd: "" } : r,
       );
@@ -314,7 +314,7 @@ describe("useShiftPlanSave", () => {
       expect(graphqlClient.graphql).not.toHaveBeenCalled();
     });
 
-    it("dispatches error and aborts when editStart is after editEnd", async () => {
+    it("editStart が editEnd より後の場合、エラー通知して中断すること", async () => {
       const rowsWithBadDates = defaultRows.map((r) =>
         r.month === 1
           ? { ...r, enabled: true, editStart: "2024-01-31", editEnd: "2024-01-01" }
@@ -336,7 +336,7 @@ describe("useShiftPlanSave", () => {
       expect(graphqlClient.graphql).not.toHaveBeenCalled();
     });
 
-    it("skips disabled rows during validation", async () => {
+    it("バリデーション時に無効行はスキップすること", async () => {
       const rowsWithDisabled = defaultRows.map((r) =>
         r.month === 1
           ? { ...r, enabled: false, editStart: "", editEnd: "" }
@@ -355,7 +355,7 @@ describe("useShiftPlanSave", () => {
   });
 
   describe("setYearRecordIds / setIsSaving", () => {
-    it("setYearRecordIds updates yearRecordIds state", () => {
+    it("setYearRecordIds で yearRecordIds 状態を更新すること", () => {
       const { result } = renderHook(() => useShiftPlanSave(defaultParams));
       act(() => {
         result.current.setYearRecordIds({
@@ -365,7 +365,7 @@ describe("useShiftPlanSave", () => {
       expect(result.current.yearRecordIds[2024].id).toBe("test-id");
     });
 
-    it("setIsSaving updates isSaving state", () => {
+    it("setIsSaving で isSaving 状態を更新すること", () => {
       const { result } = renderHook(() => useShiftPlanSave(defaultParams));
       act(() => {
         result.current.setIsSaving(true);
