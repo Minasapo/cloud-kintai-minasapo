@@ -28,7 +28,7 @@ const TestComponent: React.FC = () => {
 
 describe("SplitViewProvider", () => {
   describe("initialization", () => {
-    it("should initialize with default single mode", () => {
+    it("初期状態で single モードで初期化されること", () => {
       render(
         <SplitViewProvider>
           <TestComponent />
@@ -42,7 +42,7 @@ describe("SplitViewProvider", () => {
   });
 
   describe("setMode", () => {
-    it("should update mode to split", async () => {
+    it("setMode 実行で mode が split に更新されること", async () => {
       const user = userEvent.setup();
       render(
         <SplitViewProvider>
@@ -60,7 +60,7 @@ describe("SplitViewProvider", () => {
   });
 
   describe("enableTripleMode", () => {
-    it("should update mode to triple", async () => {
+    it("enableTripleMode 実行で mode が triple に更新されること", async () => {
       const user = userEvent.setup();
       render(
         <SplitViewProvider>
@@ -78,7 +78,7 @@ describe("SplitViewProvider", () => {
   });
 
   describe("setLeftPanel", () => {
-    it("should set left panel", async () => {
+    it("setLeftPanel 実行で leftPanel が設定されること", async () => {
       const user = userEvent.setup();
       render(
         <SplitViewProvider>
@@ -96,7 +96,7 @@ describe("SplitViewProvider", () => {
   });
 
   describe("setRightPanel", () => {
-    it("should set right panel", async () => {
+    it("setRightPanel 実行で rightPanel が設定されること", async () => {
       const user = userEvent.setup();
       render(
         <SplitViewProvider>
@@ -114,7 +114,7 @@ describe("SplitViewProvider", () => {
   });
 
   describe("error handling", () => {
-    it("should throw error when useSplitView is used outside provider", () => {
+    it("useSplitView を Provider 外で使うとエラーを throw すること", () => {
       // Suppress console.error for this test
       const spy = jest.spyOn(console, "error").mockImplementation();
 
