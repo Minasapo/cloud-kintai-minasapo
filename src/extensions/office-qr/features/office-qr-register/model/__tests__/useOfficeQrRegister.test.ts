@@ -130,7 +130,7 @@ describe("useOfficeQrRegister", () => {
   });
 
   describe("token validation", () => {
-    it("sets isValidToken true when token is valid", async () => {
+    it("token が有効な場合、isValidToken を true にすること", async () => {
       mockValidateToken.mockResolvedValue(true);
       const { result } = renderHook(() => useOfficeQrRegister(), {
         wrapper: buildWrapper(),
@@ -145,7 +145,7 @@ describe("useOfficeQrRegister", () => {
       });
     });
 
-    it("sets errorMessage when token is invalid", async () => {
+    it("token が無効な場合、errorMessage を設定すること", async () => {
       mockValidateToken.mockResolvedValue(false);
       const { result } = renderHook(() => useOfficeQrRegister(), {
         wrapper: buildWrapper(),
@@ -158,7 +158,7 @@ describe("useOfficeQrRegister", () => {
   });
 
   describe("qrMode derivation", () => {
-    it("returns clock_in mode when mode param is clock_in", () => {
+    it("mode パラメータが clock_in の場合、clock_in モードを返すこと", () => {
       (useSearchParams as jest.Mock).mockReturnValue([
         new URLSearchParams("mode=clock_in&timestamp=t&token=tok"),
       ]);
@@ -169,7 +169,7 @@ describe("useOfficeQrRegister", () => {
       expect(result.current.mode).toBe("clock_in");
     });
 
-    it("returns clock_out mode when mode param is clock_out", () => {
+    it("mode パラメータが clock_out の場合、clock_out モードを返すこと", () => {
       (useSearchParams as jest.Mock).mockReturnValue([
         new URLSearchParams("mode=clock_out&timestamp=t&token=tok"),
       ]);
@@ -180,7 +180,7 @@ describe("useOfficeQrRegister", () => {
       expect(result.current.mode).toBe("clock_out");
     });
 
-    it("returns null mode for unknown mode param and shows error", async () => {
+    it("未知の mode パラメータでは mode を null にしエラーを表示すること", async () => {
       mockValidateToken.mockResolvedValue(true);
       (useSearchParams as jest.Mock).mockReturnValue([
         new URLSearchParams("mode=unknown&timestamp=t&token=tok"),
@@ -197,7 +197,7 @@ describe("useOfficeQrRegister", () => {
   });
 
   describe("attendance fetching", () => {
-    it("fetches attendance when officeMode enabled and user authenticated", async () => {
+    it("officeMode 有効かつ認証済みユーザーの場合、勤怠を取得すること", async () => {
       const { result: _result } = renderHook(() => useOfficeQrRegister(), {
         wrapper: buildWrapper({ getOfficeMode: () => true }),
       });
@@ -210,7 +210,7 @@ describe("useOfficeQrRegister", () => {
       });
     });
 
-    it("does not fetch attendance when officeMode is disabled", async () => {
+    it("officeMode が無効な場合、勤怠を取得しないこと", async () => {
       const { result: _result } = renderHook(() => useOfficeQrRegister(), {
         wrapper: buildWrapper({ getOfficeMode: () => false }),
       });
@@ -220,7 +220,7 @@ describe("useOfficeQrRegister", () => {
       });
     });
 
-    it("does not fetch attendance when user is not authenticated", async () => {
+    it("未認証ユーザーの場合、勤怠を取得しないこと", async () => {
       const { result: _result } = renderHook(() => useOfficeQrRegister(), {
         wrapper: buildWrapper({}, { cognitoUser: null }),
       });
@@ -230,7 +230,7 @@ describe("useOfficeQrRegister", () => {
       });
     });
 
-    it("dispatches error notification when attendance fetch fails", async () => {
+    it("勤怠取得に失敗した場合、エラー通知を dispatch すること", async () => {
       mockTriggerUnwrap.mockRejectedValue(new Error("Fetch error"));
       const { result: _result } = renderHook(() => useOfficeQrRegister(), {
         wrapper: buildWrapper({ getOfficeMode: () => true }),
@@ -248,7 +248,7 @@ describe("useOfficeQrRegister", () => {
   });
 
   describe("handleClockIn", () => {
-    it("calls clockInAction and dispatches success notification", async () => {
+    it("clockInAction を呼び出し成功通知を dispatch すること", async () => {
       const updatedAttendance = makeAttendance();
       mockClockIn.mockResolvedValue(updatedAttendance);
 
@@ -268,7 +268,7 @@ describe("useOfficeQrRegister", () => {
       );
     });
 
-    it("dispatches error notification when clockInAction fails", async () => {
+    it("clockInAction が失敗した場合、エラー通知を dispatch すること", async () => {
       mockClockIn.mockRejectedValue(new Error("Clock in failed"));
 
       const { result } = renderHook(() => useOfficeQrRegister(), {
@@ -284,7 +284,7 @@ describe("useOfficeQrRegister", () => {
       );
     });
 
-    it("does nothing when user is not authenticated", async () => {
+    it("未認証ユーザーの場合、何もしないこと", async () => {
       const { result } = renderHook(() => useOfficeQrRegister(), {
         wrapper: buildWrapper({}, { cognitoUser: null }),
       });
@@ -298,7 +298,7 @@ describe("useOfficeQrRegister", () => {
   });
 
   describe("handleClockOut", () => {
-    it("calls clockOutAction and dispatches success notification", async () => {
+    it("clockOutAction を呼び出し成功通知を dispatch すること", async () => {
       const updatedAttendance = makeAttendance();
       mockClockOut.mockResolvedValue(updatedAttendance);
 

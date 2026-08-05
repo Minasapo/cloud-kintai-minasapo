@@ -12,7 +12,7 @@ describe("getWorkStatus", () => {
     updatedAt: "2024-01-01T00:00:00.000Z",
   };
 
-  it("returns BEFORE_WORK when attendance is null or undefined", () => {
+  it("attendance が null または undefined の場合、BEFORE_WORK を返すこと", () => {
     expect(getWorkStatus(null)).toEqual({
       code: WorkStatusCodes.BEFORE_WORK,
       text: WorkStatusTexts.BEFORE_WORK,
@@ -23,7 +23,7 @@ describe("getWorkStatus", () => {
     });
   });
 
-  it("returns LEFT_WORK when startTime and endTime are both set", () => {
+  it("startTime と endTime が両方設定されている場合、LEFT_WORK を返すこと", () => {
     const attendance = {
       ...baseAttendance,
       startTime: "09:00",
@@ -36,7 +36,7 @@ describe("getWorkStatus", () => {
     });
   });
 
-  it("returns RESTING when last rest has startTime but no endTime", () => {
+  it("最後の rest に startTime があり endTime がない場合、RESTING を返すこと", () => {
     const attendance = {
       ...baseAttendance,
       startTime: "09:00",
@@ -52,7 +52,7 @@ describe("getWorkStatus", () => {
     });
   });
 
-  it("returns WORKING when startTime is set but endTime is not", () => {
+  it("startTime があり endTime がない場合、WORKING を返すこと", () => {
     const attendance = {
       ...baseAttendance,
       startTime: "09:00",
@@ -65,7 +65,7 @@ describe("getWorkStatus", () => {
     });
   });
 
-  it("returns BEFORE_WORK when attendance is present but no startTime", () => {
+  it("attendance が存在しても startTime がない場合、BEFORE_WORK を返すこと", () => {
     const attendance = {
       ...baseAttendance,
       startTime: undefined,
@@ -77,7 +77,7 @@ describe("getWorkStatus", () => {
     });
   });
 
-  it("filters null rests when checking rest status", () => {
+  it("rest 状態判定時に null rests を除外すること", () => {
     const attendance = {
       ...baseAttendance,
       startTime: "09:00",
