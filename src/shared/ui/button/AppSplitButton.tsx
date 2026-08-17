@@ -30,6 +30,8 @@ type AppSplitButtonProps = {
   disabled?: boolean;
   className?: string;
   buttonGroupSx?: SxProps<Theme>;
+  primaryButtonTestId?: string;
+  toggleButtonTestId?: string;
 };
 
 const variantMap: Record<ButtonVariant, "contained" | "outlined" | "text"> = {
@@ -65,6 +67,8 @@ export default function AppSplitButton({
   disabled = false,
   className,
   buttonGroupSx,
+  primaryButtonTestId,
+  toggleButtonTestId,
 }: AppSplitButtonProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [open, setOpen] = useState(false);
@@ -95,6 +99,7 @@ export default function AppSplitButton({
           title={selected.title}
           disabled={disabled || selected.disabled}
           sx={{ whiteSpace: "nowrap", flex: 1 }}
+          data-testid={primaryButtonTestId}
         >
           {selected.label}
         </Button>
@@ -109,6 +114,7 @@ export default function AppSplitButton({
             setOpen((prev) => !prev);
           }}
           disabled={disabled}
+          data-testid={toggleButtonTestId}
         >
           <KeyboardArrowDownIcon fontSize="small" />
         </Button>

@@ -19,7 +19,7 @@ describe("graphqlBaseQuery", () => {
   });
 
   describe("success cases", () => {
-    it("returns data on successful query", async () => {
+    it("クエリが成功した場合、data を返すこと", async () => {
       mockGraphql.mockResolvedValue({ data: { user: { id: "1" } } });
       const fn = graphqlBaseQuery();
       const result = await fn({ document: "query { user { id } }" }, mockApi, mockExtraOptions);
@@ -27,7 +27,7 @@ describe("graphqlBaseQuery", () => {
       expect(result).toEqual({ data: { user: { id: "1" } } });
     });
 
-    it("returns null data when result.data is undefined", async () => {
+    it("result.data が undefined の場合、data に null を返すこと", async () => {
       mockGraphql.mockResolvedValue({ data: undefined });
       const fn = graphqlBaseQuery();
       const result = await fn({ document: "query { noop }" }, mockApi, mockExtraOptions);
@@ -35,7 +35,7 @@ describe("graphqlBaseQuery", () => {
       expect(result).toEqual({ data: null });
     });
 
-    it("passes variables to graphqlClient", async () => {
+    it("variables を graphqlClient に渡すこと", async () => {
       mockGraphql.mockResolvedValue({ data: {} });
       const fn = graphqlBaseQuery();
       await fn({ document: "query ($id: ID!) { item(id: $id) }", variables: { id: "123" } }, mockApi, mockExtraOptions);
@@ -45,7 +45,7 @@ describe("graphqlBaseQuery", () => {
       );
     });
 
-    it("uses defaultAuthMode when authMode not specified", async () => {
+    it("authMode 未指定の場合、defaultAuthMode を使用すること", async () => {
       mockGraphql.mockResolvedValue({ data: {} });
       const fn = graphqlBaseQuery({ defaultAuthMode: "iam" });
       await fn({ document: "query { noop }" }, mockApi, mockExtraOptions);
@@ -55,7 +55,7 @@ describe("graphqlBaseQuery", () => {
       );
     });
 
-    it("overrides authMode per request", async () => {
+    it("リクエスト単位の authMode 指定が defaultAuthMode を上書きすること", async () => {
       mockGraphql.mockResolvedValue({ data: {} });
       const fn = graphqlBaseQuery({ defaultAuthMode: "userPool" });
       await fn({ document: "query { noop }", authMode: "apiKey" }, mockApi, mockExtraOptions);
@@ -65,7 +65,7 @@ describe("graphqlBaseQuery", () => {
       );
     });
 
-    it("defaults to userPool authMode when no defaultAuthMode provided", async () => {
+    it("defaultAuthMode 未設定の場合、userPool を既定値として使用すること", async () => {
       mockGraphql.mockResolvedValue({ data: {} });
       const fn = graphqlBaseQuery();
       await fn({ document: "query { noop }" }, mockApi, mockExtraOptions);
@@ -77,7 +77,7 @@ describe("graphqlBaseQuery", () => {
   });
 
   describe("GraphQL errors in response", () => {
-    it("returns error when result.errors is present", async () => {
+    it("result.errors が存在する場合、error を返すこと", async () => {
       mockGraphql.mockResolvedValue({
         data: null,
         errors: [{ message: "Field not found" }],
@@ -95,7 +95,7 @@ describe("graphqlBaseQuery", () => {
       });
     });
 
-    it("returns error with path when error has path", async () => {
+    it("エラーに path がある場合、details に path を含めること", async () => {
       mockGraphql.mockResolvedValue({
         data: null,
         errors: [{ message: "Not found", path: ["user", "id"] }],
@@ -108,7 +108,7 @@ describe("graphqlBaseQuery", () => {
       expect((result.error.details as Array<Record<string, unknown>>)[0].path).toEqual(["user", "id"]);
     });
 
-    it("returns error with errorType when present", async () => {
+    it("errorType がある場合、details に errorType を含めること", async () => {
       mockGraphql.mockResolvedValue({
         data: null,
         errors: [{ message: "Unauthorized", errorType: "Unauthorized" }],
@@ -121,7 +121,7 @@ describe("graphqlBaseQuery", () => {
       expect((result.error.details as Array<Record<string, unknown>>)[0].errorType).toBe("Unauthorized");
     });
 
-    it("does not return error when errors array is empty", async () => {
+    it("errors 配列が空の場合、error を返さないこと", async () => {
       mockGraphql.mockResolvedValue({ data: { user: { id: "1" } }, errors: [] });
       const fn = graphqlBaseQuery();
       const result = await fn({ document: "query { user { id } }" }, mockApi, mockExtraOptions);
@@ -131,7 +131,7 @@ describe("graphqlBaseQuery", () => {
   });
 
   describe("thrown error handling", () => {
-    it("returns error with message when Error is thrown", async () => {
+    it("Error が throw された場合、message を含む error を返すこと", async () => {
       mockGraphql.mockRejectedValue(new Error("Network error"));
       const fn = graphqlBaseQuery();
       const result = await fn({ document: "query { noop }" }, mockApi, mockExtraOptions);
@@ -144,7 +144,7 @@ describe("graphqlBaseQuery", () => {
       });
     });
 
-    it("includes error name in details", async () => {
+    it("Error 名を details に含めること", async () => {
       mockGraphql.mockRejectedValue(new TypeError("Type mismatch"));
       const fn = graphqlBaseQuery();
       const result = await fn({ document: "query { noop }" }, mockApi, mockExtraOptions) as {
@@ -154,7 +154,7 @@ describe("graphqlBaseQuery", () => {
       expect(result.error.details.name).toBe("TypeError");
     });
 
-    it("includes statusCode in details when present", async () => {
+    it("statusCode が存在する場合、details に statusCode を含めること", async () => {
       const err = Object.assign(new Error("Forbidden"), { statusCode: 403 });
       mockGraphql.mockRejectedValue(err);
       const fn = graphqlBaseQuery();
@@ -165,7 +165,7 @@ describe("graphqlBaseQuery", () => {
       expect(result.error.details.statusCode).toBe(403);
     });
 
-    it("returns error for non-Error thrown values", async () => {
+    it("Error 以外の値が throw された場合、error を返すこと", async () => {
       mockGraphql.mockRejectedValue({ code: "CUSTOM_ERROR", value: 42 });
       const fn = graphqlBaseQuery();
       const result = await fn({ document: "query { noop }" }, mockApi, mockExtraOptions) as {
@@ -176,7 +176,7 @@ describe("graphqlBaseQuery", () => {
       expect(result.error.details).toBeDefined();
     });
 
-    it("returns fallback message for thrown string", async () => {
+    it("文字列が throw された場合、フォールバックメッセージを返すこと", async () => {
       mockGraphql.mockRejectedValue("string error");
       const fn = graphqlBaseQuery();
       const result = await fn({ document: "query { noop }" }, mockApi, mockExtraOptions) as {
@@ -188,7 +188,7 @@ describe("graphqlBaseQuery", () => {
   });
 
   describe("serializeValue edge cases via error details", () => {
-    it("serializes nested objects in GraphQL error extensions", async () => {
+    it("GraphQL error extensions のネストオブジェクトをシリアライズすること", async () => {
       mockGraphql.mockResolvedValue({
         data: null,
         errors: [

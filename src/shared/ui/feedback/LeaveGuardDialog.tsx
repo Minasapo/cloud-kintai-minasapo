@@ -39,6 +39,7 @@ export default function LeaveGuardDialog({
       title="変更内容の確認"
       description={getDescription({ isBusy, target })}
       maxWidth="xs"
+      sx={target === "dialog" ? { zIndex: 1500 } : undefined}
       actions={
         <>
           <AppButton variant="outline" tone="neutral" onClick={onCancel}>

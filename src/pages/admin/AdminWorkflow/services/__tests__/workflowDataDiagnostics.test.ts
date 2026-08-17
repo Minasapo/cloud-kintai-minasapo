@@ -8,7 +8,7 @@ import {
 
 describe("workflowDataDiagnostics", () => {
   describe("diagnoseWorkflowData", () => {
-    it("should detect missing_both when approvalSteps and assignedApproverStaffIds are empty", () => {
+    it("approvalSteps と assignedApproverStaffIds が空の場合、missing_both を検出すること", () => {
       const workflow = createMockWorkflow({
         id: "wf-1",
         status: WorkflowStatus.SUBMITTED,
@@ -22,7 +22,7 @@ describe("workflowDataDiagnostics", () => {
       expect(result.reason).toContain("承認者情報が設定されていません");
     });
 
-    it("should detect missing_approval_steps when approvalSteps is empty but assignedApproverStaffIds is not", () => {
+    it("approvalSteps が空で assignedApproverStaffIds が空でない場合、missing_approval_steps を検出すること", () => {
       const workflow = createMockWorkflow({
         id: "wf-2",
         status: WorkflowStatus.SUBMITTED,
@@ -36,7 +36,7 @@ describe("workflowDataDiagnostics", () => {
       expect(result.reason).toContain("承認ステップの構築に問題があります");
     });
 
-    it("should detect all_steps_decided when all steps have decisions and final state is inconsistent", () => {
+    it("全ステップに決定があり最終状態が不整合な場合、all_steps_decided を検出すること", () => {
       const workflow = createMockWorkflow({
         id: "wf-3",
         status: WorkflowStatus.PENDING,
@@ -59,7 +59,7 @@ describe("workflowDataDiagnostics", () => {
       expect(result.reason).toContain("不整合");
     });
 
-    it("should detect none when all steps decided and final state is already consistent", () => {
+    it("全ステップの決定済みかつ最終状態が整合している場合、none を検出すること", () => {
       const workflow = createMockWorkflow({
         id: "wf-3-2",
         status: WorkflowStatus.APPROVED,
@@ -86,7 +86,7 @@ describe("workflowDataDiagnostics", () => {
       expect(result.reason).toBe("");
     });
 
-    it("should detect none when workflow data is valid", () => {
+    it("ワークフローデータが有効な場合、none を検出すること", () => {
       const workflow = createMockWorkflow({
         id: "wf-4",
         status: WorkflowStatus.SUBMITTED,
@@ -111,7 +111,7 @@ describe("workflowDataDiagnostics", () => {
   });
 
   describe("shouldAutoFallbackToAdmins", () => {
-    it("should return true for missing_both", () => {
+    it("missing_both の場合、true を返すこと", () => {
       const workflow = createMockWorkflow({
         id: "wf-5",
         approvalSteps: [],
@@ -121,7 +121,7 @@ describe("workflowDataDiagnostics", () => {
       expect(shouldAutoFallbackToAdmins(workflow)).toBe(true);
     });
 
-    it("should return true for missing_approval_steps", () => {
+    it("missing_approval_steps の場合、true を返すこと", () => {
       const workflow = createMockWorkflow({
         id: "wf-6",
         approvalSteps: [],
@@ -131,7 +131,7 @@ describe("workflowDataDiagnostics", () => {
       expect(shouldAutoFallbackToAdmins(workflow)).toBe(true);
     });
 
-    it("should return false for valid approval steps", () => {
+    it("有効な承認ステップがある場合、false を返すこと", () => {
       const workflow = createMockWorkflow({
         id: "wf-7",
         approvalSteps: [

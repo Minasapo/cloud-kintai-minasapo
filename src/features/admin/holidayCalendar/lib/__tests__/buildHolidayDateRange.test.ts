@@ -8,13 +8,13 @@ import {
 
 describe("buildHolidayDateRange", () => {
   describe("single-day range (no endDate)", () => {
-    it("returns one ISO string for a valid single date", () => {
+    it("有効な単日の日付に対して ISO 文字列を1件返すこと", () => {
       const result = buildHolidayDateRange("2024-01-01");
       expect(result).toHaveLength(1);
       expect(dayjs(result[0]).format("YYYY-MM-DD")).toBe("2024-01-01");
     });
 
-    it("returns ISO string when endDate is null", () => {
+    it("endDate が null の場合、ISO 文字列を返すこと", () => {
       const result = buildHolidayDateRange("2024-06-15", null);
       expect(result).toHaveLength(1);
       expect(dayjs(result[0]).format("YYYY-MM-DD")).toBe("2024-06-15");
@@ -22,18 +22,18 @@ describe("buildHolidayDateRange", () => {
   });
 
   describe("multi-day range", () => {
-    it("returns correct number of days for a range", () => {
+    it("日付範囲に対して正しい日数分を返すこと", () => {
       const result = buildHolidayDateRange("2024-01-01", "2024-01-07");
       expect(result).toHaveLength(7);
     });
 
-    it("first and last entries correspond to start and end dates", () => {
+    it("先頭と末尾の要素が開始日と終了日に対応すること", () => {
       const result = buildHolidayDateRange("2024-03-01", "2024-03-03");
       expect(dayjs(result[0]).format("YYYY-MM-DD")).toBe("2024-03-01");
       expect(dayjs(result[2]).format("YYYY-MM-DD")).toBe("2024-03-03");
     });
 
-    it("returns consecutive dates in order", () => {
+    it("連続した日付を順序通りに返すこと", () => {
       const result = buildHolidayDateRange("2024-01-01", "2024-01-03");
       expect(dayjs(result[0]).format("YYYY-MM-DD")).toBe("2024-01-01");
       expect(dayjs(result[1]).format("YYYY-MM-DD")).toBe("2024-01-02");
@@ -42,7 +42,7 @@ describe("buildHolidayDateRange", () => {
   });
 
   describe("error cases", () => {
-    it("throws INVALID_START_DATE for empty startDate", () => {
+    it("startDate が空の場合、INVALID_START_DATE を throw すること", () => {
       expect(() => buildHolidayDateRange("")).toThrow(HolidayDateRangeError);
       try {
         buildHolidayDateRange("");
@@ -51,7 +51,7 @@ describe("buildHolidayDateRange", () => {
       }
     });
 
-    it("throws END_BEFORE_START when end is before start", () => {
+    it("end が start より前の場合、END_BEFORE_START を throw すること", () => {
       expect(() => buildHolidayDateRange("2024-01-10", "2024-01-01")).toThrow(
         HolidayDateRangeError
       );
@@ -62,7 +62,7 @@ describe("buildHolidayDateRange", () => {
       }
     });
 
-    it("throws RANGE_TOO_LARGE when range exceeds MAX_HOLIDAY_RANGE_DAYS", () => {
+    it("範囲が MAX_HOLIDAY_RANGE_DAYS を超える場合、RANGE_TOO_LARGE を throw すること", () => {
       const start = "2020-01-01";
       const end = "2022-01-01"; // ~730 days
       expect(() => buildHolidayDateRange(start, end)).toThrow(
@@ -75,7 +75,7 @@ describe("buildHolidayDateRange", () => {
       }
     });
 
-    it("respects custom maxRangeDays option", () => {
+    it("custom maxRangeDays オプションを尊重すること", () => {
       expect(() =>
         buildHolidayDateRange("2024-01-01", "2024-01-10", { maxRangeDays: 5 })
       ).toThrow(HolidayDateRangeError);
@@ -83,12 +83,12 @@ describe("buildHolidayDateRange", () => {
   });
 
   describe("boundary cases", () => {
-    it("same-day start and end returns one result", () => {
+    it("開始日と終了日が同日の場合、1件返すこと", () => {
       const result = buildHolidayDateRange("2024-05-05", "2024-05-05");
       expect(result).toHaveLength(1);
     });
 
-    it("succeeds at exactly MAX_HOLIDAY_RANGE_DAYS days", () => {
+    it("ちょうど MAX_HOLIDAY_RANGE_DAYS 日の場合、成功すること", () => {
       const start = "2024-01-01";
       const end = dayjs(start)
         .add(MAX_HOLIDAY_RANGE_DAYS - 1, "day")
@@ -97,7 +97,7 @@ describe("buildHolidayDateRange", () => {
       expect(result).toHaveLength(MAX_HOLIDAY_RANGE_DAYS);
     });
 
-    it("throws RANGE_TOO_LARGE at MAX_HOLIDAY_RANGE_DAYS + 1 days", () => {
+    it("MAX_HOLIDAY_RANGE_DAYS + 1 日では RANGE_TOO_LARGE を throw すること", () => {
       const start = "2024-01-01";
       const end = dayjs(start)
         .add(MAX_HOLIDAY_RANGE_DAYS, "day")

@@ -15,7 +15,6 @@ import AttendanceListCard from "./AttendanceListCard";
 import { AttendanceListProvider } from "./AttendanceListContext";
 import AttendanceListHeader from "./AttendanceListHeader";
 import {
-  formatDateRangeLabel,
   getAttendanceQueryDateRange,
   getEffectiveDateRange,
 } from "./attendanceListUtils";
@@ -103,10 +102,6 @@ export default function AttendanceTable() {
     logger,
     dispatch,
   });
-  const rangeLabelForDisplay = useMemo(
-    () => formatDateRangeLabel(effectiveDateRange),
-    [effectiveDateRange],
-  );
   if (attendanceLoading || calendarLoading || closeDatesLoading) {
     return (
       <div className="w-full flex justify-center py-10">
@@ -130,7 +125,7 @@ export default function AttendanceTable() {
   return (
     <AttendanceListProvider value={contextValue}>
       <div className="attendance-list p-4 md:p-8">
-        <AttendanceListHeader rangeLabelForDisplay={rangeLabelForDisplay} />
+        <AttendanceListHeader />
 
         <AttendanceListCard>
           {isDesktop ? <DesktopList /> : <MobileList />}

@@ -22,30 +22,25 @@ export default function RemarksItem() {
 
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <RemarksTags tags={tags} />
+          <button
+            type="button"
+            className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-300 bg-white text-sm leading-none text-slate-700 transition-[border-color,background-color] duration-150 ease-in-out hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(16_185_129/0.18)]"
+            onClick={() => setIsExpanded(true)}
+            aria-label="備考入力を全画面で開く"
+          >
+            ⤢
+          </button>
+        </div>
         <div className="min-w-0 flex-1">
-          <div className="flex min-h-12 flex-wrap items-center gap-2 rounded-md border border-slate-400/80 bg-white p-2 transition-[border-color,box-shadow] duration-150 ease-in-out focus-within:border-emerald-500/50 focus-within:shadow-[0_0_0_3px_rgb(16_185_129/0.12)]">
-            <div className="flex w-full flex-wrap items-center gap-2">
-              <RemarksTags tags={tags} />
-              <button
-                type="button"
-                className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-300 bg-white text-sm leading-none text-slate-700 transition-[border-color,background-color] duration-150 ease-in-out hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(16_185_129/0.18)]"
-                onClick={() => setIsExpanded(true)}
-                aria-label="備考入力を全画面で開く"
-              >
-                ⤢
-              </button>
-            </div>
-
-            <div className="w-full">
-              <RemarksInputField
-                control={control}
-                getValues={getValues}
-                setValue={setValue}
-                readOnly={!!readOnly}
-              />
-            </div>
-          </div>
+          <RemarksInputField
+            control={control}
+            getValues={getValues}
+            setValue={setValue}
+            readOnly={!!readOnly}
+          />
         </div>
       </div>
       {isExpanded ? (
@@ -61,7 +56,10 @@ export default function RemarksItem() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-slate-200 px-[14px] py-3">
-              <SectionTitle id="remarks-expanded-title" className="m-0 text-base font-bold text-slate-900">
+              <SectionTitle
+                id="remarks-expanded-title"
+                className="m-0 text-base font-bold text-slate-900"
+              >
                 備考入力
               </SectionTitle>
               <button

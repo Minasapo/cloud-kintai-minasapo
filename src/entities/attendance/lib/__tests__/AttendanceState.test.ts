@@ -51,7 +51,7 @@ describe("AttendanceState", () => {
     return new AttendanceState(staff, attendance, [], []);
   };
 
-  it("returns None when the work date is today", () => {
+  it("勤務日が当日の場合、None を返すこと", () => {
     const today = "2024-01-05";
     const state = buildState({ workDate: today });
 
@@ -60,7 +60,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.None);
   });
 
-  it("returns Requesting when the work date is today and there is an incomplete change request", () => {
+  it("勤務日が当日かつ未完了の変更申請がある場合、Requesting を返すこと", () => {
     const today = "2024-01-05";
     const state = buildState({
       workDate: today,
@@ -77,7 +77,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.Requesting);
   });
 
-  it("returns None when attendance management is disabled", () => {
+  it("勤怠管理が無効な場合、None を返すこと", () => {
     const state = buildState(
       {
         workDate: "2024-01-10",
@@ -91,7 +91,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.None);
   });
 
-  it("keeps existing checks when attendance management flag is null", () => {
+  it("勤怠管理フラグが null の場合、既存の判定ロジックを適用すること", () => {
     const state = buildState(
       {
         workDate: "2024-01-10",
@@ -105,7 +105,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.Error);
   });
 
-  it("keeps weekday error evaluation for past dates", () => {
+  it("過去日の場合、平日エラー判定を維持すること", () => {
     const today = "2024-01-05";
     const pastDate = "2024-01-04";
     const state = buildState({ workDate: pastDate, startTime: undefined });
@@ -115,7 +115,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.Error);
   });
 
-  it("keeps None when mocked today (UTC) matches workDate after local conversion", () => {
+  it("モックした UTC 日時がローカル変換後の勤務日と一致する場合、None を返すこと", () => {
     const workDate = "2024-01-02";
     const state = buildState({ workDate, startTime: undefined });
 
@@ -128,7 +128,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.None);
   });
 
-  it("returns None when staff usageStartDate is after workDate", () => {
+  it("スタッフの利用開始日が勤務日より後の場合、None を返すこと", () => {
     const state = buildState(
       { workDate: "2024-01-10" },
       { usageStartDate: "2024-02-01" },
@@ -139,7 +139,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.None);
   });
 
-  it("returns Ok when paidHolidayFlag is true", () => {
+  it("paidHolidayFlag が true の場合、Ok を返すこと", () => {
     const state = buildState({ workDate: "2024-01-10", paidHolidayFlag: true });
 
     setMockToday(state, "2024-02-01");
@@ -147,7 +147,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.Ok);
   });
 
-  it("returns Ok when substituteHolidayDate is valid", () => {
+  it("substituteHolidayDate が有効な日付の場合、Ok を返すこと", () => {
     const state = buildState({
       workDate: "2024-01-10",
       substituteHolidayDate: "2024-01-05",
@@ -158,7 +158,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.Ok);
   });
 
-  it("returns Requesting when there is an incomplete change request", () => {
+  it("未完了の変更申請がある場合、Requesting を返すこと", () => {
     const state = buildState({
       workDate: "2024-01-10",
       changeRequests: [
@@ -174,7 +174,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.Requesting);
   });
 
-  it("returns Ok when there are only completed change requests", () => {
+  it("完了済みの変更申請のみの場合、Ok を返すこと", () => {
     const state = buildState({
       workDate: "2024-01-10",
       changeRequests: [
@@ -190,7 +190,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.Ok);
   });
 
-  it("returns None on weekend with no start/end time", () => {
+  it("週末で始業・終業時刻が未入力の場合、None を返すこと", () => {
     const state = buildState({
       workDate: "2024-01-06", // Saturday
       startTime: "",
@@ -202,7 +202,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.None);
   });
 
-  it("returns Ok on weekend with start/end time entered", () => {
+  it("週末で始業・終業時刻が入力済みの場合、Ok を返すこと", () => {
     const state = buildState({ workDate: "2024-01-07" }); // Sunday
 
     setMockToday(state, "2024-01-10");
@@ -210,7 +210,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.Ok);
   });
 
-  it("returns Error on weekday when startTime is missing", () => {
+  it("平日で startTime が未入力の場合、Error を返すこと", () => {
     const state = buildState({
       workDate: "2024-01-09",
       startTime: undefined,
@@ -222,7 +222,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.Error);
   });
 
-  it("returns Error on weekday when endTime is missing", () => {
+  it("平日で endTime が未入力の場合、Error を返すこと", () => {
     const state = buildState({
       workDate: "2024-01-09",
       startTime: "09:00",
@@ -234,7 +234,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.Error);
   });
 
-  it("returns None for shift worker on deemed holiday", () => {
+  it("シフト勤務でみなし休日の場合、None を返すこと", () => {
     const state = buildState(
       {
         workDate: "2024-01-09",
@@ -248,7 +248,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.None);
   });
 
-  it("treats shift worker as weekday even on weekend", () => {
+  it("シフト勤務の場合、週末でも平日扱いで判定すること", () => {
     const state = buildState(
       {
         workDate: "2024-01-06", // Saturday
@@ -262,7 +262,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.Error);
   });
 
-  it("returns None when non-shift staff has a holiday calendar entry", () => {
+  it("非シフト勤務で休日カレンダー登録がある場合、None を返すこと", () => {
     const state = new AttendanceState(
       { ...baseStaff, workType: "weekday" },
       { ...baseAttendance, workDate: "2024-01-10" },
@@ -284,7 +284,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.None);
   });
 
-  it("returns None when non-shift staff has a company holiday", () => {
+  it("非シフト勤務で会社休日登録がある場合、None を返すこと", () => {
     const state = new AttendanceState(
       { ...baseStaff, workType: "weekday" },
       { ...baseAttendance, workDate: "2024-01-10" },
@@ -306,7 +306,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.None);
   });
 
-  it("prioritizes holiday over change requests for non-shift staff", () => {
+  it("非シフト勤務では変更申請より休日判定を優先すること", () => {
     const state = new AttendanceState(
       { ...baseStaff, workType: "weekday" },
       {
@@ -337,7 +337,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.None);
   });
 
-  it("returns Error when substituteHolidayDate is invalid and startTime is missing", () => {
+  it("substituteHolidayDate が不正かつ startTime が未入力の場合、Error を返すこと", () => {
     const state = buildState({
       workDate: "2024-03-05",
       substituteHolidayDate: "not-a-date",
@@ -349,7 +349,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.Error);
   });
 
-  it("still returns None when usageStartDate is after workDate even with change requests", () => {
+  it("変更申請があっても利用開始日が勤務日より後の場合、None を返すこと", () => {
     const state = buildState(
       {
         workDate: "2024-04-01",
@@ -368,7 +368,7 @@ describe("AttendanceState", () => {
     expect(state.get()).toBe(AttendanceStatus.None);
   });
 
-  it("returns Requesting for shift worker with incomplete change request before late/working checks", () => {
+  it("シフト勤務で未完了の変更申請がある場合、遅刻・勤務判定より先に Requesting を返すこと", () => {
     const state = buildState(
       {
         workDate: "2024-06-10",

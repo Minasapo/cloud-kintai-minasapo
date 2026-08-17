@@ -36,6 +36,23 @@ type LabelElementProps = CommonProps &
 
 export type AppButtonProps = ButtonElementProps | LabelElementProps;
 
+const baseButtonSx: SxProps<Theme> = {
+  fontFamily: "var(--ds-typography-font-family)",
+  textTransform: "none",
+};
+
+const resolveSx = (sx?: SxProps<Theme>): SxProps<Theme> => {
+  if (Array.isArray(sx)) {
+    return [baseButtonSx, ...sx] as SxProps<Theme>;
+  }
+
+  if (sx) {
+    return [baseButtonSx, sx] as SxProps<Theme>;
+  }
+
+  return baseButtonSx;
+};
+
 const variantMap: Record<ButtonVariant, "contained" | "outlined" | "text"> = {
   solid: "contained",
   outline: "outlined",
@@ -103,7 +120,7 @@ export default function AppButton(props: AppButtonProps) {
         startIcon={resolvedStartIcon}
         endIcon={endIcon}
         className={className}
-        sx={sx}
+        sx={resolveSx(sx)}
         onClick={(event) => {
           if (resolvedDisabled) {
             event.preventDefault();
@@ -132,7 +149,7 @@ export default function AppButton(props: AppButtonProps) {
       startIcon={resolvedStartIcon}
       endIcon={endIcon}
       className={className}
-      sx={sx}
+      sx={resolveSx(sx)}
     >
       {children}
     </Button>

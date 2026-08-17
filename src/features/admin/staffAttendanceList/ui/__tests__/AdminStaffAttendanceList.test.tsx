@@ -59,6 +59,7 @@ const mockViewModel = {
     bulkApproving: false,
     canBulkApprove: false,
     handleBulkApprove: jest.fn(),
+    handleBulkReject: jest.fn(),
   },
   pendingAttendanceControls: {
     selectedAttendanceIds: [],
@@ -68,6 +69,7 @@ const mockViewModel = {
     bulkApproving: false,
     canBulkApprove: false,
     onBulkApprove: jest.fn(),
+    onBulkReject: jest.fn(),
     onOpenQuickView: jest.fn(),
   },
   getTableRowVariant: jest.fn(() => "default" as const),
@@ -142,11 +144,21 @@ jest.mock("@features/admin/staffAttendanceList/ui/components", () => ({
   ChangeRequestQuickViewDialog: ({
     open,
     onClose,
+    onOpenPrevious,
+    onOpenNext,
   }: {
     open: boolean;
     onClose: () => void;
+    onOpenPrevious?: () => void;
+    onOpenNext?: () => void;
   }) => (
     <div data-testid="quick-view-dialog" data-open={String(open)}>
+      <button onClick={onOpenPrevious} data-testid="prev-quick-view">
+        前へ
+      </button>
+      <button onClick={onOpenNext} data-testid="next-quick-view">
+        次へ
+      </button>
       <button onClick={onClose} data-testid="close-quick-view">
         閉じる
       </button>

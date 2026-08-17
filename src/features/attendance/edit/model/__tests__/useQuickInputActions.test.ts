@@ -29,7 +29,7 @@ describe("useQuickInputActions", () => {
     jest.clearAllMocks();
   });
 
-  it("should return empty array when no actions are visible", () => {
+  it("表示可能なアクションがない場合の挙動を返すこと", () => {
     const { result } = renderHook(() =>
       useQuickInputActions({
         setValue: mockSetValue,
@@ -45,7 +45,7 @@ describe("useQuickInputActions", () => {
     expect(result.current.length).toBeGreaterThan(0);
   });
 
-  it("should return actions when visibleMode is 'staff'", () => {
+  it("visibleMode が staff の場合のアクションを返すこと", () => {
     const { result } = renderHook(() =>
       useQuickInputActions({
         setValue: mockSetValue,
@@ -67,7 +67,7 @@ describe("useQuickInputActions", () => {
     expect(actionKeys).not.toContain("pmHalf");
   });
 
-  it("should return actions when visibleMode is 'admin'", () => {
+  it("visibleMode が admin の場合のアクションを返すこと", () => {
     const { result } = renderHook(() =>
       useQuickInputActions({
         setValue: mockSetValue,
@@ -89,7 +89,7 @@ describe("useQuickInputActions", () => {
     expect(actionKeys).not.toContain("regularEnd");
   });
 
-  it("should return all visible actions when visibleMode is 'all'", () => {
+  it("visibleMode が all の場合に全表示アクションを返すこと", () => {
     const { result } = renderHook(() =>
       useQuickInputActions({
         setValue: mockSetValue,
@@ -112,7 +112,7 @@ describe("useQuickInputActions", () => {
     expect(actionKeys).toContain("paidHoliday");
   });
 
-  it("should have tooltip for each action", () => {
+  it("各アクションに tooltip が設定されること", () => {
     const { result } = renderHook(() =>
       useQuickInputActions({
         setValue: mockSetValue,
@@ -130,7 +130,7 @@ describe("useQuickInputActions", () => {
     });
   });
 
-  it("should return no actions when workDate is null", () => {
+  it("workDate が null の場合のアクション挙動を返すこと", () => {
     const { result } = renderHook(() =>
       useQuickInputActions({
         setValue: mockSetValue,
@@ -145,7 +145,7 @@ describe("useQuickInputActions", () => {
     expect(result.current.length).toBeGreaterThan(0);
   });
 
-  it("clear action should reset all fields", () => {
+  it("clear アクションで全フィールドをリセットすること", () => {
     const { result } = renderHook(() =>
       useQuickInputActions({
         setValue: mockSetValue,
@@ -169,7 +169,7 @@ describe("useQuickInputActions", () => {
     }
   });
 
-  it("normal action should set standard work hours", () => {
+  it("normal アクションで標準勤務時間を設定すること", () => {
     const { result } = renderHook(() =>
       useQuickInputActions({
         setValue: mockSetValue,
@@ -200,7 +200,7 @@ describe("useQuickInputActions", () => {
     }
   });
 
-  it("should respect readOnly prop", () => {
+  it("readOnly プロパティを尊重すること", () => {
     const { result } = renderHook(() =>
       useQuickInputActions({
         setValue: mockSetValue,

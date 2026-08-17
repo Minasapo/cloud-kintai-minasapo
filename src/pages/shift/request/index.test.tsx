@@ -86,17 +86,17 @@ function renderPage(workType: "shift" | "weekday") {
 }
 
 describe("resolveShiftRequestMode", () => {
-  it("returns normal when AppConfig display mode is normal", () => {
+  it("AppConfig の表示モードが normal の場合、normal を返すこと", () => {
     expect(resolveShiftRequestMode("normal", true)).toBe("normal");
   });
 
-  it("returns collaborative when AppConfig display mode is collaborative and collaborative is enabled", () => {
+  it("AppConfig が collaborative かつ共同編集有効の場合、collaborative を返すこと", () => {
     expect(resolveShiftRequestMode("collaborative", true)).toBe(
       "collaborative",
     );
   });
 
-  it("returns normal when AppConfig display mode is collaborative but collaborative is disabled", () => {
+  it("AppConfig が collaborative でも共同編集無効の場合、normal を返すこと", () => {
     expect(resolveShiftRequestMode("collaborative", false)).toBe("normal");
   });
 });
@@ -113,7 +113,7 @@ describe("ShiftRequestPage", () => {
     });
   });
 
-  it("shows access denied message for weekday staff", () => {
+  it("平日勤務スタッフにはアクセス拒否メッセージを表示すること", () => {
     renderPage("weekday");
 
     expect(screen.getByRole("alert")).toHaveTextContent(
@@ -122,7 +122,7 @@ describe("ShiftRequestPage", () => {
     expect(screen.queryByText("shift-request-form")).not.toBeInTheDocument();
   });
 
-  it("renders request form for shift staff", () => {
+  it("シフト勤務スタッフには申請フォームを表示すること", () => {
     renderPage("shift");
 
     expect(screen.getByText("shift-request-form")).toBeInTheDocument();

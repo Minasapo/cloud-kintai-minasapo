@@ -23,6 +23,17 @@ type DateFieldProps = {
 const INPUT_BASE_CLASS =
   "w-full rounded-xl border bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400";
 
+const normalizeDateInput = (value: string) => {
+  return value
+    .replace(/[０-９]/g, (char) =>
+      String.fromCharCode(char.charCodeAt(0) - 0xfee0),
+    )
+    .replace(/／/g, "/")
+    .replace(/[．。]/g, "/")
+    .replace(/[－ー―‐–—]/g, "-")
+    .replace(/\u3000/g, " ");
+};
+
 const parseDateDraft = (value: string, format: string) => {
   const normalized = value.trim();
   if (!normalized) {
@@ -30,7 +41,7 @@ const parseDateDraft = (value: string, format: string) => {
   }
 
   if (format === "YYYY/MM") {
-    const match = normalized.match(/^(\d{4})\/(\d{1,2})$/);
+    const match = normalized.match(/^(\d{4})[/.-](\d{1,2})$/);
     if (!match) {
       return null;
     }
@@ -41,7 +52,7 @@ const parseDateDraft = (value: string, format: string) => {
   }
 
   if (format === "YYYY/MM/DD") {
-    const match = normalized.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+    const match = normalized.match(/^(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})$/);
     if (!match) {
       return null;
     }
@@ -99,7 +110,10 @@ export default function DateField({
   const selectedDate = resolvedValue ? resolvedValue.toDate() : undefined;
 
   return (
-    <div ref={rootRef} className={["flex flex-col gap-1", className].filter(Boolean).join(" ")}>
+    <div
+      ref={rootRef}
+      className={["flex flex-col gap-1", className].filter(Boolean).join(" ")}
+    >
       {label ? (
         <label className="text-sm font-medium text-slate-700">
           {label}
@@ -114,7 +128,7 @@ export default function DateField({
           placeholder={placeholder ?? format}
           onFocus={() => setOpen(true)}
           onChange={(event) => {
-            const nextValue = event.target.value;
+            const nextValue = normalizeDateInput(event.target.value);
             setDraft(nextValue);
             if (!nextValue) {
               onChange(null);
@@ -184,7 +198,9 @@ export default function DateField({
         ) : null}
       </div>
       {message ? (
-        <p className={`m-0 text-xs leading-5 ${hasError ? "text-rose-600" : "text-slate-500"}`}>
+        <p
+          className={`m-0 text-xs leading-5 ${hasError ? "text-rose-600" : "text-slate-500"}`}
+        >
           {message}
         </p>
       ) : null}

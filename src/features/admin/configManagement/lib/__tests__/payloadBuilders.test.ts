@@ -44,7 +44,7 @@ describe("Payload Builders", () => {
   };
 
   describe("buildCreatePayload", () => {
-    it("should generate CreateAppConfigInput with name field", () => {
+    it("name フィールドを含む CreateAppConfigInput を生成すること", () => {
       const payload = buildCreatePayload(baseFormState);
 
       expect(payload.name).toBe(DEFAULT_CONFIG_NAME);
@@ -64,7 +64,7 @@ describe("Payload Builders", () => {
       expect(typeof payload.standardWorkHours).toBe("number");
     });
 
-    it("should properly map links array", () => {
+    it("links 配列を正しくマッピングすること", () => {
       const payload = buildCreatePayload(baseFormState);
 
       expect(payload.links).toHaveLength(1);
@@ -76,7 +76,7 @@ describe("Payload Builders", () => {
       });
     });
 
-    it("should properly map reasons array", () => {
+    it("reasons 配列を正しくマッピングすること", () => {
       const payload = buildCreatePayload(baseFormState);
 
       expect(payload.reasons).toHaveLength(1);
@@ -86,7 +86,7 @@ describe("Payload Builders", () => {
       });
     });
 
-    it("should convert Dayjs times to HH:mm strings for quick inputs", () => {
+    it("クイック入力時刻の Dayjs 値を HH:mm 文字列に変換すること", () => {
       const payload = buildCreatePayload(baseFormState);
 
       expect(payload.quickInputStartTimes).toHaveLength(1);
@@ -102,7 +102,7 @@ describe("Payload Builders", () => {
       });
     });
 
-    it("should convert all time fields to HH:mm format", () => {
+    it("すべての時刻フィールドを HH:mm 形式に変換すること", () => {
       const payload = buildCreatePayload(baseFormState);
 
       expect(payload.amHolidayStartTime).toBe("09:00");
@@ -118,7 +118,7 @@ describe("Payload Builders", () => {
       ...baseFormState,
     };
 
-    it("should generate UpdateAppConfigInput with id field", () => {
+    it("id フィールドを含む UpdateAppConfigInput を生成すること", () => {
       const payload = buildUpdatePayload(fullFormState);
 
       expect(payload.id).toBe("test-config-id");
@@ -127,7 +127,7 @@ describe("Payload Builders", () => {
       expect(payload.officeMode).toBe(true);
     });
 
-    it("should throw error when id is null", () => {
+    it("id が null の場合、エラーを throw すること", () => {
       const stateWithoutId: ConfigFormState = {
         ...fullFormState,
         id: null,
@@ -138,7 +138,7 @@ describe("Payload Builders", () => {
       );
     });
 
-    it("should produce same field values as buildCreatePayload except id/name", () => {
+    it("id/name 以外は buildCreatePayload と同じ値を生成すること", () => {
       const createPayload = buildCreatePayload(baseFormState);
       const updatePayload = buildUpdatePayload(fullFormState);
 
@@ -179,7 +179,7 @@ describe("Payload Builders", () => {
       );
     });
 
-    it("should handle empty arrays for links and reasons", () => {
+    it("links と reasons が空配列でも正しく処理すること", () => {
       const stateWithEmptyArrays: ConfigFormState = {
         ...fullFormState,
         links: [],
@@ -198,7 +198,7 @@ describe("Payload Builders", () => {
   });
 
   describe("Integration: payload builders consistency", () => {
-    it("should ensure Create and Update payloads use same transformation logic", () => {
+    it("Create と Update のペイロードが同じ変換ロジックを使うこと", () => {
       // 同じ状態から生成した場合、id/name以外は同一であることを確認
       const createPayload = buildCreatePayload(baseFormState);
       const updatePayload = buildUpdatePayload({

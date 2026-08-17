@@ -1,10 +1,14 @@
 import { AttendanceDate } from "@entities/attendance/lib/AttendanceDate";
+import { AttendanceStatus } from "@entities/attendance/lib/AttendanceState";
 import AttendanceStatusChip from "@entities/attendance/ui/AttendanceStatusChip";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ErrorIcon from "@mui/icons-material/Error";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
-import { Box, Chip, Divider, Stack, styled, Typography } from "@mui/material";
-import { alpha, Theme,useTheme  } from "@mui/material/styles";
+import PendingIcon from "@mui/icons-material/Pending";
+import { Box, Chip, Stack, styled, Tooltip, Typography } from "@mui/material";
+import { alpha, Theme, useTheme } from "@mui/material/styles";
 import {
   Attendance,
   CloseDate,
@@ -58,22 +62,47 @@ function CalendarDayCard({
   onOpenInRightPanel,
 }: CalendarDayCardProps) {
   const workDate = date.format(AttendanceDate.DataFormat);
-  const status = getStatus(attendance, staff, holidayCalendars, companyHolidayCalendars, date);
+  const status = getStatus(
+    attendance,
+    staff,
+    holidayCalendars,
+    companyHolidayCalendars,
+    date,
+  );
   const netHours = getNetWorkingHours(attendance);
   const totalRestHours = getTotalRestHours(attendance);
   const timeRangeLabel = attendance ? formatTimeRange(attendance) : undefined;
-  const daySurfaceState = getCalendarDaySurfaceState({ date, staff, holidayCalendars, companyHolidayCalendars });
+  const daySurfaceState = getCalendarDaySurfaceState({
+    date,
+    staff,
+    holidayCalendars,
+    companyHolidayCalendars,
+  });
   const { isToday, holidayLike, isWeekend } = daySurfaceState;
   const isCurrentMonth = date.isSame(resolvedCurrentMonth, "month");
-  const { holidayName, companyHolidayName } = getHolidayNames(date, holidayCalendars, companyHolidayCalendars);
-  const holidayLabels = buildHolidayLabels({ holidayName, companyHolidayName, attendance });
-  const termsForDay = monthlyTerms.filter(
-    (term) => !date.isBefore(term.start, "day") && !date.isAfter(term.end, "day"),
+  const { holidayName, companyHolidayName } = getHolidayNames(
+    date,
+    holidayCalendars,
+    companyHolidayCalendars,
   );
-  const allowTermHighlight = staff?.workType === "shift" ? true : !holidayLike && !isWeekend;
+  const holidayLabels = buildHolidayLabels({
+    holidayName,
+    companyHolidayName,
+    attendance,
+  });
+  const termsForDay = monthlyTerms.filter(
+    (term) =>
+      !date.isBefore(term.start, "day") && !date.isAfter(term.end, "day"),
+  );
+  const allowTermHighlight =
+    staff?.workType === "shift" ? true : !holidayLike && !isWeekend;
   const primaryTerm = allowTermHighlight ? termsForDay[0] : undefined;
-  const termBackground = primaryTerm ? alpha(primaryTerm.color, 0.08) : undefined;
-  const termBorder = primaryTerm ? `3px solid ${alpha(primaryTerm.color, 0.35)}` : undefined;
+  const termBackground = primaryTerm
+    ? alpha(primaryTerm.color, 0.08)
+    : undefined;
+  const termBorder = primaryTerm
+    ? `3px solid ${alpha(primaryTerm.color, 0.35)}`
+    : undefined;
   const hasOverlap = allowTermHighlight && termsForDay.length > 1;
 
   return (
@@ -117,7 +146,39 @@ function CalendarDayCard({
               <OpenInNewOutlinedIcon sx={{ fontSize: "16px" }} />
             </AppIconButton>
           )}
-          <AttendanceStatusChip status={status} />
+          {status === AttendanceStatus.Error ? (
+            <Tooltip title="打刻漏れや休憩時間の不整合など、勤怠データに不備があります。日付を開いて内容を確認してください。">
+              <Box
+                component="span"
+                sx={{ display: "inline-flex", alignItems: "center" }}
+                aria-label="勤怠エラー詳細"
+              >
+                <ErrorIcon color="error" fontSize="small" />
+              </Box>
+            </Tooltip>
+          ) : status === AttendanceStatus.Ok ? (
+            <Tooltip title="勤怠データは正常です。">
+              <Box
+                component="span"
+                sx={{ display: "inline-flex", alignItems: "center" }}
+                aria-label="勤怠正常"
+              >
+                <CheckCircleIcon color="success" fontSize="small" />
+              </Box>
+            </Tooltip>
+          ) : status === AttendanceStatus.Requesting ? (
+            <Tooltip title="申請中です。承認されるまで反映されません。">
+              <Box
+                component="span"
+                sx={{ display: "inline-flex", alignItems: "center" }}
+                aria-label="勤怠申請中"
+              >
+                <PendingIcon color="warning" fontSize="small" />
+              </Box>
+            </Tooltip>
+          ) : (
+            <AttendanceStatusChip status={status} />
+          )}
         </Box>
       </Stack>
       {timeRangeLabel && (
@@ -142,7 +203,12 @@ function CalendarDayCard({
         </Typography>
       )}
       {holidayLabels.map((label) => (
-        <Typography key={label} variant="caption" color="error.main" sx={{ fontWeight: "bold" }}>
+        <Typography
+          key={label}
+          variant="caption"
+          color="error.main"
+          sx={{ fontWeight: "bold" }}
+        >
           {label}
         </Typography>
       ))}
@@ -297,6 +363,9 @@ export default function DesktopCalendarView({
           alignItems="center"
           justifyContent="space-between"
         >
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            {resolvedCurrentMonth.format("YYYY年M月")}
+          </Typography>
           <Stack direction="row" spacing={1} alignItems="center">
             <AppIconButton
               aria-label="previous-month"
@@ -306,19 +375,6 @@ export default function DesktopCalendarView({
               <ChevronLeftIcon />
             </AppIconButton>
             <AppIconButton
-              aria-label="next-month"
-              onClick={() => updateMonth((prev) => prev.add(1, "month"))}
-              size="sm"
-            >
-              <ChevronRightIcon />
-            </AppIconButton>
-            <Divider orientation="vertical" flexItem />
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
-              {resolvedCurrentMonth.format("YYYY年M月")}
-            </Typography>
-          </Stack>
-          <Box>
-            <AppIconButton
               onClick={() => updateMonth(() => dayjs().startOf("month"))}
               aria-label="今月に戻る"
               size="sm"
@@ -326,7 +382,14 @@ export default function DesktopCalendarView({
             >
               <Typography variant="body2">今月</Typography>
             </AppIconButton>
-          </Box>
+            <AppIconButton
+              aria-label="next-month"
+              onClick={() => updateMonth((prev) => prev.add(1, "month"))}
+              size="sm"
+            >
+              <ChevronRightIcon />
+            </AppIconButton>
+          </Stack>
         </Stack>
 
         <Stack spacing={0.5}>
@@ -400,7 +463,9 @@ export default function DesktopCalendarView({
                 key={date.format(AttendanceDate.DataFormat)}
                 date={date}
                 resolvedCurrentMonth={resolvedCurrentMonth}
-                attendance={attendanceMap.get(date.format(AttendanceDate.DataFormat))}
+                attendance={attendanceMap.get(
+                  date.format(AttendanceDate.DataFormat),
+                )}
                 staff={staff}
                 holidayCalendars={holidayCalendars}
                 companyHolidayCalendars={companyHolidayCalendars}

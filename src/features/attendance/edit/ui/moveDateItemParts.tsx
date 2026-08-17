@@ -45,13 +45,15 @@ export function WorkDateInput({
             "aria-label": ariaLabel,
           },
           sx: {
-            width: "8rem",
+            width: "9rem",
             maxWidth: "100%",
             "& .MuiInputBase-root": {
               height: "34px",
               borderRadius: "16px",
               fontSize: "0.8125rem",
-              backgroundColor: designTokenVar("component.pageSection.background"),
+              backgroundColor: designTokenVar(
+                "component.pageSection.background",
+              ),
               boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.72)",
             },
             "& .MuiOutlinedInput-input": {

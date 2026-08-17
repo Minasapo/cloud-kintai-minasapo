@@ -29,7 +29,7 @@ const makeMocks = () => ({
 });
 
 describe("clockInAction", () => {
-  it("creates a new record when cached attendance is for another workDate", async () => {
+  it("キャッシュ勤怠の workDate が別日の場合、新規レコードを作成すること", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     await clockInAction({
       attendance: makeAttendance({ workDate: "2026-03-21" }),
@@ -43,7 +43,7 @@ describe("clockInAction", () => {
     expect(updateAttendance).not.toHaveBeenCalled();
   });
 
-  it("updates existing record when workDate matches", async () => {
+  it("workDate が一致する場合、既存レコードを更新すること", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     await clockInAction({
       attendance: makeAttendance(),
@@ -59,7 +59,7 @@ describe("clockInAction", () => {
     expect(createAttendance).not.toHaveBeenCalled();
   });
 
-  it("passes goDirectlyFlag=true when specified", async () => {
+  it("goDirectlyFlag 指定時に true を渡すこと", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     await clockInAction({
       attendance: makeAttendance(),
@@ -75,7 +75,7 @@ describe("clockInAction", () => {
     );
   });
 
-  it("creates new record when attendance is null", async () => {
+  it("attendance が null の場合、新規レコードを作成すること", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     await clockInAction({
       attendance: null,
@@ -90,7 +90,7 @@ describe("clockInAction", () => {
 });
 
 describe("clockOutAction", () => {
-  it("creates a new record when attendance is null", async () => {
+  it("attendance が null の場合、新規レコードを作成すること", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     await clockOutAction({
       attendance: null,
@@ -105,7 +105,7 @@ describe("clockOutAction", () => {
     );
   });
 
-  it("passes returnDirectlyFlag=true when specified", async () => {
+  it("returnDirectlyFlag 指定時に true を渡すこと", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     await clockOutAction({
       attendance: null,
@@ -121,7 +121,7 @@ describe("clockOutAction", () => {
     );
   });
 
-  it("updates existing attendance when workDate matches", async () => {
+  it("workDate が一致する場合、既存勤怠を更新すること", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     const endTime = "2026-03-22T10:00:00.000Z";
     await clockOutAction({
@@ -140,7 +140,7 @@ describe("clockOutAction", () => {
 });
 
 describe("restStartAction", () => {
-  it("updates only when attendance workDate matches", async () => {
+  it("attendance の workDate が一致する場合のみ更新すること", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     await restStartAction({
       attendance: makeAttendance({
@@ -158,7 +158,7 @@ describe("restStartAction", () => {
     expect(updateAttendance).not.toHaveBeenCalled();
   });
 
-  it("throws when not clocked in (no startTime)", async () => {
+  it("出勤打刻前（startTime なし）の場合、エラーを throw すること", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     await expect(
       restStartAction({
@@ -172,7 +172,7 @@ describe("restStartAction", () => {
     ).rejects.toThrow("Not clocked in");
   });
 
-  it("throws when there is a rest mismatch", async () => {
+  it("休憩データ不整合がある場合、エラーを throw すること", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     await expect(
       restStartAction({
@@ -191,7 +191,7 @@ describe("restStartAction", () => {
     ).rejects.toThrow("There is a problem with the rest time");
   });
 
-  it("adds rest start to existing rests when valid", async () => {
+  it("有効な場合、既存 rests に休憩開始を追加すること", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     await restStartAction({
       attendance: makeAttendance({
@@ -213,7 +213,7 @@ describe("restStartAction", () => {
 });
 
 describe("restEndAction", () => {
-  it("creates new attendance when workDate doesn't match", async () => {
+  it("workDate が一致しない場合、新規勤怠を作成すること", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     await restEndAction({
       attendance: makeAttendance({ workDate: "2026-03-21", startTime: "2026-03-21T00:00:00.000Z" }),
@@ -226,7 +226,7 @@ describe("restEndAction", () => {
     expect(createAttendance).toHaveBeenCalledTimes(1);
   });
 
-  it("throws when not clocked in", async () => {
+  it("出勤打刻前の場合、エラーを throw すること", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     await expect(
       restEndAction({
@@ -240,7 +240,7 @@ describe("restEndAction", () => {
     ).rejects.toThrow("Not clocked in");
   });
 
-  it("throws when there are no rests", async () => {
+  it("休憩開始が存在しない場合、エラーを throw すること", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     await expect(
       restEndAction({
@@ -257,7 +257,7 @@ describe("restEndAction", () => {
     ).rejects.toThrow("There is no rest start");
   });
 
-  it("sets endTime on the last rest entry", async () => {
+  it("最後の休憩エントリに endTime を設定すること", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     await restEndAction({
       attendance: makeAttendance({
@@ -278,7 +278,7 @@ describe("restEndAction", () => {
 });
 
 describe("updateRemarksAction", () => {
-  it("creates new attendance when attendance is null", async () => {
+  it("attendance が null の場合、新規勤怠を作成すること", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     await updateRemarksAction({
       attendance: null,
@@ -293,7 +293,7 @@ describe("updateRemarksAction", () => {
     );
   });
 
-  it("updates existing attendance remarks when workDate matches", async () => {
+  it("workDate が一致する場合、既存勤怠の備考を更新すること", async () => {
     const { createAttendance, updateAttendance } = makeMocks();
     await updateRemarksAction({
       attendance: makeAttendance(),

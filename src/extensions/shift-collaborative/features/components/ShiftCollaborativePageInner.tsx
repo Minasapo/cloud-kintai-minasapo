@@ -9,6 +9,7 @@ import AdminShiftSettingsDialog from "@/features/admin-config-shift/AdminShiftSe
 import { useCollaborativePageState } from "../hooks/useCollaborativePageState";
 import { useShiftPageDerivedState } from "../hooks/useShiftPageDerivedState";
 import { isWeekend } from "../lib/shiftPageHelpers";
+import { CellComment } from "../types/collaborative.types";
 import { CollaborativeHeader } from "./CollaborativeHeader";
 import { KeyboardShortcutsHelp } from "./KeyboardShortcutsHelp";
 import { PrintShiftDialog } from "./PrintShiftDialog";
@@ -27,6 +28,66 @@ const ShiftCellWithComments = ({
   ...restProps
 }: ShiftCellProps) => {
   return <ShiftCell {...restProps} staffId={staffId} date={date} />;
+};
+
+interface SelectedCell {
+  staffId: string;
+  date: string;
+}
+
+interface FocusedCell {
+  staffId: string;
+  date: string;
+}
+
+const getPanelSelectedCells = (
+  selectionCount: number,
+  selectedCells: SelectedCell[],
+  focusedCell: FocusedCell | null,
+): SelectedCell[] => {
+  if (selectionCount > 0) {
+    return selectedCells;
+  }
+
+  if (focusedCell) {
+    return [{ staffId: focusedCell.staffId, date: focusedCell.date }];
+  }
+
+  return [];
+};
+
+const getPanelComments = (
+  selectedCells: SelectedCell[],
+  focusedCell: FocusedCell | null,
+  commentsMap: Map<string, CellComment[]>,
+): CellComment[] => {
+  if (selectedCells.length > 0) {
+    return selectedCells.flatMap(
+      (cell) => commentsMap.get(`${cell.staffId}#${cell.date}`) || [],
+    );
+  }
+
+  if (focusedCell) {
+    return commentsMap.get(`${focusedCell.staffId}#${focusedCell.date}`) || [];
+  }
+
+  return [];
+};
+
+const getPrintableShiftStaffs = (
+  staffs: ShiftCollaborativePageInnerProps["staffs"],
+) => {
+  return staffs
+    .filter(
+      (staff) =>
+        staff.enabled &&
+        (staff as unknown as Record<string, unknown>).workType === "shift",
+    )
+    .map((staff) => ({
+      id: staff.id,
+      familyName: staff.familyName ?? undefined,
+      givenName: staff.givenName ?? undefined,
+    }));
 };
 
 interface ShiftCollaborativePageInnerProps {
@@ -125,6 +186,18 @@ export const ShiftCollaborativePageInner =
         setShowHelp,
       );
 
+      const panelSelectedCells = getPanelSelectedCells(
+        selectionCount,
+        selectedCells,
+        focusedCell,
+      );
+      const panelComments = getPanelComments(
+        selectedCells,
+        focusedCell,
+        commentsMap,
+      );
+      const printableShiftStaffs = getPrintableShiftStaffs(staffs);
+
       return (
         <Page title="シフト調整(共同)" width="full" showDefaultHeader={false}>
           {dialog}
@@ -199,25 +272,8 @@ export const ShiftCollaborativePageInner =
               currentUserId={currentUserId}
               currentUserName={currentUserDisplayName}
               selectionCount={selectionCount}
-              selectedCells={
-                selectionCount > 0
-                  ? selectedCells
-                  : focusedCell
-                    ? [{ staffId: focusedCell.staffId, date: focusedCell.date }]
-                    : []
-              }
-              comments={
-                selectedCells.length > 0
-                  ? selectedCells.flatMap(
-                      (cell) =>
-                        commentsMap.get(`${cell.staffId}#${cell.date}`) || [],
-                    )
-                  : focusedCell
-                    ? commentsMap.get(
-                        `${focusedCell.staffId}#${focusedCell.date}`,
-                      ) || []
-                    : []
-              }
+              selectedCells={panelSelectedCells}
+              comments={panelComments}
               onClear={clearSelection}
               onChangeState={handleChangeState}
               onLock={handleLockCells}
@@ -249,18 +305,8 @@ export const ShiftCollaborativePageInner =
               open={isPrintDialogOpen}
               onClose={closePrintDialog}
               days={days}
-              staffs={staffs
-                .filter(
-                  (staff) =>
-                    staff.enabled &&
-                    (staff as unknown as Record<string, unknown>).workType ===
-                      "shift",
-                )
-                .map((staff) => ({
-                  id: staff.id,
-                  familyName: staff.familyName ?? undefined,
-                  givenName: staff.givenName ?? undefined,
-                }))}
+              getEventsForDay={getEventsForDay}
+              staffs={printableShiftStaffs}
               shiftDataMap={state.shiftDataMap}
               targetMonth={targetMonth}
             />

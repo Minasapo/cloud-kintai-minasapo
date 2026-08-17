@@ -1,4 +1,4 @@
-import { fireEvent,render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import dayjs from "dayjs";
 
 import DateField from "../DateField";
@@ -37,21 +37,21 @@ describe("DateField", () => {
         value={null}
         onChange={jest.fn()}
         placeholder="選択してください"
-      />
+      />,
     );
     expect(screen.getByText("日付")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("選択してください")).toBeInTheDocument();
   });
 
   it("requiredの場合にアスタリスクが表示される", () => {
-    render(<DateField label="日付" value={null} onChange={jest.fn()} required />);
+    render(
+      <DateField label="日付" value={null} onChange={jest.fn()} required />,
+    );
     expect(screen.getByText("*")).toBeInTheDocument();
   });
 
   it("valueが設定されている場合にフォーマットされた日付が表示される", () => {
-    render(
-      <DateField value={dayjs("2024-04-15")} onChange={jest.fn()} />
-    );
+    render(<DateField value={dayjs("2024-04-15")} onChange={jest.fn()} />);
     expect(screen.getByDisplayValue("2024/04/15")).toBeInTheDocument();
   });
 
@@ -73,7 +73,9 @@ describe("DateField", () => {
     render(<DateField value={null} onChange={onChange} />);
     fireEvent.click(screen.getByLabelText("日付を選択"));
     fireEvent.click(screen.getByTestId("pick-day"));
-    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ $d: expect.any(Date) }));
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ $d: expect.any(Date) }),
+    );
     expect(screen.queryByTestId("day-picker")).not.toBeInTheDocument();
   });
 
@@ -91,7 +93,28 @@ describe("DateField", () => {
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "2024/04/15" } });
     expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ $d: expect.any(Date) })
+      expect.objectContaining({ $d: expect.any(Date) }),
+    );
+  });
+
+  it("全角数字と全角スラッシュ入力を半角に正規化してonChangeが呼ばれる", () => {
+    const onChange = jest.fn();
+    render(<DateField value={null} onChange={onChange} />);
+    const input = screen.getByRole("textbox");
+    fireEvent.change(input, { target: { value: "２０２４／０４／１５" } });
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ $d: expect.any(Date) }),
+    );
+    expect(input).toHaveValue("2024/04/15");
+  });
+
+  it("全角ハイフン区切り入力を正規化してonChangeが呼ばれる", () => {
+    const onChange = jest.fn();
+    render(<DateField value={null} onChange={onChange} />);
+    const input = screen.getByRole("textbox");
+    fireEvent.change(input, { target: { value: "２０２４－０４－１５" } });
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ $d: expect.any(Date) }),
     );
   });
 
@@ -124,14 +147,18 @@ describe("DateField", () => {
 
   it("helperTextが表示される", () => {
     render(
-      <DateField value={null} onChange={jest.fn()} helperText="ヘルプテキスト" />
+      <DateField
+        value={null}
+        onChange={jest.fn()}
+        helperText="ヘルプテキスト"
+      />,
     );
     expect(screen.getByText("ヘルプテキスト")).toBeInTheDocument();
   });
 
   it("errorTextが表示される", () => {
     render(
-      <DateField value={null} onChange={jest.fn()} errorText="エラーです" />
+      <DateField value={null} onChange={jest.fn()} errorText="エラーです" />,
     );
     expect(screen.getByText("エラーです")).toBeInTheDocument();
   });
@@ -145,12 +172,12 @@ describe("DateField", () => {
   it("YYYY/MMフォーマットで年月のみの入力を受け付ける", () => {
     const onChange = jest.fn();
     render(
-      <DateField value={null} onChange={onChange} format="YYYY/MM" monthOnly />
+      <DateField value={null} onChange={onChange} format="YYYY/MM" monthOnly />,
     );
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "2024/04" } });
     expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ $d: expect.any(Date) })
+      expect.objectContaining({ $d: expect.any(Date) }),
     );
   });
 

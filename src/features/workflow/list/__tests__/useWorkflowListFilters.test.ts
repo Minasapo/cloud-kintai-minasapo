@@ -21,7 +21,7 @@ const makeWorkflow = (
 describe("useWorkflowListFilters", () => {
   const currentStaffId = "staff-1";
 
-  it("returns empty items when workflows is null", () => {
+  it("workflows が null の場合、空の items を返すこと", () => {
     const { result } = renderHook(() =>
       useWorkflowListFilters({ workflows: null, currentStaffId })
     );
@@ -29,14 +29,14 @@ describe("useWorkflowListFilters", () => {
     expect(result.current.filteredItems).toEqual([]);
   });
 
-  it("returns empty items when workflows is undefined", () => {
+  it("workflows が undefined の場合、空の items を返すこと", () => {
     const { result } = renderHook(() =>
       useWorkflowListFilters({ workflows: undefined, currentStaffId })
     );
     expect(result.current.items).toEqual([]);
   });
 
-  it("returns empty items when currentStaffId is undefined", () => {
+  it("currentStaffId が undefined の場合、空の items を返すこと", () => {
     const { result } = renderHook(() =>
       useWorkflowListFilters({
         workflows: [makeWorkflow()],
@@ -46,7 +46,7 @@ describe("useWorkflowListFilters", () => {
     expect(result.current.items).toEqual([]);
   });
 
-  it("filters by currentStaffId", () => {
+  it("currentStaffId で絞り込みを行うこと", () => {
     const workflows = [
       makeWorkflow({ id: "wf-1", staffId: "staff-1" }),
       makeWorkflow({ id: "wf-2", staffId: "staff-2" }),
@@ -58,7 +58,7 @@ describe("useWorkflowListFilters", () => {
     expect(result.current.items[0].rawId).toBe("wf-1");
   });
 
-  it("initializes with default filters", () => {
+  it("デフォルトフィルターで初期化されること", () => {
     const { result } = renderHook(() =>
       useWorkflowListFilters({ workflows: [], currentStaffId })
     );
@@ -67,7 +67,7 @@ describe("useWorkflowListFilters", () => {
     expect(result.current.anyFilterActive).toBe(false);
   });
 
-  it("setFilter updates name filter", () => {
+  it("setFilter で name フィルターを更新できること", () => {
     const { result } = renderHook<UseWorkflowListFiltersResult, unknown>(() =>
       useWorkflowListFilters({ workflows: [], currentStaffId })
     );
@@ -80,7 +80,7 @@ describe("useWorkflowListFilters", () => {
     expect(result.current.anyFilterActive).toBe(true);
   });
 
-  it("setFilter does not update when value is the same", () => {
+  it("setFilter は同値指定時に更新しないこと", () => {
     const { result } = renderHook<UseWorkflowListFiltersResult, unknown>(() =>
       useWorkflowListFilters({ workflows: [], currentStaffId })
     );
@@ -94,7 +94,7 @@ describe("useWorkflowListFilters", () => {
     expect(result.current.filters).toBe(filtersBefore);
   });
 
-  it("setFilter with same array value does not re-render", () => {
+  it("setFilter は同一配列値指定時に再レンダーしないこと", () => {
     const { result } = renderHook<UseWorkflowListFiltersResult, unknown>(() =>
       useWorkflowListFilters({ workflows: [], currentStaffId })
     );
@@ -109,7 +109,7 @@ describe("useWorkflowListFilters", () => {
     expect(result.current.filters).toBe(filtersBefore);
   });
 
-  it("clearFilters resets all filters to default", () => {
+  it("clearFilters ですべてのフィルターを初期値に戻すこと", () => {
     const { result } = renderHook<UseWorkflowListFiltersResult, unknown>(() =>
       useWorkflowListFilters({ workflows: [], currentStaffId })
     );
@@ -130,7 +130,7 @@ describe("useWorkflowListFilters", () => {
     expect(result.current.anyFilterActive).toBe(false);
   });
 
-  it("filteredItems reflects status filter — non-matching status returns empty", () => {
+  it("status フィルターに一致しない場合、filteredItems が空になること", () => {
     const workflows = [
       makeWorkflow({ id: "wf-1", staffId: "staff-1", status: "SUBMITTED" as WorkflowLike["status"] }),
     ];
@@ -147,7 +147,7 @@ describe("useWorkflowListFilters", () => {
     expect(result.current.filteredItems).toHaveLength(0);
   });
 
-  it("filteredItems returns all items when status filter is empty", () => {
+  it("status フィルターが空の場合、filteredItems に全件を返すこと", () => {
     const workflows = [
       makeWorkflow({ id: "wf-1", staffId: "staff-1" }),
     ];

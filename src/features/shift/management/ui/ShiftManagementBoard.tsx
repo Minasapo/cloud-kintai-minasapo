@@ -2,193 +2,22 @@ import { AuthContext } from "@app/providers/auth/AuthContext";
 import { useCalendars } from "@entities/calendar/model/useCalendars";
 import useCognitoUser from "@entities/staff/model/useCognitoUser";
 import useShiftPlanYear from "@features/shift/management/model/useShiftPlanYear";
-import { createLogger } from "@shared/lib/logger";
 import { useAppNotification } from "@shared/lib/useAppNotification";
-import { useAutoSave } from "@shared/lib/useAutoSave";
 import dayjs from "dayjs";
 import { Loader2 } from "lucide-react";
-import React, { useContext, useMemo, useState } from "react";
+import { useContext, useMemo, useRef, useState } from "react";
 
-import * as MESSAGE_CODE from "@/errors";
-import AdminShiftSettingsDialog from "@/features/admin-config-shift/AdminShiftSettingsDialog";
-
-import { ShiftState } from "../lib/generateMockShifts";
+import type { ShiftState } from "../lib/generateMockShifts";
+import { useHolidayCalendarErrorNotification } from "../model/useHolidayCalendarErrorNotification";
+import { useShiftAutoSaveState } from "../model/useShiftAutoSaveState";
+import { useShiftBulkEditActions } from "../model/useShiftBulkEditActions";
 import { useShiftDisplayData } from "../model/useShiftDisplayData";
 import useShiftManagementDialogs from "../model/useShiftManagementDialogs";
 import useShiftSelection from "../model/useShiftSelection";
 import { useShiftStaffGroups } from "../model/useShiftStaffGroups";
-import ShiftBulkEditDialog from "./components/ShiftBulkEditDialog";
-import ShiftEditDialog from "./components/ShiftEditDialog";
+import { ShiftManagementContent } from "./components/ShiftManagementContent";
+import { ShiftManagementDialogs } from "./components/ShiftManagementDialogs";
 import { ShiftManagementHeader } from "./components/ShiftManagementHeader";
-import ShiftManagementLegend from "./components/ShiftManagementLegend";
-import { ShiftManagementTable } from "./components/ShiftManagementTable";
-
-const logger = createLogger("ShiftManagementBoard");
-
-function useShiftAutoSaveState({
-  scenario,
-  isAuthenticated,
-  pendingChangesRef,
-  persistShiftRequestChanges,
-  notify,
-  setMockShifts,
-}: {
-  scenario: string;
-  isAuthenticated: boolean;
-  pendingChangesRef: React.MutableRefObject<
-    Map<string, Map<string, ShiftState>>
-  >;
-  persistShiftRequestChanges: (
-    staffId: string,
-    dayKeys: string[],
-    nextState: ShiftState,
-  ) => Promise<void>;
-  notify: ReturnType<typeof useAppNotification>["notify"];
-  setMockShifts: React.Dispatch<
-    React.SetStateAction<Map<string, Record<string, ShiftState>>>
-  >;
-}) {
-  const [autoSaveCounter, setAutoSaveCounter] = React.useState(0);
-
-  const recordShiftChange = React.useCallback(
-    (staffId: string, dayKey: string, state: ShiftState) => {
-      if (scenario !== "actual") return;
-
-      if (!pendingChangesRef.current.has(staffId)) {
-        pendingChangesRef.current.set(staffId, new Map());
-      }
-      pendingChangesRef.current.get(staffId)!.set(dayKey, state);
-      setAutoSaveCounter((prev) => prev + 1);
-    },
-    [pendingChangesRef, scenario],
-  );
-
-  const applyShiftState = React.useCallback(
-    async (staffIds: string[], dayKeys: string[], nextState: ShiftState) => {
-      if (!staffIds.length || !dayKeys.length) return;
-
-      if (scenario === "actual") {
-        staffIds.forEach((staffId) => {
-          dayKeys.forEach((dayKey) => {
-            recordShiftChange(staffId, dayKey, nextState);
-          });
-        });
-        return;
-      }
-
-      setMockShifts((prev) => {
-        const next = new Map(prev);
-        staffIds.forEach((staffId) => {
-          const per = { ...(next.get(staffId) || {}) };
-          dayKeys.forEach((key) => {
-            per[key] = nextState;
-          });
-          next.set(staffId, per);
-        });
-        return next;
-      });
-    },
-    [recordShiftChange, scenario, setMockShifts],
-  );
-
-  const { isSaving, isPending, lastSavedAt, lastChangedAt } = useAutoSave({
-    saveFn: async () => {
-      if (scenario !== "actual") return;
-
-      const changes = pendingChangesRef.current;
-      if (changes.size === 0) return;
-
-      const changesToSave = new Map(changes);
-      pendingChangesRef.current = new Map();
-
-      const promises: Promise<void>[] = [];
-      changesToSave.forEach((dayChanges, staffId) => {
-        dayChanges.forEach((state, dayKey) => {
-          promises.push(persistShiftRequestChanges(staffId, [dayKey], state));
-        });
-      });
-
-      if (promises.length > 0) {
-        await Promise.all(promises);
-      }
-    },
-    data: autoSaveCounter,
-    enabled: scenario === "actual" && isAuthenticated,
-    delay: 2000,
-    onSaveSuccess: () => {
-      notify({
-        title: "シフトを自動保存しました",
-        tone: "success",
-        dedupeKey: "shift-autosave-success",
-      });
-    },
-    onSaveError: (error) => {
-      logger.error("Auto-save error:", error);
-      notify({
-        title: "エラー",
-        description: "シフトの自動保存に失敗しました",
-        tone: "error",
-        dedupeKey: "shift-autosave-error",
-      });
-    },
-  });
-
-  return {
-    applyShiftState,
-    isSaving,
-    isPending,
-    lastSavedAt,
-    lastChangedAt,
-  };
-}
-
-function useHolidayCalendarErrorNotification({
-  calendarsError,
-  notify,
-}: {
-  calendarsError: unknown;
-  notify: ReturnType<typeof useAppNotification>["notify"];
-}) {
-  React.useEffect(() => {
-    if (calendarsError) {
-      logger.error(calendarsError);
-      notify({
-        title: "エラー",
-        description: MESSAGE_CODE.E00001,
-        tone: "error",
-        dedupeKey: "holiday-load-error",
-      });
-    }
-  }, [calendarsError, notify]);
-}
-
-function useShiftBulkEditActions({
-  hasBulkSelection,
-  openBulkEditDialog,
-  applyBulkEdit,
-  selectedStaffIds,
-  selectedDayKeys,
-}: {
-  hasBulkSelection: boolean;
-  openBulkEditDialog: () => void;
-  applyBulkEdit: (staffIds: string[], dayKeys: string[]) => Promise<void>;
-  selectedStaffIds: Set<string>;
-  selectedDayKeys: Set<string>;
-}) {
-  const handleOpenBulkEditDialog = React.useCallback(() => {
-    if (!hasBulkSelection) return;
-    openBulkEditDialog();
-  }, [hasBulkSelection, openBulkEditDialog]);
-
-  const handleApplyBulkEdit = React.useCallback(() => {
-    if (!hasBulkSelection) return;
-    const staffIds = Array.from(selectedStaffIds);
-    const selectedDayKeyList = Array.from(selectedDayKeys);
-    void applyBulkEdit(staffIds, selectedDayKeyList);
-  }, [applyBulkEdit, hasBulkSelection, selectedDayKeys, selectedStaffIds]);
-
-  return { handleOpenBulkEditDialog, handleApplyBulkEdit };
-}
 
 // ShiftManagement: シフト管理テーブル。左固定列を前面に出し、各日ごとの出勤人数を集計して表示する。
 export default function ShiftManagementBoard() {
@@ -286,7 +115,7 @@ export default function ShiftManagementBoard() {
     shiftPlanPlans,
   });
 
-  const pendingChangesRef = React.useRef<Map<string, Map<string, ShiftState>>>(
+  const pendingChangesRef = useRef<Map<string, Map<string, ShiftState>>>(
     new Map(),
   );
   const {
@@ -354,86 +183,47 @@ export default function ShiftManagementBoard() {
         onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
-      {(loading || shiftRequestsLoading) && (
-        <div className="flex justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
-        </div>
-      )}
-
-      {error && (
-        <div
-          className="mb-4 rounded bg-red-50 p-4 text-sm text-red-800"
-          role="alert"
-        >
-          スタッフデータの取得に失敗しました
-        </div>
-      )}
-
-      {Boolean(calendarsError) && (
-        <div
-          className="mb-4 rounded bg-red-50 p-4 text-sm text-red-800"
-          role="alert"
-        >
-          カレンダー情報の取得に失敗しました
-        </div>
-      )}
-
-      {!loading && !shiftRequestsLoading && (
-        <ShiftManagementTable
-          days={days}
-          groupedShiftStaffs={groupedShiftStaffs.map((group) => ({
-            groupName: group.groupName,
-            staffs: group.members.map((staff) => ({
-              id: staff.id,
-              name: `${staff.familyName}${staff.givenName}`,
-            })),
-          }))}
-          holidaySet={holidaySet}
-          companyHolidaySet={companyHolidaySet}
-          holidayNameMap={holidayNameMap}
-          companyHolidayNameMap={companyHolidayNameMap}
-          selectedStaffIds={selectedStaffIds}
-          selectedDayKeys={selectedDayKeys}
-          onStaffCheckboxChange={handleStaffCheckboxChange}
-          onDayCheckboxChange={handleDayCheckboxChange}
-          displayShifts={displayShifts}
-          dailyCounts={dailyCounts}
-          plannedDailyCounts={plannedDailyCounts}
-          onOpenShiftEditDialog={openShiftEditDialog}
-        />
-      )}
-
-      <div className="mt-6">
-        <ShiftManagementLegend />
-      </div>
-
-      {/* ダイアログ類 */}
-      <ShiftEditDialog
-        open={isEditDialogOpen}
-        editingCell={editingCell}
-        editingState={editingState}
-        isSaving={isSavingSingleEdit}
-        onClose={closeShiftEditDialog}
-        onStateChange={handleEditingStateChange}
-        onSubmit={saveShiftEdit}
+      <ShiftManagementContent
+        days={days}
+        groupedShiftStaffs={groupedShiftStaffs}
+        loading={loading}
+        shiftRequestsLoading={shiftRequestsLoading}
+        error={error}
+        calendarsError={calendarsError}
+        holidaySet={holidaySet}
+        companyHolidaySet={companyHolidaySet}
+        holidayNameMap={holidayNameMap}
+        companyHolidayNameMap={companyHolidayNameMap}
+        selectedStaffIds={selectedStaffIds}
+        selectedDayKeys={selectedDayKeys}
+        onStaffCheckboxChange={handleStaffCheckboxChange}
+        onDayCheckboxChange={handleDayCheckboxChange}
+        displayShifts={displayShifts}
+        dailyCounts={dailyCounts}
+        plannedDailyCounts={plannedDailyCounts}
+        onOpenShiftEditDialog={openShiftEditDialog}
       />
 
-      <ShiftBulkEditDialog
-        open={isBulkDialogOpen}
+      <ShiftManagementDialogs
+        isEditDialogOpen={isEditDialogOpen}
+        editingCell={editingCell}
+        editingState={editingState}
+        isSavingSingleEdit={isSavingSingleEdit}
+        closeShiftEditDialog={closeShiftEditDialog}
+        handleEditingStateChange={handleEditingStateChange}
+        saveShiftEdit={saveShiftEdit}
+        isBulkDialogOpen={isBulkDialogOpen}
         selectedStaffCount={selectedStaffIds.size}
         selectedDayCount={selectedDayKeys.size}
         selectedCellCount={selectedCellCount}
         bulkEditState={bulkEditState}
-        isSaving={isSavingBulkEdit}
-        canSubmit={hasBulkSelection}
-        onClose={closeBulkEditDialog}
-        onStateChange={handleBulkEditStateChange}
-        onSubmit={handleApplyBulkEdit}
-      />
-
-      <AdminShiftSettingsDialog
-        open={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
+        isSavingBulkEdit={isSavingBulkEdit}
+        hasBulkSelection={hasBulkSelection}
+        closeBulkEditDialog={closeBulkEditDialog}
+        handleBulkEditStateChange={handleBulkEditStateChange}
+        handleApplyBulkEdit={handleApplyBulkEdit}
+        isSettingsOpen={isSettingsOpen}
+        onCloseSettings={() => setIsSettingsOpen(false)}
       />
     </div>
   );

@@ -1,7 +1,8 @@
+import { isShiftWorkType } from "@entities/staff/lib/workTypeOptions";
 import { StaffFormValues } from "@features/admin/staff/model/staffForm";
 import { Autocomplete } from "@mui/material";
 import { AppTextField } from "@shared/ui/form";
-import { Control, Controller } from "react-hook-form";
+import { Control, Controller, useWatch } from "react-hook-form";
 
 const LABEL_CELL_CLASS =
   "w-[220px] min-w-[180px] border-b border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900";
@@ -13,6 +14,15 @@ type Props = {
 };
 
 export function ShiftGroupRow({ control, shiftGroupOptions }: Props) {
+  const workType = useWatch({
+    control,
+    name: "workType",
+  });
+
+  if (!isShiftWorkType(workType)) {
+    return null;
+  }
+
   return (
     <tr>
       <td className={LABEL_CELL_CLASS}>シフトグループ</td>

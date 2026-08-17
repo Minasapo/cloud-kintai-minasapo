@@ -1,7 +1,10 @@
 // ─── Imports (must come before jest.mock per ESLint import/first) ─────────────
 import { AuthContext } from "@app/providers/auth/AuthContext";
 import { AppConfigContext } from "@entities/app-config/model/AppConfigContext";
-import { StaffRole, type StaffType } from "@entities/staff/model/useStaffs/useStaffs";
+import {
+  StaffRole,
+  type StaffType,
+} from "@entities/staff/model/useStaffs/useStaffs";
 import { ApproverSettingMode } from "@shared/api/graphql/types";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -212,6 +215,7 @@ describe("CreateStaffDialog", () => {
       const user = userEvent.setup();
       renderComponent();
       await user.click(screen.getByRole("button", { name: /スタッフ登録/ }));
+      await user.click(screen.getByRole("tab", { name: "ワークフロー" }));
       expect(
         screen.getByRole("radio", { name: "管理者全員 (デフォルト)" }),
       ).toBeInTheDocument();
@@ -230,13 +234,14 @@ describe("CreateStaffDialog", () => {
       expect(screen.getByRole("button", { name: "登録" })).toBeDisabled();
     });
 
-    it("シフトグループが空の場合、案内メッセージが表示される", async () => {
+    it("初期状態 (weekday) ではシフトグループ行が表示されない", async () => {
       const user = userEvent.setup();
       renderComponent();
       await user.click(screen.getByRole("button", { name: /スタッフ登録/ }));
       expect(
-        screen.getByText(/利用可能なシフトグループがありません/),
-      ).toBeInTheDocument();
+        screen.queryByText(/利用可能なシフトグループがありません/),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText("シフトグループ")).not.toBeInTheDocument();
     });
 
     it("シフトグループが存在する場合 Autocomplete が表示される", async () => {
@@ -246,9 +251,7 @@ describe("CreateStaffDialog", () => {
         ],
       } as unknown as React.ContextType<typeof AppConfigContext>;
 
-      const WrapperWithGroups = ({
-        children,
-      }: React.PropsWithChildren) => (
+      const WrapperWithGroups = ({ children }: React.PropsWithChildren) => (
         <AuthContext.Provider value={baseAuthContextValue}>
           <AppConfigContext.Provider value={appConfigWithGroups}>
             {children}
@@ -274,7 +277,7 @@ describe("CreateStaffDialog", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("cognitoUser.owner が true のとき、オーナー権限フィールドが表示される", async () => {
+    it("cognitoUser.owner が true のとき、オーナー設定と開発者向けタブが有効になる", async () => {
       const ownerAuthValue = {
         ...baseAuthContextValue,
         cognitoUser: {
@@ -308,16 +311,24 @@ describe("CreateStaffDialog", () => {
         { wrapper: OwnerWrapper },
       );
       await user.click(screen.getByRole("button", { name: /スタッフ登録/ }));
+      expect(screen.getByRole("tab", { name: "オーナー設定" })).toBeEnabled();
+      expect(screen.getByRole("tab", { name: "開発者向け" })).toBeEnabled();
+
+      await user.click(screen.getByRole("tab", { name: "オーナー設定" }));
       expect(screen.getByText("オーナー権限")).toBeInTheDocument();
+
+      await user.click(screen.getByRole("tab", { name: "開発者向け" }));
       expect(screen.getByText("開発者フラグ")).toBeInTheDocument();
     });
 
-    it("cognitoUser.owner が false のとき、オーナー権限フィールドが非表示", async () => {
+    it("cognitoUser.owner が false のとき、オーナー設定と開発者向けタブが無効になる", async () => {
       const user = userEvent.setup();
       renderComponent();
       await user.click(screen.getByRole("button", { name: /スタッフ登録/ }));
-      expect(screen.queryByText("オーナー権限")).not.toBeInTheDocument();
-      expect(screen.queryByText("開発者フラグ")).not.toBeInTheDocument();
+      expect(screen.getByRole("tab", { name: "オーナー設定" })).toBeDisabled();
+      expect(screen.getByRole("tab", { name: "開発者向け" })).toBeDisabled();
+      expect(screen.getByText("オーナー権限")).not.toBeVisible();
+      expect(screen.getByText("開発者フラグ")).not.toBeVisible();
     });
 
     it("ダイアログを開くと勤怠管理対象チェックボックスが表示される", async () => {
@@ -327,8 +338,6 @@ describe("CreateStaffDialog", () => {
       expect(screen.getByText("勤怠管理対象")).toBeInTheDocument();
     });
   });
-
-  // ─── バリデーション ────────────────────────────────────────────────────────
   describe("フォームバリデーション", () => {
     it("姓をクリアすると isValid が false になり登録ボタンが無効のままになる", async () => {
       const user = userEvent.setup();
@@ -419,6 +428,7 @@ describe("CreateStaffDialog", () => {
       const user = userEvent.setup();
       renderComponent();
       await user.click(screen.getByRole("button", { name: /スタッフ登録/ }));
+      await user.click(screen.getByRole("tab", { name: "ワークフロー" }));
       const adminRadio = screen.getByRole("radio", {
         name: "管理者全員 (デフォルト)",
       });
@@ -453,6 +463,7 @@ describe("CreateStaffDialog", () => {
       );
 
       await user.click(screen.getByRole("button", { name: /スタッフ登録/ }));
+      await user.click(screen.getByRole("tab", { name: "ワークフロー" }));
       await user.click(
         screen.getByRole("radio", { name: "特定の承認者を1名に限定" }),
       );
@@ -469,6 +480,7 @@ describe("CreateStaffDialog", () => {
       const user = userEvent.setup();
       renderComponent();
       await user.click(screen.getByRole("button", { name: /スタッフ登録/ }));
+      await user.click(screen.getByRole("tab", { name: "ワークフロー" }));
       await user.click(
         screen.getByRole("radio", { name: "特定の承認者を複数選択" }),
       );
@@ -487,6 +499,7 @@ describe("CreateStaffDialog", () => {
       const user = userEvent.setup();
       renderComponent();
       await user.click(screen.getByRole("button", { name: /スタッフ登録/ }));
+      await user.click(screen.getByRole("tab", { name: "ワークフロー" }));
       await user.click(
         screen.getByRole("radio", { name: "特定の承認者を複数選択" }),
       );
@@ -608,9 +621,7 @@ describe("CreateStaffDialog", () => {
     });
 
     it("addUserToGroup が失敗した場合、エラー通知が表示され後続処理は呼ばれない", async () => {
-      mockAddUserToGroupFn.mockRejectedValue(
-        new Error("add to group failed"),
-      );
+      mockAddUserToGroupFn.mockRejectedValue(new Error("add to group failed"));
 
       const { user } = await openAndFill();
       await user.click(screen.getByRole("button", { name: "登録" }));
@@ -659,7 +670,8 @@ describe("CreateStaffDialog", () => {
           expect.objectContaining({
             payload: expect.objectContaining({
               tone: "error",
-              message: expect.stringContaining("作成したスタッフが見つかりません"),
+              message:
+                expect.stringContaining("作成したスタッフが見つかりません"),
             }),
           }),
         );

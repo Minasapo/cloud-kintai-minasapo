@@ -8,7 +8,7 @@ describe("createLazyRoute", () => {
     <div data-testid="content">{label}</div>
   );
 
-  it("returns Component that renders lazy loaded module", async () => {
+  it("遅延読み込みモジュールを描画する Component を返すこと", async () => {
     const lazy = createLazyRoute(async () => ({ default: Component }));
 
     const route = await lazy();
@@ -18,7 +18,7 @@ describe("createLazyRoute", () => {
     expect(screen.getByTestId("content")).toHaveTextContent("hello");
   });
 
-  it("wraps rendered node when wrap option is provided", async () => {
+  it("wrap オプション指定時に描画ノードをラップすること", async () => {
     const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
       <div data-testid="wrapper">{children}</div>
     );
@@ -35,7 +35,7 @@ describe("createLazyRoute", () => {
     expect(screen.getByTestId("content")).toHaveTextContent("hello");
   });
 
-  it("attaches loader, action, and shouldRevalidate when provided", async () => {
+  it("loader/action/shouldRevalidate 指定時にそれらを設定すること", async () => {
     const loader = jest.fn();
     const action = jest.fn();
     const shouldRevalidate = jest.fn();
@@ -53,7 +53,7 @@ describe("createLazyRoute", () => {
     expect(route.shouldRevalidate).toBe(shouldRevalidate);
   });
 
-  it("uses ErrorBoundary from errorElement when provided", async () => {
+  it("errorElement 指定時にそれを ErrorBoundary として利用すること", async () => {
     const errorElement = <div data-testid="error">error</div>;
     const lazy = createLazyRoute(async () => ({ default: Component }), {
       errorElement,
@@ -67,21 +67,21 @@ describe("createLazyRoute", () => {
     expect(screen.getByTestId("error")).toHaveTextContent("error");
   });
 
-  it("sets default ErrorBoundary when no boundary option is provided", async () => {
+  it("boundary 未指定時にデフォルト ErrorBoundary を設定すること", async () => {
     const lazy = createLazyRoute(async () => ({ default: Component }));
     const route = await lazy();
 
     expect(route.ErrorBoundary).toBeDefined();
   });
 
-  it("sets default HydrateFallback when no fallback option is provided", async () => {
+  it("fallback 未指定時にデフォルト HydrateFallback を設定すること", async () => {
     const lazy = createLazyRoute(async () => ({ default: Component }));
     const route = await lazy();
 
     expect(route.HydrateFallback).toBeDefined();
   });
 
-  it("wraps component with feature error boundary", async () => {
+  it("コンポーネントを feature error boundary でラップすること", async () => {
     const ThrowingComponent: React.FC = () => {
       throw new Error("feature crash");
     };
@@ -103,7 +103,7 @@ describe("createLazyRoute", () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it("supports hydrateFallback as element or component", async () => {
+  it("hydrateFallback に element と component の両方を指定できること", async () => {
     const elementFallback = <div data-testid="fallback-element">fallback</div>;
     const lazyElement = createLazyRoute(async () => ({ default: Component }), {
       hydrateFallback: elementFallback,

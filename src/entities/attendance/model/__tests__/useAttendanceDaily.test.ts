@@ -58,7 +58,7 @@ describe("useAttendanceDaily", () => {
   });
 
   describe("initial state", () => {
-    it("returns empty lists and no error when staffs is empty", async () => {
+    it("staffs が空の場合、空リストを返し error がないこと", async () => {
       const { result } = renderHook(() =>
         useAttendanceDaily({ staffs: [] }),
       );
@@ -69,7 +69,7 @@ describe("useAttendanceDaily", () => {
       expect(mockTrigger).not.toHaveBeenCalled();
     });
 
-    it("skips loading when staffLoading is true", async () => {
+    it("staffLoading=true の場合、読み込み処理をスキップすること", async () => {
       const { result } = renderHook(() =>
         useAttendanceDaily({ staffs: [STAFF_A], staffLoading: true }),
       );
@@ -78,7 +78,7 @@ describe("useAttendanceDaily", () => {
       expect(mockTrigger).not.toHaveBeenCalled();
     });
 
-    it("skips loading when staffError is set", async () => {
+    it("staffError が設定されている場合、読み込み処理をスキップすること", async () => {
       const error = new Error("fetch failed");
       const { result } = renderHook(() =>
         useAttendanceDaily({ staffs: [STAFF_A], staffError: error }),
@@ -90,7 +90,7 @@ describe("useAttendanceDaily", () => {
   });
 
   describe("loadAttendanceDataByMonth", () => {
-    it("fetches attendance for all staffs in the month", async () => {
+    it("月内の全スタッフ分の勤怠を取得すること", async () => {
       const staffs = [STAFF_A, STAFF_B];
       mockTrigger.mockResolvedValue({ data: makeAttendance("user-a") });
 
@@ -116,7 +116,7 @@ describe("useAttendanceDaily", () => {
       );
     });
 
-    it("populates attendanceDailyList with staff data", async () => {
+    it("attendanceDailyList にスタッフ勤怠データを設定すること", async () => {
       const staffs = [STAFF_A];
       const attendance = makeAttendance("user-a", "2024-01-15");
       mockTrigger.mockResolvedValue({ data: attendance });
@@ -138,7 +138,7 @@ describe("useAttendanceDaily", () => {
       });
     });
 
-    it("uses cached data on second call for same month", async () => {
+    it("同月2回目の呼び出しではキャッシュを利用すること", async () => {
       mockTrigger.mockResolvedValue({ data: makeAttendance("user-a") });
       const staffs = [STAFF_A];
 
@@ -160,7 +160,7 @@ describe("useAttendanceDaily", () => {
       expect(mockTrigger.mock.calls.length).toBe(callCount);
     });
 
-    it("bypasses cache when forceRefresh is true", async () => {
+    it("forceRefresh=true の場合、キャッシュを使わず再取得すること", async () => {
       mockTrigger.mockResolvedValue({ data: makeAttendance("user-a") });
       const staffs = [STAFF_A];
 
@@ -183,7 +183,7 @@ describe("useAttendanceDaily", () => {
       expect(mockTrigger.mock.calls.length).toBeGreaterThan(callCount);
     });
 
-    it("sets error state when trigger throws non-duplicate error", async () => {
+    it("重複以外のエラー時に error 状態を設定すること", async () => {
       const fetchError = new Error("Network error");
       mockTrigger.mockResolvedValue({ error: fetchError });
       const staffs = [STAFF_A];
@@ -199,7 +199,7 @@ describe("useAttendanceDaily", () => {
       ).rejects.toThrow("Network error");
     });
 
-    it("handles null attendance data gracefully", async () => {
+    it("attendance データが null の場合でも適切に処理すること", async () => {
       mockTrigger.mockResolvedValue({ data: null });
       const staffs = [STAFF_A];
 
@@ -214,7 +214,7 @@ describe("useAttendanceDaily", () => {
       expect(result.current.attendanceDailyList[0].attendance).toBeNull();
     });
 
-    it("records duplicate attendance conflict", async () => {
+    it("勤怠の重複競合を記録すること", async () => {
       const duplicateError = {
         details: {
           code: "DUPLICATE_CONFLICT",
@@ -243,7 +243,7 @@ describe("useAttendanceDaily", () => {
       });
     });
 
-    it("ignores duplicate outside the target month range", async () => {
+    it("対象月範囲外の重複は無視すること", async () => {
       const duplicateError = {
         details: {
           code: "DUPLICATE_CONFLICT",
@@ -266,7 +266,7 @@ describe("useAttendanceDaily", () => {
       expect(result.current.duplicateAttendances).toHaveLength(0);
     });
 
-    it("handles staffs with null name fields", async () => {
+    it("名前フィールドが null のスタッフでも処理できること", async () => {
       const staffNoName: AttendanceDailyStaff = {
         cognitoUserId: "user-c",
         givenName: null,
@@ -290,7 +290,7 @@ describe("useAttendanceDaily", () => {
   });
 
   describe("subscription lifecycle", () => {
-    it("subscribes to create, update, delete attendance on mount", async () => {
+    it("マウント時に勤怠の create/update/delete を購読すること", async () => {
       mockTrigger.mockResolvedValue({ data: null });
       const staffs = [STAFF_A];
 
@@ -311,7 +311,7 @@ describe("useAttendanceDaily", () => {
       });
     });
 
-    it("unsubscribes all subscriptions on unmount", async () => {
+    it("アンマウント時に全サブスクリプションを解除すること", async () => {
       mockTrigger.mockResolvedValue({ data: null });
       const staffs = [STAFF_A];
 
@@ -325,7 +325,7 @@ describe("useAttendanceDaily", () => {
       expect(mockUnsubscribe).toHaveBeenCalledTimes(3);
     });
 
-    it("does not subscribe when staffs is empty", () => {
+    it("staffs が空の場合、サブスクリプションを開始しないこと", () => {
       renderHook(() =>
         useAttendanceDaily({ staffs: [] }),
       );

@@ -473,19 +473,22 @@ describe("DesktopCalendarView", () => {
       );
     };
 
-    it("Ok ステータスの場合、'OK' チップを表示する", () => {
+    it("Ok ステータスの場合、CheckCircleIcon を表示する", () => {
       renderWithStatus(AttendanceStatus.Ok);
-      expect(screen.getByText("OK")).toBeInTheDocument();
+      expect(screen.getByTestId("CheckCircleIcon")).toBeInTheDocument();
+      expect(screen.queryByText("OK")).not.toBeInTheDocument();
     });
 
-    it("Error ステータスの場合、'要確認' チップを表示する", () => {
+    it("Error ステータスの場合、ErrorIcon を表示する", () => {
       renderWithStatus(AttendanceStatus.Error);
-      expect(screen.getByText("要確認")).toBeInTheDocument();
+      expect(screen.getByTestId("ErrorIcon")).toBeInTheDocument();
+      expect(screen.queryByText("要確認")).not.toBeInTheDocument();
     });
 
-    it("Requesting ステータスの場合、'申請中' チップを表示する", () => {
+    it("Requesting ステータスの場合、PendingIcon を表示する", () => {
       renderWithStatus(AttendanceStatus.Requesting);
-      expect(screen.getByText("申請中")).toBeInTheDocument();
+      expect(screen.getByTestId("PendingIcon")).toBeInTheDocument();
+      expect(screen.queryByText("申請中")).not.toBeInTheDocument();
     });
 
     it("Late ステータスの場合、'遅刻' チップを表示する", () => {

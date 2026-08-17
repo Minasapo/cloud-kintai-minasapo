@@ -64,7 +64,7 @@ describe("useWorkflowDetailData", () => {
     mockSubscribeNotifications.mockReturnValue(mockUnsubscribeNotification);
   });
 
-  it("starts with null workflow and no loading when id is undefined", async () => {
+  it("id が undefined の場合、workflow は null かつ loading は false で開始すること", async () => {
     const { result } = renderHook(() => useWorkflowDetailData(undefined));
 
     expect(result.current.workflow).toBeNull();
@@ -72,7 +72,7 @@ describe("useWorkflowDetailData", () => {
     expect(result.current.error).toBeNull();
   });
 
-  it("fetches workflow when id is provided", async () => {
+  it("id が指定された場合、workflow を取得すること", async () => {
     const workflow = makeWorkflow();
     setupGraphqlMock({ data: { getWorkflow: workflow }, errors: [] });
 
@@ -86,7 +86,7 @@ describe("useWorkflowDetailData", () => {
     expect(result.current.error).toBeNull();
   });
 
-  it("sets loading to true during fetch and false after", async () => {
+  it("取得中は loading=true、完了後は loading=false になること", async () => {
     let resolveFetch!: (value: unknown) => void;
     const fetchPromise = new Promise((resolve) => {
       resolveFetch = resolve;
@@ -110,7 +110,7 @@ describe("useWorkflowDetailData", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
   });
 
-  it("sets error when workflow is not found", async () => {
+  it("workflow が見つからない場合、error を設定すること", async () => {
     setupGraphqlMock({ data: { getWorkflow: null }, errors: [] });
 
     const { result } = renderHook(() => useWorkflowDetailData("wf-1"));
@@ -123,7 +123,7 @@ describe("useWorkflowDetailData", () => {
     expect(result.current.error).toContain("見つかりませんでした");
   });
 
-  it("sets error when graphql throws", async () => {
+  it("graphql が throw した場合、error を設定すること", async () => {
     mockGraphql.mockImplementation(({ query }: { query: string }) => {
       if (query === getWorkflow) return Promise.reject(new Error("Network error"));
       return { subscribe: mockSubscribe };
@@ -138,7 +138,7 @@ describe("useWorkflowDetailData", () => {
     expect(result.current.error).toBe("Network error");
   });
 
-  it("sets error when response has GraphQL errors", async () => {
+  it("レスポンスに GraphQL errors がある場合、error を設定すること", async () => {
     setupGraphqlMock({ data: null, errors: [{ message: "Unauthorized" }] });
 
     const { result } = renderHook(() => useWorkflowDetailData("wf-1"));
@@ -148,7 +148,7 @@ describe("useWorkflowDetailData", () => {
     });
   });
 
-  it("subscribes to workflow updates when id is provided", async () => {
+  it("id が指定された場合、workflow 更新サブスクリプションを開始すること", async () => {
     setupGraphqlMock();
 
     const { unmount } = renderHook(() => useWorkflowDetailData("wf-1"));
@@ -159,12 +159,12 @@ describe("useWorkflowDetailData", () => {
     expect(mockUnsubscribe).toHaveBeenCalled();
   });
 
-  it("does not subscribe when id is undefined", () => {
+  it("id が undefined の場合、サブスクリプションを開始しないこと", () => {
     renderHook(() => useWorkflowDetailData(undefined));
     expect(mockSubscribe).not.toHaveBeenCalled();
   });
 
-  it("allows setting workflow via setWorkflow", async () => {
+  it("setWorkflow で workflow を更新できること", async () => {
     setupGraphqlMock();
 
     const { result } = renderHook(() => useWorkflowDetailData("wf-1"));
@@ -179,7 +179,7 @@ describe("useWorkflowDetailData", () => {
     expect(result.current.workflow?.status).toBe("APPROVED");
   });
 
-  it("subscribes to comment notifications when currentStaffId and onNewComment are provided", async () => {
+  it("currentStaffId と onNewComment がある場合、コメント通知サブスクリプションを開始すること", async () => {
     setupGraphqlMock();
 
     const onNewComment = jest.fn();
@@ -203,7 +203,7 @@ describe("useWorkflowDetailData", () => {
     expect(mockUnsubscribeNotification).toHaveBeenCalled();
   });
 
-  it("does not subscribe to notifications when currentStaffId is missing", async () => {
+  it("currentStaffId がない場合、通知サブスクリプションを開始しないこと", async () => {
     setupGraphqlMock();
 
     renderHook(() =>
@@ -216,7 +216,7 @@ describe("useWorkflowDetailData", () => {
     expect(mockSubscribeNotifications).not.toHaveBeenCalled();
   });
 
-  it("calls refetchWorkflow to reload workflow data", async () => {
+  it("refetchWorkflow 呼び出しで workflow を再取得すること", async () => {
     const workflow = makeWorkflow();
     const updatedWorkflow = makeWorkflow({ status: "APPROVED" });
     let callCount = 0;

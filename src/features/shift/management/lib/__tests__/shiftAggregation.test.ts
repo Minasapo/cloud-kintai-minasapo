@@ -13,7 +13,7 @@ const days = [
 ];
 
 describe("calculateDailyCounts", () => {
-  it("counts work entries for each day", () => {
+  it("各日の勤務エントリ数を集計すること", () => {
     const displayShifts = new Map([
       ["staff-1", { "2024-01-01": "work", "2024-01-02": "fixedOff", "2024-01-03": "work" }],
       ["staff-2", { "2024-01-01": "work", "2024-01-02": "work",     "2024-01-03": "empty" }],
@@ -26,7 +26,7 @@ describe("calculateDailyCounts", () => {
     expect(result.get("2024-01-03")).toBe(1);
   });
 
-  it("returns 0 for all days when no staff work", () => {
+  it("勤務者がいない場合、全日 0 を返すこと", () => {
     const displayShifts = new Map([
       ["staff-1", { "2024-01-01": "fixedOff", "2024-01-02": "empty", "2024-01-03": "auto" }],
     ]);
@@ -38,14 +38,14 @@ describe("calculateDailyCounts", () => {
     expect(result.get("2024-01-03")).toBe(0);
   });
 
-  it("returns 0 for all days when staffIds is empty", () => {
+  it("staffIds が空の場合、全日 0 を返すこと", () => {
     const displayShifts = new Map<string, Record<string, string>>();
     const result = calculateDailyCounts(days, [], displayShifts as never);
 
     expect(result.get("2024-01-01")).toBe(0);
   });
 
-  it("handles missing staff entry in displayShifts", () => {
+  it("displayShifts にスタッフ情報がない場合でも処理できること", () => {
     const displayShifts = new Map<string, Record<string, string>>();
     const result = calculateDailyCounts(days, ["staff-999"], displayShifts as never);
 
@@ -60,7 +60,7 @@ describe("calculateGroupDailyCounts", () => {
     ["staff-3", { "2024-01-01": "fixedOff", "2024-01-02": "work", "2024-01-03": "work" }],
   ]);
 
-  it("counts work entries per group per day", () => {
+  it("グループごと・日ごとの勤務エントリ数を集計すること", () => {
     const groups = [
       { groupName: "A", members: [{ id: "staff-1" }, { id: "staff-2" }] },
       { groupName: "B", members: [{ id: "staff-3" }] },
@@ -74,7 +74,7 @@ describe("calculateGroupDailyCounts", () => {
     expect(result.get("B")?.get("2024-01-03")).toBe(1);
   });
 
-  it("returns empty map for empty groups", () => {
+  it("groups が空の場合、空の Map を返すこと", () => {
     const result = calculateGroupDailyCounts(days, [], displayShifts as never);
     expect(result.size).toBe(0);
   });
@@ -83,7 +83,7 @@ describe("calculateGroupDailyCounts", () => {
 describe("calculatePlannedDailyCounts", () => {
   const monthStart = dayjs("2024-01-01");
 
-  it("returns null for all days when shiftPlanPlans is null", () => {
+  it("shiftPlanPlans が null の場合、全日 null を返すこと", () => {
     const result = calculatePlannedDailyCounts(days, monthStart, null);
 
     expect(result.get("2024-01-01")).toBeNull();
@@ -91,14 +91,14 @@ describe("calculatePlannedDailyCounts", () => {
     expect(result.get("2024-01-03")).toBeNull();
   });
 
-  it("returns null for all days when no matching month plan", () => {
+  it("一致する月次計画がない場合、全日 null を返すこと", () => {
     const plans = [{ month: 3, dailyCapacities: [5, 5, 5] }];
     const result = calculatePlannedDailyCounts(days, monthStart, plans as never);
 
     expect(result.get("2024-01-01")).toBeNull();
   });
 
-  it("returns planned capacities for matching month", () => {
+  it("一致する月次計画がある場合、計画人数を返すこと", () => {
     const plans = [{ month: 1, dailyCapacities: [3, 5, 4] }];
     const result = calculatePlannedDailyCounts(days, monthStart, plans as never);
 
@@ -107,7 +107,7 @@ describe("calculatePlannedDailyCounts", () => {
     expect(result.get("2024-01-03")).toBe(4);
   });
 
-  it("returns null for capacity index beyond dailyCapacities length", () => {
+  it("dailyCapacities の範囲外インデックスは null を返すこと", () => {
     const plans = [{ month: 1, dailyCapacities: [3] }];
     const result = calculatePlannedDailyCounts(days, monthStart, plans as never);
 
@@ -115,7 +115,7 @@ describe("calculatePlannedDailyCounts", () => {
     expect(result.get("2024-01-02")).toBeNull();
   });
 
-  it("returns null for NaN capacity values", () => {
+  it("計画人数が NaN の場合、null を返すこと", () => {
     const plans = [{ month: 1, dailyCapacities: [NaN, 5, 4] }];
     const result = calculatePlannedDailyCounts(days, monthStart, plans as never);
 
@@ -123,7 +123,7 @@ describe("calculatePlannedDailyCounts", () => {
     expect(result.get("2024-01-02")).toBe(5);
   });
 
-  it("returns null for all days when dailyCapacities is null", () => {
+  it("dailyCapacities が null の場合、全日 null を返すこと", () => {
     const plans = [{ month: 1, dailyCapacities: null }];
     const result = calculatePlannedDailyCounts(days, monthStart, plans as never);
 

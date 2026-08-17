@@ -3,20 +3,16 @@ import "./AttendanceListHeader.scss";
 import { PageTitle } from "@shared/ui/typography";
 import { useState } from "react";
 
-type AttendanceListHeaderProps = {
-  rangeLabelForDisplay: string;
-};
-
-export default function AttendanceListHeader({
-  rangeLabelForDisplay,
-}: AttendanceListHeaderProps) {
+export default function AttendanceListHeader() {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   return (
     <section className="attendance-list-header">
       <div className="attendance-list-header__inner">
         <div className="attendance-list-header__content">
-          <PageTitle className="attendance-list-header__title">勤怠一覧</PageTitle>
+          <PageTitle className="attendance-list-header__title">
+            勤怠一覧
+          </PageTitle>
           <p
             id="attendance-list-header-description"
             className={`attendance-list-header__description${
@@ -36,11 +32,6 @@ export default function AttendanceListHeader({
           >
             {isDescriptionExpanded ? "閉じる" : "続きを読む"}
           </button>
-        </div>
-        <div className="attendance-list-header__summary">
-          <p className="attendance-list-header__summary-inline">
-            集計期間：{rangeLabelForDisplay}
-          </p>
         </div>
       </div>
     </section>

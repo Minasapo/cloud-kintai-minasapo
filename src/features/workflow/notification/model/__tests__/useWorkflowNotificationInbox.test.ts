@@ -193,7 +193,7 @@ describe("useWorkflowNotificationInbox", () => {
   // 1. Initial state – unauthenticated
   // -------------------------------------------------------------------------
   describe("unauthenticated state", () => {
-    it("returns empty notifications and zero unread count when not authenticated", async () => {
+    it("未認証状態の場合、通知が空かつ未読件数 0 を返すこと", async () => {
       const wrapper = buildWrapper({ authStatus: "unauthenticated", cognitoUser: null });
 
       const { result } = renderHook(() => useWorkflowNotificationInbox(), { wrapper });
@@ -207,7 +207,7 @@ describe("useWorkflowNotificationInbox", () => {
       expect(mockGraphql).not.toHaveBeenCalled();
     });
 
-    it("does not set up subscriptions when recipientIds is empty", async () => {
+    it("recipientIds が空の場合、サブスクリプションを設定しないこと", async () => {
       const wrapper = buildWrapper({ authStatus: "unauthenticated", cognitoUser: null });
 
       renderHook(() => useWorkflowNotificationInbox(), { wrapper });
@@ -222,7 +222,7 @@ describe("useWorkflowNotificationInbox", () => {
   // 2. Fetch notifications – success path
   // -------------------------------------------------------------------------
   describe("fetchNotifications", () => {
-    it("fetches and sets notifications on mount", async () => {
+    it("マウント時に通知を取得して設定すること", async () => {
       const event = makeNotificationEvent({ id: "notif-1" });
       mockGraphql.mockImplementation(
         buildGraphqlMock(() => Promise.resolve(makeNotificationPageResponse([event]))),
@@ -239,7 +239,7 @@ describe("useWorkflowNotificationInbox", () => {
       expect(result.current.notifications[0].id).toBe("notif-1");
     });
 
-    it("sets loading=true during fetch and false when done", async () => {
+    it("取得中は loading=true、完了後は loading=false になること", async () => {
       let resolveQuery!: (value: unknown) => void;
       const pendingQuery = new Promise((resolve) => {
         resolveQuery = resolve;
@@ -267,7 +267,7 @@ describe("useWorkflowNotificationInbox", () => {
       });
     });
 
-    it("sets error when fetch fails", async () => {
+    it("取得に失敗した場合、error を設定すること", async () => {
       mockGraphql.mockImplementation(
         buildGraphqlMock(() => Promise.reject(new Error("Network error"))),
       );
@@ -281,7 +281,7 @@ describe("useWorkflowNotificationInbox", () => {
       });
     });
 
-    it("sets error when graphql response contains errors", async () => {
+    it("GraphQL レスポンスに errors がある場合、error を設定すること", async () => {
       mockGraphql.mockImplementation(
         buildGraphqlMock(() =>
           Promise.resolve({ errors: [{ message: "GraphQL error occurred" }] }),
@@ -297,7 +297,7 @@ describe("useWorkflowNotificationInbox", () => {
       });
     });
 
-    it("deduplicates notifications across multiple recipients", async () => {
+    it("複数 recipient の通知を重複排除すること", async () => {
       // Both staff-1 and cognito-123 return the same notification id
       const sharedEvent = makeNotificationEvent({ id: "shared-notif" });
       mockGraphql.mockImplementation(
@@ -315,7 +315,7 @@ describe("useWorkflowNotificationInbox", () => {
       expect(ids.filter((id) => id === "shared-notif")).toHaveLength(1);
     });
 
-    it("sorts notifications by eventAt descending", async () => {
+    it("通知を eventAt の降順で並べること", async () => {
       const older = makeNotificationEvent({ id: "old", eventAt: "2024-01-01T08:00:00.000Z" });
       const newer = makeNotificationEvent({ id: "new", eventAt: "2024-01-02T08:00:00.000Z" });
       let callCount = 0;
@@ -340,7 +340,7 @@ describe("useWorkflowNotificationInbox", () => {
       expect(ids.indexOf("new")).toBeLessThan(ids.indexOf("old"));
     });
 
-    it("sets hasMore=true when any recipient has a nextToken", async () => {
+    it("いずれかの recipient に nextToken がある場合、hasMore=true にすること", async () => {
       let callCount = 0;
       mockGraphql.mockImplementation(
         buildGraphqlMock(() => {
@@ -366,7 +366,7 @@ describe("useWorkflowNotificationInbox", () => {
   // 3. currentStaffId derivation
   // -------------------------------------------------------------------------
   describe("currentStaffId", () => {
-    it("returns the staff ID matching the cognitoUser ID", async () => {
+    it("cognitoUser ID に一致する staff ID を返すこと", async () => {
       mockUseStaffs.mockReturnValue({ staffs: [makeStaff("staff-99", "cognito-123")] });
 
       const wrapper = buildWrapper();
@@ -379,7 +379,7 @@ describe("useWorkflowNotificationInbox", () => {
       expect(result.current.currentStaffId).toBe("staff-99");
     });
 
-    it("returns null when no staff matches the cognitoUser ID", async () => {
+    it("cognitoUser ID に一致するスタッフがいない場合、null を返すこと", async () => {
       mockUseStaffs.mockReturnValue({ staffs: [makeStaff("staff-1", "other-cognito")] });
 
       const wrapper = buildWrapper();
@@ -397,7 +397,7 @@ describe("useWorkflowNotificationInbox", () => {
   // 4. recipientIds – admin vs. non-admin
   // -------------------------------------------------------------------------
   describe("recipientIds", () => {
-    it("includes ADMINS recipient for admin users", async () => {
+    it("管理者ユーザーの場合、recipientIds に ADMINS を含めること", async () => {
       defaultIsCognitoUserRole.mockImplementation(
         (role: string) => role === StaffRole.ADMIN,
       );
@@ -423,7 +423,7 @@ describe("useWorkflowNotificationInbox", () => {
       expect(recipientIds).toContain("ADMINS");
     });
 
-    it("does not include ADMINS recipient for regular (non-admin) users", async () => {
+    it("通常ユーザーの場合、recipientIds に ADMINS を含めないこと", async () => {
       defaultIsCognitoUserRole.mockReturnValue(false);
 
       const wrapper = buildWrapper();
@@ -449,7 +449,7 @@ describe("useWorkflowNotificationInbox", () => {
   // 5. Subscription lifecycle
   // -------------------------------------------------------------------------
   describe("subscription lifecycle", () => {
-    it("sets up create and update subscriptions for each recipient on mount", async () => {
+    it("マウント時に各 recipient の create/update サブスクリプションを設定すること", async () => {
       const wrapper = buildWrapper();
       renderHook(() => useWorkflowNotificationInbox(), { wrapper });
 
@@ -459,7 +459,7 @@ describe("useWorkflowNotificationInbox", () => {
       });
     });
 
-    it("unsubscribes from all subscriptions on unmount", async () => {
+    it("アンマウント時にすべてのサブスクリプションを解除すること", async () => {
       const wrapper = buildWrapper();
       const { unmount } = renderHook(() => useWorkflowNotificationInbox(), { wrapper });
 
@@ -472,7 +472,7 @@ describe("useWorkflowNotificationInbox", () => {
       expect(mockUnsubscribe).toHaveBeenCalled();
     });
 
-    it("adds a new unread notification when create subscription fires", async () => {
+    it("create サブスクリプション受信時に未読通知を追加すること", async () => {
       const wrapper = buildWrapper();
       const { result } = renderHook(() => useWorkflowNotificationInbox(), { wrapper });
 
@@ -494,7 +494,7 @@ describe("useWorkflowNotificationInbox", () => {
       expect(result.current.unreadCount).toBeGreaterThan(0);
     });
 
-    it("updates an existing notification when update subscription fires", async () => {
+    it("update サブスクリプション受信時に既存通知を更新すること", async () => {
       const existing = makeNotificationEvent({ id: "notif-1", isRead: false });
       mockGraphql.mockImplementation(
         buildGraphqlMock(() => Promise.resolve(makeNotificationPageResponse([existing]))),
@@ -521,7 +521,7 @@ describe("useWorkflowNotificationInbox", () => {
       });
     });
 
-    it("ignores subscription events with no data payload", async () => {
+    it("data payload がないサブスクリプションイベントは無視すること", async () => {
       const wrapper = buildWrapper();
       const { result } = renderHook(() => useWorkflowNotificationInbox(), { wrapper });
 
@@ -544,7 +544,7 @@ describe("useWorkflowNotificationInbox", () => {
   // 6. markAsRead – regular notification
   // -------------------------------------------------------------------------
   describe("markAsRead – regular notification", () => {
-    it("calls graphql mutation and marks notification as read", async () => {
+    it("GraphQL mutation を呼び出して通知を既読化すること", async () => {
       const event = makeNotificationEvent({ id: "notif-1", isRead: false });
       mockGraphql.mockImplementation(
         buildGraphqlMock((input) => {
@@ -572,7 +572,7 @@ describe("useWorkflowNotificationInbox", () => {
       expect(notif?.isRead).toBe(true);
     });
 
-    it("decrements unreadCount when marking an unread notification as read", async () => {
+    it("未読通知を既読化した場合、unreadCount が減少すること", async () => {
       const event = makeNotificationEvent({ id: "notif-1", isRead: false });
       mockGraphql.mockImplementation(
         buildGraphqlMock((input) => {
@@ -601,7 +601,7 @@ describe("useWorkflowNotificationInbox", () => {
       expect(result.current.unreadCount).toBeLessThanOrEqual(countBefore);
     });
 
-    it("throws when mutation response contains errors", async () => {
+    it("mutation レスポンスに errors がある場合、例外を throw すること", async () => {
       const event = makeNotificationEvent({ id: "notif-1", isRead: false });
       mockGraphql.mockImplementation(
         buildGraphqlMock((input) => {
@@ -632,7 +632,7 @@ describe("useWorkflowNotificationInbox", () => {
   // 7. markAsRead – ADMINS notification (localStorage-only)
   // -------------------------------------------------------------------------
   describe("markAsRead – ADMINS notification", () => {
-    it("marks ADMINS notification as read via localStorage without API call", async () => {
+    it("ADMINS 通知は API 呼び出しなしで localStorage 経由で既読化すること", async () => {
       const adminEvent = makeNotificationEvent({
         id: "admin-notif-1",
         recipientStaffId: "ADMINS",
@@ -677,7 +677,7 @@ describe("useWorkflowNotificationInbox", () => {
       expect(stored).toContain("admin-notif-1");
     });
 
-    it("applies locally-read ADMINS notifications from localStorage on fetch", async () => {
+    it("取得時に localStorage 上の ADMINS 既読情報を反映すること", async () => {
       // Pre-populate localStorage with a read admin event
       const storageKey = `workflowNotificationRead.workflowComment.cognito-123`;
       localStorage.setItem(storageKey, JSON.stringify(["pre-read-admin-notif"]));
@@ -712,7 +712,7 @@ describe("useWorkflowNotificationInbox", () => {
   // 8. loadMoreNotifications
   // -------------------------------------------------------------------------
   describe("loadMoreNotifications", () => {
-    it("loads additional notifications when nextToken is available", async () => {
+    it("nextToken がある場合、追加通知を読み込むこと", async () => {
       const firstPage = makeNotificationEvent({ id: "notif-first" });
       const secondPage = makeNotificationEvent({
         id: "notif-second",
@@ -761,7 +761,7 @@ describe("useWorkflowNotificationInbox", () => {
       expect(ids).toContain("notif-second");
     });
 
-    it("is a no-op when there are no nextTokens", async () => {
+    it("nextToken がない場合、追加読み込みで何もしないこと", async () => {
       mockGraphql.mockImplementation(
         buildGraphqlMock(() => Promise.resolve(makeNotificationPageResponse([]))),
       );
@@ -784,7 +784,7 @@ describe("useWorkflowNotificationInbox", () => {
       expect(mockGraphql.mock.calls.length).toBe(graphqlCallCount);
     });
 
-    it("sets loadingMore state correctly during load", async () => {
+    it("追加読み込み中に loadingMore 状態を正しく更新すること", async () => {
       let resolveSecondPage!: (value: unknown) => void;
       const pendingSecondPage = new Promise((resolve) => {
         resolveSecondPage = resolve;
@@ -837,7 +837,7 @@ describe("useWorkflowNotificationInbox", () => {
       });
     });
 
-    it("sets error when loadMore fails", async () => {
+    it("追加読み込みに失敗した場合、error を設定すること", async () => {
       // Route by nextToken: absent → first page with cursor; "cursor-err" → reject
       // Route by filter → unreadCount (no nextToken loop)
       mockGraphql.mockImplementation(
@@ -881,7 +881,7 @@ describe("useWorkflowNotificationInbox", () => {
   // 9. markAllAsRead
   // -------------------------------------------------------------------------
   describe("markAllAsRead", () => {
-    it("fetches all unread IDs and marks each as read", async () => {
+    it("未読 ID を全件取得し、それぞれを既読化すること", async () => {
       const event1 = makeNotificationEvent({ id: "notif-a", isRead: false });
       const event2 = makeNotificationEvent({
         id: "notif-b",
@@ -921,7 +921,7 @@ describe("useWorkflowNotificationInbox", () => {
   // 10. unreadCount management via applyIncomingEvent
   // -------------------------------------------------------------------------
   describe("unreadCount via applyIncomingEvent", () => {
-    it("increments unreadCount when a brand-new unread notification arrives", async () => {
+    it("新規未読通知を受信した場合、unreadCount が増加すること", async () => {
       const wrapper = buildWrapper();
       const { result } = renderHook(() => useWorkflowNotificationInbox(), { wrapper });
 
@@ -947,7 +947,7 @@ describe("useWorkflowNotificationInbox", () => {
       });
     });
 
-    it("decrements unreadCount when an existing unread notification is marked as read via subscription", async () => {
+    it("既存未読通知がサブスクリプション経由で既読化された場合、unreadCount が減少すること", async () => {
       const event = makeNotificationEvent({ id: "notif-x", isRead: false });
       mockGraphql.mockImplementation(
         buildGraphqlMock(() => Promise.resolve(makeNotificationPageResponse([event]))),
@@ -980,7 +980,7 @@ describe("useWorkflowNotificationInbox", () => {
   // 11. fetchNotifications re-triggered by recipientIds change
   // -------------------------------------------------------------------------
   describe("fetchNotifications is exposed and callable", () => {
-    it("re-fetches notifications when fetchNotifications() is called explicitly", async () => {
+    it("fetchNotifications() を明示的に呼ぶと通知を再取得すること", async () => {
       mockGraphql.mockImplementation(
         buildGraphqlMock(() => Promise.resolve(makeNotificationPageResponse([]))),
       );

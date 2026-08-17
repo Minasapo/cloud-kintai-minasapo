@@ -52,6 +52,26 @@ type ExpandedDownloadPanelProps = {
   aggregateDownloadDisabled: boolean;
 };
 
+type PeriodSelectionStepProps = {
+  closeDates: CloseDateItem[];
+  closeMonthSelectLabelId: string;
+  selectedCloseDate: string;
+  selectedPeriodMode: PeriodSelectionMode;
+  setSelectedPeriodMode: (value: PeriodSelectionMode) => void;
+  startDate: string;
+  endDate: string;
+  setStartDate: (value: string) => void;
+  setEndDate: (value: string) => void;
+};
+
+type DownloadActionCardProps = {
+  title: string;
+  description: string;
+  buttonLabel: string;
+  onClick: () => void;
+  disabled: boolean;
+};
+
 const formatInputDate = (value: dayjs.Dayjs) => value.format("YYYY-MM-DD");
 const MAIN_GREEN = designTokenVar(
   "color.feedback.success.base",
@@ -101,8 +121,6 @@ function ExpandedDownloadPanel({
     (displayStep === 1 && hasSelectedStaff);
   const isFirstStep = displayStep === 0;
   const isLastStep = displayStep === DOWNLOAD_FLOW_STEPS.length - 1;
-  const isCustomRangeSelected = selectedPeriodMode === "customRange";
-  const isCloseMonthSelected = selectedPeriodMode === "closeMonth";
 
   const handlePrevStep = () => {
     setDisplayStep((prev) => Math.max(prev - 1, 0));
@@ -134,217 +152,17 @@ function ExpandedDownloadPanel({
         </div>
 
         {displayStep === 0 && (
-          <div
-            className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5"
-            role="radiogroup"
-            aria-label="期間の指定方法"
-          >
-            <div
-              className={`group relative overflow-hidden rounded-2xl border p-4 shadow-sm transition-all duration-300 ${
-                isCustomRangeSelected
-                  ? "border-emerald-300/90 bg-emerald-50/70 shadow-emerald-100"
-                  : "border-slate-300/90 bg-slate-100/85 hover:border-slate-300 hover:shadow-sm"
-              }`}
-            >
-              <div
-                aria-hidden="true"
-                className={`pointer-events-none absolute inset-0 bg-gradient-to-br transition-opacity duration-300 ${
-                  isCustomRangeSelected
-                    ? "from-emerald-100/70 via-transparent to-teal-100/40 opacity-100"
-                    : "from-slate-100/0 via-transparent to-slate-200/20 opacity-70 group-hover:opacity-100"
-                }`}
-              />
-              <label className="relative z-10 flex cursor-pointer items-start justify-between gap-3 rounded-xl px-1 py-1 text-left">
-                <div className="flex items-start gap-3">
-                  <AppRadio
-                    name="attendance-download-period-mode"
-                    checked={isCustomRangeSelected}
-                    onChange={() => setSelectedPeriodMode("customRange")}
-                    value="customRange"
-                    sx={{ mt: -0.5 }}
-                  />
-                  <div>
-                    <span
-                      className={`whitespace-nowrap text-sm font-semibold ${
-                        isCustomRangeSelected
-                          ? "text-slate-800"
-                          : "text-slate-600"
-                      }`}
-                    >
-                      指定した期間から
-                    </span>
-                    <p
-                      className={`mt-1 text-xs leading-5 ${
-                        isCustomRangeSelected
-                          ? "text-slate-500"
-                          : "text-slate-400"
-                      }`}
-                    >
-                      開始日と終了日を自由に指定して出力できます
-                    </p>
-                  </div>
-                </div>
-                {isCustomRangeSelected && (
-                  <span className="rounded-full bg-emerald-600/90 px-2 py-0.5 text-[11px] font-semibold text-white shadow-sm">
-                    選択中
-                  </span>
-                )}
-              </label>
-              <div className="relative z-10 mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-                <div
-                  className={`flex-1 transition-opacity ${
-                    isCustomRangeSelected ? "opacity-100" : "opacity-40"
-                  }`}
-                >
-                  <AppTextField
-                    type="date"
-                    value={startDate}
-                    onChange={(event) => {
-                      setSelectedPeriodMode("customRange");
-                      setStartDate(event.target.value);
-                    }}
-                    disabled={!isCustomRangeSelected}
-                    size="small"
-                    fullWidth
-                    inputProps={{ "aria-label": "開始日" }}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        backgroundColor: INPUT_SURFACE,
-                      },
-                    }}
-                  />
-                </div>
-                <div className="hidden h-11 items-center text-slate-400 sm:flex">
-                  〜
-                </div>
-                <div
-                  className={`flex-1 transition-opacity ${
-                    isCustomRangeSelected ? "opacity-100" : "opacity-40"
-                  }`}
-                >
-                  <AppTextField
-                    type="date"
-                    value={endDate}
-                    onChange={(event) => {
-                      setSelectedPeriodMode("customRange");
-                      setEndDate(event.target.value);
-                    }}
-                    disabled={!isCustomRangeSelected}
-                    size="small"
-                    fullWidth
-                    inputProps={{ "aria-label": "終了日" }}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        backgroundColor: INPUT_SURFACE,
-                      },
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div
-              className={`group relative overflow-hidden rounded-2xl border p-4 shadow-sm transition-all duration-300 ${
-                isCloseMonthSelected
-                  ? "border-emerald-300/90 bg-emerald-50/70 shadow-emerald-100"
-                  : "border-slate-300/90 bg-slate-100/85 hover:border-slate-300 hover:shadow-sm"
-              }`}
-            >
-              <div
-                aria-hidden="true"
-                className={`pointer-events-none absolute inset-0 bg-gradient-to-br transition-opacity duration-300 ${
-                  isCloseMonthSelected
-                    ? "from-emerald-100/70 via-transparent to-teal-100/40 opacity-100"
-                    : "from-slate-100/0 via-transparent to-slate-200/20 opacity-70 group-hover:opacity-100"
-                }`}
-              />
-              <label className="relative z-10 flex cursor-pointer items-start justify-between gap-3 rounded-xl px-1 py-1 text-left">
-                <div className="flex items-start gap-3">
-                  <AppRadio
-                    name="attendance-download-period-mode"
-                    checked={isCloseMonthSelected}
-                    onChange={() => setSelectedPeriodMode("closeMonth")}
-                    value="closeMonth"
-                    sx={{ mt: -0.5 }}
-                  />
-                  <div>
-                    <span
-                      className={`whitespace-nowrap text-sm font-semibold ${
-                        isCloseMonthSelected
-                          ? "text-slate-800"
-                          : "text-slate-600"
-                      }`}
-                    >
-                      集計対象月から
-                    </span>
-                    <p
-                      className={`mt-1 text-xs leading-5 ${
-                        isCloseMonthSelected
-                          ? "text-slate-500"
-                          : "text-slate-400"
-                      }`}
-                    >
-                      締め日設定に基づく対象月を選んで出力します
-                    </p>
-                  </div>
-                </div>
-                {isCloseMonthSelected && (
-                  <span className="rounded-full bg-emerald-600/90 px-2 py-0.5 text-[11px] font-semibold text-white shadow-sm">
-                    選択中
-                  </span>
-                )}
-              </label>
-              <div
-                className={`relative z-10 mt-2 flex flex-col gap-2 sm:flex-row sm:items-center ${
-                  isCloseMonthSelected ? "opacity-100" : "opacity-45"
-                }`}
-              >
-                <AppSelect<string>
-                  label="対象月"
-                  labelId={closeMonthSelectLabelId}
-                  value={selectedCloseDate}
-                  onChange={(value) => {
-                    setSelectedPeriodMode("closeMonth");
-                    const closeDate = closeDates.find(
-                      (item) => item.closeDate === value,
-                    );
-                    if (!closeDate) return;
-                    setStartDate(formatInputDate(dayjs(closeDate.startDate)));
-                    setEndDate(formatInputDate(dayjs(closeDate.endDate)));
-                  }}
-                  disabled={!isCloseMonthSelected}
-                  options={[
-                    { value: "", label: "対象月を選択" },
-                    ...closeDates
-                      .toSorted((a, b) =>
-                        dayjs(b.closeDate).diff(dayjs(a.closeDate)),
-                      )
-                      .map((closeDate) => ({
-                        value: closeDate.closeDate,
-                        label: dayjs(closeDate.closeDate).format("YYYY/MM"),
-                      })),
-                  ]}
-                  sx={{
-                    minWidth: 0,
-                    flex: 1,
-                    "& .MuiOutlinedInput-root": {
-                      backgroundColor: INPUT_SURFACE,
-                    },
-                  }}
-                />
-              </div>
-              <p className="relative z-10 text-sm leading-6 text-slate-600">
-                集計対象月は
-                <RouterLink
-                  to="/admin/master/job_term"
-                  className="font-medium text-emerald-700 underline decoration-emerald-300 underline-offset-4 transition hover:text-emerald-600"
-                >
-                  設定画面
-                </RouterLink>
-                より編集可能です
-              </p>
-            </div>
-          </div>
+          <PeriodSelectionStep
+            closeDates={closeDates}
+            closeMonthSelectLabelId={closeMonthSelectLabelId}
+            selectedCloseDate={selectedCloseDate}
+            selectedPeriodMode={selectedPeriodMode}
+            setSelectedPeriodMode={setSelectedPeriodMode}
+            startDate={startDate}
+            endDate={endDate}
+            setStartDate={setStartDate}
+            setEndDate={setEndDate}
+          />
         )}
 
         {displayStep === 1 && (
@@ -356,75 +174,12 @@ function ExpandedDownloadPanel({
         )}
 
         {displayStep === 2 && (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
-            <div className="group relative overflow-hidden rounded-2xl border border-slate-300/90 bg-slate-100/85 p-4 shadow-sm transition-all duration-300 hover:border-slate-300 hover:shadow-sm">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-100/0 via-transparent to-slate-200/20 opacity-70 transition-opacity duration-300 group-hover:opacity-100"
-              />
-              <div className="relative z-10 flex h-full flex-col gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-slate-800">
-                    一括ダウンロード
-                  </p>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">
-                    選択した期間と対象者の勤怠データをまとめて出力します。
-                  </p>
-                </div>
-                <AppButton
-                  variant="solid"
-                  tone="primary"
-                  size="md"
-                  onClick={onDetailDownload}
-                  disabled={detailDownloadDisabled}
-                  className="w-full"
-                  sx={{
-                    mt: "auto",
-                    "--variant-containedBg": MAIN_GREEN,
-                    "&:hover": {
-                      "--variant-containedBg": MAIN_GREEN_DARK,
-                    },
-                  }}
-                >
-                  一括ダウンロード
-                </AppButton>
-              </div>
-            </div>
-
-            <div className="group relative overflow-hidden rounded-2xl border border-slate-300/90 bg-slate-100/85 p-4 shadow-sm transition-all duration-300 hover:border-slate-300 hover:shadow-sm">
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-100/0 via-transparent to-slate-200/20 opacity-70 transition-opacity duration-300 group-hover:opacity-100"
-              />
-              <div className="relative z-10 flex h-full flex-col gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-slate-800">
-                    集計ダウンロード
-                  </p>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">
-                    選択した期間と対象者の集計結果を出力します。
-                  </p>
-                </div>
-                <AppButton
-                  variant="solid"
-                  tone="primary"
-                  size="md"
-                  onClick={onAggregateDownload}
-                  disabled={aggregateDownloadDisabled}
-                  className="w-full"
-                  sx={{
-                    mt: "auto",
-                    "--variant-containedBg": MAIN_GREEN,
-                    "&:hover": {
-                      "--variant-containedBg": MAIN_GREEN_DARK,
-                    },
-                  }}
-                >
-                  集計ダウンロード
-                </AppButton>
-              </div>
-            </div>
-          </div>
+          <DownloadExecutionStep
+            onDetailDownload={onDetailDownload}
+            onAggregateDownload={onAggregateDownload}
+            detailDownloadDisabled={detailDownloadDisabled}
+            aggregateDownloadDisabled={aggregateDownloadDisabled}
+          />
         )}
 
         <div className="flex items-center justify-between gap-2">
@@ -452,6 +207,296 @@ function ExpandedDownloadPanel({
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function PeriodSelectionStep({
+  closeDates,
+  closeMonthSelectLabelId,
+  selectedCloseDate,
+  selectedPeriodMode,
+  setSelectedPeriodMode,
+  startDate,
+  endDate,
+  setStartDate,
+  setEndDate,
+}: PeriodSelectionStepProps) {
+  const isCustomRangeSelected = selectedPeriodMode === "customRange";
+  const isCloseMonthSelected = selectedPeriodMode === "closeMonth";
+
+  return (
+    <div
+      className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5"
+      role="radiogroup"
+      aria-label="期間の指定方法"
+    >
+      <div
+        className={`group relative overflow-hidden rounded-2xl border p-4 shadow-sm transition-all duration-300 ${
+          isCustomRangeSelected
+            ? "border-emerald-300/90 bg-emerald-50/70 shadow-emerald-100"
+            : "border-slate-300/90 bg-slate-100/85 hover:border-slate-300 hover:shadow-sm"
+        }`}
+      >
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-0 bg-gradient-to-br transition-opacity duration-300 ${
+            isCustomRangeSelected
+              ? "from-emerald-100/70 via-transparent to-teal-100/40 opacity-100"
+              : "from-slate-100/0 via-transparent to-slate-200/20 opacity-70 group-hover:opacity-100"
+          }`}
+        />
+        <label className="relative z-10 flex cursor-pointer items-start justify-between gap-3 rounded-xl px-1 py-1 text-left">
+          <div className="flex items-start gap-3">
+            <AppRadio
+              name="attendance-download-period-mode"
+              checked={isCustomRangeSelected}
+              onChange={() => setSelectedPeriodMode("customRange")}
+              value="customRange"
+              sx={{ mt: -0.5 }}
+            />
+            <div>
+              <span
+                className={`whitespace-nowrap text-sm font-semibold ${
+                  isCustomRangeSelected ? "text-slate-800" : "text-slate-600"
+                }`}
+              >
+                指定した期間から
+              </span>
+              <p
+                className={`mt-1 text-xs leading-5 ${
+                  isCustomRangeSelected ? "text-slate-500" : "text-slate-400"
+                }`}
+              >
+                開始日と終了日を自由に指定して出力できます
+              </p>
+            </div>
+          </div>
+          {isCustomRangeSelected && (
+            <span className="rounded-full bg-emerald-600/90 px-2 py-0.5 text-[11px] font-semibold text-white shadow-sm">
+              選択中
+            </span>
+          )}
+        </label>
+        <div className="relative z-10 mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div
+            className={`flex-1 transition-opacity ${
+              isCustomRangeSelected ? "opacity-100" : "opacity-40"
+            }`}
+          >
+            <AppTextField
+              type="date"
+              value={startDate}
+              onChange={(event) => {
+                setSelectedPeriodMode("customRange");
+                setStartDate(event.target.value);
+              }}
+              disabled={!isCustomRangeSelected}
+              size="small"
+              fullWidth
+              inputProps={{ "aria-label": "開始日" }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: INPUT_SURFACE,
+                },
+              }}
+            />
+          </div>
+          <div className="hidden h-11 items-center text-slate-400 sm:flex">
+            〜
+          </div>
+          <div
+            className={`flex-1 transition-opacity ${
+              isCustomRangeSelected ? "opacity-100" : "opacity-40"
+            }`}
+          >
+            <AppTextField
+              type="date"
+              value={endDate}
+              onChange={(event) => {
+                setSelectedPeriodMode("customRange");
+                setEndDate(event.target.value);
+              }}
+              disabled={!isCustomRangeSelected}
+              size="small"
+              fullWidth
+              inputProps={{ "aria-label": "終了日" }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: INPUT_SURFACE,
+                },
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div
+        className={`group relative overflow-hidden rounded-2xl border p-4 shadow-sm transition-all duration-300 ${
+          isCloseMonthSelected
+            ? "border-emerald-300/90 bg-emerald-50/70 shadow-emerald-100"
+            : "border-slate-300/90 bg-slate-100/85 hover:border-slate-300 hover:shadow-sm"
+        }`}
+      >
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-0 bg-gradient-to-br transition-opacity duration-300 ${
+            isCloseMonthSelected
+              ? "from-emerald-100/70 via-transparent to-teal-100/40 opacity-100"
+              : "from-slate-100/0 via-transparent to-slate-200/20 opacity-70 group-hover:opacity-100"
+          }`}
+        />
+        <label className="relative z-10 flex cursor-pointer items-start justify-between gap-3 rounded-xl px-1 py-1 text-left">
+          <div className="flex items-start gap-3">
+            <AppRadio
+              name="attendance-download-period-mode"
+              checked={isCloseMonthSelected}
+              onChange={() => setSelectedPeriodMode("closeMonth")}
+              value="closeMonth"
+              sx={{ mt: -0.5 }}
+            />
+            <div>
+              <span
+                className={`whitespace-nowrap text-sm font-semibold ${
+                  isCloseMonthSelected ? "text-slate-800" : "text-slate-600"
+                }`}
+              >
+                集計対象月から
+              </span>
+              <p
+                className={`mt-1 text-xs leading-5 ${
+                  isCloseMonthSelected ? "text-slate-500" : "text-slate-400"
+                }`}
+              >
+                締め日設定に基づく対象月を選んで出力します
+              </p>
+            </div>
+          </div>
+          {isCloseMonthSelected && (
+            <span className="rounded-full bg-emerald-600/90 px-2 py-0.5 text-[11px] font-semibold text-white shadow-sm">
+              選択中
+            </span>
+          )}
+        </label>
+        <div
+          className={`relative z-10 mt-2 flex flex-col gap-2 sm:flex-row sm:items-center ${
+            isCloseMonthSelected ? "opacity-100" : "opacity-45"
+          }`}
+        >
+          <AppSelect<string>
+            label="対象月"
+            labelId={closeMonthSelectLabelId}
+            value={selectedCloseDate}
+            onChange={(value) => {
+              setSelectedPeriodMode("closeMonth");
+              const closeDate = closeDates.find(
+                (item) => item.closeDate === value,
+              );
+              if (!closeDate) return;
+              setStartDate(formatInputDate(dayjs(closeDate.startDate)));
+              setEndDate(formatInputDate(dayjs(closeDate.endDate)));
+            }}
+            disabled={!isCloseMonthSelected}
+            options={[
+              { value: "", label: "対象月を選択" },
+              ...closeDates
+                .toSorted((a, b) => dayjs(b.closeDate).diff(dayjs(a.closeDate)))
+                .map((closeDate) => ({
+                  value: closeDate.closeDate,
+                  label: dayjs(closeDate.closeDate).format("YYYY/MM"),
+                })),
+            ]}
+            sx={{
+              minWidth: 0,
+              flex: 1,
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: INPUT_SURFACE,
+              },
+            }}
+          />
+        </div>
+        <p className="relative z-10 text-sm leading-6 text-slate-600">
+          集計対象月は
+          <RouterLink
+            to="/admin/master/job_term"
+            className="font-medium text-emerald-700 underline decoration-emerald-300 underline-offset-4 transition hover:text-emerald-600"
+          >
+            設定画面
+          </RouterLink>
+          より編集可能です
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function DownloadActionCard({
+  title,
+  description,
+  buttonLabel,
+  onClick,
+  disabled,
+}: DownloadActionCardProps) {
+  return (
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-300/90 bg-slate-100/85 p-4 shadow-sm transition-all duration-300 hover:border-slate-300 hover:shadow-sm">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-100/0 via-transparent to-slate-200/20 opacity-70 transition-opacity duration-300 group-hover:opacity-100"
+      />
+      <div className="relative z-10 flex h-full flex-col gap-3">
+        <div>
+          <p className="text-sm font-semibold text-slate-800">{title}</p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">{description}</p>
+        </div>
+        <AppButton
+          variant="solid"
+          tone="primary"
+          size="md"
+          onClick={onClick}
+          disabled={disabled}
+          className="w-full"
+          sx={{
+            mt: "auto",
+            "--variant-containedBg": MAIN_GREEN,
+            "&:hover": {
+              "--variant-containedBg": MAIN_GREEN_DARK,
+            },
+          }}
+        >
+          {buttonLabel}
+        </AppButton>
+      </div>
+    </div>
+  );
+}
+
+function DownloadExecutionStep({
+  onDetailDownload,
+  onAggregateDownload,
+  detailDownloadDisabled,
+  aggregateDownloadDisabled,
+}: {
+  onDetailDownload: () => void;
+  onAggregateDownload: () => void;
+  detailDownloadDisabled: boolean;
+  aggregateDownloadDisabled: boolean;
+}) {
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
+      <DownloadActionCard
+        title="一括ダウンロード"
+        description="選択した期間と対象者の勤怠データをまとめて出力します。"
+        buttonLabel="一括ダウンロード"
+        onClick={onDetailDownload}
+        disabled={detailDownloadDisabled}
+      />
+      <DownloadActionCard
+        title="集計ダウンロード"
+        description="選択した期間と対象者の集計結果を出力します。"
+        buttonLabel="集計ダウンロード"
+        onClick={onAggregateDownload}
+        disabled={aggregateDownloadDisabled}
+      />
     </div>
   );
 }

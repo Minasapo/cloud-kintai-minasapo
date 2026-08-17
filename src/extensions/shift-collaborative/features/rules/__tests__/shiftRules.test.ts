@@ -32,17 +32,17 @@ const buildContext = (
 describe("createMinWorkersRule", () => {
   const rule = createMinWorkersRule(2);
 
-  it("returns null when work count meets minimum", () => {
+  it("勤務人数が最小人数を満たす場合、null を返すこと", () => {
     const ctx = buildContext("01", { "s1": "work", "s2": "work" });
     expect(rule.check(ctx)).toBeNull();
   });
 
-  it("returns null when work count exceeds minimum", () => {
+  it("勤務人数が最小人数を上回る場合、null を返すこと", () => {
     const ctx = buildContext("01", { "s1": "work", "s2": "work", "s3": "work" });
     expect(rule.check(ctx)).toBeNull();
   });
 
-  it("returns violation when work count is below minimum", () => {
+  it("勤務人数が最小人数を下回る場合、違反を返すこと", () => {
     const ctx = buildContext("01", { "s1": "work", "s2": "fixedOff" });
     const violation = rule.check(ctx);
     expect(violation).not.toBeNull();
@@ -50,7 +50,7 @@ describe("createMinWorkersRule", () => {
     expect(violation!.severity).toBe("error");
   });
 
-  it("suggests available staff as actions", () => {
+  it("対応候補として割当可能なスタッフを提案すること", () => {
     const ctx = buildContext("01", { "s1": "work", "s2": "empty", "s3": "auto" });
     const violation = rule.check(ctx);
     expect(violation!.suggestedActions).toHaveLength(1);
@@ -60,12 +60,12 @@ describe("createMinWorkersRule", () => {
 describe("createMaxWorkersRule", () => {
   const rule = createMaxWorkersRule(2);
 
-  it("returns null when work count is at max", () => {
+  it("勤務人数が上限ちょうどの場合、null を返すこと", () => {
     const ctx = buildContext("01", { "s1": "work", "s2": "work" });
     expect(rule.check(ctx)).toBeNull();
   });
 
-  it("returns violation when work count exceeds max", () => {
+  it("勤務人数が上限を超える場合、違反を返すこと", () => {
     const ctx = buildContext("01", { "s1": "work", "s2": "work", "s3": "work" });
     const violation = rule.check(ctx);
     expect(violation).not.toBeNull();
@@ -73,7 +73,7 @@ describe("createMaxWorkersRule", () => {
     expect(violation!.severity).toBe("warning");
   });
 
-  it("provides suggestedActions to reduce workers", () => {
+  it("勤務人数を減らすための suggestedActions を返すこと", () => {
     const ctx = buildContext("01", { "s1": "work", "s2": "work", "s3": "work" });
     const violation = rule.check(ctx);
     expect(violation!.suggestedActions!.length).toBeGreaterThan(0);
@@ -97,18 +97,18 @@ describe("createConsecutiveWorkDaysRule", () => {
     return { date: dateKeys[0], staffId, shiftDataMap, staffIds: [staffId], dateKeys };
   };
 
-  it("returns null when no staffId is given", () => {
+  it("staffId が指定されていない場合、null を返すこと", () => {
     const ctx = buildContext("01", {});
     const ctxNoStaff: RuleContext = { ...ctx, staffId: undefined };
     expect(rule.check(ctxNoStaff)).toBeNull();
   });
 
-  it("returns null when consecutive count does not exceed max", () => {
+  it("連続勤務日数が上限を超えない場合、null を返すこと", () => {
     const ctx = buildConsecutiveContext("s1", { "01": "work", "02": "work", "03": "fixedOff" });
     expect(rule.check(ctx)).toBeNull();
   });
 
-  it("returns violation when consecutive count exceeds max", () => {
+  it("連続勤務日数が上限を超える場合、違反を返すこと", () => {
     const ctx = buildConsecutiveContext("s1", {
       "01": "work", "02": "work", "03": "work", "04": "work",
     });
@@ -118,7 +118,7 @@ describe("createConsecutiveWorkDaysRule", () => {
     expect(violation!.severity).toBe("warning");
   });
 
-  it("resets counter after a non-work day", () => {
+  it("非勤務日を挟んだ後は連続勤務カウントをリセットすること", () => {
     const ctx = buildConsecutiveContext("s1", {
       "01": "work", "02": "work", "03": "fixedOff",
       "04": "work", "05": "work", "06": "work",
@@ -128,7 +128,7 @@ describe("createConsecutiveWorkDaysRule", () => {
 });
 
 describe("getDefaultRules", () => {
-  it("returns three default rules", () => {
+  it("デフォルトルールを3件返すこと", () => {
     const rules = getDefaultRules();
     expect(rules).toHaveLength(3);
     const ids = rules.map((r) => r.id);

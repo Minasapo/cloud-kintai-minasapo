@@ -1,4 +1,5 @@
 import AppsRoundedIcon from "@mui/icons-material/AppsRounded";
+import { Box, ButtonBase, Paper, Typography } from "@mui/material";
 import {
   predefinedIcons,
   type PredefinedIconValue,
@@ -79,10 +80,6 @@ const POPPER_SURFACE_ALT = designTokenVar(
   "component.headerActions.popoverSurfaceAlt",
   "rgb(255 255 255)",
 );
-const POPPER_SHADOW = designTokenVar(
-  "component.headerActions.popoverShadow",
-  "0 28px 56px rgba(15, 23, 42, 0.28)",
-);
 const GRID_GAP = designTokenVar("component.headerActions.gridGap", "8px");
 const GRID_ITEM_PADDING = designTokenVar(
   "component.headerActions.gridItemPadding",
@@ -150,35 +147,49 @@ function LinksSection({
   useGenericIcon?: boolean;
 }) {
   return (
-    <div>
-      <div
-        className="mb-[var(--section-title-margin-bottom)] flex items-center gap-1 border-b pb-3"
-        style={
-          {
-            "--section-title-margin-bottom": SECTION_TITLE_MARGIN_BOTTOM,
-            borderColor: SECTION_DIVIDER,
-          } as CSSProperties & Record<`--${string}`, string>
-        }
+    <Box component="section">
+      <Box
+        sx={{
+          mb: SECTION_TITLE_MARGIN_BOTTOM,
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          borderBottom: 1,
+          borderColor: SECTION_DIVIDER,
+          pb: 1.5,
+        }}
       >
-        <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-600" />
-        <p
-          className="m-0 text-sm text-slate-900"
-          style={{
+        <Box
+          sx={{
+            height: 8,
+            width: 8,
+            flexShrink: 0,
+            borderRadius: 9999,
+            bgcolor: "emerald.600",
+          }}
+        />
+        <Typography
+          variant="body2"
+          sx={{
+            m: 0,
+            color: "slate.900",
             fontWeight: SECTION_TITLE_FONT_WEIGHT,
             letterSpacing: SECTION_TITLE_LETTER_SPACING,
           }}
         >
           {title}
-        </p>
-      </div>
+        </Typography>
+      </Box>
 
-      <div
-        className="grid grid-cols-3 gap-[var(--grid-gap)] sm:grid-cols-4"
-        style={
-          {
-            "--grid-gap": GRID_GAP,
-          } as CSSProperties & Record<`--${string}`, string>
-        }
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+          gap: GRID_GAP,
+          "@media (min-width: 640px)": {
+            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+          },
+        }}
       >
         {links.map((link, index) => (
           <LinkGridItem
@@ -189,8 +200,8 @@ function LinksSection({
             staffName={staffName}
           />
         ))}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
 
@@ -215,46 +226,65 @@ function LinkGridItem({
   const processedUrl = url.replace("{staffName}", staffName);
 
   return (
-    <a
+    <ButtonBase
+      component="a"
       href={processedUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="block text-inherit no-underline"
+      disableRipple
+      sx={{
+        minHeight: 72,
+        width: "100%",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        justifyContent: "flex-start",
+        gap: 1,
+        border: GRID_ITEM_BORDER,
+        borderRadius: GRID_ITEM_RADIUS,
+        bgcolor: "common.white",
+        p: GRID_ITEM_PADDING,
+        textAlign: "left",
+        boxShadow: "0 1px 2px rgba(15, 23, 42, 0.06)",
+        color: "inherit",
+        transition: `background-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}, transform ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}, border-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}`,
+        "&:hover": {
+          bgcolor: GRID_HOVER_BACKGROUND,
+          borderColor: "rgba(20, 76, 44, 0.28)",
+          transform: "translateY(-1px)",
+        },
+        "&:focus-visible": {
+          outline: "2px solid rgba(15, 168, 94, 0.45)",
+          outlineOffset: 2,
+        },
+      }}
     >
-      <div
-        className="flex min-h-[72px] flex-col items-start gap-1 rounded-[var(--grid-item-radius)] border bg-white p-[var(--grid-item-padding)] transition hover:-translate-y-px"
-        style={
-          {
-            "--grid-item-padding": GRID_ITEM_PADDING,
-            "--grid-item-radius": GRID_ITEM_RADIUS,
-            border: GRID_ITEM_BORDER,
-            boxShadow: "0 1px 2px rgba(15, 23, 42, 0.06)",
-            transition: `background-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}, transform ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}, border-color ${INTERACTION_TRANSITION_DURATION} ${INTERACTION_TRANSITION_EASING}`,
-          } as CSSProperties & Record<`--${string}`, string>
-        }
-        onMouseEnter={(event) => {
-          event.currentTarget.style.backgroundColor = GRID_HOVER_BACKGROUND;
-          event.currentTarget.style.borderColor = "rgba(20, 76, 44, 0.28)";
-        }}
-        onMouseLeave={(event) => {
-          event.currentTarget.style.backgroundColor = "rgb(255 255 255)";
-          event.currentTarget.style.borderColor = "";
+      <Box
+        component="span"
+        sx={{
+          display: "inline-flex",
+          height: 26,
+          width: 26,
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: 1,
+          bgcolor: GRID_ICON_SURFACE,
+          color: "emerald.800",
         }}
       >
-        <span
-          className="inline-flex h-[26px] w-[26px] items-center justify-center rounded-[4px] text-emerald-800"
-          style={{ backgroundColor: GRID_ICON_SURFACE }}
-        >
-          {iconComponent}
-        </span>
-        <span
-          className="text-[0.7rem] font-semibold leading-[1.2] text-slate-900"
-          style={{ wordBreak: "break-word" }}
-        >
-          {title}
-        </span>
-      </div>
-    </a>
+        {iconComponent}
+      </Box>
+      <Typography
+        variant="caption"
+        sx={{
+          fontWeight: 600,
+          lineHeight: 1.2,
+          color: "slate.900",
+          wordBreak: "break-word",
+        }}
+      >
+        {title}
+      </Typography>
+    </ButtonBase>
   );
 }
 
@@ -263,7 +293,8 @@ const ExternalLinks = ({
   staffName,
   personalLinksFetchError = false,
 }: ExternalLinksProps) => {
-  const [open, setOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const open = Boolean(anchorEl);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const buttonVars = {
     "--external-links-button-size": ACTION_ICON_SIZE,
@@ -282,13 +313,13 @@ const ExternalLinks = ({
       }
 
       if (!rootRef.current?.contains(target)) {
-        setOpen(false);
+        setAnchorEl(null);
       }
     };
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setOpen(false);
+        setAnchorEl(null);
       }
     };
 
@@ -317,9 +348,11 @@ const ExternalLinks = ({
   }, [links]);
 
   return (
-    <div ref={rootRef} className="relative" style={buttonVars}>
+    <Box ref={rootRef} sx={{ position: "relative" }} style={buttonVars}>
       <AppIconButton
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={(event) => {
+          setAnchorEl((current) => (current ? null : event.currentTarget));
+        }}
         aria-expanded={open}
         aria-controls={open ? "external-links-popup" : undefined}
         aria-label="external links"
@@ -333,16 +366,6 @@ const ExternalLinks = ({
             padding: 0,
           } as CSSProperties & Record<`--${string}`, string>
         }
-        onMouseEnter={(event) => {
-          event.currentTarget.style.backgroundColor = ACTION_ICON_HOVER_BG;
-          event.currentTarget.style.borderColor = "rgba(20, 76, 44, 0.2)";
-        }}
-        onMouseLeave={(event) => {
-          event.currentTarget.style.backgroundColor = open
-            ? ACTION_ICON_HOVER_BG
-            : ACTION_BUTTON_BG;
-          event.currentTarget.style.borderColor = ACTION_BUTTON_BORDER;
-        }}
       >
         <AppsRoundedIcon
           className="h-[22px] w-[22px] sm:h-7 sm:w-7"
@@ -351,34 +374,45 @@ const ExternalLinks = ({
       </AppIconButton>
 
       {open ? (
-        <div
+        <Paper
           id="external-links-popup"
-          className="absolute right-0 top-full z-50 mt-3 w-[min(calc(100vw-16px),var(--popper-width))] min-w-[var(--popper-min-width)] max-w-[var(--popper-width)] overflow-hidden rounded-[var(--popper-radius)] border bg-white shadow-[var(--popper-shadow)]"
-          style={
-            {
-              "--popper-width": POPPER_WIDTH,
-              "--popper-min-width": POPPER_MIN_WIDTH,
-              "--popper-radius": POPPER_RADIUS,
-              "--popper-shadow": POPPER_SHADOW,
-              borderColor: "rgba(15, 23, 42, 0.18)",
-              background: `linear-gradient(180deg, ${POPPER_SURFACE_ALT} 0%, ${POPPER_SURFACE} 100%)`,
-              boxShadow:
-                "0 28px 56px rgba(15, 23, 42, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.9) inset",
-            } as CSSProperties & Record<`--${string}`, string>
-          }
+          elevation={0}
+          sx={{
+            position: "absolute",
+            right: 0,
+            top: "calc(100% + 12px)",
+            zIndex: 50,
+            width: `min(calc(100vw - 16px), ${POPPER_WIDTH})`,
+            minWidth: POPPER_MIN_WIDTH,
+            maxWidth: POPPER_WIDTH,
+            overflow: "hidden",
+            border: "1px solid rgba(15, 23, 42, 0.18)",
+            borderRadius: POPPER_RADIUS,
+            background: `linear-gradient(180deg, ${POPPER_SURFACE_ALT} 0%, ${POPPER_SURFACE} 100%)`,
+            boxShadow:
+              "0 28px 56px rgba(15, 23, 42, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.9) inset",
+            boxSizing: "border-box",
+          }}
         >
-          <div
-            className="flex max-h-[var(--popper-max-height)] flex-col gap-[var(--popper-gap)] overflow-hidden p-[var(--popper-padding)]"
-            style={
-              {
-                "--popper-max-height": POPPER_MAX_HEIGHT,
-                "--popper-gap": POPPER_GAP,
-                "--popper-padding": POPPER_PADDING,
-              } as CSSProperties & Record<`--${string}`, string>
-            }
+          <Box
+            sx={{
+              display: "flex",
+              maxHeight: POPPER_MAX_HEIGHT,
+              flexDirection: "column",
+              gap: POPPER_GAP,
+              overflow: "hidden",
+              p: POPPER_PADDING,
+              bgcolor: "transparent",
+            }}
           >
-            <div className="overflow-y-auto pr-2">
-              <div className="space-y-[var(--popper-gap)]">
+            <Box sx={{ overflowY: "auto", pr: 0.5 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: POPPER_GAP,
+                }}
+              >
                 {companyLinks.length > 0 ? (
                   <LinksSection
                     title="共通"
@@ -395,27 +429,27 @@ const ExternalLinks = ({
                   />
                 ) : null}
                 {personalLinksFetchError ? (
-                  <p
-                    className="m-0 text-sm"
-                    style={{ color: PERSONAL_LINK_ERROR_COLOR }}
+                  <Typography
+                    variant="body2"
+                    sx={{ m: 0, color: PERSONAL_LINK_ERROR_COLOR }}
                   >
                     プライベートリンクの取得に失敗しました
-                  </p>
+                  </Typography>
                 ) : null}
                 {companyLinks.length === 0 && personalLinks.length === 0 ? (
-                  <p
-                    className="m-0 text-center text-sm"
-                    style={{ color: EMPTY_STATE_COLOR }}
+                  <Typography
+                    variant="body2"
+                    sx={{ m: 0, textAlign: "center", color: EMPTY_STATE_COLOR }}
                   >
                     表示できるリンクがありません
-                  </p>
+                  </Typography>
                 ) : null}
-              </div>
-            </div>
-          </div>
-        </div>
+              </Box>
+            </Box>
+          </Box>
+        </Paper>
       ) : null}
-    </div>
+    </Box>
   );
 };
 

@@ -24,35 +24,35 @@ const makeItem = (
 });
 
 describe("resolveWorkflowStatusKey", () => {
-  it("returns rawStatus when present", () => {
+  it("rawStatus が存在する場合、rawStatus を返すこと", () => {
     expect(resolveWorkflowStatusKey(makeItem({ rawStatus: WorkflowStatus.APPROVED }))).toBe(
       WorkflowStatus.APPROVED
     );
   });
 
-  it("falls back to status when rawStatus is absent", () => {
+  it("rawStatus が存在しない場合、status を返すこと", () => {
     const item = makeItem({ rawStatus: undefined });
     expect(resolveWorkflowStatusKey(item)).toBe("提出済み");
   });
 
-  it("returns UNKNOWN when both status and rawStatus are absent", () => {
+  it("status と rawStatus が両方ない場合、UNKNOWN を返すこと", () => {
     const item = makeItem({ rawStatus: undefined, status: undefined });
     expect(resolveWorkflowStatusKey(item)).toBe("UNKNOWN");
   });
 });
 
 describe("isCancelledWorkflow", () => {
-  it("returns true for CANCELLED rawStatus", () => {
+  it("rawStatus が CANCELLED の場合、true を返すこと", () => {
     expect(isCancelledWorkflow(makeItem({ rawStatus: WorkflowStatus.CANCELLED }))).toBe(true);
   });
 
-  it("returns false for non-CANCELLED status", () => {
+  it("rawStatus が CANCELLED 以外の場合、false を返すこと", () => {
     expect(isCancelledWorkflow(makeItem({ rawStatus: WorkflowStatus.APPROVED }))).toBe(false);
   });
 });
 
 describe("countItemsByStatus", () => {
-  it("counts items by their status key", () => {
+  it("ステータスキーごとに件数を集計すること", () => {
     const items = [
       makeItem({ rawStatus: WorkflowStatus.SUBMITTED }),
       makeItem({ rawStatus: WorkflowStatus.SUBMITTED }),
@@ -63,24 +63,24 @@ describe("countItemsByStatus", () => {
     expect(counts.get(WorkflowStatus.APPROVED)).toBe(1);
   });
 
-  it("returns empty map for empty array", () => {
+  it("入力配列が空の場合、空の Map を返すこと", () => {
     expect(countItemsByStatus([])).toEqual(new Map());
   });
 });
 
 describe("getStatusCount", () => {
-  it("returns count for given status", () => {
+  it("指定したステータスの件数を返すこと", () => {
     const counts = new Map([[WorkflowStatus.SUBMITTED, 3]]);
     expect(getStatusCount(counts, WorkflowStatus.SUBMITTED)).toBe(3);
   });
 
-  it("returns 0 for missing status", () => {
+  it("指定したステータスが存在しない場合、0 を返すこと", () => {
     expect(getStatusCount(new Map(), WorkflowStatus.APPROVED)).toBe(0);
   });
 });
 
 describe("buildStatusSummary", () => {
-  it("returns correct totals and breakdowns", () => {
+  it("合計件数と内訳件数を正しく返すこと", () => {
     const items = [
       makeItem({ rawStatus: WorkflowStatus.DRAFT }),
       makeItem({ rawStatus: WorkflowStatus.SUBMITTED }),
@@ -94,30 +94,30 @@ describe("buildStatusSummary", () => {
     expect(summary.approved).toBe(1);
   });
 
-  it("returns all zeros for empty list", () => {
+  it("入力リストが空の場合、すべて 0 を返すこと", () => {
     const summary = buildStatusSummary([]);
     expect(summary).toEqual({ total: 0, draft: 0, pending: 0, approved: 0 });
   });
 });
 
 describe("resolveWorkflowKey", () => {
-  it("uses rawId when present", () => {
+  it("rawId が存在する場合、rawId をキーとして返すこと", () => {
     expect(resolveWorkflowKey(makeItem({ rawId: "wf-42" }))).toBe("wf-42");
   });
 
-  it("falls back to name-createdAt when rawId is absent", () => {
+  it("rawId が存在しない場合、name-createdAt をキーとして返すこと", () => {
     const item = makeItem({ rawId: undefined, name: "申請", createdAt: "2024-03-01" });
     expect(resolveWorkflowKey(item)).toBe("申請-2024-03-01");
   });
 });
 
 describe("buildWorkflowDetailPath", () => {
-  it("builds path with encoded rawId", () => {
+  it("rawId を含む詳細パスを生成すること", () => {
     const item = makeItem({ rawId: "wf-1" });
     expect(buildWorkflowDetailPath(item)).toBe("/workflow/wf-1");
   });
 
-  it("encodes special characters in the key", () => {
+  it("キーに特殊文字が含まれる場合でも詳細パスを生成すること", () => {
     const item = makeItem({ rawId: undefined, name: "有給申請", createdAt: "2024-01-01" });
     expect(buildWorkflowDetailPath(item)).toContain("/workflow/");
   });

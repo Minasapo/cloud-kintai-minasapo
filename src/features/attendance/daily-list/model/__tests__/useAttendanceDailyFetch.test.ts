@@ -47,7 +47,7 @@ describe("useAttendanceDailyFetch", () => {
     });
   });
 
-  it("returns empty maps when attendanceDailyList is empty", () => {
+  it("attendanceDailyList が空の場合、各マップを空で返すこと", () => {
     const { result } = renderHook(() =>
       useAttendanceDailyFetch(defaultParams),
     );
@@ -57,7 +57,7 @@ describe("useAttendanceDailyFetch", () => {
     expect(result.current.attendanceErrorMap).toEqual({});
   });
 
-  it("calls trigger for each staff in attendanceDailyList", async () => {
+  it("attendanceDailyList の各スタッフに対して trigger を呼ぶこと", async () => {
     const rows = [makeRow()];
     renderHook(() =>
       useAttendanceDailyFetch({ ...defaultParams, attendanceDailyList: rows }),
@@ -74,7 +74,7 @@ describe("useAttendanceDailyFetch", () => {
     );
   });
 
-  it("stores fetched attendances in attendanceMap", async () => {
+  it("取得した勤怠を attendanceMap に格納すること", async () => {
     const attendance = makeAttendance();
     mockTrigger.mockReturnValue({
       unwrap: () => Promise.resolve([attendance]),
@@ -95,7 +95,7 @@ describe("useAttendanceDailyFetch", () => {
     expect(result.current.attendanceLoadingMap["staff-1"]).toBe(false);
   });
 
-  it("sets error when fetch fails", async () => {
+  it("取得に失敗した場合、error を設定すること", async () => {
     mockTrigger.mockReturnValue({
       unwrap: () => Promise.reject(new Error("API error")),
     });
@@ -115,7 +115,7 @@ describe("useAttendanceDailyFetch", () => {
     expect(result.current.attendanceLoadingMap["staff-1"]).toBe(false);
   });
 
-  it("handles duplicate error details in error response", async () => {
+  it("エラーレスポンスの重複情報を処理すること", async () => {
     const dupError = {
       details: {
         duplicates: [
@@ -146,7 +146,7 @@ describe("useAttendanceDailyFetch", () => {
     );
   });
 
-  it("deduplicates staff fetches when duplicate sub values exist", async () => {
+  it("sub が重複している場合、スタッフ取得を重複実行しないこと", async () => {
     const rows = [makeRow(), makeRow()]; // same sub "staff-1" twice
     renderHook(() =>
       useAttendanceDailyFetch({ ...defaultParams, attendanceDailyList: rows }),
@@ -159,7 +159,7 @@ describe("useAttendanceDailyFetch", () => {
   });
 
   describe("getAttendanceForDisplayDate", () => {
-    it("returns matching attendance from attendanceMap for displayDate", async () => {
+    it("displayDate に一致する勤怠を attendanceMap から返すこと", async () => {
       const attendance = makeAttendance({ workDate: "2024-01-15" });
       mockTrigger.mockReturnValue({
         unwrap: () => Promise.resolve([attendance]),
@@ -183,7 +183,7 @@ describe("useAttendanceDailyFetch", () => {
       expect(found?.workDate).toBe("2024-01-15");
     });
 
-    it("returns row.attendance when no match in attendanceMap and dates match", () => {
+    it("attendanceMap に一致がなく日付が一致する場合、row.attendance を返すこと", () => {
       const attendance = makeAttendance({ workDate: "2024-01-15" });
       const row = makeRow({ attendance });
       const list = [row];
@@ -201,7 +201,7 @@ describe("useAttendanceDailyFetch", () => {
       expect(found?.workDate).toBe("2024-01-15");
     });
 
-    it("returns null when row.attendance date does not match displayDate", () => {
+    it("row.attendance の日付が displayDate と一致しない場合、null を返すこと", () => {
       const attendance = makeAttendance({ workDate: "2024-01-10" });
       const row = makeRow({ attendance });
       const list = [row];
@@ -220,7 +220,7 @@ describe("useAttendanceDailyFetch", () => {
       expect(found).toBeNull();
     });
 
-    it("returns null when row.attendance is null and no map match", () => {
+    it("row.attendance が null かつ map に一致がない場合、null を返すこと", () => {
       const row = makeRow({ attendance: null });
       const list = [row];
 
@@ -240,7 +240,7 @@ describe("useAttendanceDailyFetch", () => {
   });
 
   describe("overtimeMinutesMap", () => {
-    it("calculates overtime when end time exceeds scheduled end", async () => {
+    it("終業時刻が所定終了時刻を超える場合、残業時間を計算すること", async () => {
       // scheduledHour=18:00, endTime=19:00 → 60 min overtime
       const attendance = makeAttendance({
         workDate: "2024-01-15",
@@ -267,7 +267,7 @@ describe("useAttendanceDailyFetch", () => {
       expect(result.current.overtimeMinutesMap["staff-1"]).toBeGreaterThan(0);
     });
 
-    it("returns 0 overtime when end time is before scheduled end", async () => {
+    it("終業時刻が所定終了時刻以前の場合、残業時間 0 を返すこと", async () => {
       // scheduledHour=18:00, endTime=17:00 local → 0 min overtime
       const attendance = makeAttendance({
         workDate: "2024-01-15",
@@ -296,7 +296,7 @@ describe("useAttendanceDailyFetch", () => {
   });
 
   describe("mergedDuplicateAttendances", () => {
-    it("deduplicates across duplicateAttendances and summaryDuplicateList", async () => {
+    it("duplicateAttendances と summaryDuplicateList を横断して重複排除すること", async () => {
       const dupError = {
         details: {
           duplicates: [
@@ -335,7 +335,7 @@ describe("useAttendanceDailyFetch", () => {
       expect(result.current.mergedDuplicateAttendances).toHaveLength(1);
     });
 
-    it("returns empty array when loading is true", () => {
+    it("loading=true の場合、空配列を返すこと", () => {
       const { result } = renderHook(() =>
         useAttendanceDailyFetch({
           ...defaultParams,
@@ -356,7 +356,7 @@ describe("useAttendanceDailyFetch", () => {
   });
 
   describe("duplicateInfoByStaff", () => {
-    it("groups duplicates by staffId", async () => {
+    it("重複情報を staffId ごとにグルーピングすること", async () => {
       const dupError = {
         details: {
           duplicates: [

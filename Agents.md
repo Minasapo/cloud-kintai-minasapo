@@ -1,80 +1,133 @@
-# Agents.md
+# AGENTS.md
+
+このファイルは、リポジトリ内のコードを扱う際にAIエージェントに指示を与えるためのガイダンスを提供します。
 
 ## 基本ルール
 
-- 英語で考えて、日本語で説明してください。
-- コミットメッセージは英語で書く
-- push 前に `npm run typecheck` が `.githooks` で自動実行される
+- チャット上では、英語で考えて、日本語で説明します。
+- ユーザーが確認する事項がない場合は、変更した内容を英語でコミットメッセージを記述し、コミットします。
+- 必要に応じて`AGENTS.md`の更新を提案します。
 
-## 最低限のエラー解消
+## commit messageについて
 
-- `npm run typecheck` でエラーが出ない状態を保つこと
-  - 既存のエラーがある場合は、修正対象コードに新たなエラーを追加しないこと（例: `src/features/attendance/edit/ui/AttendanceEditPage.tsx` に既に `5` 個エラーがあるなら、修正後も `5` 個以下に抑える）
-- `npm run lint -- --fix` を定期的に実行して、ESLint エラーを増やさないこと
-  - 既存の ESLint エラーがある場合は、修正対象コードに新たなエラーを追加しないこと（例: `src/features/attendance/edit/ui/AttendanceEditPage.tsx` に既に `10` 個エラーがあるなら、修正後も `10` 個以下に抑える）
+- コミットメッセージは、変更内容の要約を英語で明確に記述してください。
 
-## タスクやファイル書き込み時の注意点
+## Pull Request (PR)について
 
-- 使用しているAIモデルのコンテキストウィンドウサイズを超える大規模な変更を行う場合は、変更内容を複数の小さなタスクに分割して実行すること
-- ファイルサイズが大きい場合は、変更内容を複数の小さなタスクに分割して実行すること（例: `AttendanceEditPage.tsx` が `500` 行ある場合は、変更内容を複数の小さなタスクに分割して実行する）
+- Pull Request (PR) の作成時は、PRのタイトルと説明に、変更内容の要約と目的を日本語で明確に記述してください。
 
-## 実装時の重要制約
+## ドキュメントについて
 
-- `src/shared/api/graphql/documents/` 配下の生成ファイル（`mutations.ts`, `queries.ts`, `subscriptions.ts`）および `src/shared/api/graphql/types.ts` は Amplify 自動生成のため手動編集禁止
-- `src/ui-components/` は Amplify 自動生成のため手動編集禁止
-- キャッシュ戦略ユーティリティ（`graphqlBaseQuery.ts`、`tagBuilder.ts`、`concurrency.ts`、`paginatedQuery.ts` など）は手動管理ファイルのため編集可能
-- MUI コンポーネントの新規直接 import は禁止（`src/shared/ui/` の共通 UI を使う）
-- スタイリングは MUI `sx` を主軸、Tailwind は補助、新規 SCSS は作らない
-- デザイントークンは `designTokenVar()` 経由で参照する
-- フォームは React Hook Form + Zod を基本にする
-- 拡張モジュールは `src/extensions/<name>/` 配下に `manifest.ts` を置いて宣言する。新規追加は `node scripts/create-extension.mjs <name>` で雛形生成。詳細は `docs/EXTENSION_ARCHITECTURE.md`
+ユーザー向けのドキュメントは、`docs-site`ディレクトリで管理されています。ドキュメントの変更や追加を行う場合は、`docs-site`ディレクトリ内の該当するファイルを編集してください。
 
-## アンチリグレッション・レビュー基準（肥大化防止）
+## Amplify自動生成ファイルについて
 
-- **コンポーネント分割**: 1ファイルが目安 `200` 行超、または `useEffect/useMemo/useCallback` が合計 `4` 個以上になったら分割を検討し、PR で「分割しない理由」か「分割先」を明記する
-- **Hook 抽出**: UI イベント処理以外の副作用が `2` 系統以上（例: API + URL クエリ同期）ある場合は custom hook へ分離する
-- **Page の責務**: `src/pages/**` はオーケストレーション中心に保ち、表示ロジックは `features/**/ui`、データ整形は `features/**/model` か `entities/**` に移す
-- **MUI ラッパー移行**: 既存コードを触る際、同等ラッパーが `src/shared/ui/**` にあるなら直接 MUI import を増やさず置換する。未整備ならラッパー追加→利用側置換を同一PRで最小1箇所行う
-- **SCSS → sx/token 移行**: 変更対象コンポーネントでは、触ったスタイル差分を `sx + designTokenVar()` へ寄せる。SCSS は「未移行部分のみ暫定残置」を許可し、残課題を PR に記載する
+次のディレクトリ・ファイルは、Amplify CLI によって自動生成されます。これらのファイルを手動で編集しないでください。変更が必要な場合は、Amplify の設定やスキーマを更新し、コード生成コマンドを実行してください。
 
-## Skill 参照
+- `src/graphql/**` 配下
+- `src/ui-components/**` 配下
+- `src/aws-exports.js`
+- `src/aws-exports.ts`
+- `src/aws-exports.d.ts`
 
-- 開発コマンドと検証手順は `.agents/skills/garaku-dev-commands/SKILL.md` を参照
-- テスト設計・Jest/Playwright 規約は `.agents/skills/garaku-testing-guide/SKILL.md` を参照
-- 配置ルールと依存方向は `.agents/skills/garaku-architecture-map/SKILL.md` を参照
-- 機能配置と修正対象の当たりを付けるときは `.agents/skills/garaku-feature-map/SKILL.md` を参照
-- 勤怠ドメイン全般は `.agents/skills/about-kintai-app/SKILL.md` を参照
-- 権限・ロールは `.agents/skills/about-permissions/SKILL.md` を参照
+### Schemaの変更方法について
 
-## Skill 優先順位（競合時）
+スキーマを変更する場合は、`amplify/backend/api/garakufrontend/schema.graphql` を編集してください。その後、`amplify codegen` を実行して変更を反映させます。
 
-- 実装場所探索（どこを直すか）と構成判定（レイヤー違反）が同時に出た場合:
-	1) `garaku-feature-map` で候補を特定し、2) `garaku-architecture-map` で正誤判定する
-- 検証コマンド選定とテスト設計が同時に出た場合:
-	1) `garaku-testing-guide` でテスト層を決め、2) `garaku-dev-commands` で実行順を決める
-- 勤怠仕様と権限仕様が同時に出た場合:
-	1) `about-permissions` を優先してアクセス可否を確定し、2) `about-kintai-app` で業務ルールを適用する
-- エラー調査時の開始点:
-	実装場所不明なら `garaku-feature-map`、仕様不明ならドメインSKILL（`about-kintai-app` / `about-permissions`）を先に使う
+### コード生成コマンドについて
 
-## 詳細仕様ドキュメント
+`amplify codegen` コマンドを実行すると、スキーマの変更に基づいて自動生成ファイルが更新されます。
 
-機能ごとの詳細仕様は `.github/instructions/` に配置：
+## フォントシステム方針
 
-| ファイル                                  | 対象                                         |
-| ----------------------------------------- | -------------------------------------------- |
-| `attendanceEdit.instructions.md`          | 勤怠編集（定型入力・バリデーションルール等） |
-| `attendanceList.instructions.md`          | 勤怠一覧・ステータス判定                     |
-| `register.instructions.md`                | 打刻ページ・直行直帰                         |
-| `shift.instructions.md`                   | シフト機能全般                               |
-| `shiftCollaborative.instructions.md`      | シフト共同編集のガードレール                 |
-| `dailyReport.instructions.md`             | 日報                                         |
-| `amplifyGraphqlGenerated.instructions.md` | 自動生成ファイルの扱い                       |
-| `graphqlCachingStrategy.instructions.md`  | GraphQL キャッシング戦略・RTK Query 規約     |
+UI 全体のテキストは、Noto Sans JP のみを使用して統一します。日本語と英数字を含む画面でも、同一のフォントで一貫した見た目と可読性を保ちます。
 
-## 自動生成ファイル（編集禁止）
+- プライマリフォント: `Noto Sans JP`
+- 読み込み方法: `src/index.css` で Google Fonts の `@import` を使用する
+- 基本ウェイト: `400`、`500`、`600`
+- デザインシステム変数: `--ds-typography-font-family`
+- すべての UI テキストはこの変数経由で統一する
+- コードブロックやログ表示などの等幅テキストは、別途 monospace フォントを使用する
 
-- `src/shared/api/graphql/documents/mutations.ts`, `queries.ts`, `subscriptions.ts`（`amplify codegen` で生成）
-- `src/shared/api/graphql/types.ts`（`amplify codegen` で生成）
-- `src/ui-components/**`
-- `src/aws-exports.js`（`amplify pull` で生成）。ソースツリー（git worktree）使用時はメインリポジトリのファイルをリンクして使用する
+### 実装ルール
+
+- `src/shared/designSystem/tokens.ts` のフォント値は `Noto Sans JP` を基準にする
+- `src/shared/designSystem/cssVariables.ts` で生成される CSS 変数を通じてフォントを適用する
+- Tailwind や MUI のテーマは、ハードコードではなくトークンや CSS 変数を参照する
+- フォント更新時は、関連する設定・表示確認を行い、必要に応じてドキュメントも更新する
+
+## MUI利用方針
+
+- MUI コンポーネントを利用する場合は、まず既存のデザインシステム（トークン・CSS 変数・テーマ）との整合性を優先する
+- 色・余白・タイポグラフィは、可能な限り MUI テーマまたはデザインシステム由来の値を参照し、画面ごとのハードコードを避ける
+- スタイル調整は `sx` や `styled` を用いる場合でも、共通化できるものはテーマ拡張や共通コンポーネント化を検討する
+- Tailwind と MUI を併用する際は責務を分離し、同一要素に対して競合するスタイル指定を重ねない
+
+## テスト方針
+
+### テストピラミッドと責務
+
+- Unit（Jest）: 純粋関数、バリデーション、lib/model、hooks のロジックを検証する
+- Integration（Jest + React Testing Library）: コンポーネントの表示、ユーザー操作、コンポーネント連携を検証する
+- E2E（Playwright）: ログイン後の主要業務フローをエンドツーエンドで検証する
+
+各層で避ける対象:
+
+- Unit で DOM や実ネットワーク通信を過剰に扱わない
+- Integration で実ネットワーク通信や DB 依存を持ち込まない
+- E2E で細かい分岐ロジックの網羅を狙わない（Unit/Integration で担保）
+
+### テスト配置・命名
+
+- Unit/Integration は原則として対象実装と同階層の `__tests__` に配置する
+- shared UI の単純コンポーネントは同ディレクトリに `*.test.tsx` を並置してよい
+- E2E は `playwright/tests/<機能名>/` に配置する
+- `describe` は対象名、`it`/`test` は「〜の場合、〜すること」の日本語で記述する
+
+### 共通テストユーティリティ
+
+- `src/shared/test-utils` の `renderWithProviders` を優先利用する
+- モックデータは `createMockAppConfig`、`createMockUser`、`createMockAttendance` などの factory を優先する
+- 同じ Arrange が 3 回以上出たら `setupXxx` か factory に抽出する
+- 入力と期待値のみが異なるケースは `test.each` を優先する
+
+### Jest モック規約
+
+- `jest.mock` はファイルトップで宣言し、必要なモック参照はファクトリ外で定義する
+- 外部 API や副作用はモジュール全体モック、純粋関数の一部差し替えは部分モックを使い分ける
+- 呼び出し監視中心のケースは `jest.spyOn` を使い、`afterEach` で `jest.restoreAllMocks()` を実行する
+- 実装詳細（内部 state 名など）ではなく、ユーザー観点の振る舞いを検証する
+
+### Hooks テスト
+
+- `renderHook` と `act` を基本とし、非同期は `waitFor` または `findBy*` で待機する
+- Context が必要な hooks はテスト内 wrapper で必要 Provider を組み立てる
+
+### Playwright E2E 規約
+
+- 認証状態は `playwright/.auth/` のストレージを利用する
+- `chromium-staff`: `playwright/.auth/user.json`
+- `chromium-admin`: `playwright/.auth/admin.json`
+- 認証再生成は `npm run test:e2e:setup` を利用する
+- 操作は `test.step` で意味単位に分割する
+- ロケーター優先順位は `getByRole` → `getByLabel`/`getByPlaceholder` → `getByTestId` → CSS selector とする
+- 重要要素には `data-testid` の付与を検討する
+- 待機は要素可視（`expect(...).toBeVisible()`）優先で、必要時のみ `waitForResponse` を併用する
+
+### カバレッジ運用
+
+- `jest.config.cjs` の現行 global threshold:
+- statements: 65%
+- branches: 52%
+- functions: 56%
+- lines: 65%
+- 新規コードは原則 Unit テストを追加する
+- ビジネスロジック・バリデーションは 80% 以上を目標にする
+- PR では閾値未達を許容しない
+
+### よくあるミスの防止
+
+- `describe.skip` / `test.skip` には理由と追跡情報（チケット等）を残す
+- テスト内の `console.log` はコミット前に削除する
+- `afterEach` で `jest.clearAllMocks()` / `jest.restoreAllMocks()` を実行し副作用を隔離する
+- UI 操作は `fireEvent` より `userEvent` を優先する

@@ -2,7 +2,7 @@ import { deriveWorkflowDetailPermissions } from "@features/workflow/detail-panel
 import { WorkflowStatus } from "@shared/api/graphql/types";
 
 describe("deriveWorkflowDetailPermissions", () => {
-  it("enables edit/withdraw when draft with id", () => {
+  it("id があり下書き状態の場合、編集/取り下げを有効にすること", () => {
     const result = deriveWorkflowDetailPermissions({
       id: "wf-1",
       status: WorkflowStatus.DRAFT,
@@ -13,7 +13,7 @@ describe("deriveWorkflowDetailPermissions", () => {
     expect(result.isFinalized).toBe(false);
   });
 
-  it("disables edit after submission", () => {
+  it("提出後は編集を無効化すること", () => {
     const result = deriveWorkflowDetailPermissions({
       id: "wf-1",
       status: WorkflowStatus.SUBMITTED,
@@ -22,7 +22,7 @@ describe("deriveWorkflowDetailPermissions", () => {
     expect(result.editTooltip).toBe("提出済み以降の申請は編集できません");
   });
 
-  it("disables withdraw when cancelled", () => {
+  it("キャンセル済みの場合、取り下げを無効化すること", () => {
     const result = deriveWorkflowDetailPermissions({
       id: "wf-1",
       status: WorkflowStatus.CANCELLED,
@@ -33,7 +33,7 @@ describe("deriveWorkflowDetailPermissions", () => {
     );
   });
 
-  it("disables withdraw when finalized", () => {
+  it("確定済みの場合、取り下げを無効化すること", () => {
     const result = deriveWorkflowDetailPermissions({
       id: "wf-1",
       status: WorkflowStatus.APPROVED,
@@ -42,7 +42,7 @@ describe("deriveWorkflowDetailPermissions", () => {
     expect(result.withdrawTooltip).toBe("承認済みの申請は取り下げできません");
   });
 
-  it("disables all actions when id missing", () => {
+  it("id がない場合、すべての操作を無効化すること", () => {
     const result = deriveWorkflowDetailPermissions({ status: null });
     expect(result.editDisabled).toBe(true);
     expect(result.withdrawDisabled).toBe(true);
